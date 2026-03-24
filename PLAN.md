@@ -1,4 +1,4 @@
-# Portfolio Improvement Plan — Developer-First
+# Portfolio Improvement Plan — Final
 **Repo:** `github.com/Royc4515/roy-carmelli-portfolio`  
 **Stack:** Vite 6 · React 18 · TypeScript · Tailwind CSS v4 · Framer Motion · Lucide React  
 **Deployed:** `roy-carmelli-portfolio.vercel.app`
@@ -7,40 +7,33 @@
 
 ## How to use this plan
 
-Read it fully before writing any code. Execute one phase at a time. After each phase, run `npm run dev` and verify visually before moving on.
+Read it fully before writing any code. Execute one phase at a time. Run `npm run dev` after each phase and verify visually before moving on.
 
 ---
 
-## Core philosophy — portfolio ≠ CV
+## Design direction
 
-The CV is for HR. It lists everything: grades, military timeline, fellowships.  
-The portfolio is for **engineers and engineering managers**. It answers one question: **can this person build things?**
+**Neuro-inspired.** Warm amber accent (`#f59e0b`), an animated neural network background in the Hero, and a cycling word in the tagline. Everything else stays clean and minimal.
 
-The best developer portfolios (Brittany Chiang, Olaolu Olawuyi, Rob Bowen) share a structure:
-1. **Who you are** — one sharp sentence, no fluff
-2. **What you've built** — projects with real context: what was the problem, how did you solve it, what can I click
-3. **How to reach you** — one clear CTA
-
-Everything else is noise. IDF timeline, course grades, StandWithUs — that's CV territory. The one exception: a single line in About that mentions the dual degree and military service, because together they say something real about who you are. One line. Not a timeline.
+The neural net (barely visible at ~5% opacity, amber nodes + connections pulsing slowly) makes the portfolio unmistakably personal — no other developer has that angle. The tagline cycle (`why → how → both`) quietly tells the story of the dual degree without explaining it.
 
 ---
 
-## Diagnosis — what to cut from the previous plan
+## Design tokens — new accent
 
-The previous plan was too CV-like. These items are **removed**:
-- `src/sections/Experience.tsx` — full IDF timeline with bullet points — belongs on the CV, not here
-- Course grade chips (93, 92, 96...) — HR content, not developer content
-- StandWithUs fellowship — irrelevant to engineering
-- "At a glance" card rows for Service and Languages — CV fields
-- `gpa` field in `bio.ts` — no grade numbers in the UI
+Replace teal with amber throughout:
 
-What carries over from the previous plan (unchanged): project descriptions, theme toggle, meta tags, resume download button, footer polish.
+| Token | Dark | Light |
+|-------|------|-------|
+| `--accent` | `#f59e0b` | `#d97706` |
+| `--accent-dim` | `rgba(245,158,11,0.10)` | `rgba(217,119,6,0.10)` |
+| `--accent-hover` | `#fbbf24` | `#b45309` |
 
 ---
 
-## Phase 1 — Content & Identity
+## Phase 1 — Content
 
-> Pure data changes. No new components, no styling. Highest ROI.
+> Pure data changes. No new components. Do this first.
 
 ---
 
@@ -57,7 +50,9 @@ export const bio = {
   title: "CS × Brain Sciences",
   institution: "Bar-Ilan University",
   location: "Israel",
-  tagline: "I build things at the intersection of software and the mind.",
+  // tagline is split — the base sentence + the cycling word rendered separately in Hero.tsx
+  taglineBase: "Writing software, studying brains, asking",
+  taglineCycleWords: ["why", "how", "both"] as const,
   about: `I'm a Computer Science and Brain Sciences student at Bar-Ilan University — one of the few programs that puts software engineering depth and hands-on neuroscience research in the same degree.
 
 I ship full-stack apps, data pipelines, and browser extensions. I use AI deliberately as part of how I work — not as a shortcut, but as a tool I understand. I'm drawn to problems that sit at the edge of CS and neuroscience: how software models cognition, how data reveals something real about the brain.
@@ -80,16 +75,11 @@ export const skills = [
 ];
 ```
 
-**Key decisions:**
-- No `gpa` field — grade numbers don't belong in a developer portfolio
-- `about` mentions IDF in exactly one sentence — context, not biography
-- `tagline` leads with building, not credentials
-
 ---
 
 ### Task 2 · Replace `src/data/projects.ts`
 
-Projects are the heart of the portfolio. Each description answers: what was the problem, what did you actually build, what can I click. Replace the entire file:
+Replace the entire file with exactly this:
 
 ```typescript
 // src/data/projects.ts
@@ -137,7 +127,7 @@ export const projects: Project[] = [
   {
     id: "portfolio",
     title: "This Portfolio",
-    description: "Built from scratch. Vite + React + TypeScript + Tailwind CSS + Framer Motion. Dark/light theme with system preference detection.",
+    description: "Built from scratch. Vite + React + TypeScript + Tailwind CSS + Framer Motion. Neuro-inspired design with animated background and dark/light theme.",
     tech: ["React", "TypeScript", "Vite", "Tailwind CSS", "Framer Motion"],
     github: "https://github.com/Royc4515/roy-carmelli-portfolio",
     featured: false,
@@ -150,7 +140,7 @@ export const projects: Project[] = [
 
 ### Task 3 · Update `index.html` meta tags
 
-Replace the `<title>` and all `<meta>` content in `<head>` with:
+Replace `<title>` and all `<meta>` content — keep `<meta charset>`, `<meta viewport>`, and `<link rel="icon">` unchanged:
 
 ```html
 <title>Roy Carmelli — CS × Brain Sciences</title>
@@ -166,28 +156,32 @@ Replace the `<title>` and all `<meta>` content in `<head>` with:
 <meta name="twitter:description" content="CS and Brain Sciences, Bar-Ilan University." />
 ```
 
-Keep existing `<link rel="icon">`, `<meta charset>`, `<meta viewport>` unchanged.
+---
+
+## Phase 2 — Accent Color & Theme Toggle
 
 ---
 
-## Phase 2 — Dark / Light Theme Toggle
+### Task 4 · Update `src/index.css`
 
-> Adds full light theme and a toggle button in the navbar. System preference detection included.
+**Step 1** — In the existing `:root` block, replace the three accent lines only:
 
----
+```css
+--accent:       #f59e0b;
+--accent-dim:   rgba(245, 158, 11, 0.10);
+--accent-hover: #fbbf24;
+```
 
-### Task 4 · Update `src/index.css` — add light theme variables
-
-Keep the existing `:root` block exactly as-is. Add this **directly after** the closing `}` of `:root`:
+**Step 2** — Add this block **directly after** the closing `}` of `:root`:
 
 ```css
 [data-theme="light"] {
   --bg-primary:     #fafafa;
   --bg-secondary:   #f3f3f7;
   --bg-card:        #ffffff;
-  --accent:         #0d9488;
-  --accent-dim:     rgba(13, 148, 136, 0.10);
-  --accent-hover:   #0f766e;
+  --accent:         #d97706;
+  --accent-dim:     rgba(217, 119, 6, 0.10);
+  --accent-hover:   #b45309;
   --text-primary:   #0f0f1a;
   --text-secondary: #444466;
   --text-muted:     #888899;
@@ -195,10 +189,9 @@ Keep the existing `:root` block exactly as-is. Add this **directly after** the c
 }
 ```
 
-Add this rule after the `[data-theme="light"]` block, before the `* { margin: 0 }` reset:
+**Step 3** — Add this rule after `[data-theme="light"]`, before the `* { margin: 0 }` reset:
 
 ```css
-/* smooth theme transition — exclude animated elements */
 *:not([style*="transform"]):not([style*="opacity"]) {
   transition: background-color 0.25s ease, border-color 0.25s ease, color 0.15s ease;
 }
@@ -208,7 +201,7 @@ Add this rule after the `[data-theme="light"]` block, before the `* { margin: 0 
 
 ### Task 5 · Create `src/hooks/useTheme.ts`
 
-Create a new file at this exact path:
+Create a new file:
 
 ```typescript
 // src/hooks/useTheme.ts
@@ -269,22 +262,19 @@ export default function App() {
 }
 ```
 
-> Skills is intentionally not imported here — removed in Task 10.
+**`src/components/Navbar.tsx`** — four changes:
 
-**`src/components/Navbar.tsx`** — three changes:
-
-**1.** Add props interface at the top of the file:
+**1.** Add props interface at top of file:
 
 ```tsx
 interface NavbarProps {
   theme: 'dark' | 'light';
   onThemeToggle: () => void;
 }
-
 export default function Navbar({ theme, onThemeToggle }: NavbarProps) {
 ```
 
-**2.** Update the `links` array — remove Skills, keep three links:
+**2.** Replace the `links` array:
 
 ```tsx
 const links: NavLink[] = [
@@ -294,7 +284,7 @@ const links: NavLink[] = [
 ];
 ```
 
-**3.** Add the theme toggle button inside the desktop `<ul>`, after the last nav link `<li>`:
+**3.** Add theme toggle button inside the desktop `<ul>`, after the last nav `<li>`:
 
 ```tsx
 <li>
@@ -326,7 +316,7 @@ const links: NavLink[] = [
 </li>
 ```
 
-**4.** Fix the hardcoded dark background color in the Navbar's inline style. Replace `rgba(9,9,15,0.95)` with:
+**4.** Fix hardcoded dark background. Replace `rgba(9,9,15,0.95)` with:
 
 ```tsx
 background: scrolled || menuOpen
@@ -334,64 +324,310 @@ background: scrolled || menuOpen
   : 'transparent',
 ```
 
-Also update the mobile fullscreen overlay `background` from the hardcoded hex to `var(--bg-primary)`.
+Replace the mobile fullscreen overlay hardcoded background with `var(--bg-primary)`.
 
 ---
 
-## Phase 3 — Resume Download Button
+## Phase 3 — Neural Background + Cycling Word
 
-> One new file. A single clean CTA — no section heading needed.
+> Two new component files, then Hero.tsx is updated to use both.
 
 ---
 
-### Task 7 · Create `src/sections/Resume.tsx`
+### Task 7 · Create `src/components/NeuralBackground.tsx`
 
-Sits between Projects and Contact. One centered button, nothing else.
+Animated canvas behind the Hero. Nodes pulse, edges breathe. Opacity stays between 4–8% — it should be felt more than seen.
 
 ```tsx
-// src/sections/Resume.tsx
-import { Download } from 'lucide-react';
+// src/components/NeuralBackground.tsx
+import { useEffect, useRef } from 'react';
 
-export default function Resume() {
+const NODES = [
+  { x: 0.08, y: 0.18 }, { x: 0.22, y: 0.08 }, { x: 0.38, y: 0.22 },
+  { x: 0.18, y: 0.52 }, { x: 0.32, y: 0.68 }, { x: 0.55, y: 0.12 },
+  { x: 0.65, y: 0.42 }, { x: 0.72, y: 0.18 }, { x: 0.85, y: 0.55 },
+  { x: 0.92, y: 0.28 }, { x: 0.48, y: 0.55 }, { x: 0.15, y: 0.82 },
+];
+
+const EDGES: [number, number][] = [
+  [0,1],[1,2],[2,5],[5,7],[7,9],[9,8],[8,6],[6,2],
+  [6,10],[10,3],[3,4],[4,11],[10,4],[1,5],[3,0],[2,10],
+];
+
+export default function NeuralBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const prefersReducedMotion =
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    let t = 0;
+
+    const draw = () => {
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.008;
+
+      EDGES.forEach(([a, b], i) => {
+        const alpha = 0.04 + 0.035 * Math.sin(t + i * 0.7);
+        ctx.strokeStyle = `rgba(245, 158, 11, ${alpha})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(NODES[a].x * W, NODES[a].y * H);
+        ctx.lineTo(NODES[b].x * W, NODES[b].y * H);
+        ctx.stroke();
+      });
+
+      NODES.forEach((n, i) => {
+        const alpha = 0.12 + 0.08 * Math.sin(t * 1.3 + i * 1.1);
+        ctx.fillStyle = `rgba(245, 158, 11, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(n.x * W, n.y * H, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      if (!prefersReducedMotion) {
+        rafRef.current = requestAnimationFrame(draw);
+      }
+    };
+
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   return (
-    <section
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
       style={{
-        padding: '1rem 2rem 4rem',
-        maxWidth: '900px',
-        margin: '0 auto',
-        display: 'flex',
-        justifyContent: 'center',
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+```
+
+---
+
+### Task 8 · Create `src/components/CyclingWord.tsx`
+
+A single word that fades out, swaps, then fades back in on a 2.4s interval.
+
+```tsx
+// src/components/CyclingWord.tsx
+import { useState, useEffect } from 'react';
+
+interface CyclingWordProps {
+  words: readonly string[];
+}
+
+export default function CyclingWord({ words }: CyclingWordProps) {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex(i => (i + 1) % words.length);
+        setVisible(true);
+      }, 350);
+    }, 2400);
+
+    return () => clearInterval(interval);
+  }, [words]);
+
+  return (
+    <span
+      style={{
+        color: 'var(--accent)',
+        fontStyle: 'inherit',
+        borderBottom: '1px solid var(--accent-dim)',
+        paddingBottom: '1px',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.3s ease',
+        display: 'inline-block',
       }}
     >
-      <a
-        href="/Roy_Carmelli_CV.pdf"
-        download="Roy_Carmelli_CV.pdf"
+      {words[index]}
+    </span>
+  );
+}
+```
+
+---
+
+### Task 9 · Rewrite `src/sections/Hero.tsx`
+
+Replace the entire file. This version uses both new components and reads from the updated `bio` fields.
+
+```tsx
+// src/sections/Hero.tsx
+import { motion } from 'framer-motion';
+import { bio } from '../data/bio';
+import NeuralBackground from '../components/NeuralBackground';
+import CyclingWord from '../components/CyclingWord';
+
+const fadeUp = (delay: number) => ({
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const, delay },
+});
+
+export default function Hero() {
+  return (
+    <section
+      id="hero"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '0 2rem',
+        paddingTop: '100px',
+        maxWidth: '900px',
+        margin: '0 auto',
+        position: 'relative',
+      }}
+    >
+      {/* Neural network background — absolutely positioned behind content */}
+      <div
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.75rem 1.75rem',
-          border: '1px solid var(--border)',
-          color: 'var(--text-secondary)',
-          borderRadius: '4px',
-          textDecoration: 'none',
-          fontFamily: 'var(--font-body)',
-          fontSize: '0.9rem',
-          transition: 'all 0.2s',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.borderColor = 'var(--accent)';
-          e.currentTarget.style.color = 'var(--accent)';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.borderColor = 'var(--border)';
-          e.currentTarget.style.color = 'var(--text-secondary)';
+          position: 'absolute',
+          inset: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none',
         }}
       >
-        <Download size={14} />
-        Download Resume
-      </a>
-      {/* TODO: place Roy_Carmelli_CV.pdf in /public before deploying */}
+        <NeuralBackground />
+      </div>
+
+      {/* Hero content — sits above the canvas */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <motion.p {...fadeUp(0.1)} style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.85rem',
+          color: 'var(--accent)',
+          letterSpacing: '0.1em',
+          marginBottom: '1.5rem',
+          opacity: 0.9,
+        }}>
+          Hi, I'm
+        </motion.p>
+
+        <motion.h1 {...fadeUp(0.2)} style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(3rem, 8vw, 6.5rem)',
+          lineHeight: 1.05,
+          color: 'var(--text-primary)',
+          marginBottom: '0.5rem',
+          letterSpacing: '-0.02em',
+        }}>
+          {bio.name}
+        </motion.h1>
+
+        <motion.h2 {...fadeUp(0.35)} style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(1.5rem, 4vw, 3rem)',
+          lineHeight: 1.2,
+          color: 'var(--text-muted)',
+          marginBottom: '2rem',
+          fontStyle: 'italic',
+          letterSpacing: '-0.01em',
+        }}>
+          {bio.title}
+        </motion.h2>
+
+        {/* Tagline with cycling last word */}
+        <motion.p {...fadeUp(0.5)} style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '1.1rem',
+          color: 'var(--text-secondary)',
+          maxWidth: '520px',
+          lineHeight: 1.7,
+          marginBottom: '3rem',
+        }}>
+          {bio.taglineBase}{' '}
+          <CyclingWord words={bio.taglineCycleWords} />.
+        </motion.p>
+
+        <motion.div
+          {...fadeUp(0.65)}
+          className="hero-buttons"
+          style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
+        >
+          <a
+            href="#projects"
+            style={{
+              padding: '0.75rem 1.75rem',
+              background: 'var(--accent)',
+              color: 'var(--bg-primary)',
+              borderRadius: '4px',
+              textDecoration: 'none',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'var(--accent)')}
+          >
+            View Projects
+          </a>
+          <a
+            href="#contact"
+            style={{
+              padding: '0.75rem 1.75rem',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+              borderRadius: '4px',
+              textDecoration: 'none',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.9rem',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
+          >
+            Contact me
+          </a>
+        </motion.div>
+      </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .hero-buttons { flex-direction: column !important; }
+          .hero-buttons a { text-align: center !important; }
+        }
+      `}</style>
     </section>
   );
 }
@@ -399,23 +635,13 @@ export default function Resume() {
 
 ---
 
-## Phase 4 — Polish
-
-> Independent tasks. Do in any order after Phase 3.
+## Phase 4 — Remaining Section Updates
 
 ---
 
-### Task 8 · `src/sections/Hero.tsx` — one copy tweak
+### Task 10 · `src/sections/About.tsx` — replace broken photo placeholder
 
-Change the `"Get in Touch"` button label to `"Contact me"`. More direct. That's the only change needed here — the subtitle already renders from `bio.title`, which now reads `"CS × Brain Sciences"` after Task 1.
-
----
-
-### Task 9 · `src/sections/About.tsx` — replace broken photo placeholder
-
-`bio.photo` is `null`. The current code renders a dashed box with `"photo.jpg"` text — looks broken. Replace it with a clean stats card showing only developer-relevant info. No grades, no service details, no languages — those belong on the CV.
-
-Replace the entire right-column `<div>` (the one with `bg-card` that currently holds the photo ternary) with:
+`bio.photo` is `null`. Replace the entire right-column `<div>` (the one with `bg-card` that holds the photo ternary) with a clean stats card:
 
 ```tsx
 <div style={{
@@ -472,19 +698,80 @@ Replace the entire right-column `<div>` (the one with `bg-card` that currently h
 </div>
 ```
 
-Also remove the three `<span>` links (institution, location, github) below the card — redundant with the Contact section.
+Also remove the three `<span>` links (institution, location, github) below the card — they're redundant with the Contact section.
 
 ---
 
-### Task 10 · Remove Skills section
+### Task 11 · Create `src/sections/Resume.tsx`
+
+New file — a single centered download button between Projects and Contact:
+
+```tsx
+// src/sections/Resume.tsx
+import { Download } from 'lucide-react';
+
+export default function Resume() {
+  return (
+    <section
+      style={{
+        padding: '1rem 2rem 4rem',
+        maxWidth: '900px',
+        margin: '0 auto',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <a
+        href="/Roy_Carmelli_CV.pdf"
+        download="Roy_Carmelli_CV.pdf"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.75rem 1.75rem',
+          border: '1px solid var(--border)',
+          color: 'var(--text-secondary)',
+          borderRadius: '4px',
+          textDecoration: 'none',
+          fontFamily: 'var(--font-body)',
+          fontSize: '0.9rem',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.borderColor = 'var(--accent)';
+          e.currentTarget.style.color = 'var(--accent)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.borderColor = 'var(--border)';
+          e.currentTarget.style.color = 'var(--text-secondary)';
+        }}
+      >
+        <Download size={14} />
+        Download Resume
+      </a>
+      {/* TODO: place Roy_Carmelli_CV.pdf in /public before deploying */}
+    </section>
+  );
+}
+```
+
+---
+
+### Task 12 · Remove Skills section
 
 In `App.tsx`, remove the `import Skills` line and remove `<Skills />` from JSX. Do not delete the file.
 
-The skills are already visible in every project card's tech tags. A separate grid of pills adds nothing and makes the site feel like a template.
+---
+
+### Task 13 · Update section number labels
+
+- `About.tsx` → `"01. about"` — unchanged
+- `Projects.tsx` → `"02. projects"` (was `"03. projects"`)
+- `Contact.tsx` → `"03. contact"` (was `"04. contact"`)
 
 ---
 
-### Task 11 · `src/components/Footer.tsx` — two-line footer
+### Task 14 · `src/components/Footer.tsx` — two-line footer
 
 ```tsx
 // src/components/Footer.tsx
@@ -498,10 +785,19 @@ export default function Footer() {
       flexDirection: 'column',
       gap: '0.35rem',
     }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+      <p style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: '0.75rem',
+        color: 'var(--text-muted)',
+      }}>
         Designed and built by Roy Carmelli · {new Date().getFullYear()}
       </p>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-muted)', opacity: 0.6 }}>
+      <p style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: '0.65rem',
+        color: 'var(--text-muted)',
+        opacity: 0.6,
+      }}>
         React · TypeScript · Framer Motion
       </p>
     </footer>
@@ -511,32 +807,24 @@ export default function Footer() {
 
 ---
 
-### Task 12 · Update section number labels
-
-After removing Skills, fix the section counters in the remaining sections:
-
-- `About.tsx` → `"01. about"` ✓ unchanged
-- `Projects.tsx` → `"02. projects"` (was `"03. projects"`)
-- `Contact.tsx` → `"03. contact"` (was `"04. contact"`)
-
----
-
 ## Execution summary
 
 | Phase | Task | File(s) | What changes |
 |-------|------|---------|-------------|
-| 1 | Task 1  | `src/data/bio.ts` | New title, tagline, about — no grades, no biography |
-| 1 | Task 2  | `src/data/projects.ts` | Story-driven descriptions for all 5 projects |
-| 1 | Task 3  | `index.html` | Better title, meta description, og tags |
-| 2 | Task 4  | `src/index.css` | Add `[data-theme="light"]` variables + transition rule |
-| 2 | Task 5  | `src/hooks/useTheme.ts` | New file — create it |
-| 2 | Task 6  | `src/App.tsx`, `src/components/Navbar.tsx` | Wire hook, add toggle button, simplify nav, fix hardcoded colors |
-| 3 | Task 7  | `src/sections/Resume.tsx` | New file — resume download button |
-| 4 | Task 8  | `src/sections/Hero.tsx` | Button label copy tweak |
-| 4 | Task 9  | `src/sections/About.tsx` | Replace broken photo placeholder with stats card |
-| 4 | Task 10 | `src/App.tsx` | Remove Skills section from render |
-| 4 | Task 11 | `src/components/Footer.tsx` | Two-line footer |
-| 4 | Task 12 | `src/sections/Projects.tsx`, `Contact.tsx` | Update section number labels |
+| 1 | Task 1  | `src/data/bio.ts` | New tagline split, about copy, cycle words array |
+| 1 | Task 2  | `src/data/projects.ts` | Story-driven descriptions, all 5 projects |
+| 1 | Task 3  | `index.html` | Page title, meta description, og tags |
+| 2 | Task 4  | `src/index.css` | Amber accent, light theme variables, transition rule |
+| 2 | Task 5  | `src/hooks/useTheme.ts` | New file |
+| 2 | Task 6  | `src/App.tsx`, `src/components/Navbar.tsx` | Theme hook wired, toggle button, nav simplified, hardcoded colors fixed |
+| 3 | Task 7  | `src/components/NeuralBackground.tsx` | New file — animated canvas |
+| 3 | Task 8  | `src/components/CyclingWord.tsx` | New file — fade-swap word |
+| 3 | Task 9  | `src/sections/Hero.tsx` | Full rewrite using both new components |
+| 4 | Task 10 | `src/sections/About.tsx` | Stats card replaces broken photo placeholder |
+| 4 | Task 11 | `src/sections/Resume.tsx` | New file — download button |
+| 4 | Task 12 | `src/App.tsx` | Remove Skills from render |
+| 4 | Task 13 | `src/sections/Projects.tsx`, `Contact.tsx` | Section number labels updated |
+| 4 | Task 14 | `src/components/Footer.tsx` | Two-line footer |
 
 ---
 
@@ -545,26 +833,27 @@ After removing Skills, fix the section counters in the remaining sections:
 ```
 Navbar  —  rc.dev  ·  About  ·  Projects  ·  Contact  ·  ☀/☾
 │
-├── Hero       — name · "CS × Brain Sciences" · tagline · [View Projects] [Contact me]
-├── About      — 3-paragraph bio + "at a glance" card (degree, university, open to)
-├── Projects   — 2 featured cards + 3 list cards, each: description + tech tags + GitHub/Live links
-├── Resume     — single centered "Download Resume" button
-└── Contact    — "Let's Talk" + email CTA + social icons
+├── Hero       — neural net bg · name · "CS × Brain Sciences" ·
+│                "Writing software, studying brains, asking why/how/both."
+│                [View Projects]  [Contact me]
+│
+├── About      — 3-paragraph bio + "at a glance" card
+├── Projects   — 2 featured cards + 3 list cards
+├── Resume     — "Download Resume" button
+└── Contact    — email CTA + social icons
 │
 Footer  —  built by · stack credit
 ```
-
-The CV handles the rest. The portfolio handles this.
 
 ---
 
 ## Out of scope — add later
 
-- **Photo** — set `bio.photo` in `bio.ts` to the path. `About.tsx` already checks for it and renders it, replacing the stats card fallback.
+- **Photo** — set `bio.photo` in `bio.ts`. `About.tsx` renders it automatically, replacing the stats card.
 - **`og:image`** — add a social preview image to `/public`, reference it in `index.html`
-- **`Roy_Carmelli_CV.pdf`** — place your CV PDF in `/public`. The Resume button links to `/Roy_Carmelli_CV.pdf`.
+- **`Roy_Carmelli_CV.pdf`** — place in `/public`. The Resume button links to `/Roy_Carmelli_CV.pdf`.
 - **Custom domain** — Vercel dashboard only, no code changes needed
-- **Project screenshots** — add an optional `image` field to the `Project` type in `src/types/index.ts` and render thumbnails in the featured project cards
+- **Project screenshots** — add optional `image` field to `Project` type and render thumbnails in featured cards
 
 ---
 
