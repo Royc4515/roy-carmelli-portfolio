@@ -8,6 +8,7 @@ export default function Hero() {
       flexDirection: 'column',
       justifyContent: 'center',
       padding: '0 2rem',
+      paddingTop: '100px',
       maxWidth: '900px',
       margin: '0 auto',
     }}>
@@ -52,7 +53,7 @@ export default function Hero() {
       }}>
         {bio.tagline}
       </p>
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className="hero-buttons" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
         <a href="#projects" style={{
           padding: '0.75rem 1.75rem',
           background: 'var(--accent)',
@@ -85,6 +86,12 @@ export default function Hero() {
           Get in Touch
         </a>
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .hero-buttons { flex-direction: column !important; }
+          .hero-buttons a { text-align: center !important; }
+        }
+      `}</style>
     </section>
   );
 }

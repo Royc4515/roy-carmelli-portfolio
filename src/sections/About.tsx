@@ -9,7 +9,7 @@ export default function About() {
     }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>01. about</p>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '3rem', letterSpacing: '-0.02em' }}>Who I Am</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' }}>
+      <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' }}>
         <div>
           {bio.about.split('\n\n').map((para, i) => (
             <p key={i} style={{
@@ -50,6 +50,11 @@ export default function About() {
           </div>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .about-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+        }
+      `}</style>
     </section>
   );
 }

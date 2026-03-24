@@ -17,7 +17,7 @@ export default function Projects() {
             onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
             onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+            <div className="project-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '-0.01em' }}>{project.title}</h3>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 {project.github && <a href={project.github} target="_blank" rel="noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent)', textDecoration: 'none' }}>GitHub →</a>}
@@ -40,6 +40,11 @@ export default function Projects() {
           </div>
         ))}
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .project-header { flex-direction: column !important; gap: 0.5rem !important; }
+        }
+      `}</style>
     </section>
   );
 }
