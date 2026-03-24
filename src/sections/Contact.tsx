@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Mail, Github, Linkedin, Facebook, Phone } from 'lucide-react';
 import { bio } from '../data/bio';
 
 export default function Contact() {
@@ -34,15 +35,38 @@ export default function Contact() {
       >
         {bio.email}
       </a>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-        <a href={bio.github} target="_blank" rel="noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-        >GitHub</a>
-        <a href={bio.linkedin} target="_blank" rel="noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-        >LinkedIn</a>
+      <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+        {[
+          { href: bio.github, icon: <Github width={18} height={18} />, label: 'GitHub' },
+          { href: bio.linkedin, icon: <Linkedin width={18} height={18} />, label: 'LinkedIn' },
+          { href: bio.facebook, icon: <Facebook width={18} height={18} />, label: 'Facebook' },
+          { href: `mailto:${bio.email}`, icon: <Mail width={18} height={18} />, label: 'Email' },
+          { href: `tel:${bio.phone}`, icon: <Phone width={18} height={18} />, label: 'Phone' },
+        ].map(({ href, icon, label }) => (
+          <a
+            key={label}
+            href={href}
+            target={href.startsWith('http') ? '_blank' : undefined}
+            rel={href.startsWith('http') ? 'noreferrer' : undefined}
+            aria-label={label}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '44px',
+              height: '44px',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            {icon}
+          </a>
+        ))}
       </div>
     </motion.section>
   );
