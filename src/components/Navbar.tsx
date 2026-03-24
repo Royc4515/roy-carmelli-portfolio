@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from '../types';
 
+interface NavbarProps {
+  theme: 'dark' | 'light';
+  onThemeToggle: () => void;
+}
+
 const links: NavLink[] = [
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
+  { label: 'About',    href: '#about'    },
   { label: 'Projects', href: '#projects' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Contact',  href: '#contact'  },
 ];
 
-export default function Navbar() {
+export default function Navbar({ theme, onThemeToggle }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -30,7 +34,9 @@ export default function Navbar() {
         padding: '0 2rem',
         height: '64px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: scrolled || menuOpen ? 'rgba(9,9,15,0.95)' : 'transparent',
+        background: scrolled || menuOpen
+          ? 'color-mix(in srgb, var(--bg-primary) 95%, transparent)'
+          : 'transparent',
         backdropFilter: scrolled || menuOpen ? 'blur(12px)' : 'none',
         borderBottom: scrolled && !menuOpen ? '1px solid var(--border)' : '1px solid transparent',
         transition: 'background 0.3s ease, border-color 0.3s ease',
@@ -48,7 +54,7 @@ export default function Navbar() {
         </a>
 
         {/* Desktop links */}
-        <ul className="desktop-nav" style={{ display: 'flex', gap: '2rem', listStyle: 'none' }}>
+        <ul className="desktop-nav" style={{ display: 'flex', gap: '2rem', listStyle: 'none', alignItems: 'center' }}>
           {links.map(link => (
             <li key={link.href}>
               <a href={link.href} style={{
@@ -66,6 +72,33 @@ export default function Navbar() {
               </a>
             </li>
           ))}
+          <li>
+            <button
+              onClick={onThemeToggle}
+              aria-label="Toggle theme"
+              style={{
+                background: 'none',
+                border: '1px solid var(--border)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                padding: '4px 10px',
+                color: 'var(--text-muted)',
+                fontSize: '0.85rem',
+                lineHeight: 1,
+                transition: 'border-color 0.2s, color 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                e.currentTarget.style.color = 'var(--accent)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.color = 'var(--text-muted)';
+              }}
+            >
+              {theme === 'dark' ? '☀' : '☾'}
+            </button>
+          </li>
         </ul>
 
         {/* Hamburger */}

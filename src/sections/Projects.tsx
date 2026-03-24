@@ -14,7 +14,7 @@ export default function Projects() {
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       style={{ padding: '6rem 2rem', maxWidth: '900px', margin: '0 auto' }}
     >
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>03. projects</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>02. projects</p>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '3rem', letterSpacing: '-0.02em' }}>Things I've Built</h2>
 
       {/* Featured grid */}
