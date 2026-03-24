@@ -1,0 +1,55 @@
+import { bio } from '../data/bio';
+
+export default function About() {
+  return (
+    <section id="about" style={{
+      padding: '6rem 2rem',
+      maxWidth: '900px',
+      margin: '0 auto',
+    }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>01. about</p>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '3rem', letterSpacing: '-0.02em' }}>Who I Am</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' }}>
+        <div>
+          {bio.about.split('\n\n').map((para, i) => (
+            <p key={i} style={{
+              color: 'var(--text-secondary)',
+              lineHeight: 1.8,
+              marginBottom: '1.25rem',
+              fontSize: '1rem',
+            }}>{para}</p>
+          ))}
+        </div>
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '8px',
+          padding: '2rem',
+        }}>
+          {bio.photo ? (
+            <img src={bio.photo} alt={bio.name} style={{ width: '100%', borderRadius: '6px', marginBottom: '1.5rem' }} />
+          ) : (
+            <div style={{
+              width: '100%',
+              aspectRatio: '1',
+              background: 'var(--bg-secondary)',
+              borderRadius: '6px',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px dashed var(--text-muted)',
+            }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>photo.jpg</span>
+            </div>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{bio.institution}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{bio.location}</span>
+            <a href={bio.github} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', textDecoration: 'none' }}>{bio.github}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
