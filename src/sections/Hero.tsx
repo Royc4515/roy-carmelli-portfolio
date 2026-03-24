@@ -1,4 +1,11 @@
+import { motion } from 'framer-motion';
 import { bio } from '../data/bio';
+
+const fadeUp = (delay: number) => ({
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const, delay },
+});
 
 export default function Hero() {
   return (
@@ -12,7 +19,7 @@ export default function Hero() {
       maxWidth: '900px',
       margin: '0 auto',
     }}>
-      <p style={{
+      <motion.p {...fadeUp(0.1)} style={{
         fontFamily: 'var(--font-mono)',
         fontSize: '0.85rem',
         color: 'var(--accent)',
@@ -21,8 +28,8 @@ export default function Hero() {
         opacity: 0.9,
       }}>
         Hi, I'm
-      </p>
-      <h1 style={{
+      </motion.p>
+      <motion.h1 {...fadeUp(0.2)} style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(3rem, 8vw, 6.5rem)',
         lineHeight: 1.05,
@@ -31,8 +38,8 @@ export default function Hero() {
         letterSpacing: '-0.02em',
       }}>
         {bio.name}
-      </h1>
-      <h2 style={{
+      </motion.h1>
+      <motion.h2 {...fadeUp(0.35)} style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(1.5rem, 4vw, 3rem)',
         lineHeight: 1.2,
@@ -42,8 +49,8 @@ export default function Hero() {
         letterSpacing: '-0.01em',
       }}>
         {bio.title}
-      </h2>
-      <p style={{
+      </motion.h2>
+      <motion.p {...fadeUp(0.5)} style={{
         fontFamily: 'var(--font-body)',
         fontSize: '1.1rem',
         color: 'var(--text-secondary)',
@@ -52,8 +59,8 @@ export default function Hero() {
         marginBottom: '3rem',
       }}>
         {bio.tagline}
-      </p>
-      <div className="hero-buttons" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      </motion.p>
+      <motion.div {...fadeUp(0.65)} className="hero-buttons" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
         <a href="#projects" style={{
           padding: '0.75rem 1.75rem',
           background: 'var(--accent)',
@@ -85,7 +92,7 @@ export default function Hero() {
         >
           Get in Touch
         </a>
-      </div>
+      </motion.div>
       <style>{`
         @media (max-width: 640px) {
           .hero-buttons { flex-direction: column !important; }

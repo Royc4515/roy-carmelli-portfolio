@@ -1,8 +1,16 @@
+import { motion } from 'framer-motion';
 import { bio } from '../data/bio';
 
 export default function Contact() {
   return (
-    <section id="contact" style={{ padding: '6rem 2rem 10rem', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+    <motion.section
+      id="contact"
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      style={{ padding: '6rem 2rem 10rem', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}
+    >
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>04. contact</p>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Let's Talk</h2>
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '3rem', fontSize: '1rem' }}>
@@ -36,6 +44,6 @@ export default function Contact() {
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
         >LinkedIn</a>
       </div>
-    </section>
+    </motion.section>
   );
 }
