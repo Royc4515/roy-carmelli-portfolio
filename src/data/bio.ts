@@ -11,7 +11,8 @@ When I'm not studying or coding, I serve in the IDF Gaza Division reserves, cook
   email: "Roy.y.carmelli@gmail.com",
   github: "https://github.com/Royc4515",
   linkedin: "https://linkedin.com/in/roy-carmelli",
-  Facebook: "https://www.facebook.com/roy.carmelli",
+  facebook: "https://www.facebook.com/YOUR_ACTUAL_FACEBOOK_URL",
+  phone: "+972547287807",
   photo: null as string | null,
 };
 
