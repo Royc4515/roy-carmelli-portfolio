@@ -19,3 +19,4 @@ npm run dev
 ## Deploy
 
 Hosted on Vercel. Auto-deploys on push to main.
+https://roy-carmelli-portfolio.vercel.app/
