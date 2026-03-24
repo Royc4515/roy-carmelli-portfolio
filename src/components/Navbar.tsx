@@ -18,45 +18,159 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
   return (
-    <nav style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      padding: '0 2rem',
-      height: '64px',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      background: scrolled ? 'rgba(9,9,15,0.92)' : 'transparent',
-      backdropFilter: scrolled ? 'blur(12px)' : 'none',
-      borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
-      transition: 'all 0.3s ease',
-    }}>
-      <a href="#hero" style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: '0.85rem',
-        color: 'var(--accent)',
-        textDecoration: 'none',
-        letterSpacing: '0.05em',
+    <>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        padding: '0 2rem',
+        height: '64px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: scrolled || menuOpen ? 'rgba(9,9,15,0.95)' : 'transparent',
+        backdropFilter: scrolled || menuOpen ? 'blur(12px)' : 'none',
+        borderBottom: scrolled && !menuOpen ? '1px solid var(--border)' : '1px solid transparent',
+        transition: 'background 0.3s ease, border-color 0.3s ease',
       }}>
-        rc<span style={{ color: 'var(--text-muted)' }}>.dev</span>
-      </a>
-      <ul style={{ display: 'flex', gap: '2rem', listStyle: 'none' }}>
-        {links.map(link => (
-          <li key={link.href}>
-            <a href={link.href} style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-              color: 'var(--text-secondary)',
+        {/* Logo */}
+        <a href="#hero" style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.85rem',
+          color: 'var(--accent)',
+          textDecoration: 'none',
+          letterSpacing: '0.05em',
+          zIndex: 101,
+        }}>
+          rc<span style={{ color: 'var(--text-muted)' }}>.dev</span>
+        </a>
+
+        {/* Desktop links */}
+        <ul className="desktop-nav" style={{ display: 'flex', gap: '2rem', listStyle: 'none' }}>
+          {links.map(link => (
+            <li key={link.href}>
+              <a href={link.href} style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                transition: 'color 0.2s',
+                letterSpacing: '0.02em',
+              }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        {/* Hamburger */}
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setMenuOpen(prev => !prev)}
+          aria-label="Toggle menu"
+          style={{
+            display: 'none',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '4px',
+            zIndex: 101,
+            flexDirection: 'column',
+            gap: '5px',
+          }}
+        >
+          <span style={{
+            display: 'block', width: '22px', height: '1.5px',
+            background: menuOpen ? 'var(--accent)' : 'var(--text-secondary)',
+            borderRadius: '1px',
+            transition: 'transform 0.3s, background 0.3s',
+            transform: menuOpen ? 'translateY(6.5px) rotate(45deg)' : 'none',
+          }} />
+          <span style={{
+            display: 'block', width: '22px', height: '1.5px',
+            background: menuOpen ? 'var(--accent)' : 'var(--text-secondary)',
+            borderRadius: '1px',
+            transition: 'opacity 0.3s, background 0.3s',
+            opacity: menuOpen ? 0 : 1,
+          }} />
+          <span style={{
+            display: 'block', width: '22px', height: '1.5px',
+            background: menuOpen ? 'var(--accent)' : 'var(--text-secondary)',
+            borderRadius: '1px',
+            transition: 'transform 0.3s, background 0.3s',
+            transform: menuOpen ? 'translateY(-6.5px) rotate(-45deg)' : 'none',
+          }} />
+        </button>
+      </nav>
+
+      {/* Fullscreen overlay */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99,
+        background: 'var(--bg-primary)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '2.5rem',
+        opacity: menuOpen ? 1 : 0,
+        pointerEvents: menuOpen ? 'all' : 'none',
+        transition: 'opacity 0.3s ease',
+      }}>
+        {links.map((link, i) => (
+          <a
+            key={link.href}
+            href={link.href}
+            onClick={() => setMenuOpen(false)}
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(2rem, 8vw, 3.5rem)',
+              color: 'var(--text-primary)',
               textDecoration: 'none',
-              transition: 'color 0.2s',
-              letterSpacing: '0.02em',
+              fontStyle: 'italic',
+              letterSpacing: '-0.02em',
+              transition: `color 0.2s, transform 0.3s ${i * 0.05}s, opacity 0.3s ${i * 0.05}s`,
+              transform: menuOpen ? 'translateY(0)' : 'translateY(10px)',
+              opacity: menuOpen ? 1 : 0,
             }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
-            >
-              {link.label}
-            </a>
-          </li>
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+          >
+            {link.label}
+          </a>
         ))}
-      </ul>
-    </nav>
+
+        <a
+          href="mailto:royc4515@gmail.com"
+          style={{
+            position: 'absolute',
+            bottom: '3rem',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.8rem',
+            color: 'var(--text-muted)',
+            textDecoration: 'none',
+            letterSpacing: '0.05em',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+        >
+          royc4515@gmail.com
+        </a>
+      </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .desktop-nav { display: none !important; }
+          .mobile-menu-btn { display: flex !important; }
+        }
+      `}</style>
+    </>
   );
 }
