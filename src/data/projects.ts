@@ -1,11 +1,12 @@
-import { Project } from '../types';
+// src/data/projects.ts
+import { Project } from '../types/index';
 
 export const projects: Project[] = [
   {
     id: "career-predictor",
-    title: "Career Predictor",
-    description: "Full-stack web app with Google OAuth, Express backend, SQLite database, and Railway deployment. Frontend in React 19 + Vite + Tailwind. AI-powered career image generation via Pollinations.ai in progress.",
-    tech: ["React 19", "Vite", "Tailwind CSS", "Node.js", "Express", "SQLite", "Passport.js", "Railway"],
+    title: "CareerPredict AI",
+    description: "Full-stack web app: Google OAuth login → 5-question quiz → AI-generated career portrait with 100+ unique outcomes. Built to learn OAuth flows, session management, and client-server architecture from scratch. React/Vite/Tailwind frontend, Node/Express + Passport.js backend, SQLite persistence — production-deployed on Railway.",
+    tech: ["React 19", "Vite", "Tailwind CSS", "Node.js", "Express", "Passport.js", "SQLite", "Google OAuth"],
     github: "https://github.com/Royc4515/career-predictor",
     live: "https://career-predictor-production-a8bd.up.railway.app/",
     featured: true,
@@ -14,36 +15,36 @@ export const projects: Project[] = [
   {
     id: "background-cognitive-correlation",
     title: "Background–Cognitive Correlation",
-    description: "Data analysis project exploring socio-educational predictors of children's cognitive outcomes. OLS regression, statistical modeling, and visualization across a real dataset.",
-    tech: ["Python", "Pandas", "NumPy", "Matplotlib", "SciPy", "Jupyter Notebook"],
+    description: "Research data pipeline investigating socio-educational predictors of children's cognitive outcomes using the OpenNeuro dataset (N=56). Owned the full analysis: data merging, ISCO scoring, LISAS metric, hierarchical OLS regression, Spearman heatmaps. 84 commits, pytest suite, reproducible Jupyter notebook.",
+    tech: ["Python", "Pandas", "NumPy", "Matplotlib", "SciPy", "Jupyter", "pytest"],
     github: "https://github.com/Royc4515/background-cognitive-correlation",
     featured: true,
     year: 2026,
   },
   {
-    id: "arkanoid-game",
-    title: "Arkanoid Game",
-    description: "Fully functional Arkanoid clone built in Java. Demonstrates OOP principles — inheritance, polymorphism, encapsulation — with custom game loop, collision detection, and level design.",
-    tech: ["Java", "OOP", "Game Loop", "Collision Detection"],
-    github: "https://github.com/Royc4515/ArkanoidGame",
-    featured: false,
-    year: 2025,
-  },
-  {
     id: "white-matter-game",
     title: "White Matter Tracts Game",
-    description: "Browser-based self-test mini-game for neuroanatomy — specifically the white matter tracts unit. Built to actually help study for the Neuroscience course at Bar-Ilan.",
-    tech: ["HTML", "CSS", "JavaScript", "Neuroanatomy"],
+    description: "Browser-based neuroanatomy learning tool — drag-and-drop game for white matter tract classification. Training mode with instant feedback and a timed Test mode. Designed the architecture and UX, directed AI-assisted implementation. Vanilla JS, zero dependencies, mobile-responsive.",
+    tech: ["JavaScript", "HTML", "CSS"],
     github: "https://github.com/Royc4515/white-matter-tracts-game",
     live: "https://royc4515.github.io/white-matter-tracts-game",
     featured: false,
     year: 2025,
   },
   {
+    id: "arkanoid-game",
+    title: "Arkanoid Game",
+    description: "Functional Arkanoid clone in Java 17. The point was the architecture: clean OOP — inheritance, polymorphism, encapsulation — with a custom game loop and collision detection. Documented and refactored.",
+    tech: ["Java 17", "OOP", "Game Loop", "Collision Detection"],
+    github: "https://github.com/Royc4515/ArkanoidGame",
+    featured: false,
+    year: 2025,
+  },
+  {
     id: "portfolio",
     title: "This Portfolio",
-    description: "Personal portfolio site. Vite + React + TypeScript + Tailwind CSS. Designed and built from scratch.",
-    tech: ["React", "TypeScript", "Vite", "Tailwind CSS"],
+    description: "Built from scratch. Vite + React + TypeScript + Tailwind CSS + Framer Motion. Dark/light theme with system preference detection.",
+    tech: ["React", "TypeScript", "Vite", "Tailwind CSS", "Framer Motion"],
     github: "https://github.com/Royc4515/roy-carmelli-portfolio",
     featured: false,
     year: 2026,

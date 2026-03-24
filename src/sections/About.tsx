@@ -34,28 +34,51 @@ export default function About() {
           borderRadius: '8px',
           padding: '2rem',
         }}>
-          {bio.photo ? (
-            <img src={bio.photo} alt={bio.name} style={{ width: '100%', borderRadius: '6px', marginBottom: '1.5rem' }} />
-          ) : (
-            <div style={{
-              width: '100%',
-              aspectRatio: '1',
-              background: 'var(--bg-secondary)',
-              borderRadius: '6px',
-              marginBottom: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px dashed var(--text-muted)',
-            }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>photo.jpg</span>
+          <p style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.7rem',
+            color: 'var(--accent)',
+            letterSpacing: '0.1em',
+            marginBottom: '1.25rem',
+            textTransform: 'uppercase',
+          }}>
+            At a glance
+          </p>
+          {[
+            { label: 'Degree',     value: 'B.Sc. CS & Brain Sciences' },
+            { label: 'University', value: 'Bar-Ilan University' },
+            { label: 'Currently',  value: '2nd year, 2024–present' },
+            { label: 'Open to',    value: 'Internships · Research · Collaborations' },
+          ].map(({ label, value }, i, arr) => (
+            <div
+              key={label}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                gap: '1rem',
+                padding: '0.75rem 0',
+                borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
+              }}
+            >
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                whiteSpace: 'nowrap',
+              }}>
+                {label}
+              </span>
+              <span style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary)',
+                textAlign: 'right',
+              }}>
+                {value}
+              </span>
             </div>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{bio.institution}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{bio.location}</span>
-            <a href={bio.github} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', textDecoration: 'none' }}>{bio.github}</a>
-          </div>
+          ))}
         </div>
       </div>
       <style>{`

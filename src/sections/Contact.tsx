@@ -12,7 +12,7 @@ export default function Contact() {
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       style={{ padding: '6rem 2rem 10rem', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}
     >
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>04. contact</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>03. contact</p>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Let's Talk</h2>
       <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '3rem', fontSize: '1rem' }}>
         I'm open to internships, research collaborations, and interesting projects at the intersection of CS and neuroscience.
