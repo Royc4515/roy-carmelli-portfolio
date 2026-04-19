@@ -4,6 +4,7 @@ const links = [
   { label: 'Home',     href: '#hero',     icon: '🍄' },
   { label: 'Library',  href: '#projects', icon: '📖' },
   { label: 'About',    href: '#about',    icon: '👤' },
+  { label: 'Arcade',   href: '#arcade',   icon: '🕹️' },
   { label: 'Contact',  href: '#contact',  icon: '📮' },
 ];
 
