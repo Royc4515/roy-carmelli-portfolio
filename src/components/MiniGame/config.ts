@@ -2,10 +2,10 @@ const BASE = '/assets/sprites';
 
 // ─── Canvas ───────────────────────────────────────────────────────────────────
 export const CANVAS_CONFIG = {
-  width: 700,
-  height: 220,
-  /** Pixel Y of the visual ground line in the background image */
-  groundY: 176,
+  width: 800,
+  height: 402,
+  /** Pixel Y of the visual ground line — ~84% of canvas height matches the bg image */
+  groundY: 338,
 } as const;
 
 // ─── Physics ──────────────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ export const SPRITE_PATHS = {
     ],
   },
 
-  background: `${BASE}/background-background.png`,
+  background: `${BASE}/Background .png`,
 } as const;
 
 // ─── Frame intervals (ms per frame) ───────────────────────────────────────────
