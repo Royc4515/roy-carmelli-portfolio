@@ -27,7 +27,7 @@ export const PLAYER_CONFIG = {
   displayW: 56,
   displayH: 72,
   /** Visual render size for the slide sprite */
-  slideW: 80,
+  slideW: 56,
   slideH: 72,
   /** Collision hitbox height while sliding (much shorter than standing) */
   slideHitboxH: 32,
@@ -71,7 +71,7 @@ export const SPRITE_PATHS = {
     jumpDown: [`${BASE}/jump-3.png`,  `${BASE}/jump-4.png`],
     stand:    [`${BASE}/stand-1.png`, `${BASE}/stand-2.png`],
     idle:     [`${BASE}/idle.png`],
-    slide:    [`${BASE}/slide-3.png`],
+    slide:    [`${BASE}/slide-2.png`, `${BASE}/slide-3.png`],
   } satisfies Record<string, string[]>,
 
   obstacles: {

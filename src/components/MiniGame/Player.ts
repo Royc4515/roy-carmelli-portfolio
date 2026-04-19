@@ -98,7 +98,12 @@ export class Player {
       if (this.frameClock >= interval) {
         this.frameClock -= interval;
         const len = this.frames.length;
-        this.frameIdx = (this.frameIdx + 1) % len;
+        // slide plays once then holds on last frame
+        if (this.animState === 'slide') {
+          this.frameIdx = Math.min(this.frameIdx + 1, len - 1);
+        } else {
+          this.frameIdx = (this.frameIdx + 1) % len;
+        }
       }
     }
   }
