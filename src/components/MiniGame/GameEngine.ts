@@ -206,14 +206,10 @@ export class GameEngine {
   // ── Draw ────────────────────────────────────────────────────────────────────
 
   private draw(): void {
-    const { ctx, canvasW, canvasH } = this;
+    const { ctx } = this;
     ctx.imageSmoothingEnabled = false;
 
-    if (this.state === 'IDLE') {
-      this.drawIdleBackground();
-    } else {
-      this.drawScrollingBackground();
-    }
+    this.drawScrollingBackground();
 
     this.obstacles.draw(ctx, this.renderer);
     this.player.draw(ctx, this.renderer);
@@ -222,20 +218,6 @@ export class GameEngine {
       case 'IDLE':     this.drawIdleUI();     break;
       case 'PLAYING':  this.drawScore();      break;
       case 'GAMEOVER': this.drawGameOverUI(); break;
-    }
-    void canvasW; void canvasH;
-  }
-
-  private drawIdleBackground(): void {
-    const { ctx, canvasW, canvasH } = this;
-    ctx.fillStyle = C.darkGreen;
-    ctx.fillRect(0, 0, canvasW, canvasH);
-    // dot grid
-    ctx.fillStyle = C.forestLight;
-    for (let gx = 16; gx < canvasW; gx += 32) {
-      for (let gy = 16; gy < canvasH; gy += 32) {
-        ctx.fillRect(gx, gy, 1, 1);
-      }
     }
   }
 

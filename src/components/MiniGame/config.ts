@@ -5,7 +5,7 @@ export const CANVAS_CONFIG = {
   width: 700,
   height: 220,
   /** Pixel Y of the visual ground line in the background image */
-  groundY: 192,
+  groundY: 176,
 } as const;
 
 // ─── Physics ──────────────────────────────────────────────────────────────────
