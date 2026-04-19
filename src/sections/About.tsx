@@ -75,7 +75,7 @@ export default function About() {
               ── AT A GLANCE ──
             </p>
             {[
-              { label: 'Degree',     value: 'B.Sc. CS & Brain Sciences' },
+              { label: 'Degree',     value: 'B.Sc. Computer & Neuro Sciences' },
               { label: 'University', value: 'Bar-Ilan University' },
               { label: 'Year',       value: '2nd year, 2024–present' },
               { label: 'Open to',    value: 'Internships · Research · Collabs' },

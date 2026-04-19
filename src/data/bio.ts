@@ -3,7 +3,7 @@
 export const bio = {
   name: "Roy Carmelli",
   nameHe: "רועי כרמלי",
-  title: "CS × Brain Sciences",
+  title: "Computer & Neuro Sciences",
   institution: "Bar-Ilan University",
   location: "Israel",
   tagline: "I build things at the intersection of software and the mind.",
