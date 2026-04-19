@@ -26,8 +26,9 @@ export const SCROLL_CONFIG = {
 export const PLAYER_CONFIG = {
   displayW: 56,
   displayH: 72,
-  /** Crouch height while sliding */
-  slideH: 36,
+  /** Display size for the slide (prone) pose */
+  slideW: 80,
+  slideH: 44,
   /** How long a slide lasts (seconds) */
   slideDuration: 0.65,
   /** Gap between sprite bottom and the ground line */

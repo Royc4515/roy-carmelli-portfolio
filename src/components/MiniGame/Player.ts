@@ -109,24 +109,28 @@ export class Player {
 
   getHitbox(): AABB {
     const { left, top, right, bottom } = PLAYER_CONFIG.hitboxInset;
-    const h = this.isSliding ? PLAYER_CONFIG.slideH : PLAYER_CONFIG.displayH;
-    const drawY = this.isSliding
-      ? this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideH
-      : this.y;
+    if (this.isSliding) {
+      const slideY = this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideH;
+      return {
+        x: this.x + left,
+        y: slideY + top,
+        w: PLAYER_CONFIG.slideW - left - right,
+        h: PLAYER_CONFIG.slideH - top - bottom,
+      };
+    }
     return {
       x: this.x + left,
-      y: drawY + top,
+      y: this.y + top,
       w: PLAYER_CONFIG.displayW - left - right,
-      h: h - top - bottom,
+      h: PLAYER_CONFIG.displayH - top - bottom,
     };
   }
 
   draw(ctx: CanvasRenderingContext2D, renderer: SpriteRenderer): void {
     const src = this.frames[Math.min(this.frameIdx, this.frames.length - 1)];
     if (this.isSliding) {
-      // Anchor slide sprite to feet — draw it squished at the bottom
       const drawY = this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideH;
-      renderer.draw(ctx, src, this.x, drawY, PLAYER_CONFIG.displayW, PLAYER_CONFIG.slideH);
+      renderer.draw(ctx, src, this.x, drawY, PLAYER_CONFIG.slideW, PLAYER_CONFIG.slideH);
     } else {
       renderer.draw(ctx, src, this.x, this.y, PLAYER_CONFIG.displayW, PLAYER_CONFIG.displayH);
     }
