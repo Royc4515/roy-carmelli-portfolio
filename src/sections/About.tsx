@@ -1,91 +1,110 @@
 import { motion } from 'framer-motion';
 import { bio } from '../data/bio';
+import Character from '../components/Character';
+import PixelPanel from '../components/PixelPanel';
+import ZoneLabel from '../components/ZoneLabel';
+
+const DOT_GRID = {
+  backgroundImage: 'radial-gradient(circle, #4a6b2e 1px, transparent 1px)',
+  backgroundSize: '32px 32px',
+} as const;
 
 export default function About() {
   return (
-    <motion.section
+    <section
       id="about"
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        padding: '6rem 2rem',
-        maxWidth: '900px',
-        margin: '0 auto',
+        minHeight: '100vh',
+        background: '#1a2e10',
+        ...DOT_GRID,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '80px 2rem 4rem',
       }}
     >
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: '1rem' }}>01. about</p>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '3rem', letterSpacing: '-0.02em' }}>Who I Am</h2>
-      <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' }}>
-        <div>
-          {bio.about.split('\n\n').map((para, i) => (
-            <p key={i} style={{
-              color: 'var(--text-secondary)',
-              lineHeight: 1.8,
-              marginBottom: '1.25rem',
-              fontSize: '1rem',
-            }}>{para}</p>
-          ))}
+      <div
+        style={{
+          maxWidth: '1100px',
+          width: '100%',
+          margin: '0 auto',
+          display: 'flex',
+          gap: '2.5rem',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+        }}
+      >
+        {/* Zone label + Character */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', minWidth: '140px' }}>
+          <ZoneLabel lines={['ABOUT', 'THE', 'ADVENTURER']} />
+          <Character pose="sit" scale={1} ariaLabel="Roy reading" />
         </div>
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: '8px',
-          padding: '2rem',
-        }}>
-          <p style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.7rem',
-            color: 'var(--accent)',
-            letterSpacing: '0.1em',
-            marginBottom: '1.25rem',
-            textTransform: 'uppercase',
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.7 }}
+          style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+        >
+          <h2 style={{
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: 'clamp(0.85rem, 2vw, 1.2rem)',
+            color: '#e8d8a8',
+            textShadow: '2px 2px 0 #000',
           }}>
-            At a glance
-          </p>
-          {[
-            { label: 'Degree',     value: 'B.Sc. CS & Brain Sciences' },
-            { label: 'University', value: 'Bar-Ilan University' },
-            { label: 'Currently',  value: '2nd year, 2024–present' },
-            { label: 'Open to',    value: 'Internships · Research · Collaborations' },
-          ].map(({ label, value }, i, arr) => (
-            <div
-              key={label}
-              style={{
+            Who I Am
+          </h2>
+
+          <PixelPanel variant="parchment">
+            {bio.about.split('\n\n').map((para, i) => (
+              <p key={i} style={{
+                fontFamily: '"Inter", sans-serif',
+                fontSize: '0.95rem',
+                color: '#3a2818',
+                lineHeight: 1.8,
+                marginBottom: i < bio.about.split('\n\n').length - 1 ? '0.85rem' : 0,
+              }}>
+                {para}
+              </p>
+            ))}
+          </PixelPanel>
+
+          <PixelPanel variant="wood">
+            <p style={{
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize: '0.5rem',
+              color: '#c9a24a',
+              letterSpacing: '0.1em',
+              marginBottom: '1rem',
+            }}>
+              ── AT A GLANCE ──
+            </p>
+            {[
+              { label: 'Degree',     value: 'B.Sc. CS & Brain Sciences' },
+              { label: 'University', value: 'Bar-Ilan University' },
+              { label: 'Year',       value: '2nd year, 2024–present' },
+              { label: 'Open to',    value: 'Internships · Research · Collabs' },
+            ].map(({ label, value }, i, arr) => (
+              <div key={label} style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'baseline',
                 gap: '1rem',
-                padding: '0.75rem 0',
-                borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
-              }}
-            >
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                color: 'var(--text-muted)',
-                whiteSpace: 'nowrap',
+                padding: '0.65rem 0',
+                borderBottom: i < arr.length - 1 ? '1px solid #4a6b2e' : 'none',
               }}>
-                {label}
-              </span>
-              <span style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                color: 'var(--text-secondary)',
-                textAlign: 'right',
-              }}>
-                {value}
-              </span>
-            </div>
-          ))}
-        </div>
+                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: '#c9b87a', whiteSpace: 'nowrap' }}>
+                  {label}
+                </span>
+                <span style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: '#e8d8a8', textAlign: 'right' }}>
+                  {value}
+                </span>
+              </div>
+            ))}
+          </PixelPanel>
+        </motion.div>
       </div>
-      <style>{`
-        @media (max-width: 640px) {
-          .about-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-        }
-      `}</style>
-    </motion.section>
+    </section>
   );
 }

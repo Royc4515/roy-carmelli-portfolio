@@ -1,25 +1,20 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from '../types';
 
-interface NavbarProps {
-  theme: 'dark' | 'light';
-  onThemeToggle: () => void;
-}
-
-const links: NavLink[] = [
-  { label: 'About',    href: '#about'    },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Contact',  href: '#contact'  },
+const links = [
+  { label: 'Home',     href: '#hero',     icon: '🍄' },
+  { label: 'Library',  href: '#projects', icon: '📖' },
+  { label: 'About',    href: '#about',    icon: '👤' },
+  { label: 'Contact',  href: '#contact',  icon: '📮' },
 ];
 
-export default function Navbar({ theme, onThemeToggle }: NavbarProps) {
-  const [scrolled, setScrolled] = useState(false);
+export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -29,179 +24,155 @@ export default function Navbar({ theme, onThemeToggle }: NavbarProps) {
 
   return (
     <>
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        padding: '0 2rem',
-        height: '64px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: scrolled || menuOpen
-          ? 'color-mix(in srgb, var(--bg-primary) 95%, transparent)'
-          : 'transparent',
-        backdropFilter: scrolled || menuOpen ? 'blur(12px)' : 'none',
-        borderBottom: scrolled && !menuOpen ? '1px solid var(--border)' : '1px solid transparent',
-        transition: 'background 0.3s ease, border-color 0.3s ease',
-      }}>
-        {/* Logo */}
-        <a href="#hero" style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.85rem',
-          color: 'var(--accent)',
-          textDecoration: 'none',
-          letterSpacing: '0.05em',
-          zIndex: 101,
-        }}>
-          rc<span style={{ color: 'var(--text-muted)' }}>.dev</span>
-        </a>
-
-        {/* Desktop links */}
-        <ul className="desktop-nav" style={{ display: 'flex', gap: '2rem', listStyle: 'none', alignItems: 'center' }}>
-          {links.map(link => (
-            <li key={link.href}>
-              <a href={link.href} style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                color: 'var(--text-secondary)',
-                textDecoration: 'none',
-                transition: 'color 0.2s',
-                letterSpacing: '0.02em',
-              }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-          <li>
-            <button
-              onClick={onThemeToggle}
-              aria-label="Toggle theme"
-              style={{
-                background: 'none',
-                border: '1px solid var(--border)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                padding: '4px 10px',
-                color: 'var(--text-muted)',
-                fontSize: '0.85rem',
-                lineHeight: 1,
-                transition: 'border-color 0.2s, color 0.2s',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--accent)';
-                e.currentTarget.style.color = 'var(--accent)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.color = 'var(--text-muted)';
-              }}
-            >
-              {theme === 'dark' ? '☀' : '☾'}
-            </button>
-          </li>
-        </ul>
-
-        {/* Hamburger */}
-        <button
-          className="mobile-menu-btn"
-          onClick={() => setMenuOpen(prev => !prev)}
-          aria-label="Toggle menu"
+      <nav
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          background: '#2d4a1e',
+          borderBottom: scrolled ? '3px solid #c9a24a' : '3px solid #4a6b2e',
+          transition: 'border-color 0.3s',
+        }}
+      >
+        {/* Main nav bar */}
+        <div
           style={{
-            display: 'none',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '4px',
-            zIndex: 101,
-            flexDirection: 'column',
-            gap: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 1.5rem',
+            height: '60px',
           }}
         >
-          <span style={{
-            display: 'block', width: '22px', height: '1.5px',
-            background: menuOpen ? 'var(--accent)' : 'var(--text-secondary)',
-            borderRadius: '1px',
-            transition: 'transform 0.3s, background 0.3s',
-            transform: menuOpen ? 'translateY(6.5px) rotate(45deg)' : 'none',
-          }} />
-          <span style={{
-            display: 'block', width: '22px', height: '1.5px',
-            background: menuOpen ? 'var(--accent)' : 'var(--text-secondary)',
-            borderRadius: '1px',
-            transition: 'opacity 0.3s, background 0.3s',
-            opacity: menuOpen ? 0 : 1,
-          }} />
-          <span style={{
-            display: 'block', width: '22px', height: '1.5px',
-            background: menuOpen ? 'var(--accent)' : 'var(--text-secondary)',
-            borderRadius: '1px',
-            transition: 'transform 0.3s, background 0.3s',
-            transform: menuOpen ? 'translateY(-6.5px) rotate(-45deg)' : 'none',
-          }} />
-        </button>
+          {/* Nav links */}
+          <ul
+            className="rpg-nav-links"
+            style={{ display: 'flex', gap: '0', listStyle: 'none', alignItems: 'center' }}
+          >
+            {links.map(link => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '8px 20px',
+                    textDecoration: 'none',
+                    fontFamily: '"Press Start 2P", monospace',
+                    fontSize: '0.5rem',
+                    color: '#e8d8a8',
+                    letterSpacing: '0.05em',
+                    transition: 'color 0.15s, background 0.15s',
+                    borderRight: '1px solid #4a6b2e',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(201,162,74,0.15)';
+                    e.currentTarget.style.color = '#c9a24a';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = '#e8d8a8';
+                  }}
+                >
+                  <span style={{ fontSize: '1.4rem', lineHeight: 1, imageRendering: 'pixelated' }}>
+                    {link.icon}
+                  </span>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* Right side: face avatar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <img
+              src="/assets/sprites/face-small.png"
+              alt="Roy Carmelli"
+              style={{
+                height: '48px',
+                width: 'auto',
+                imageRendering: 'pixelated',
+                borderRadius: 0,
+                border: '2px solid #c9a24a',
+                background: '#1a2e10',
+              }}
+            />
+
+            {/* Mobile hamburger */}
+            <button
+              className="rpg-hamburger"
+              onClick={() => setMenuOpen(p => !p)}
+              aria-label="Toggle menu"
+              style={{
+                display: 'none',
+                background: 'none',
+                border: '2px solid #c9a24a',
+                cursor: 'pointer',
+                padding: '6px 10px',
+                color: '#e8d8a8',
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize: '0.6rem',
+              }}
+            >
+              {menuOpen ? '✕' : '☰'}
+            </button>
+          </div>
+        </div>
       </nav>
 
-      {/* Fullscreen overlay */}
-      <div style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 99,
-        background: 'var(--bg-primary)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '2.5rem',
-        opacity: menuOpen ? 1 : 0,
-        pointerEvents: menuOpen ? 'all' : 'none',
-        transition: 'opacity 0.3s ease',
-      }}>
-        {links.map((link, i) => (
+      {/* Mobile overlay */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 99,
+          background: '#1a2e10',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '2rem',
+          opacity: menuOpen ? 1 : 0,
+          pointerEvents: menuOpen ? 'all' : 'none',
+          transition: 'opacity 0.25s ease',
+        }}
+      >
+        {links.map(link => (
           <a
             key={link.href}
             href={link.href}
             onClick={() => setMenuOpen(false)}
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(2rem, 8vw, 3.5rem)',
-              color: 'var(--text-primary)',
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize: '1rem',
+              color: '#e8d8a8',
               textDecoration: 'none',
-              fontStyle: 'italic',
-              letterSpacing: '-0.02em',
-              transition: `color 0.2s, transform 0.3s ${i * 0.05}s, opacity 0.3s ${i * 0.05}s`,
-              transform: menuOpen ? 'translateY(0)' : 'translateY(10px)',
-              opacity: menuOpen ? 1 : 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '1rem 2rem',
+              border: '3px solid #4a6b2e',
+              width: '200px',
+              textAlign: 'center',
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#c9a24a'; e.currentTarget.style.color = '#c9a24a'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#4a6b2e'; e.currentTarget.style.color = '#e8d8a8'; }}
           >
+            <span style={{ fontSize: '2rem' }}>{link.icon}</span>
             {link.label}
           </a>
         ))}
-
-        <a
-          href="mailto:royc4515@gmail.com"
-          style={{
-            position: 'absolute',
-            bottom: '3rem',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.8rem',
-            color: 'var(--text-muted)',
-            textDecoration: 'none',
-            letterSpacing: '0.05em',
-            transition: 'color 0.2s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-        >
-          royc4515@gmail.com
-        </a>
       </div>
 
       <style>{`
         @media (max-width: 640px) {
-          .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: flex !important; }
+          .rpg-nav-links { display: none !important; }
+          .rpg-hamburger { display: block !important; }
         }
       `}</style>
     </>

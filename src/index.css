@@ -1,54 +1,64 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+@import "@fontsource/press-start-2p/400.css";
+@import "./styles/pixel.css";
 
-:root {
-  --bg-primary: #09090f;
-  --bg-secondary: #0f0f1a;
-  --bg-card: #13131f;
-  --accent: #2dd4bf;
-  --accent-dim: rgba(45, 212, 191, 0.12);
-  --accent-hover: #5eead4;
-  --text-primary: #f0f0f5;
-  --text-secondary: #8888aa;
-  --text-muted: #4a4a6a;
-  --border: rgba(255,255,255,0.06);
-  --font-display: 'DM Serif Display', serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-  --font-body: 'Inter', sans-serif;
+@theme {
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+
+  --color-forest-dark: #1a2e10;
+  --color-forest: #2d4a1e;
+  --color-forest-light: #4a6b2e;
+  --color-parchment: #e8d8a8;
+  --color-parchment-dark: #c9b87a;
+  --color-brass: #c9a24a;
+  --color-wood-dark: #3a2818;
+  --color-wood: #6b4a2e;
 }
 
-[data-theme="light"] {
-  --bg-primary:     #fafafa;
-  --bg-secondary:   #f3f3f7;
-  --bg-card:        #ffffff;
-  --accent:         #0d9488;
-  --accent-dim:     rgba(13, 148, 136, 0.10);
-  --accent-hover:   #0f766e;
-  --text-primary:   #0f0f1a;
-  --text-secondary: #444466;
-  --text-muted:     #888899;
-  --border:         rgba(0, 0, 0, 0.08);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* smooth theme transition — exclude animated elements */
-*:not([style*="transform"]):not([style*="opacity"]) {
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.15s ease;
+html {
+  scroll-behavior: smooth;
 }
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
   font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-color: var(--color-forest-dark);
+  color: var(--color-parchment);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-::selection { background: var(--accent-dim); color: var(--accent); }
+h1,
+h2,
+h3 {
+  font-family: var(--font-pixel);
+  letter-spacing: 0.05em;
+}
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+a {
+  color: var(--color-brass);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-forest-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-forest-light);
+  border: 2px solid var(--color-forest-dark);
+}
