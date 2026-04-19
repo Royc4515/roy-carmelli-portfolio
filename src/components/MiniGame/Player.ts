@@ -15,8 +15,8 @@ export class Player {
   private frameIdx = 0;
   private frameClock = 0;
   private prevAnimState: PlayerAnimState = 'wave';
+  private slideTimer = 0;
 
-  /** Y coordinate of player top when standing on the ground */
   private readonly groundStandY: number;
 
   constructor(canvasW: number, canvasH: number) {
@@ -24,20 +24,22 @@ export class Player {
       CANVAS_CONFIG.groundY - PLAYER_CONFIG.displayH - PLAYER_CONFIG.groundOffset;
     this.x = canvasW * PLAYER_CONFIG.idleFraction - PLAYER_CONFIG.displayW / 2;
     this.y = this.groundStandY;
-
-    void canvasH; // kept for API symmetry
+    void canvasH;
   }
 
   jump(): void {
     if (!this.isOnGround) return;
+    if (this.animState === 'slide') this.slideTimer = 0; // cancel slide on jump
     this.velocityY = PHYSICS_CONFIG.jumpForce;
     this.isOnGround = false;
   }
 
-  /**
-   * Reset to idle position (center of canvas).
-   * Called when restarting the game.
-   */
+  slide(): void {
+    if (!this.isOnGround || this.animState === 'slide') return;
+    this.animState = 'slide';
+    this.slideTimer = PLAYER_CONFIG.slideDuration;
+  }
+
   reset(canvasW: number): void {
     this.x = canvasW * PLAYER_CONFIG.idleFraction - PLAYER_CONFIG.displayW / 2;
     this.y = this.groundStandY;
@@ -47,9 +49,19 @@ export class Player {
     this.frameIdx = 0;
     this.frameClock = 0;
     this.prevAnimState = 'wave';
+    this.slideTimer = 0;
   }
 
   update(dt: number): void {
+    // ── Slide timer ───────────────────────────────────────────────────────
+    if (this.animState === 'slide') {
+      this.slideTimer -= dt;
+      if (this.slideTimer <= 0) {
+        this.slideTimer = 0;
+        this.animState = 'run';
+      }
+    }
+
     // ── Vertical physics ──────────────────────────────────────────────────
     if (!this.isOnGround) {
       this.velocityY = Math.min(
@@ -62,14 +74,13 @@ export class Player {
         this.y = this.groundStandY;
         this.velocityY = 0;
         this.isOnGround = true;
-        // Only resume running if we were in jumping states
         if (this.animState === 'jumpUp' || this.animState === 'jumpDown') {
           this.animState = 'run';
         }
       }
     }
 
-    // ── Derive jump sub-state from vertical velocity ───────────────────
+    // ── Derive jump sub-state from vertical velocity ──────────────────────
     if (!this.isOnGround) {
       this.animState = this.velocityY < 0 ? 'jumpUp' : 'jumpDown';
     }
@@ -92,19 +103,33 @@ export class Player {
     }
   }
 
+  get isSliding(): boolean {
+    return this.animState === 'slide';
+  }
+
   getHitbox(): AABB {
     const { left, top, right, bottom } = PLAYER_CONFIG.hitboxInset;
+    const h = this.isSliding ? PLAYER_CONFIG.slideH : PLAYER_CONFIG.displayH;
+    const drawY = this.isSliding
+      ? this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideH
+      : this.y;
     return {
       x: this.x + left,
-      y: this.y + top,
+      y: drawY + top,
       w: PLAYER_CONFIG.displayW - left - right,
-      h: PLAYER_CONFIG.displayH - top - bottom,
+      h: h - top - bottom,
     };
   }
 
   draw(ctx: CanvasRenderingContext2D, renderer: SpriteRenderer): void {
     const src = this.frames[Math.min(this.frameIdx, this.frames.length - 1)];
-    renderer.draw(ctx, src, this.x, this.y, PLAYER_CONFIG.displayW, PLAYER_CONFIG.displayH);
+    if (this.isSliding) {
+      // Anchor slide sprite to feet — draw it squished at the bottom
+      const drawY = this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideH;
+      renderer.draw(ctx, src, this.x, drawY, PLAYER_CONFIG.displayW, PLAYER_CONFIG.slideH);
+    } else {
+      renderer.draw(ctx, src, this.x, this.y, PLAYER_CONFIG.displayW, PLAYER_CONFIG.displayH);
+    }
   }
 
   private get frames(): readonly string[] {

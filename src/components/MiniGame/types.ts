@@ -6,7 +6,8 @@ export type PlayerAnimState =
   | 'jumpUp'
   | 'jumpDown'
   | 'stand'
-  | 'idle';
+  | 'idle'
+  | 'slide';
 
 export interface AABB {
   x: number;

@@ -74,6 +74,7 @@ export class GameEngine {
       ...SPRITE_PATHS.player.jumpDown,
       ...SPRITE_PATHS.player.stand,
       ...SPRITE_PATHS.player.idle,
+      ...SPRITE_PATHS.player.slide,
       ...SPRITE_PATHS.obstacles.ground.map(o => o.src),
       ...SPRITE_PATHS.obstacles.air.map(o => o.src),
       SPRITE_PATHS.background,
@@ -92,20 +93,18 @@ export class GameEngine {
     cancelAnimationFrame(this.rafId);
   }
 
-  /** Called by the React component on Space / click */
+  /** Space / click / W / ArrowUp */
   handleInput(): void {
     switch (this.state) {
-      case 'IDLE':
-        this.beginTransition();
-        break;
-      case 'PLAYING':
-        this.player.jump();
-        break;
-      case 'GAMEOVER':
-        this.resetGame();
-        break;
-      // TRANSITION input is ignored
+      case 'IDLE':       this.beginTransition(); break;
+      case 'PLAYING':    this.player.jump();      break;
+      case 'GAMEOVER':   this.resetGame();        break;
     }
+  }
+
+  /** S / ArrowDown — slide under air obstacles */
+  handleSlide(): void {
+    if (this.state === 'PLAYING') this.player.slide();
   }
 
   // ── Game loop ───────────────────────────────────────────────────────────────

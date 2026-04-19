@@ -21,10 +21,16 @@ export default function MiniGame() {
 
     engine.init().then(() => engine.start());
 
+    const JUMP_KEYS  = new Set(['Space', 'KeyW', 'ArrowUp']);
+    const SLIDE_KEYS = new Set(['KeyS', 'ArrowDown']);
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
+      if (JUMP_KEYS.has(e.code)) {
         e.preventDefault();
         engine.handleInput();
+      } else if (SLIDE_KEYS.has(e.code)) {
+        e.preventDefault();
+        engine.handleSlide();
       }
     };
     const onClick = () => engine.handleInput();

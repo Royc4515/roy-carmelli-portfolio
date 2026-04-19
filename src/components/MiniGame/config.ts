@@ -5,7 +5,7 @@ export const CANVAS_CONFIG = {
   width: 800,
   height: 402,
   /** Pixel Y of the visual ground line — ~84% of canvas height matches the bg image */
-  groundY: 338,
+  groundY: 382
 } as const;
 
 // ─── Physics ──────────────────────────────────────────────────────────────────
@@ -26,6 +26,10 @@ export const SCROLL_CONFIG = {
 export const PLAYER_CONFIG = {
   displayW: 56,
   displayH: 72,
+  /** Crouch height while sliding */
+  slideH: 36,
+  /** How long a slide lasts (seconds) */
+  slideDuration: 0.65,
   /** Gap between sprite bottom and the ground line */
   groundOffset: 4,
   /** Fraction of canvas width: player x during IDLE / TRANSITION start */
@@ -43,7 +47,7 @@ export const OBSTACLE_CONFIG = {
   spawnIntervalMin: 1.5,  // s
   spawnIntervalMax: 3.2,  // s
   /** Y fraction of canvas height for air-type obstacles */
-  airYFraction: 0.44,
+  airYFraction: 0.7,
   /** Uniform inner hitbox inset for all obstacles */
   hitboxInset: 10,
 } as const;
@@ -64,6 +68,7 @@ export const SPRITE_PATHS = {
     jumpDown: [`${BASE}/jump-3.png`,  `${BASE}/jump-4.png`],
     stand:    [`${BASE}/stand-1.png`, `${BASE}/stand-2.png`],
     idle:     [`${BASE}/idle.png`],
+    slide:    [`${BASE}/slide-1.png`, `${BASE}/slide-2.png`, `${BASE}/slide-3.png`, `${BASE}/slide-4.png`],
   } satisfies Record<string, string[]>,
 
   obstacles: {
@@ -77,8 +82,8 @@ export const SPRITE_PATHS = {
       { src: `${BASE}/sprites_for_the_202604192014(6).png`,           w: 44, h: 54 },
     ],
     air: [
-      { src: `${BASE}/bird-blue.png`,  w: 50, h: 36 },
-      { src: `${BASE}/bird-brown.png`, w: 50, h: 36 },
+      { src: `${BASE}/bird-blue.png`,  w: 50, h: 60 },
+      { src: `${BASE}/bird-brown.png`, w: 50, h: 60 },
     ],
   },
 
@@ -93,4 +98,5 @@ export const FRAME_INTERVALS: Readonly<Record<string, number>> = {
   jumpDown: 120,
   stand:    500,
   idle:     0,   // single frame — never advances
+  slide:    80,
 };
