@@ -82,7 +82,7 @@ export const SPRITE_PATHS = {
     ],
   },
 
-  background: `${BASE}/Background.png`,
+  background: `${BASE}/background-background.png`,
 } as const;
 
 // ─── Frame intervals (ms per frame) ───────────────────────────────────────────
