@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { bio } from '../data/bio';
-import Character from '../components/Character';
 import PixelPanel from '../components/PixelPanel';
 import ZoneLabel from '../components/ZoneLabel';
 
@@ -33,10 +32,9 @@ export default function About() {
           flexWrap: 'wrap',
         }}
       >
-        {/* Zone label + Character */}
+        {/* Zone label */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', minWidth: '140px' }}>
-          <ZoneLabel lines={['ABOUT', 'THE', 'ADVENTURER']} />
-          <Character pose="sit" scale={1} ariaLabel="Roy reading" />
+          <ZoneLabel lines={['ABOUT', 'THE', 'ADVENTURER']} icon="/assets/sprites/icon-about.png" />
         </div>
 
         {/* Content */}

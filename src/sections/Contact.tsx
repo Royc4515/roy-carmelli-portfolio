@@ -39,7 +39,7 @@ export default function Contact() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', minWidth: '120px' }}>
-          <ZoneLabel lines={['CONTACT', 'ZONE']} />
+          <ZoneLabel lines={['CONTACT', 'ZONE']} icon="/assets/sprites/icon-contact.png" />
           <Character pose="idle" scale={1} ariaLabel="Roy standing" />
         </div>
 
@@ -88,46 +88,47 @@ export default function Contact() {
             >
               ✉ {bio.email}
             </a>
-          </PixelPanel>
 
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {socials.map(({ href, label, icon }) => (
-              <a
-                key={label}
-                href={href}
-                target={href.startsWith('http') ? '_blank' : undefined}
-                rel={href.startsWith('http') ? 'noreferrer' : undefined}
-                aria-label={label}
-                title={label}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '52px',
-                  height: '52px',
-                  background: '#1a2e10',
-                  border: '2px solid #4a6b2e',
-                  color: '#e8d8a8',
-                  textDecoration: 'none',
-                  fontSize: '1.4rem',
-                  boxShadow: '3px 3px 0 #0f1c09',
-                  transition: 'border-color 0.15s, transform 0.08s, box-shadow 0.08s',
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = '#c9a24a';
-                  (e.currentTarget as HTMLElement).style.transform = 'translate(1px,1px)';
-                  (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 #0f1c09';
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = '#4a6b2e';
-                  (e.currentTarget as HTMLElement).style.transform = '';
-                  (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 #0f1c09';
-                }}
-              >
-                {icon}
-              </a>
-            ))}
-          </div>
+            <div style={{ borderTop: '1px solid #4a6b2e', marginTop: '1.25rem', paddingTop: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              {socials.map(({ href, label, icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel={href.startsWith('http') ? 'noreferrer' : undefined}
+                  aria-label={label}
+                  style={{
+                    display: 'inline-flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    width: '64px',
+                    padding: '8px 4px',
+                    background: '#1a2e10',
+                    border: '2px solid #4a6b2e',
+                    color: '#e8d8a8',
+                    textDecoration: 'none',
+                    boxShadow: '3px 3px 0 #0f1c09',
+                    transition: 'border-color 0.15s, transform 0.08s, box-shadow 0.08s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = '#c9a24a';
+                    (e.currentTarget as HTMLElement).style.transform = 'translate(1px,1px)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 #0f1c09';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = '#4a6b2e';
+                    (e.currentTarget as HTMLElement).style.transform = '';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 #0f1c09';
+                  }}
+                >
+                  <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{icon}</span>
+                  <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.3rem', color: '#c9b87a', letterSpacing: '0.05em' }}>{label}</span>
+                </a>
+              ))}
+            </div>
+          </PixelPanel>
         </motion.div>
       </div>
     </section>

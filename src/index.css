@@ -1,10 +1,12 @@
 @import "tailwindcss";
 @import "@fontsource/press-start-2p/400.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/700.css";
 @import "./styles/pixel.css";
 
 @theme {
   --font-pixel: "Press Start 2P", ui-monospace, monospace;
-  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-body: "JetBrains Mono", ui-monospace, monospace;
 
   --color-forest-dark: #1a2e10;
   --color-forest: #2d4a1e;

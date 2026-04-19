@@ -74,7 +74,7 @@ export default function Hero() {
           <p style={{
             fontFamily: '"Inter", sans-serif',
             fontSize: '1.05rem',
-            color: '#c9b87a',
+            color: '#e8d8a8',
             lineHeight: 1.75,
             marginBottom: '2.25rem',
             maxWidth: '440px',
@@ -82,28 +82,28 @@ export default function Hero() {
             {bio.tagline}
           </p>
 
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <a
               href="#projects"
               style={{
                 fontFamily: '"Press Start 2P", monospace',
-                fontSize: '0.55rem',
-                padding: '0.85rem 1.75rem',
+                fontSize: '0.6rem',
+                padding: '1rem 2rem',
                 background: '#c9a24a',
                 color: '#1a2e10',
                 textDecoration: 'none',
                 letterSpacing: '0.05em',
-                boxShadow: '4px 4px 0 #6b4a2e',
+                boxShadow: '5px 5px 0 #6b4a2e',
                 display: 'inline-block',
                 transition: 'transform 0.08s, box-shadow 0.08s',
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.transform = 'translate(2px,2px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 #6b4a2e';
+                (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 #6b4a2e';
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLElement).style.transform = '';
-                (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 #6b4a2e';
+                (e.currentTarget as HTMLElement).style.boxShadow = '5px 5px 0 #6b4a2e';
               }}
             >
               ▶ View Projects
@@ -112,23 +112,23 @@ export default function Hero() {
               href="#contact"
               style={{
                 fontFamily: '"Press Start 2P", monospace',
-                fontSize: '0.55rem',
-                padding: '0.85rem 1.75rem',
+                fontSize: '0.45rem',
+                padding: '0.75rem 1.25rem',
                 background: 'transparent',
-                color: '#e8d8a8',
+                color: '#8aaa6a',
                 textDecoration: 'none',
                 letterSpacing: '0.05em',
-                boxShadow: '4px 4px 0 #2d4a1e, inset 0 0 0 2px #c9a24a',
+                boxShadow: 'inset 0 0 0 2px #4a6b2e',
                 display: 'inline-block',
-                transition: 'transform 0.08s, box-shadow 0.08s',
+                transition: 'transform 0.08s, color 0.08s, box-shadow 0.08s',
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.transform = 'translate(2px,2px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 #2d4a1e, inset 0 0 0 2px #c9a24a';
+                (e.currentTarget as HTMLElement).style.color = '#c9a24a';
+                (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px #c9a24a';
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.transform = '';
-                (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 #2d4a1e, inset 0 0 0 2px #c9a24a';
+                (e.currentTarget as HTMLElement).style.color = '#8aaa6a';
+                (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px #4a6b2e';
               }}
             >
               Contact Me
@@ -141,35 +141,42 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.25 }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}
         >
-          {/* Face avatar */}
-          <img
-            src="/assets/sprites/face-large.png"
-            alt="Roy Carmelli pixel avatar"
-            style={{
-              height: '120px',
-              width: 'auto',
-              imageRendering: 'pixelated',
-              border: '3px solid #c9a24a',
-              boxShadow: '4px 4px 0 #3a2818',
-              background: '#1a2e10',
-            }}
-          />
-          {/* Animated character */}
-          <Character pose="wave" scale={1.4} ariaLabel="Roy waving hello" />
-
-          {/* HP/Status bar decoration */}
+          {/* Player Profile Card */}
           <div style={{
-            fontFamily: '"Press Start 2P", monospace',
-            fontSize: '0.4rem',
-            color: '#4a6b2e',
-            letterSpacing: '0.08em',
-            textAlign: 'center',
-            lineHeight: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            background: '#2d4a1e',
+            border: '3px solid #c9a24a',
+            boxShadow: '4px 4px 0 #3a2818',
+            padding: '0.5rem 0.75rem',
+            position: 'relative',
+            zIndex: 10,
           }}>
-            <div>HP ████████████ MAX</div>
-            <div>XP ██████░░░░░░ LVL 3</div>
+            <img
+              src="/assets/sprites/face-large.png"
+              alt="Roy Carmelli pixel avatar"
+              style={{
+                height: '56px',
+                width: 'auto',
+                imageRendering: 'pixelated',
+                background: '#1a2e10',
+              }}
+            />
+            <div>
+              <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: '#c9a24a', marginBottom: '0.3rem' }}>PLAYER 1</div>
+              <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: '#e8d8a8', lineHeight: 2 }}>
+                <div>HP ████████ MAX</div>
+                <div>XP █████░░░ LVL 3</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Animated character — shifted left so waving arm clears the card */}
+          <div style={{ transform: 'translateX(-375px)' }}>
+            <Character pose="wave" scale={1.4} ariaLabel="Roy waving hello" />
           </div>
         </motion.div>
       </div>

@@ -1,9 +1,10 @@
 interface ZoneLabelProps {
   lines: string[];
   align?: 'left' | 'right';
+  icon?: string;
 }
 
-export default function ZoneLabel({ lines, align = 'left' }: ZoneLabelProps) {
+export default function ZoneLabel({ lines, align = 'left', icon }: ZoneLabelProps) {
   return (
     <div
       style={{
@@ -11,8 +12,21 @@ export default function ZoneLabel({ lines, align = 'left' }: ZoneLabelProps) {
         flexDirection: 'column',
         gap: '0.5rem',
         textAlign: align,
+        alignItems: align === 'right' ? 'flex-end' : 'flex-start',
       }}
     >
+      {icon && (
+        <img
+          src={icon}
+          alt=""
+          style={{
+            width: '64px',
+            height: '64px',
+            imageRendering: 'pixelated',
+            marginBottom: '0.25rem',
+          }}
+        />
+      )}
       {lines.map((line, i) => (
         <span
           key={i}

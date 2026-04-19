@@ -34,7 +34,7 @@ export default function Projects() {
       >
         {/* Zone label + character */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', paddingTop: '0.5rem', minWidth: '140px' }}>
-          <ZoneLabel lines={['LIBRARY', 'READING', 'NOOK']} />
+          <ZoneLabel lines={['LIBRARY', 'READING', 'NOOK']} icon="/assets/sprites/icon-library.png" />
           <Character pose="sit" scale={0.95} ariaLabel="Roy reading in the library" />
         </div>
 
@@ -110,7 +110,7 @@ export default function Projects() {
                       <h3 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.55rem', color: '#e8d8a8', marginBottom: '0.45rem', lineHeight: 1.6 }}>
                         {project.title}
                       </h3>
-                      <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: '#c9b87a', lineHeight: 1.65, marginBottom: '0.6rem' }}>
+                      <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: '#e8d8a8', lineHeight: 1.65, marginBottom: '0.6rem' }}>
                         {project.description}
                       </p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>

@@ -8,6 +8,7 @@ export const SPRITES = {
   wave: [
     '/assets/sprites/wave-1.png',
     '/assets/sprites/wave-2.png',
+    '/assets/sprites/wave-3.png',
   ],
   sit: [
     '/assets/sprites/sit-1.png',

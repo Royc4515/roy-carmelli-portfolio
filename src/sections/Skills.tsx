@@ -29,7 +29,7 @@ export default function Skills() {
         }}
       >
         <div style={{ paddingTop: '0.5rem', minWidth: '120px' }}>
-          <ZoneLabel lines={['SKILL', 'TREE', '── LVL UP ──']} />
+          <ZoneLabel lines={['SKILL', 'TREE', '── LVL UP ──']} icon="/assets/sprites/icon-skills.jpg" />
         </div>
 
         <motion.div
@@ -49,7 +49,7 @@ export default function Skills() {
             What I Work With
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.25rem' }}>
             {skills.map((group, gi) => (
               <motion.div
                 key={group.category}
@@ -57,6 +57,7 @@ export default function Skills() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: gi * 0.07 }}
+                style={{ flex: '0 1 280px', minWidth: '220px' }}
               >
                 <PixelPanel variant="wood">
                   <h3 style={{
@@ -76,7 +77,7 @@ export default function Skills() {
                         fontSize: '0.78rem',
                         color: '#e8d8a8',
                         background: '#2d4a1e',
-                        padding: '4px 10px',
+                        padding: '6px 12px',
                         border: '1px solid #4a6b2e',
                       }}>
                         {item}
