@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import { SPRITES, FRAME_INTERVALS } from '../theme/tokens';
-
-type Pose = 'walk' | 'wave' | 'sit' | 'idle';
+import { type Pose, SPRITES, FRAME_INTERVALS } from '../theme/tokens';
 
 interface CharacterProps {
   pose: Pose;

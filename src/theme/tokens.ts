@@ -1,4 +1,6 @@
-export const SPRITES = {
+export type Pose = 'walk' | 'wave' | 'sit' | 'idle';
+
+export const SPRITES: Record<Pose, string[]> & { faceLarge: string; faceSmall: string } = {
   walk: [
     '/assets/sprites/walk-1.png',
     '/assets/sprites/walk-2.png',
@@ -18,9 +20,9 @@ export const SPRITES = {
   idle: ['/assets/sprites/idle.png'],
   faceLarge: '/assets/sprites/face-large.png',
   faceSmall: '/assets/sprites/face-small.png',
-} as const;
+};
 
-export const FRAME_INTERVALS: Record<string, number> = {
+export const FRAME_INTERVALS: Record<Pose, number> = {
   walk: 150,
   wave: 400,
   sit: 500,
@@ -37,3 +39,11 @@ export const COLORS = {
   woodDark: '#3a2818',
   wood: '#6b4a2e',
 } as const;
+
+export const DOT_GRID = {
+  backgroundImage: 'radial-gradient(circle, #4a6b2e 1px, transparent 1px)',
+  backgroundSize: '32px 32px',
+} as const;
+
+/** px offset to clear the waving arm from the Player card above the character */
+export const HERO_CHARACTER_OFFSET_X = -375;

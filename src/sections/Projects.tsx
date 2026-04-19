@@ -3,11 +3,7 @@ import { projects } from '../data/projects';
 import PixelPanel from '../components/PixelPanel';
 import ZoneLabel from '../components/ZoneLabel';
 import Character from '../components/Character';
-
-const DOT_GRID = {
-  backgroundImage: 'radial-gradient(circle, #4a6b2e 1px, transparent 1px)',
-  backgroundSize: '32px 32px',
-} as const;
+import { DOT_GRID } from '../theme/tokens';
 
 export default function Projects() {
   const featured = projects.filter(p => p.featured);

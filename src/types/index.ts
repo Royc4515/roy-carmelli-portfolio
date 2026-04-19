@@ -15,7 +15,3 @@ export interface Skill {
   items: string[];
 }
 
-export interface NavLink {
-  label: string;
-  href: string;
-}

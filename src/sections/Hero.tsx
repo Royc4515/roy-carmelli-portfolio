@@ -1,11 +1,7 @@
 import { motion } from 'framer-motion';
 import { bio } from '../data/bio';
 import Character from '../components/Character';
-
-const DOT_GRID = {
-  backgroundImage: 'radial-gradient(circle, #4a6b2e 1px, transparent 1px)',
-  backgroundSize: '32px 32px',
-} as const;
+import { DOT_GRID, HERO_CHARACTER_OFFSET_X } from '../theme/tokens';
 
 export default function Hero() {
   return (
@@ -174,8 +170,8 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Animated character — shifted left so waving arm clears the card */}
-          <div style={{ transform: 'translateX(-375px)' }}>
+          {/* Animated character */}
+          <div style={{ transform: `translateX(${HERO_CHARACTER_OFFSET_X}px)` }}>
             <Character pose="wave" scale={1.4} ariaLabel="Roy waving hello" />
           </div>
         </motion.div>
