@@ -110,12 +110,12 @@ export class Player {
   getHitbox(): AABB {
     const { left, top, right, bottom } = PLAYER_CONFIG.hitboxInset;
     if (this.isSliding) {
-      const slideY = this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideH;
+      const hitboxY = this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideHitboxH;
       return {
         x: this.x + left,
-        y: slideY + top,
+        y: hitboxY + top,
         w: PLAYER_CONFIG.slideW - left - right,
-        h: PLAYER_CONFIG.slideH - top - bottom,
+        h: PLAYER_CONFIG.slideHitboxH - top - bottom,
       };
     }
     return {
@@ -129,6 +129,7 @@ export class Player {
   draw(ctx: CanvasRenderingContext2D, renderer: SpriteRenderer): void {
     const src = this.frames[Math.min(this.frameIdx, this.frames.length - 1)];
     if (this.isSliding) {
+      // Render at full standing height so the sprite isn't squished
       const drawY = this.groundStandY + PLAYER_CONFIG.displayH - PLAYER_CONFIG.slideH;
       renderer.draw(ctx, src, this.x, drawY, PLAYER_CONFIG.slideW, PLAYER_CONFIG.slideH);
     } else {

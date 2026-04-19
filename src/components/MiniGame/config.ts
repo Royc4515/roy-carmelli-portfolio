@@ -26,9 +26,11 @@ export const SCROLL_CONFIG = {
 export const PLAYER_CONFIG = {
   displayW: 56,
   displayH: 72,
-  /** Display size for the slide (prone) pose */
+  /** Visual render size for the slide sprite */
   slideW: 80,
-  slideH: 44,
+  slideH: 72,
+  /** Collision hitbox height while sliding (much shorter than standing) */
+  slideHitboxH: 32,
   /** How long a slide lasts (seconds) */
   slideDuration: 0.65,
   /** Gap between sprite bottom and the ground line */
