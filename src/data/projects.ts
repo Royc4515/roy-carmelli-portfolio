@@ -28,7 +28,7 @@ export const projects: Project[] = [
     tech: ["JavaScript", "HTML", "CSS"],
     github: "https://github.com/Royc4515/white-matter-tracts-game",
     live: "https://royc4515.github.io/white-matter-tracts-game",
-    featured: false,
+    featured: true,
     year: 2025,
   },
   {
@@ -39,6 +39,15 @@ export const projects: Project[] = [
     github: "https://github.com/Royc4515/ArkanoidGame",
     featured: false,
     year: 2025,
+  },
+  {
+    id: "sommelier-bot",
+    title: "Sommelier Bot",
+    description: "Serverless Telegram bot acting as a Hebrew-speaking AI wine sommelier. Webhook-driven Python on Vercel — stateless by design. Features a dual-layer memory system: 30-message short-term context + AI-compressed long-term summaries persisted to Google Sheets, surviving session resets for multi-day continuity. Zero external dependencies beyond the Gemini SDK.",
+    tech: ["Python", "Gemini API", "Telegram Bot API", "Vercel", "Google Sheets"],
+    github: "https://github.com/Royc4515/gemini-wine-sommelier",
+    featured: true,
+    year: 2026,
   },
   {
     id: "portfolio",

@@ -57,7 +57,7 @@ export default function Contact() {
 
           <PixelPanel variant="wood">
             <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '1rem', color: '#c9b87a', lineHeight: 1.8, marginBottom: '1.25rem' }}>
-              Open to internships, research collaborations, and interesting projects at the intersection of CS and neuroscience.
+              Actively seeking a student position in software engineering or AI development. Open to research collaborations at the intersection of CS and neuroscience.
             </p>
             <a
               href={`mailto:${bio.email}`}

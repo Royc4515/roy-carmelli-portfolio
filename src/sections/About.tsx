@@ -77,7 +77,7 @@ export default function About() {
             {[
               { label: 'Degree',     value: 'B.Sc. Computer & Neuro Sciences' },
               { label: 'University', value: 'Bar-Ilan University' },
-              { label: 'Year',       value: '2nd year, 2024–present' },
+              { label: 'Year',       value: '2nd Year, Semester B' },
               { label: 'Open to',    value: 'Internships · Research · Collabs' },
             ].map(({ label, value }, i, arr) => (
               <div key={label} style={{
