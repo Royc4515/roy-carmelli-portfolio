@@ -91,7 +91,7 @@ export const SPRITE_PATHS = {
   },
 
   background: `${BASE}/background.png`,
-  playerScoreHUD: `${BASE}/player score.png`,
+  playerScoreHUD: `${BASE}/player-score.png`,
 } as const;
 
 // ─── Frame intervals (ms per frame) ───────────────────────────────────────────
