@@ -7,6 +7,11 @@ const links = [
   { label: 'Contact',  href: '#contact',  icon: '📮' },
 ];
 
+function triggerArcade() {
+  document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => window.dispatchEvent(new CustomEvent('arcade:play')), 400);
+}
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -85,6 +90,39 @@ export default function Navbar() {
                 </a>
               </li>
             ))}
+            <li>
+              <button
+                onClick={triggerArcade}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '8px 20px',
+                  background: 'none',
+                  border: 'none',
+                  borderRight: '1px solid #4a6b2e',
+                  cursor: 'pointer',
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '0.5rem',
+                  color: '#e8d8a8',
+                  letterSpacing: '0.05em',
+                  transition: 'color 0.15s, background 0.15s',
+                  height: '60px',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(201,162,74,0.15)';
+                  (e.currentTarget as HTMLElement).style.color = '#c9a24a';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  (e.currentTarget as HTMLElement).style.color = '#e8d8a8';
+                }}
+              >
+                <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🕹️</span>
+                Arcade
+              </button>
+            </li>
           </ul>
 
           {/* Right side: face avatar */}
@@ -167,6 +205,29 @@ export default function Navbar() {
             {link.label}
           </a>
         ))}
+        <button
+          onClick={() => { setMenuOpen(false); triggerArcade(); }}
+          style={{
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: '1rem',
+            color: '#e8d8a8',
+            background: 'none',
+            border: '3px solid #4a6b2e',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '1rem 2rem',
+            width: '200px',
+            textAlign: 'center',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#c9a24a'; (e.currentTarget as HTMLElement).style.color = '#c9a24a'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#4a6b2e'; (e.currentTarget as HTMLElement).style.color = '#e8d8a8'; }}
+        >
+          <span style={{ fontSize: '2rem' }}>🕹️</span>
+          Arcade
+        </button>
       </div>
 
       <style>{`

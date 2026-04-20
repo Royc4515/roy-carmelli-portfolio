@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { bio } from '../data/bio';
 import Character from '../components/Character';
@@ -7,6 +7,12 @@ import { DOT_GRID, HERO_CHARACTER_OFFSET_X } from '../theme/tokens';
 
 export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setIsPlaying(true);
+    window.addEventListener('arcade:play', handler);
+    return () => window.removeEventListener('arcade:play', handler);
+  }, []);
 
   return (
     <section
