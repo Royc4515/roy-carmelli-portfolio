@@ -3,9 +3,9 @@ const BASE = '/assets/sprites';
 // ─── Canvas ───────────────────────────────────────────────────────────────────
 export const CANVAS_CONFIG = {
   width: 800,
-  height: 402,
-  /** Pixel Y of the visual ground line — ~84% of canvas height matches the bg image */
-  groundY: 382
+  height: 377,
+  /** Pixel Y of the visual ground line — ~95% of canvas height matches the bg image */
+  groundY: 358
 } as const;
 
 // ─── Physics ──────────────────────────────────────────────────────────────────
