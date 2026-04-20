@@ -265,15 +265,15 @@ export class GameEngine {
     // Static HUD frame image
     this.renderer.draw(ctx, SPRITE_PATHS.playerScoreHUD, HUD_X, HUD_Y, HUD_W, HUD_H);
 
-    // Score number centered in the lower half of the HUD
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
+    // Score number — top-right corner
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'top';
     ctx.font         = FONT_MD;
     ctx.fillStyle    = C.brass;
     ctx.fillText(
       String(Math.floor(this.score)).padStart(6, '0'),
-      HUD_X + HUD_W / 2,
-      HUD_Y + HUD_H * 0.7,
+      this.canvasW - 12,
+      12,
     );
   }
 
