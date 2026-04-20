@@ -3,9 +3,9 @@ const BASE = '/assets/sprites';
 // ─── Canvas ───────────────────────────────────────────────────────────────────
 export const CANVAS_CONFIG = {
   width: 800,
-  height: 377,
+  height: 446,
   /** Pixel Y of the visual ground line — ~95% of canvas height matches the bg image */
-  groundY: 358
+  groundY: 424
 } as const;
 
 // ─── Physics ──────────────────────────────────────────────────────────────────
@@ -91,6 +91,7 @@ export const SPRITE_PATHS = {
   },
 
   background: `${BASE}/background.png`,
+  playerScoreHUD: `${BASE}/player score.png`,
 } as const;
 
 // ─── Frame intervals (ms per frame) ───────────────────────────────────────────

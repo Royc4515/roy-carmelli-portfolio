@@ -78,6 +78,7 @@ export class GameEngine {
       ...SPRITE_PATHS.obstacles.ground.map(o => o.src),
       ...SPRITE_PATHS.obstacles.air.map(o => o.src),
       SPRITE_PATHS.background,
+      SPRITE_PATHS.playerScoreHUD,
     ];
     await this.renderer.preload(paths);
     // Ensure Press Start 2P is available before first draw
@@ -213,9 +214,10 @@ export class GameEngine {
     this.obstacles.draw(ctx, this.renderer);
     this.player.draw(ctx, this.renderer);
 
+    this.drawScoreHUD();
+
     switch (this.state) {
       case 'IDLE':     this.drawIdleUI();     break;
-      case 'PLAYING':  this.drawScore();      break;
       case 'GAMEOVER': this.drawGameOverUI(); break;
     }
   }
@@ -253,13 +255,26 @@ export class GameEngine {
     ctx.fillText('SPACE or CLICK', canvasW / 2, canvasH * 0.91);
   }
 
-  private drawScore(): void {
-    const { ctx, canvasW } = this;
-    ctx.textAlign    = 'right';
-    ctx.textBaseline = 'top';
+  private drawScoreHUD(): void {
+    const { ctx } = this;
+    const HUD_W = 160;
+    const HUD_H = 76;
+    const HUD_X = 8;
+    const HUD_Y = 8;
+
+    // Static HUD frame image
+    this.renderer.draw(ctx, SPRITE_PATHS.playerScoreHUD, HUD_X, HUD_Y, HUD_W, HUD_H);
+
+    // Score number centered in the lower half of the HUD
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
     ctx.font         = FONT_MD;
     ctx.fillStyle    = C.brass;
-    ctx.fillText(String(Math.floor(this.score)).padStart(6, '0'), canvasW - 12, 12);
+    ctx.fillText(
+      String(Math.floor(this.score)).padStart(6, '0'),
+      HUD_X + HUD_W / 2,
+      HUD_Y + HUD_H * 0.7,
+    );
   }
 
   private drawGameOverUI(): void {
