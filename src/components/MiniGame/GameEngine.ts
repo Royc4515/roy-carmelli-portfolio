@@ -257,8 +257,8 @@ export class GameEngine {
 
   private drawScoreHUD(): void {
     const { ctx } = this;
-    const HUD_W = 160;
-    const HUD_H = 76;
+    const HUD_W = 200;
+    const HUD_H = 95;
     const HUD_X = 8;
     const HUD_Y = 8;
 
