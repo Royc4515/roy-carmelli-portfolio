@@ -6,8 +6,6 @@ import Projects from './sections/Projects';
 import Skills from './sections/Skills';
 import Resume from './sections/Resume';
 import Contact from './sections/Contact';
-import Arcade from './sections/Arcade';
-
 export default function App() {
   return (
     <>
@@ -17,7 +15,6 @@ export default function App() {
         <About />
         <Projects />
         <Skills />
-        <Arcade />
         <Contact />
         <Resume />
       </main>

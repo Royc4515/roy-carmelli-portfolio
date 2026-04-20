@@ -2,10 +2,16 @@ import { useEffect, useRef } from 'react';
 import { GameEngine } from './GameEngine';
 import { CANVAS_CONFIG } from './config';
 
-export default function MiniGame() {
+interface MiniGameProps {
+  onQuit?: () => void;
+}
+
+export default function MiniGame({ onQuit }: MiniGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // useRef — not useState — so game state never triggers React re-renders
   const engineRef = useRef<GameEngine | null>(null);
+  // Keep onQuit in a ref so the effect closure stays stable
+  const onQuitRef = useRef(onQuit);
+  useEffect(() => { onQuitRef.current = onQuit; }, [onQuit]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -31,6 +37,9 @@ export default function MiniGame() {
       } else if (SLIDE_KEYS.has(e.code)) {
         e.preventDefault();
         engine.handleSlide();
+      } else if (e.code === 'Escape') {
+        e.preventDefault();
+        onQuitRef.current?.();
       }
     };
     const onClick = () => engine.handleInput();
