@@ -7,7 +7,7 @@ export const bio = {
   institution: "Bar-Ilan University",
   location: "Israel",
   tagline: "I build full-stack apps, data pipelines, and agentic AI systems at the intersection of software and the mind.",
-  about: `I'm a Computer Science and Brain Sciences student at Bar-Ilan University — one of the few programs that puts software engineering depth and hands-on neuroscience research in the same degree.
+  about: `I'm a Computer Science and Neuroscience student at Bar-Ilan University — one of the few programs that puts software engineering depth and hands-on neuroscience research in the same degree.
 
 I ship full-stack apps, data pipelines, and browser extensions. I use AI deliberately as part of how I work — not as a shortcut, but as a tool I understand. I'm drawn to problems that sit at the edge of CS and neuroscience: how software models cognition, how data reveals something real about the brain.
 
