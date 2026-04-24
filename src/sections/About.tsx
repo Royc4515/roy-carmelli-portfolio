@@ -2,16 +2,16 @@ import { motion } from 'framer-motion';
 import { bio } from '../data/bio';
 import PixelPanel from '../components/PixelPanel';
 import ZoneLabel from '../components/ZoneLabel';
-import { DOT_GRID } from '../theme/tokens';
 
 export default function About() {
   return (
     <section
       id="about"
+      className="dot-grid"
       style={{
+        position: 'relative',
         minHeight: '100vh',
-        background: '#1a2e10',
-        ...DOT_GRID,
+        background: 'var(--color-forest-dark)',
         display: 'flex',
         alignItems: 'center',
         padding: '80px 2rem 4rem',
@@ -44,8 +44,8 @@ export default function About() {
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: 'clamp(0.85rem, 2vw, 1.2rem)',
-            color: '#e8d8a8',
-            textShadow: '2px 2px 0 #000',
+            color: 'var(--color-parchment)',
+            textShadow: '2px 2px 0 var(--color-wood-dark)',
           }}>
             Who I Am
           </h2>
@@ -55,7 +55,7 @@ export default function About() {
               <p key={i} style={{
                 fontFamily: '"Inter", sans-serif',
                 fontSize: '0.95rem',
-                color: '#3a2818',
+                color: 'var(--color-wood-dark)',
                 lineHeight: 1.8,
                 marginBottom: i < bio.about.split('\n\n').length - 1 ? '0.85rem' : 0,
               }}>
@@ -68,7 +68,7 @@ export default function About() {
             <p style={{
               fontFamily: '"Press Start 2P", monospace',
               fontSize: '0.5rem',
-              color: '#c9a24a',
+              color: 'var(--color-brass)',
               letterSpacing: '0.1em',
               marginBottom: '1rem',
             }}>
@@ -86,12 +86,12 @@ export default function About() {
                 alignItems: 'baseline',
                 gap: '1rem',
                 padding: '0.65rem 0',
-                borderBottom: i < arr.length - 1 ? '1px solid #4a6b2e' : 'none',
+                borderBottom: i < arr.length - 1 ? '1px solid var(--color-forest-light)' : 'none',
               }}>
-                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: '#c9b87a', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: 'var(--color-parchment-dark)', whiteSpace: 'nowrap' }}>
                   {label}
                 </span>
-                <span style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: '#e8d8a8', textAlign: 'right' }}>
+                <span style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: 'var(--color-parchment)', textAlign: 'right' }}>
                   {value}
                 </span>
               </div>

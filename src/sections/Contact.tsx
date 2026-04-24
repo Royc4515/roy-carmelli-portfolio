@@ -3,7 +3,6 @@ import { bio } from '../data/bio';
 import PixelPanel from '../components/PixelPanel';
 import ZoneLabel from '../components/ZoneLabel';
 import Character from '../components/Character';
-import { DOT_GRID } from '../theme/tokens';
 
 const socials = [
   { href: bio.github,            label: 'GitHub',   icon: '🐙' },
@@ -17,10 +16,11 @@ export default function Contact() {
   return (
     <section
       id="contact"
+      className="dot-grid"
       style={{
+        position: 'relative',
         minHeight: '80vh',
-        background: '#2d4a1e',
-        ...DOT_GRID,
+        background: 'var(--color-forest)',
         padding: '80px 2rem 4rem',
       }}
     >
@@ -49,14 +49,14 @@ export default function Contact() {
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: 'clamp(0.7rem, 1.8vw, 1.1rem)',
-            color: '#e8d8a8',
-            textShadow: '2px 2px 0 #1a2e10',
+            color: 'var(--color-parchment)',
+            textShadow: '2px 2px 0 var(--color-forest-dark)',
           }}>
             Let's Talk 📮
           </h2>
 
           <PixelPanel variant="wood">
-            <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '1rem', color: '#c9b87a', lineHeight: 1.8, marginBottom: '1.25rem' }}>
+            <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '1rem', color: 'var(--color-parchment-dark)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
               Actively seeking a student position in software engineering or AI development. Open to research collaborations at the intersection of CS and neuroscience.
             </p>
             <a
@@ -66,26 +66,26 @@ export default function Contact() {
                 fontFamily: '"Press Start 2P", monospace',
                 fontSize: '0.5rem',
                 padding: '0.85rem 1.25rem',
-                background: '#c9a24a',
-                color: '#1a2e10',
+                background: 'var(--color-brass)',
+                color: 'var(--color-forest-dark)',
                 textDecoration: 'none',
                 letterSpacing: '0.04em',
-                boxShadow: '4px 4px 0 #6b4a2e',
+                boxShadow: '4px 4px 0 var(--color-wood)',
                 transition: 'transform 0.08s, box-shadow 0.08s',
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.transform = 'translate(2px,2px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 #6b4a2e';
+                (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 var(--color-wood)';
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLElement).style.transform = '';
-                (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 #6b4a2e';
+                (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 var(--color-wood)';
               }}
             >
               ✉ {bio.email}
             </a>
 
-            <div style={{ borderTop: '1px solid #4a6b2e', marginTop: '1.25rem', paddingTop: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ borderTop: '1px solid var(--color-forest-light)', marginTop: '1.25rem', paddingTop: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               {socials.map(({ href, label, icon }) => (
                 <a
                   key={label}
@@ -101,26 +101,26 @@ export default function Contact() {
                     gap: '4px',
                     width: '64px',
                     padding: '8px 4px',
-                    background: '#1a2e10',
-                    border: '2px solid #4a6b2e',
-                    color: '#e8d8a8',
+                    background: 'var(--color-forest-dark)',
+                    border: '2px solid var(--color-forest-light)',
+                    color: 'var(--color-parchment)',
                     textDecoration: 'none',
-                    boxShadow: '3px 3px 0 #0f1c09',
+                    boxShadow: '3px 3px 0 var(--color-shadow-deep)',
                     transition: 'border-color 0.15s, transform 0.08s, box-shadow 0.08s',
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = '#c9a24a';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brass)';
                     (e.currentTarget as HTMLElement).style.transform = 'translate(1px,1px)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 #0f1c09';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 var(--color-shadow-deep)';
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = '#4a6b2e';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)';
                     (e.currentTarget as HTMLElement).style.transform = '';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 #0f1c09';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 var(--color-shadow-deep)';
                   }}
                 >
                   <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{icon}</span>
-                  <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.3rem', color: '#c9b87a', letterSpacing: '0.05em' }}>{label}</span>
+                  <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.3rem', color: 'var(--color-parchment-dark)', letterSpacing: '0.05em' }}>{label}</span>
                 </a>
               ))}
             </div>

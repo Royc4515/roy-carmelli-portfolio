@@ -2,16 +2,16 @@ import { motion } from 'framer-motion';
 import { skills } from '../data/bio';
 import PixelPanel from '../components/PixelPanel';
 import ZoneLabel from '../components/ZoneLabel';
-import { DOT_GRID } from '../theme/tokens';
 
 export default function Skills() {
   return (
     <section
       id="skills"
+      className="dot-grid"
       style={{
+        position: 'relative',
         minHeight: '80vh',
-        background: '#1a2e10',
-        ...DOT_GRID,
+        background: 'var(--color-forest-dark)',
         padding: '80px 2rem 4rem',
       }}
     >
@@ -38,8 +38,8 @@ export default function Skills() {
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: 'clamp(0.7rem, 1.8vw, 1.1rem)',
-            color: '#e8d8a8',
-            textShadow: '2px 2px 0 #000',
+            color: 'var(--color-parchment)',
+            textShadow: '2px 2px 0 var(--color-wood-dark)',
             marginBottom: '1.75rem',
           }}>
             What I Work With
@@ -59,7 +59,7 @@ export default function Skills() {
                   <h3 style={{
                     fontFamily: '"Press Start 2P", monospace',
                     fontSize: '0.45rem',
-                    color: '#c9a24a',
+                    color: 'var(--color-brass)',
                     letterSpacing: '0.08em',
                     marginBottom: '0.85rem',
                     textTransform: 'uppercase',
@@ -71,10 +71,10 @@ export default function Skills() {
                       <span key={item} style={{
                         fontFamily: '"Inter", sans-serif',
                         fontSize: '0.78rem',
-                        color: '#e8d8a8',
-                        background: '#2d4a1e',
+                        color: 'var(--color-parchment)',
+                        background: 'var(--color-forest)',
                         padding: '6px 12px',
-                        border: '1px solid #4a6b2e',
+                        border: '1px solid var(--color-forest-light)',
                       }}>
                         {item}
                       </span>

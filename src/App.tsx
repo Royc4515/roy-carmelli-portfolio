@@ -6,10 +6,13 @@ import Projects from './sections/Projects';
 import Skills from './sections/Skills';
 import Resume from './sections/Resume';
 import Contact from './sections/Contact';
+import { useTheme } from './hooks/useTheme';
+
 export default function App() {
+  const [theme, toggleTheme] = useTheme();
   return (
     <>
-      <Navbar />
+      <Navbar theme={theme} onToggleTheme={toggleTheme} />
       <main>
         <Hero />
         <About />

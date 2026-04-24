@@ -40,10 +40,5 @@ export const COLORS = {
   wood: '#6b4a2e',
 } as const;
 
-export const DOT_GRID = {
-  backgroundImage: 'radial-gradient(circle, #4a6b2e 1px, transparent 1px)',
-  backgroundSize: '32px 32px',
-} as const;
-
 /** px offset to clear the waving arm from the Player card above the character */
 export const HERO_CHARACTER_OFFSET_X = -375;

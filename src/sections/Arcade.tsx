@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion';
 import MiniGame from '../components/MiniGame/MiniGame';
 import ZoneLabel from '../components/ZoneLabel';
-import { DOT_GRID } from '../theme/tokens';
 
 export default function Arcade() {
   return (
     <section
       id="arcade"
+      className="dot-grid"
       style={{
+        position: 'relative',
         minHeight: '100vh',
-        background: '#1a2e10',
-        ...DOT_GRID,
+        background: 'var(--color-forest-dark)',
         display: 'flex',
         alignItems: 'center',
         padding: '80px 2rem 4rem',
@@ -38,8 +38,8 @@ export default function Arcade() {
             style={{
               fontFamily: '"Press Start 2P", monospace',
               fontSize: 'clamp(0.85rem, 2vw, 1.2rem)',
-              color: '#e8d8a8',
-              textShadow: '2px 2px 0 #000',
+              color: 'var(--color-parchment)',
+              textShadow: '2px 2px 0 var(--color-wood-dark)',
             }}
           >
             Roy Runner
@@ -61,7 +61,7 @@ export default function Arcade() {
         <p style={{
           fontFamily: '"Press Start 2P", monospace',
           fontSize: '0.4rem',
-          color: '#4a6b2e',
+          color: 'var(--color-forest-light)',
           marginTop: '0.85rem',
           textAlign: 'center',
           letterSpacing: '0.08em',

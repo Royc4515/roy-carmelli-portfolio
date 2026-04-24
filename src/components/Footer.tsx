@@ -2,8 +2,8 @@ export default function Footer() {
   return (
     <footer
       style={{
-        background: '#1a2e10',
-        borderTop: '3px solid #c9a24a',
+        background: 'var(--color-forest-dark)',
+        borderTop: '3px solid var(--color-brass)',
         padding: '1.5rem 2rem',
         textAlign: 'center',
         display: 'flex',
@@ -15,7 +15,7 @@ export default function Footer() {
         style={{
           fontFamily: '"Press Start 2P", monospace',
           fontSize: '0.5rem',
-          color: '#c9b87a',
+          color: 'var(--color-parchment-dark)',
           letterSpacing: '0.08em',
         }}
       >
@@ -25,7 +25,7 @@ export default function Footer() {
         style={{
           fontFamily: '"Press Start 2P", monospace',
           fontSize: '0.4rem',
-          color: '#4a6b2e',
+          color: 'var(--color-forest-light)',
           letterSpacing: '0.05em',
         }}
       >

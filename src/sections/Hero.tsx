@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { bio } from '../data/bio';
 import Character from '../components/Character';
 import MiniGame from '../components/MiniGame/MiniGame';
-import { DOT_GRID, HERO_CHARACTER_OFFSET_X } from '../theme/tokens';
+import { HERO_CHARACTER_OFFSET_X } from '../theme/tokens';
 
 export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,11 +17,11 @@ export default function Hero() {
   return (
     <section
       id="hero"
+      className="dot-grid"
       style={{
         position: 'relative',
         minHeight: '100vh',
-        background: '#1a2e10',
-        ...DOT_GRID,
+        background: 'var(--color-forest-dark)',
         overflow: 'hidden',
       }}
     >
@@ -64,7 +64,7 @@ export default function Hero() {
                   style={{
                     fontFamily: '"Press Start 2P", monospace',
                     fontSize: '0.6rem',
-                    color: '#c9a24a',
+                    color: 'var(--color-brass)',
                     letterSpacing: '0.15em',
                     marginBottom: '1.25rem',
                     background: 'none',
@@ -81,10 +81,10 @@ export default function Hero() {
                 <h1 style={{
                   fontFamily: '"Press Start 2P", monospace',
                   fontSize: 'clamp(1.4rem, 3.5vw, 2.4rem)',
-                  color: '#e8d8a8',
+                  color: 'var(--color-parchment)',
                   lineHeight: 1.4,
                   marginBottom: '0.75rem',
-                  textShadow: '3px 3px 0 #1a2e10',
+                  textShadow: '3px 3px 0 var(--color-forest-dark)',
                 }}>
                   {bio.name}
                 </h1>
@@ -92,7 +92,7 @@ export default function Hero() {
                 <h2 style={{
                   fontFamily: '"Press Start 2P", monospace',
                   fontSize: 'clamp(0.5rem, 1.2vw, 0.75rem)',
-                  color: '#c9a24a',
+                  color: 'var(--color-brass)',
                   lineHeight: 2,
                   marginBottom: '1.75rem',
                 }}>
@@ -102,7 +102,7 @@ export default function Hero() {
                 <p style={{
                   fontFamily: '"Inter", sans-serif',
                   fontSize: '1.05rem',
-                  color: '#e8d8a8',
+                  color: 'var(--color-parchment)',
                   lineHeight: 1.75,
                   marginBottom: '2.25rem',
                   maxWidth: '440px',
@@ -117,21 +117,21 @@ export default function Hero() {
                       fontFamily: '"Press Start 2P", monospace',
                       fontSize: '0.6rem',
                       padding: '1rem 2rem',
-                      background: '#c9a24a',
-                      color: '#1a2e10',
+                      background: 'var(--color-brass)',
+                      color: 'var(--color-forest-dark)',
                       textDecoration: 'none',
                       letterSpacing: '0.05em',
-                      boxShadow: '5px 5px 0 #6b4a2e',
+                      boxShadow: '5px 5px 0 var(--color-wood)',
                       display: 'inline-block',
                       transition: 'transform 0.08s, box-shadow 0.08s',
                     }}
                     onMouseEnter={e => {
                       (e.currentTarget as HTMLElement).style.transform = 'translate(2px,2px)';
-                      (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 #6b4a2e';
+                      (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 var(--color-wood)';
                     }}
                     onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.transform = '';
-                      (e.currentTarget as HTMLElement).style.boxShadow = '5px 5px 0 #6b4a2e';
+                      (e.currentTarget as HTMLElement).style.boxShadow = '5px 5px 0 var(--color-wood)';
                     }}
                   >
                     ▶ View Projects
@@ -143,20 +143,20 @@ export default function Hero() {
                       fontSize: '0.45rem',
                       padding: '0.75rem 1.25rem',
                       background: 'transparent',
-                      color: '#8aaa6a',
+                      color: 'var(--color-secondary-text)',
                       textDecoration: 'none',
                       letterSpacing: '0.05em',
-                      boxShadow: 'inset 0 0 0 2px #4a6b2e',
+                      boxShadow: 'inset 0 0 0 2px var(--color-forest-light)',
                       display: 'inline-block',
                       transition: 'transform 0.08s, color 0.08s, box-shadow 0.08s',
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.color = '#c9a24a';
-                      (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px #c9a24a';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
+                      (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px var(--color-brass)';
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.color = '#8aaa6a';
-                      (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px #4a6b2e';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--color-secondary-text)';
+                      (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px var(--color-forest-light)';
                     }}
                   >
                     Contact Me
@@ -175,9 +175,9 @@ export default function Hero() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.75rem',
-                  background: '#2d4a1e',
-                  border: '3px solid #c9a24a',
-                  boxShadow: '4px 4px 0 #3a2818',
+                  background: 'var(--color-forest)',
+                  border: '3px solid var(--color-brass)',
+                  boxShadow: '4px 4px 0 var(--color-wood-dark)',
                   padding: '0.5rem 0.75rem',
                   position: 'relative',
                   zIndex: 10,
@@ -185,11 +185,11 @@ export default function Hero() {
                   <img
                     src="/assets/sprites/face-large.png"
                     alt="Roy Carmelli pixel avatar"
-                    style={{ height: '56px', width: 'auto', imageRendering: 'pixelated', background: '#1a2e10' }}
+                    style={{ height: '56px', width: 'auto', imageRendering: 'pixelated', background: 'var(--color-forest-dark)' }}
                   />
                   <div>
-                    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: '#c9a24a', marginBottom: '0.3rem' }}>PLAYER 1</div>
-                    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: '#e8d8a8', lineHeight: 2 }}>
+                    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-brass)', marginBottom: '0.3rem' }}>PLAYER 1</div>
+                    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: 'var(--color-parchment)', lineHeight: 2 }}>
                       <div>HP ████████ MAX</div>
                       <div>XP █████░░░ LVL 3</div>
                     </div>
@@ -232,21 +232,21 @@ export default function Hero() {
               style={{
                 fontFamily: '"Press Start 2P", monospace',
                 fontSize: '0.45rem',
-                color: '#e8d8a8',
+                color: 'var(--color-parchment)',
                 background: 'transparent',
-                border: '2px solid #4a6b2e',
+                border: '2px solid var(--color-forest-light)',
                 padding: '0.5rem 1rem',
                 cursor: 'pointer',
                 letterSpacing: '0.1em',
                 transition: 'color 0.15s, border-color 0.15s',
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.color = '#c9a24a';
-                (e.currentTarget as HTMLElement).style.borderColor = '#c9a24a';
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brass)';
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.color = '#e8d8a8';
-                (e.currentTarget as HTMLElement).style.borderColor = '#4a6b2e';
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)';
               }}
             >
               [ESC] QUIT

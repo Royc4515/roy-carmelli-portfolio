@@ -65,8 +65,8 @@ export default function MiniGame({ onQuit }: MiniGameProps) {
         imageRendering: 'pixelated',
         cursor: 'pointer',
         maxWidth: '100%',
-        border: '3px solid #c9a24a',
-        boxShadow: '4px 4px 0 #3a2818',
+        border: '3px solid var(--color-brass)',
+        boxShadow: '4px 4px 0 var(--color-wood-dark)',
       }}
       aria-label="Roy Runner mini-game — press Space or click to play"
     />
