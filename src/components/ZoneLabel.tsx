@@ -33,8 +33,8 @@ export default function ZoneLabel({ lines, align = 'left', icon }: ZoneLabelProp
           style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: i === 0 ? '1.1rem' : '0.7rem',
-            color: i === 0 ? '#e8d8a8' : '#c9b87a',
-            textShadow: '2px 2px 0 #1a2e10, -1px -1px 0 rgba(0,0,0,0.5)',
+            color: i === 0 ? 'var(--color-parchment)' : 'var(--color-parchment-dark)',
+            textShadow: '2px 2px 0 var(--color-forest-dark), -1px -1px 0 rgba(0,0,0,0.5)',
             letterSpacing: '0.08em',
             lineHeight: 1.6,
           }}

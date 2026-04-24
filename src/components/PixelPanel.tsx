@@ -11,18 +11,18 @@ interface PixelPanelProps {
 const styles: Record<Variant, React.CSSProperties> = {
   parchment: {
     background: 'rgba(232, 216, 168, 0.92)',
-    color: '#3a2818',
-    boxShadow: '0 -4px 0 0 #c9a24a, 0 4px 0 0 #c9a24a, -4px 0 0 0 #c9a24a, 4px 0 0 0 #c9a24a, inset 0 0 0 2px rgba(0,0,0,0.1)',
+    color: 'var(--color-wood-dark)',
+    boxShadow: '0 -4px 0 0 var(--color-brass), 0 4px 0 0 var(--color-brass), -4px 0 0 0 var(--color-brass), 4px 0 0 0 var(--color-brass), inset 0 0 0 2px rgba(0,0,0,0.1)',
   },
   wood: {
     background: 'rgba(58, 40, 24, 0.92)',
-    color: '#e8d8a8',
-    boxShadow: '0 -4px 0 0 #c9a24a, 0 4px 0 0 #c9a24a, -4px 0 0 0 #c9a24a, 4px 0 0 0 #c9a24a',
+    color: 'var(--color-parchment)',
+    boxShadow: '0 -4px 0 0 var(--color-brass), 0 4px 0 0 var(--color-brass), -4px 0 0 0 var(--color-brass), 4px 0 0 0 var(--color-brass)',
   },
   dark: {
     background: 'rgba(26, 46, 16, 0.92)',
-    color: '#e8d8a8',
-    boxShadow: '0 -4px 0 0 #4a6b2e, 0 4px 0 0 #4a6b2e, -4px 0 0 0 #4a6b2e, 4px 0 0 0 #4a6b2e',
+    color: 'var(--color-parchment)',
+    boxShadow: '0 -4px 0 0 var(--color-forest-light), 0 4px 0 0 var(--color-forest-light), -4px 0 0 0 var(--color-forest-light), 4px 0 0 0 var(--color-forest-light)',
   },
 };
 

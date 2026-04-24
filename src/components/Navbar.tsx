@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { Theme } from '../hooks/useTheme';
 
 const links = [
   { label: 'Home',     href: '#hero',     icon: '🍄' },
@@ -12,7 +13,12 @@ function triggerArcade() {
   setTimeout(() => window.dispatchEvent(new CustomEvent('arcade:play')), 400);
 }
 
-export default function Navbar() {
+interface NavbarProps {
+  theme: Theme;
+  onToggleTheme: () => void;
+}
+
+export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -36,8 +42,8 @@ export default function Navbar() {
           left: 0,
           right: 0,
           zIndex: 100,
-          background: '#2d4a1e',
-          borderBottom: scrolled ? '3px solid #c9a24a' : '3px solid #4a6b2e',
+          background: 'var(--color-forest)',
+          borderBottom: scrolled ? '3px solid var(--color-brass)' : '3px solid var(--color-forest-light)',
           transition: 'border-color 0.3s',
         }}
       >
@@ -69,18 +75,18 @@ export default function Navbar() {
                     textDecoration: 'none',
                     fontFamily: '"Press Start 2P", monospace',
                     fontSize: '0.5rem',
-                    color: '#e8d8a8',
+                    color: 'var(--color-parchment)',
                     letterSpacing: '0.05em',
                     transition: 'color 0.15s, background 0.15s',
-                    borderRight: '1px solid #4a6b2e',
+                    borderRight: '1px solid var(--color-forest-light)',
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.background = 'rgba(201,162,74,0.15)';
-                    e.currentTarget.style.color = '#c9a24a';
+                    e.currentTarget.style.color = 'var(--color-brass)';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#e8d8a8';
+                    e.currentTarget.style.color = 'var(--color-parchment)';
                   }}
                 >
                   <span style={{ fontSize: '1.4rem', lineHeight: 1, imageRendering: 'pixelated' }}>
@@ -101,22 +107,22 @@ export default function Navbar() {
                   padding: '8px 20px',
                   background: 'none',
                   border: 'none',
-                  borderRight: '1px solid #4a6b2e',
+                  borderRight: '1px solid var(--color-forest-light)',
                   cursor: 'pointer',
                   fontFamily: '"Press Start 2P", monospace',
                   fontSize: '0.5rem',
-                  color: '#e8d8a8',
+                  color: 'var(--color-parchment)',
                   letterSpacing: '0.05em',
                   transition: 'color 0.15s, background 0.15s',
                   height: '60px',
                 }}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLElement).style.background = 'rgba(201,162,74,0.15)';
-                  (e.currentTarget as HTMLElement).style.color = '#c9a24a';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
                 }}
                 onMouseLeave={e => {
                   (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  (e.currentTarget as HTMLElement).style.color = '#e8d8a8';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
                 }}
               >
                 <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🕹️</span>
@@ -125,8 +131,34 @@ export default function Navbar() {
             </li>
           </ul>
 
-          {/* Right side: face avatar */}
+          {/* Right side: theme toggle + face avatar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={onToggleTheme}
+              aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
+              title={theme === 'night' ? 'Switch to day' : 'Switch to night'}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                background: 'var(--color-forest-dark)',
+                border: '2px solid var(--color-brass)',
+                color: 'var(--color-brass)',
+                cursor: 'pointer',
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize: '1rem',
+                lineHeight: 1,
+                padding: 0,
+                transition: 'transform 0.12s, color 0.15s, border-color 0.15s',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translate(-1px,-1px)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; }}
+            >
+              {theme === 'night' ? '☀' : '☾'}
+            </button>
+
             <img
               src="/assets/sprites/face-small.png"
               alt="Roy Carmelli"
@@ -135,8 +167,8 @@ export default function Navbar() {
                 width: 'auto',
                 imageRendering: 'pixelated',
                 borderRadius: 0,
-                border: '2px solid #c9a24a',
-                background: '#1a2e10',
+                border: '2px solid var(--color-brass)',
+                background: 'var(--color-forest-dark)',
               }}
             />
 
@@ -148,10 +180,10 @@ export default function Navbar() {
               style={{
                 display: 'none',
                 background: 'none',
-                border: '2px solid #c9a24a',
+                border: '2px solid var(--color-brass)',
                 cursor: 'pointer',
                 padding: '6px 10px',
-                color: '#e8d8a8',
+                color: 'var(--color-parchment)',
                 fontFamily: '"Press Start 2P", monospace',
                 fontSize: '0.6rem',
               }}
@@ -168,7 +200,7 @@ export default function Navbar() {
           position: 'fixed',
           inset: 0,
           zIndex: 99,
-          background: '#1a2e10',
+          background: 'var(--color-forest-dark)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -187,19 +219,19 @@ export default function Navbar() {
             style={{
               fontFamily: '"Press Start 2P", monospace',
               fontSize: '1rem',
-              color: '#e8d8a8',
+              color: 'var(--color-parchment)',
               textDecoration: 'none',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '8px',
               padding: '1rem 2rem',
-              border: '3px solid #4a6b2e',
+              border: '3px solid var(--color-forest-light)',
               width: '200px',
               textAlign: 'center',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#c9a24a'; e.currentTarget.style.color = '#c9a24a'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#4a6b2e'; e.currentTarget.style.color = '#e8d8a8'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-brass)'; e.currentTarget.style.color = 'var(--color-brass)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-forest-light)'; e.currentTarget.style.color = 'var(--color-parchment)'; }}
           >
             <span style={{ fontSize: '2rem' }}>{link.icon}</span>
             {link.label}
@@ -210,9 +242,9 @@ export default function Navbar() {
           style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: '1rem',
-            color: '#e8d8a8',
+            color: 'var(--color-parchment)',
             background: 'none',
-            border: '3px solid #4a6b2e',
+            border: '3px solid var(--color-forest-light)',
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
@@ -222,8 +254,8 @@ export default function Navbar() {
             width: '200px',
             textAlign: 'center',
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#c9a24a'; (e.currentTarget as HTMLElement).style.color = '#c9a24a'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#4a6b2e'; (e.currentTarget as HTMLElement).style.color = '#e8d8a8'; }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brass)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)'; }}
         >
           <span style={{ fontSize: '2rem' }}>🕹️</span>
           Arcade
