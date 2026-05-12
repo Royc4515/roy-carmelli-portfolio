@@ -24,17 +24,11 @@ export default function Contact() {
         padding: '80px 2rem 4rem',
       }}
     >
-      <div
-        style={{
-          maxWidth: '900px',
-          margin: '0 auto',
-          display: 'flex',
-          gap: '2.5rem',
-          flexWrap: 'wrap',
-          alignItems: 'flex-start',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', minWidth: '120px' }}>
+      {/* Mobile-first: stack vertically, side-by-side from md */}
+      <div className="flex flex-col md:flex-row gap-10 items-start mx-auto" style={{ maxWidth: '900px' }}>
+
+        {/* Zone label + character sidebar */}
+        <div className="flex flex-col items-center gap-6 flex-shrink-0 md:w-28">
           <ZoneLabel lines={['CONTACT', 'ZONE']} icon="/assets/sprites/icon-contact.png" />
           <Character pose="idle" scale={1} ariaLabel="Roy standing" />
         </div>
@@ -44,7 +38,8 @@ export default function Contact() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{ duration: 0.7 }}
-          style={{ flex: 1, minWidth: '260px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+          className="flex-1 min-w-0 flex flex-col"
+          style={{ gap: '1.5rem' }}
         >
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
@@ -66,11 +61,13 @@ export default function Contact() {
                 fontFamily: '"Press Start 2P", monospace',
                 fontSize: '0.5rem',
                 padding: '0.85rem 1.25rem',
+                minHeight: '44px',
                 background: 'var(--color-brass)',
                 color: 'var(--color-forest-dark)',
                 textDecoration: 'none',
                 letterSpacing: '0.04em',
                 boxShadow: '4px 4px 0 var(--color-wood)',
+                wordBreak: 'break-all',
                 transition: 'transform 0.08s, box-shadow 0.08s',
               }}
               onMouseEnter={e => {
@@ -85,7 +82,7 @@ export default function Contact() {
               ✉ {bio.email}
             </a>
 
-            <div style={{ borderTop: '1px solid var(--color-forest-light)', marginTop: '1.25rem', paddingTop: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="flex flex-wrap gap-3" style={{ borderTop: '1px solid var(--color-forest-light)', marginTop: '1.25rem', paddingTop: '1.25rem' }}>
               {socials.map(({ href, label, icon }) => (
                 <a
                   key={label}
@@ -100,6 +97,7 @@ export default function Contact() {
                     justifyContent: 'center',
                     gap: '4px',
                     width: '64px',
+                    minHeight: '44px',
                     padding: '8px 4px',
                     background: 'var(--color-forest-dark)',
                     border: '2px solid var(--color-forest-light)',

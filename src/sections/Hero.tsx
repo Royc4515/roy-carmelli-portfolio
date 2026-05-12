@@ -3,16 +3,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { bio } from '../data/bio';
 import Character from '../components/Character';
 import MiniGame from '../components/MiniGame/MiniGame';
+import ArcadeFallback from '../components/ArcadeFallback';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { HERO_CHARACTER_OFFSET_X } from '../theme/tokens';
 
 export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handler = () => setIsPlaying(true);
     window.addEventListener('arcade:play', handler);
     return () => window.removeEventListener('arcade:play', handler);
   }, []);
+
+  function handlePressStart() {
+    // Always enter "playing" state — on mobile the overlay shows ArcadeFallback
+    // rather than the canvas game, which is unusable at < 768px
+    setIsPlaying(true);
+  }
 
   return (
     <section
@@ -25,7 +34,7 @@ export default function Hero() {
         overflow: 'hidden',
       }}
     >
-      {/* ── Static hero content ────────────────────────────────────────── */}
+      {/* ── Static hero content ─────────────────────────────────────────── */}
       <AnimatePresence>
         {!isPlaying && (
           <motion.div
@@ -41,26 +50,17 @@ export default function Hero() {
               padding: '80px 2rem 2rem',
             }}
           >
-            <div
-              style={{
-                maxWidth: '1100px',
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '3rem',
-                flexWrap: 'wrap',
-              }}
-            >
+            <div className="flex flex-col md:flex-row items-center justify-between gap-12 w-full" style={{ maxWidth: '1100px' }}>
+
               {/* Text content */}
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
-                style={{ maxWidth: '520px', flex: 1, minWidth: '280px' }}
+                className="w-full md:max-w-[520px]"
               >
                 <button
-                  onClick={() => setIsPlaying(true)}
+                  onClick={handlePressStart}
                   style={{
                     fontFamily: '"Press Start 2P", monospace',
                     fontSize: '0.6rem',
@@ -80,7 +80,7 @@ export default function Hero() {
 
                 <h1 style={{
                   fontFamily: '"Press Start 2P", monospace',
-                  fontSize: 'clamp(1.4rem, 3.5vw, 2.4rem)',
+                  fontSize: 'clamp(1.2rem, 3.5vw, 2.4rem)',
                   color: 'var(--color-parchment)',
                   lineHeight: 1.4,
                   marginBottom: '0.75rem',
@@ -91,7 +91,7 @@ export default function Hero() {
 
                 <h2 style={{
                   fontFamily: '"Press Start 2P", monospace',
-                  fontSize: 'clamp(0.5rem, 1.2vw, 0.75rem)',
+                  fontSize: 'clamp(0.45rem, 1.2vw, 0.75rem)',
                   color: 'var(--color-brass)',
                   lineHeight: 2,
                   marginBottom: '1.75rem',
@@ -110,7 +110,7 @@ export default function Hero() {
                   {bio.tagline}
                 </p>
 
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <div className="flex flex-wrap gap-4 items-center">
                   <a
                     href="#projects"
                     style={{
@@ -123,6 +123,7 @@ export default function Hero() {
                       letterSpacing: '0.05em',
                       boxShadow: '5px 5px 0 var(--color-wood)',
                       display: 'inline-block',
+                      minHeight: '44px',
                       transition: 'transform 0.08s, box-shadow 0.08s',
                     }}
                     onMouseEnter={e => {
@@ -148,6 +149,7 @@ export default function Hero() {
                       letterSpacing: '0.05em',
                       boxShadow: 'inset 0 0 0 2px var(--color-forest-light)',
                       display: 'inline-block',
+                      minHeight: '44px',
                       transition: 'transform 0.08s, color 0.08s, box-shadow 0.08s',
                     }}
                     onMouseEnter={e => {
@@ -164,48 +166,50 @@ export default function Hero() {
                 </div>
               </motion.div>
 
-              {/* Character */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.25 }}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  background: 'var(--color-forest)',
-                  border: '3px solid var(--color-brass)',
-                  boxShadow: '4px 4px 0 var(--color-wood-dark)',
-                  padding: '0.5rem 0.75rem',
-                  position: 'relative',
-                  zIndex: 10,
-                }}>
-                  <img
-                    src="/assets/sprites/face-large.png"
-                    alt="Roy Carmelli pixel avatar"
-                    style={{ height: '56px', width: 'auto', imageRendering: 'pixelated', background: 'var(--color-forest-dark)' }}
-                  />
-                  <div>
-                    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-brass)', marginBottom: '0.3rem' }}>PLAYER 1</div>
-                    <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: 'var(--color-parchment)', lineHeight: 2 }}>
-                      <div>HP ████████ MAX</div>
-                      <div>XP █████░░░ LVL 3</div>
+              {/* Character card — hidden on mobile (avoids -375px offset overflow) */}
+              {!isMobile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.25 }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    background: 'var(--color-forest)',
+                    border: '3px solid var(--color-brass)',
+                    boxShadow: '4px 4px 0 var(--color-wood-dark)',
+                    padding: '0.5rem 0.75rem',
+                    position: 'relative',
+                    zIndex: 10,
+                  }}>
+                    <img
+                      src="/assets/sprites/face-large.png"
+                      alt="Roy Carmelli pixel avatar"
+                      style={{ height: '56px', width: 'auto', imageRendering: 'pixelated', background: 'var(--color-forest-dark)' }}
+                    />
+                    <div>
+                      <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-brass)', marginBottom: '0.3rem' }}>PLAYER 1</div>
+                      <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: 'var(--color-parchment)', lineHeight: 2 }}>
+                        <div>HP ████████ MAX</div>
+                        <div>XP █████░░░ LVL 3</div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ transform: `translateX(${HERO_CHARACTER_OFFSET_X}px)` }}>
-                  <Character pose="wave" scale={1.4} ariaLabel="Roy waving hello" />
-                </div>
-              </motion.div>
+                  <div style={{ transform: `translateX(${HERO_CHARACTER_OFFSET_X}px)` }}>
+                    <Character pose="wave" scale={1.4} ariaLabel="Roy waving hello" />
+                  </div>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Game overlay ───────────────────────────────────────────────── */}
+      {/* ── Game / fallback overlay ──────────────────────────────────────── */}
       <AnimatePresence>
         {isPlaying && (
           <motion.div
@@ -225,7 +229,11 @@ export default function Hero() {
               padding: '80px 1rem 1rem',
             }}
           >
-            <MiniGame onQuit={() => setIsPlaying(false)} />
+            {isMobile ? (
+              <ArcadeFallback />
+            ) : (
+              <MiniGame onQuit={() => setIsPlaying(false)} />
+            )}
 
             <button
               onClick={() => setIsPlaying(false)}
@@ -236,6 +244,7 @@ export default function Hero() {
                 background: 'transparent',
                 border: '2px solid var(--color-forest-light)',
                 padding: '0.5rem 1rem',
+                minHeight: '44px',
                 cursor: 'pointer',
                 letterSpacing: '0.1em',
                 transition: 'color 0.15s, border-color 0.15s',
