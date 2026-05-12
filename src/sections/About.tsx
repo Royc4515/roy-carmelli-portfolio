@@ -17,19 +17,11 @@ export default function About() {
         padding: '80px 2rem 4rem',
       }}
     >
-      <div
-        style={{
-          maxWidth: '1100px',
-          width: '100%',
-          margin: '0 auto',
-          display: 'flex',
-          gap: '2.5rem',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-        }}
-      >
-        {/* Zone label */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', minWidth: '140px' }}>
+      {/* Mobile-first: stack vertically, side-by-side from md */}
+      <div className="flex flex-col md:flex-row gap-10 items-start mx-auto w-full" style={{ maxWidth: '1100px' }}>
+
+        {/* Zone label sidebar */}
+        <div className="flex flex-col items-center gap-6 flex-shrink-0 md:w-36">
           <ZoneLabel lines={['ABOUT', 'THE', 'ADVENTURER']} icon="/assets/sprites/icon-about.png" />
         </div>
 
@@ -39,7 +31,8 @@ export default function About() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{ duration: 0.7 }}
-          style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+          className="flex-1 min-w-0 flex flex-col"
+          style={{ gap: '1.5rem' }}
         >
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
@@ -80,18 +73,14 @@ export default function About() {
               { label: 'Year',       value: '2nd Year, Semester B' },
               { label: 'Open to',    value: 'Internships · Research · Collabs' },
             ].map(({ label, value }, i, arr) => (
-              <div key={label} style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                gap: '1rem',
+              <div key={label} className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-1 sm:gap-4" style={{
                 padding: '0.65rem 0',
                 borderBottom: i < arr.length - 1 ? '1px solid var(--color-forest-light)' : 'none',
               }}>
                 <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: 'var(--color-parchment-dark)', whiteSpace: 'nowrap' }}>
                   {label}
                 </span>
-                <span style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: 'var(--color-parchment)', textAlign: 'right' }}>
+                <span style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: 'var(--color-parchment)' }}>
                   {value}
                 </span>
               </div>

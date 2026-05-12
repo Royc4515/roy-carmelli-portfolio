@@ -1,8 +1,12 @@
 import { motion } from 'framer-motion';
 import MiniGame from '../components/MiniGame/MiniGame';
+import ArcadeFallback from '../components/ArcadeFallback';
 import ZoneLabel from '../components/ZoneLabel';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function Arcade() {
+  const isMobile = useIsMobile();
+
   return (
     <section
       id="arcade"
@@ -19,13 +23,7 @@ export default function Arcade() {
       <div style={{ maxWidth: '1100px', width: '100%', margin: '0 auto' }}>
 
         {/* Header row */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1.5rem',
-          marginBottom: '2rem',
-          flexWrap: 'wrap',
-        }}>
+        <div className="flex flex-wrap items-center gap-6 mb-8">
           <ZoneLabel
             lines={['ARCADE', 'ZONE']}
             icon="/assets/sprites/icon-home.png"
@@ -46,7 +44,7 @@ export default function Arcade() {
           </motion.h2>
         </div>
 
-        {/* Canvas */}
+        {/* Canvas or fallback */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -54,21 +52,22 @@ export default function Arcade() {
           transition={{ duration: 0.7 }}
           style={{ display: 'flex', justifyContent: 'center' }}
         >
-          <MiniGame />
+          {isMobile ? <ArcadeFallback /> : <MiniGame />}
         </motion.div>
 
-        {/* Controls hint */}
-        <p style={{
-          fontFamily: '"Press Start 2P", monospace',
-          fontSize: '0.4rem',
-          color: 'var(--color-forest-light)',
-          marginTop: '0.85rem',
-          textAlign: 'center',
-          letterSpacing: '0.08em',
-        }}>
-          SPACE or CLICK TO JUMP
-        </p>
-
+        {/* Controls hint — only relevant on desktop */}
+        {!isMobile && (
+          <p style={{
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: '0.4rem',
+            color: 'var(--color-forest-light)',
+            marginTop: '0.85rem',
+            textAlign: 'center',
+            letterSpacing: '0.08em',
+          }}>
+            SPACE or CLICK TO JUMP
+          </p>
+        )}
       </div>
     </section>
   );

@@ -15,16 +15,11 @@ export default function Skills() {
         padding: '80px 2rem 4rem',
       }}
     >
-      <div
-        style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
-          display: 'flex',
-          gap: '2.5rem',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div style={{ paddingTop: '0.5rem', minWidth: '120px' }}>
+      {/* Mobile-first: stack vertically, side-by-side from md */}
+      <div className="flex flex-col md:flex-row gap-10 mx-auto" style={{ maxWidth: '1100px' }}>
+
+        {/* Zone label sidebar */}
+        <div className="pt-2 flex-shrink-0 md:w-28">
           <ZoneLabel lines={['SKILL', 'TREE', '── LVL UP ──']} icon="/assets/sprites/icon-skills.jpg" />
         </div>
 
@@ -33,7 +28,7 @@ export default function Skills() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{ duration: 0.7 }}
-          style={{ flex: 1, minWidth: '280px' }}
+          className="flex-1 min-w-0"
         >
           <h2 style={{
             fontFamily: '"Press Start 2P", monospace',
@@ -53,7 +48,7 @@ export default function Skills() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: gi * 0.07 }}
-                style={{ flex: '0 1 280px', minWidth: '220px' }}
+                style={{ flex: '0 1 280px', minWidth: '200px' }}
               >
                 <PixelPanel variant="wood">
                   <h3 style={{
