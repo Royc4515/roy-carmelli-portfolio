@@ -4,11 +4,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Hero from './Hero';
 
 // framer-motion uses ResizeObserver — stub it
-global.ResizeObserver = class {
+window.ResizeObserver = class {
   observe() {}
   unobserve() {}
   disconnect() {}
-};
+} as unknown as typeof ResizeObserver;
 
 function setupMatchMedia(isMobile: boolean) {
   window.matchMedia = (query: string) => {

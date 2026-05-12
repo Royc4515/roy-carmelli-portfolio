@@ -1,13 +1,13 @@
 import '@testing-library/jest-dom';
 
 // framer-motion uses these browser APIs not present in jsdom
-global.ResizeObserver = class {
+window.ResizeObserver = class {
   observe() {}
   unobserve() {}
   disconnect() {}
-};
+} as unknown as typeof ResizeObserver;
 
-global.IntersectionObserver = class {
+window.IntersectionObserver = class {
   observe() {}
   unobserve() {}
   disconnect() {}
