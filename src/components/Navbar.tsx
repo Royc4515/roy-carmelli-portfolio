@@ -225,6 +225,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
             transition: 'opacity 0.25s ease',
           }}
         >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '1rem', width: '100%', maxWidth: '300px', padding: '0 1.5rem' }}>
           {links.map(link => (
             <a
               key={link.href}
@@ -242,7 +243,6 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                 padding: '0.875rem 2rem',
                 minHeight: '44px',
                 border: '3px solid var(--color-forest-light)',
-                width: '220px',
                 textAlign: 'center',
               }}
               onMouseEnter={e => {
@@ -273,7 +273,6 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
               gap: '8px',
               padding: '0.875rem 2rem',
               minHeight: '44px',
-              width: '220px',
               textAlign: 'center',
             }}
             onMouseEnter={e => {
@@ -288,6 +287,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
             <span style={{ fontSize: '2rem' }}>🕹️</span>
             Arcade
           </button>
+          </div>
         </div>
       )}
     </>

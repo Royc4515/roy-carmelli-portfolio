@@ -27,8 +27,8 @@ export default function Contact() {
       {/* Mobile-first: stack vertically, side-by-side from md */}
       <div className="flex flex-col md:flex-row gap-10 items-start mx-auto" style={{ maxWidth: '900px' }}>
 
-        {/* Zone label + character sidebar */}
-        <div className="flex flex-col items-center gap-6 flex-shrink-0 md:w-28">
+        {/* Zone label + character sidebar — full-width on mobile so items center properly */}
+        <div className="flex flex-col items-center gap-6 flex-shrink-0 w-full md:w-28">
           <ZoneLabel lines={['CONTACT', 'ZONE']} icon="/assets/sprites/icon-contact.png" />
           <Character pose="idle" scale={1} ariaLabel="Roy standing" />
         </div>
@@ -41,7 +41,7 @@ export default function Contact() {
           className="flex-1 min-w-0 flex flex-col"
           style={{ gap: '1.5rem' }}
         >
-          <h2 style={{
+          <h2 className="text-center md:text-left" style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: 'clamp(0.7rem, 1.8vw, 1.1rem)',
             color: 'var(--color-parchment)',
@@ -54,6 +54,7 @@ export default function Contact() {
             <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '1rem', color: 'var(--color-parchment-dark)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
               Actively seeking a student position in software engineering or AI development. Open to research collaborations at the intersection of CS and neuroscience.
             </p>
+            <div className="flex justify-center md:justify-start">
             <a
               href={`mailto:${bio.email}`}
               style={{
@@ -81,8 +82,9 @@ export default function Contact() {
             >
               ✉ {bio.email}
             </a>
+            </div>
 
-            <div className="flex flex-wrap gap-3" style={{ borderTop: '1px solid var(--color-forest-light)', marginTop: '1.25rem', paddingTop: '1.25rem' }}>
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start" style={{ borderTop: '1px solid var(--color-forest-light)', marginTop: '1.25rem', paddingTop: '1.25rem' }}>
               {socials.map(({ href, label, icon }) => (
                 <a
                   key={label}

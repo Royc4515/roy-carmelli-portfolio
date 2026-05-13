@@ -47,10 +47,10 @@ export default function Hero() {
               alignItems: 'center',
               justifyContent: 'center',
               minHeight: '100vh',
-              padding: '80px 2rem 2rem',
+              padding: '80px 1.5rem 2rem',
             }}
           >
-            <div className="flex flex-col md:flex-row items-center justify-between gap-12 w-full" style={{ maxWidth: '1100px' }}>
+            <div className="w-full md:flex md:flex-row md:items-center md:justify-between md:gap-12" style={{ maxWidth: '1100px' }}>
 
               {/* Text content */}
               <motion.div
@@ -104,13 +104,82 @@ export default function Hero() {
                   fontSize: '1.05rem',
                   color: 'var(--color-parchment)',
                   lineHeight: 1.75,
-                  marginBottom: '2.25rem',
+                  marginBottom: '1rem',
                   maxWidth: '440px',
                 }}>
                   {bio.tagline}
                 </p>
 
-                <div className="flex flex-wrap gap-4 items-center">
+                {/* Mobile: buttons on left, character on right — same row */}
+                <div className="flex flex-row items-start gap-4 md:hidden">
+                  <div className="flex flex-col gap-3 flex-shrink-0 items-start">
+                    <a
+                      href="#projects"
+                      style={{
+                        fontFamily: '"Press Start 2P", monospace',
+                        fontSize: '0.65rem',
+                        padding: '1rem 1.5rem',
+                        background: 'var(--color-brass)',
+                        color: 'var(--color-forest-dark)',
+                        textDecoration: 'none',
+                        letterSpacing: '0.05em',
+                        boxShadow: '4px 4px 0 var(--color-wood)',
+                        display: 'inline-block',
+                        minHeight: '44px',
+                        transition: 'transform 0.08s, box-shadow 0.08s',
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.transform = 'translate(2px,2px)';
+                        (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 var(--color-wood)';
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.transform = '';
+                        (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 var(--color-wood)';
+                      }}
+                    >
+                      ▶ View Projects
+                    </a>
+                    <a
+                      href="#contact"
+                      style={{
+                        fontFamily: '"Press Start 2P", monospace',
+                        fontSize: '0.5rem',
+                        padding: '0.6rem 0.875rem',
+                        background: 'transparent',
+                        color: 'var(--color-secondary-text)',
+                        textDecoration: 'none',
+                        letterSpacing: '0.05em',
+                        boxShadow: 'inset 0 0 0 2px var(--color-forest-light)',
+                        display: 'inline-block',
+                        minHeight: '44px',
+                        transition: 'transform 0.08s, color 0.08s, box-shadow 0.08s',
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
+                        (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px var(--color-brass)';
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.color = 'var(--color-secondary-text)';
+                        (e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 2px var(--color-forest-light)';
+                      }}
+                    >
+                      Contact Me
+                    </a>
+                  </div>
+
+                  {/* Character beside buttons on mobile */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.25 }}
+                    className="flex-1 flex justify-end"
+                  >
+                    <Character pose="wave" scale={1.1} ariaLabel="Roy waving hello" />
+                  </motion.div>
+                </div>
+
+                {/* Desktop: buttons only (character rendered separately below) */}
+                <div className="hidden md:flex flex-wrap gap-4 items-center">
                   <a
                     href="#projects"
                     style={{
@@ -166,13 +235,13 @@ export default function Hero() {
                 </div>
               </motion.div>
 
-              {/* Character card — hidden on mobile (avoids -375px offset overflow) */}
+              {/* Desktop only: character + player card column */}
               {!isMobile && (
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.25 }}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}
                 >
                   <div style={{
                     display: 'flex',
@@ -198,7 +267,6 @@ export default function Hero() {
                       </div>
                     </div>
                   </div>
-
                   <div style={{ transform: `translateX(${HERO_CHARACTER_OFFSET_X}px)` }}>
                     <Character pose="wave" scale={1.4} ariaLabel="Roy waving hello" />
                   </div>
