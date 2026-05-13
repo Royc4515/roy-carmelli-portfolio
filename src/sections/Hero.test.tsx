@@ -74,8 +74,11 @@ describe('Hero — mobile', () => {
     expect(screen.getByTestId('arcade-fallback-message')).toBeInTheDocument();
   });
 
-  it('does NOT render the character panel on mobile (avoids offset overflow)', () => {
+  it('renders the waving character sprite on mobile (no player card)', () => {
     render(<Hero />);
+    // Character sprite is present
+    expect(screen.getByAltText(/roy waving hello/i)).toBeInTheDocument();
+    // Player card face avatar is NOT rendered on mobile
     expect(screen.queryByAltText(/pixel avatar/i)).toBeNull();
   });
 });

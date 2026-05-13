@@ -123,3 +123,12 @@ a:hover {
   .dot-grid::before { animation: none; }
   body, .dot-grid { transition: none; }
 }
+
+/* ── Mobile layout fixes ────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Tighten section gaps */
+  section[id]:not(#hero) {
+    padding-top: 40px !important;
+    padding-bottom: 2rem !important;
+  }
+}
