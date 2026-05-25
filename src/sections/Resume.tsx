@@ -18,7 +18,7 @@ export default function Resume() {
             📜 RESUME SCROLL
           </p>
           <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.9rem', color: 'var(--color-parchment-dark)', marginBottom: '1.25rem', lineHeight: 1.6 }}>
-            Download my CV to learn more about my experience and skills.
+            Full breakdown — coursework with grades, project deep-dives, IDF reserve service, certifications.
           </p>
           <a
             href="/Roy_Carmelli_CV.pdf"

@@ -15,11 +15,11 @@ export default function App() {
       <Navbar theme={theme} onToggleTheme={toggleTheme} />
       <main>
         <Hero />
-        <About />
         <Projects />
+        <About />
         <Skills />
-        <Contact />
         <Resume />
+        <Contact />
       </main>
       <Footer />
     </>

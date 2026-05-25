@@ -68,10 +68,11 @@ export default function About() {
               ── AT A GLANCE ──
             </p>
             {[
-              { label: 'Degree',     value: 'B.Sc. Computer & Neuro Sciences' },
+              { label: 'Degree',     value: 'B.Sc. Computer Science & Neuroscience' },
               { label: 'University', value: 'Bar-Ilan University' },
               { label: 'Year',       value: '2nd Year, Semester B' },
-              { label: 'Open to',    value: 'Internships · Research · Collabs' },
+              { label: 'GPA',        value: '86.16 / 100' },
+              { label: 'Open to',    value: 'Internships · Student roles · R&D' },
             ].map(({ label, value }, i, arr) => (
               <div key={label} className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-1 sm:gap-4" style={{
                 padding: '0.65rem 0',
