@@ -7,7 +7,6 @@ import Character from '../components/Character';
 const socials = [
   { href: bio.github,            label: 'GitHub',   icon: '🐙' },
   { href: bio.linkedin,          label: 'LinkedIn', icon: '💼' },
-  { href: bio.facebook,          label: 'Facebook', icon: '📘' },
   { href: `mailto:${bio.email}`, label: 'Email',    icon: '✉️' },
   { href: `tel:${bio.phone}`,    label: 'Phone',    icon: '📞' },
 ];
@@ -52,7 +51,7 @@ export default function Contact() {
 
           <PixelPanel variant="wood">
             <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '1rem', color: 'var(--color-parchment-dark)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
-              Actively seeking a student position in software engineering or AI development. Open to research collaborations at the intersection of CS and neuroscience.
+              Available for software engineering and AI internships starting summer 2026 — part-time during the semester, full-time during breaks. Also open to research collaborations at the CS × neuroscience intersection.
             </p>
             <div className="flex justify-center md:justify-start">
             <a
