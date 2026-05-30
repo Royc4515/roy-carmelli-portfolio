@@ -4,10 +4,11 @@ import { Project } from '../types/index';
 export const projects: Project[] = [
   {
     id: "ai-sidebar",
-    title: "AI Sidebar",
-    description: "Chrome MV3 extension that injects a context-aware AI assistant into any webpage. Architecture is the point: BaseProvider abstract class + Factory pattern for runtime provider selection + Strategy pattern for swappable AI backends + Template Method for streaming flow. Concrete providers for Claude, Gemini, OpenAI, Grok, Groq, and Ollama — Grok/Groq reuse OpenAI's implementation via inheritance, passing different endpoints to the parent constructor. Custom Markdown renderer and DOM sanitizer.",
-    tech: ["JavaScript", "Chrome MV3", "OOP", "Factory Pattern", "Strategy Pattern", "Claude API", "Gemini API", "OpenAI API"],
-    github: "https://github.com/Royc4515/ai-sidebar",
+    title: "Aside — AI Sidebar",
+    description: "Zero-build Chrome MV3 extension that puts a context-aware AI assistant in a sidebar on any webpage — Alt+A and it's already reading the page. Six providers (Claude, Gemini, OpenAI, Grok, Groq, local Ollama) with a per-provider model picker and a 'Custom…' option for models not yet on the list. Streaming token-by-token answers, one-tap actions (summarize, key points, translate, explain, find on page), per-site conversation history, light/dark/auto themes, and full English/Hebrew RTL. Privacy-first: keys and history stay in the browser, page text is sent only on your prompt. Architecture is the point: BaseProvider abstract class + Factory for runtime provider selection + Strategy for swappable backends + Template Method for the streaming flow — Grok and Groq extend a shared OpenAI-compatible provider, passing different endpoints to the parent constructor. Custom Markdown renderer and DOM sanitizer, ships with a GitHub Pages landing site.",
+    tech: ["JavaScript", "Chrome MV3", "OOP", "Factory Pattern", "Strategy Pattern", "Claude API", "Gemini API", "OpenAI API", "i18n / RTL"],
+    github: "https://github.com/Royc4515/Aside",
+    live: "https://royc4515.github.io/Aside/",
     featured: true,
     year: 2026,
   },

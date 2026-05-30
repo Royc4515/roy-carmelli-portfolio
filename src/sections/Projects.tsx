@@ -50,7 +50,7 @@ export default function Projects() {
             {featured.map(project => (
               <motion.div key={project.id} whileHover={{ y: -4 }} transition={{ duration: 0.15 }}>
                 <PixelPanel variant="parchment">
-                  <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: 'var(--color-brass)', marginBottom: '0.6rem', letterSpacing: '0.1em' }}>
+                  <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: '#7a5610', marginBottom: '0.6rem', letterSpacing: '0.1em' }}>
                     ★ FEATURED
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem', gap: '0.5rem' }}>
