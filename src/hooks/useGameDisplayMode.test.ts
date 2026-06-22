@@ -3,15 +3,17 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameDisplayMode } from './useGameDisplayMode';
 
 /**
- * Builds a matchMedia mock answering the two queries the hook cares about:
+ * Builds a matchMedia mock answering the three queries the hook cares about:
  *  - `(pointer: coarse)`        → `coarse`
  *  - `(orientation: portrait)`  → `portrait`
+ *  - `(max-width: 767px)`       → `narrow` (phone-sized; defaults to `coarse`)
  */
-function createMatchMediaMock(coarse: boolean, portrait: boolean) {
+function createMatchMediaMock(coarse: boolean, portrait: boolean, narrow = coarse) {
   return (query: string) => {
     let matches = false;
     if (query.includes('pointer: coarse')) matches = coarse;
     else if (query.includes('orientation: portrait')) matches = portrait;
+    else if (query.includes('max-width')) matches = narrow;
 
     return {
       matches,
@@ -49,6 +51,13 @@ describe('useGameDisplayMode', () => {
     expect(result.current).toBe('touch');
   });
 
+  it('returns "touch" on a coarse-pointer tablet in portrait (wide enough to play)', () => {
+    // coarse + portrait but NOT narrow (≥768px) → playable, not a rotate prompt
+    window.matchMedia = createMatchMediaMock(true, true, false);
+    const { result } = renderHook(() => useGameDisplayMode());
+    expect(result.current).toBe('touch');
+  });
+
   it('updates reactively when orientation changes (rotate → touch)', () => {
     const listeners: Array<(e: MediaQueryListEvent) => void> = [];
     let portrait = true;
@@ -58,7 +67,9 @@ describe('useGameDisplayMode', () => {
         ? true
         : query.includes('orientation: portrait')
           ? portrait
-          : false,
+          : query.includes('max-width')
+            ? true // phone-sized
+            : false,
       media: query,
       onchange: null,
       addListener: vi.fn(),
@@ -98,7 +109,7 @@ describe('useGameDisplayMode', () => {
     const { unmount } = renderHook(() => useGameDisplayMode());
     unmount();
 
-    // One per query (coarse + portrait)
-    expect(removeEventListener).toHaveBeenCalledTimes(2);
+    // One per query (coarse + portrait + max-width)
+    expect(removeEventListener).toHaveBeenCalledTimes(3);
   });
 });

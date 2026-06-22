@@ -12,14 +12,16 @@ window.ResizeObserver = class {
  * Mocks matchMedia for the game display-mode queries:
  *  - `(pointer: coarse)`       → `coarse`
  *  - `(orientation: portrait)` → `portrait`
- * Anything else (e.g. legacy max-width) reports the `coarse` flag as a stand-in for
- * "is mobile", which is unused by Arcade but keeps the mock harmless.
+ *  - `(max-width: 767px)`      → `narrow` (phone-sized; defaults to `coarse`)
  */
-function setupMatchMedia({ coarse, portrait }: { coarse: boolean; portrait: boolean }) {
+function setupMatchMedia(
+  { coarse, portrait, narrow = coarse }: { coarse: boolean; portrait: boolean; narrow?: boolean },
+) {
   window.matchMedia = (query: string) => {
     let matches = false;
     if (query.includes('pointer: coarse')) matches = coarse;
     else if (query.includes('orientation: portrait')) matches = portrait;
+    else if (query.includes('max-width')) matches = narrow;
     return {
       matches,
       media: query,
@@ -91,6 +93,20 @@ describe('Arcade section — phone landscape', () => {
 
   it('does not render the rotate prompt in landscape', () => {
     render(<Arcade />);
+    expect(screen.queryByTestId('arcade-fallback-message')).toBeNull();
+  });
+});
+
+describe('Arcade section — tablet portrait (wide enough to play)', () => {
+  // coarse + portrait but NOT narrow: a portrait tablet should play, not see the prompt.
+  beforeEach(() => {
+    setupMatchMedia({ coarse: true, portrait: true, narrow: false });
+    vi.restoreAllMocks();
+  });
+
+  it('mounts the game (canvas) and does not show the rotate prompt', () => {
+    render(<Arcade />);
+    expect(document.querySelector('canvas')).not.toBeNull();
     expect(screen.queryByTestId('arcade-fallback-message')).toBeNull();
   });
 });
