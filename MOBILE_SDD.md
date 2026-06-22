@@ -1,5 +1,15 @@
 # MOBILE_SDD — Mobile Responsiveness
 
+> **Update (Roy Runner now playable on mobile):** The "hide the game on mobile" decision
+> documented below (§4, ArcadeFallback) has been **superseded for landscape phones**. The
+> game is now playable on touch phones in **landscape** via tap-to-jump + an on-screen
+> SLIDE button. Detection moved from width-only `useIsMobile` to a new
+> `useGameDisplayMode` hook gating on `(pointer: coarse)` + `(orientation: portrait)`
+> (`desktop` / `rotate` / `touch`). In **portrait**, `ArcadeFallback` now shows a
+> "ROTATE YOUR PHONE" prompt instead of "open on desktop". Desktop behavior is unchanged.
+> See `src/hooks/useGameDisplayMode.ts`, `src/components/MiniGame/MiniGame.tsx`.
+
+
 **Branch:** `feature/mobile-responsiveness`  
 **Breakpoint contract:** `< 768px` = mobile, `≥ 768px` = desktop (maps to Tailwind `md:`)  
 **Stack note:** The codebase uses **inline styles almost exclusively**, not Tailwind utility classes. "Mobile-First" here means adding a `useIsMobile` hook and conditional style objects — not migrating to Tailwind prefixes (that would be a separate refactor and out of scope).
