@@ -5,11 +5,13 @@ import Character from '../components/Character';
 import MiniGame from '../components/MiniGame/MiniGame';
 import ArcadeFallback from '../components/ArcadeFallback';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useGameDisplayMode } from '../hooks/useGameDisplayMode';
 import { HERO_CHARACTER_OFFSET_X } from '../theme/tokens';
 
 export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(false);
   const isMobile = useIsMobile();
+  const mode = useGameDisplayMode();
 
   useEffect(() => {
     const handler = () => setIsPlaying(true);
@@ -17,9 +19,17 @@ export default function Hero() {
     return () => window.removeEventListener('arcade:play', handler);
   }, []);
 
+  // Lock body scroll while the play overlay is open so taps don't bleed into page scroll.
+  useEffect(() => {
+    if (!isPlaying) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [isPlaying]);
+
   function handlePressStart() {
-    // Always enter "playing" state — on mobile the overlay shows ArcadeFallback
-    // rather than the canvas game, which is unusable at < 768px
+    // Enter "playing" state. The overlay decides what to show based on display mode:
+    // desktop/landscape-phone → the game; portrait phone → a "rotate" prompt.
     setIsPlaying(true);
   }
 
@@ -294,13 +304,20 @@ export default function Hero() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '1rem',
-              padding: '80px 1rem 1rem',
+              // Landscape-phone play goes fullscreen above the navbar (z 100) with no
+              // top padding; otherwise keep the navbar-clearing layout.
+              ...(mode === 'touch'
+                ? { padding: '0', zIndex: 200, background: 'var(--color-forest-dark)' }
+                : { padding: '80px 1rem 1rem' }),
             }}
           >
-            {isMobile ? (
+            {mode === 'rotate' ? (
               <ArcadeFallback />
             ) : (
-              <MiniGame onQuit={() => setIsPlaying(false)} />
+              <MiniGame
+                onQuit={() => setIsPlaying(false)}
+                showTouchControls={mode === 'touch'}
+              />
             )}
 
             <button
@@ -309,13 +326,24 @@ export default function Hero() {
                 fontFamily: '"Press Start 2P", monospace',
                 fontSize: '0.45rem',
                 color: 'var(--color-parchment)',
-                background: 'transparent',
+                background: mode === 'touch' ? 'rgba(58, 40, 24, 0.55)' : 'transparent',
                 border: '2px solid var(--color-forest-light)',
                 padding: '0.5rem 1rem',
+                minWidth: '44px',
                 minHeight: '44px',
                 cursor: 'pointer',
                 letterSpacing: '0.1em',
                 transition: 'color 0.15s, border-color 0.15s',
+                // In fullscreen touch mode, float QUIT over the top-right corner
+                // (away from the game's top-left HUD), inside the safe-area inset.
+                ...(mode === 'touch'
+                  ? {
+                      position: 'absolute',
+                      top: 'calc(env(safe-area-inset-top, 0px) + 10px)',
+                      right: 'calc(env(safe-area-inset-right, 0px) + 10px)',
+                      zIndex: 210,
+                    }
+                  : {}),
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
@@ -326,7 +354,7 @@ export default function Hero() {
                 (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)';
               }}
             >
-              [ESC] QUIT
+              {mode === 'touch' ? '✕' : '[ESC] QUIT'}
             </button>
           </motion.div>
         )}

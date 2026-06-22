@@ -2,10 +2,10 @@ import { motion } from 'framer-motion';
 import MiniGame from '../components/MiniGame/MiniGame';
 import ArcadeFallback from '../components/ArcadeFallback';
 import ZoneLabel from '../components/ZoneLabel';
-import { useIsMobile } from '../hooks/useIsMobile';
+import { useGameDisplayMode } from '../hooks/useGameDisplayMode';
 
 export default function Arcade() {
-  const isMobile = useIsMobile();
+  const mode = useGameDisplayMode();
 
   return (
     <section
@@ -52,11 +52,13 @@ export default function Arcade() {
           transition={{ duration: 0.7 }}
           style={{ display: 'flex', justifyContent: 'center' }}
         >
-          {isMobile ? <ArcadeFallback /> : <MiniGame />}
+          {mode === 'rotate'
+            ? <ArcadeFallback />
+            : <MiniGame showTouchControls={mode === 'touch'} />}
         </motion.div>
 
-        {/* Controls hint — only relevant on desktop */}
-        {!isMobile && (
+        {/* Controls hint — adapts to input method */}
+        {mode !== 'rotate' && (
           <p style={{
             fontFamily: '"Press Start 2P", monospace',
             fontSize: '0.4rem',
@@ -65,7 +67,7 @@ export default function Arcade() {
             textAlign: 'center',
             letterSpacing: '0.08em',
           }}>
-            SPACE or CLICK TO JUMP
+            {mode === 'touch' ? 'TAP TO JUMP · SLIDE BUTTON TO DUCK' : 'SPACE or CLICK TO JUMP'}
           </p>
         )}
       </div>

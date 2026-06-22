@@ -5,8 +5,14 @@ export default function ArcadeFallback() {
     <div className="w-full max-w-md mx-auto">
       <PixelPanel variant="dark">
         <div className="flex flex-col items-center gap-6 py-8 text-center">
-          <span style={{ fontSize: '3rem', lineHeight: 1, imageRendering: 'pixelated' }}>
-            🖥️
+          <span style={{
+            fontSize: '3rem',
+            lineHeight: 1,
+            imageRendering: 'pixelated',
+            display: 'inline-block',
+            transform: 'rotate(90deg)',
+          }}>
+            📱
           </span>
 
           <h3 style={{
@@ -28,12 +34,11 @@ export default function ArcadeFallback() {
               letterSpacing: '0.05em',
             }}
           >
-            ROY RUNNER REQUIRES<br />
-            A LARGER SCREEN<br />
-            TO PLAY.<br />
+            ROTATE YOUR PHONE<br />
+            TO LANDSCAPE<br />
+            TO PLAY ROY RUNNER.<br />
             <br />
-            OPEN ON DESKTOP OR<br />
-            ROTATE TO LANDSCAPE.
+            (OR OPEN ON DESKTOP.)
           </p>
 
           <div style={{
@@ -45,7 +50,7 @@ export default function ArcadeFallback() {
             letterSpacing: '0.08em',
             animation: 'hero-blink 1.5s step-end infinite',
           }}>
-            [ INSERT COIN ON DESKTOP ]
+            [ TURN DEVICE SIDEWAYS ]
           </div>
         </div>
       </PixelPanel>

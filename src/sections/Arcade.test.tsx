@@ -8,12 +8,22 @@ window.ResizeObserver = class {
   disconnect() {}
 } as unknown as typeof ResizeObserver;
 
-function setupMatchMedia(isMobile: boolean) {
+/**
+ * Mocks matchMedia for the game display-mode queries:
+ *  - `(pointer: coarse)`       → `coarse`
+ *  - `(orientation: portrait)` → `portrait`
+ *  - `(max-width: 767px)`      → `narrow` (phone-sized; defaults to `coarse`)
+ */
+function setupMatchMedia(
+  { coarse, portrait, narrow = coarse }: { coarse: boolean; portrait: boolean; narrow?: boolean },
+) {
   window.matchMedia = (query: string) => {
-    const match = query.match(/max-width:\s*(\d+)px/);
-    const breakpoint = match ? parseInt(match[1], 10) : 0;
+    let matches = false;
+    if (query.includes('pointer: coarse')) matches = coarse;
+    else if (query.includes('orientation: portrait')) matches = portrait;
+    else if (query.includes('max-width')) matches = narrow;
     return {
-      matches: isMobile && 375 <= breakpoint,
+      matches,
       media: query,
       onchange: null,
       addListener: vi.fn(),
@@ -25,17 +35,22 @@ function setupMatchMedia(isMobile: boolean) {
   };
 }
 
-describe('Arcade section — desktop', () => {
-  beforeEach(() => { setupMatchMedia(false); vi.restoreAllMocks(); });
+describe('Arcade section — desktop (fine pointer)', () => {
+  beforeEach(() => { setupMatchMedia({ coarse: false, portrait: false }); vi.restoreAllMocks(); });
 
   it('mounts a canvas element (MiniGame) on desktop', () => {
     render(<Arcade />);
     expect(document.querySelector('canvas')).not.toBeNull();
   });
 
-  it('does not render ArcadeFallback on desktop', () => {
+  it('does not render the rotate prompt on desktop', () => {
     render(<Arcade />);
     expect(screen.queryByTestId('arcade-fallback-message')).toBeNull();
+  });
+
+  it('does not show the SLIDE touch button on desktop', () => {
+    render(<Arcade />);
+    expect(screen.queryByRole('button', { name: /slide/i })).toBeNull();
   });
 
   it('renders the "Roy Runner" heading', () => {
@@ -44,21 +59,54 @@ describe('Arcade section — desktop', () => {
   });
 });
 
-describe('Arcade section — mobile', () => {
-  beforeEach(() => { setupMatchMedia(true); vi.restoreAllMocks(); });
+describe('Arcade section — phone portrait', () => {
+  beforeEach(() => { setupMatchMedia({ coarse: true, portrait: true }); vi.restoreAllMocks(); });
 
-  it('does NOT mount a canvas element on mobile', () => {
+  it('does NOT mount a canvas element in portrait', () => {
     render(<Arcade />);
     expect(document.querySelector('canvas')).toBeNull();
   });
 
-  it('renders ArcadeFallback on mobile', () => {
+  it('renders the rotate prompt in portrait', () => {
     render(<Arcade />);
     expect(screen.getByTestId('arcade-fallback-message')).toBeInTheDocument();
   });
 
-  it('still renders the "Roy Runner" heading on mobile', () => {
+  it('still renders the "Roy Runner" heading in portrait', () => {
     render(<Arcade />);
     expect(screen.getByRole('heading', { name: /roy runner/i })).toBeInTheDocument();
+  });
+});
+
+describe('Arcade section — phone landscape', () => {
+  beforeEach(() => { setupMatchMedia({ coarse: true, portrait: false }); vi.restoreAllMocks(); });
+
+  it('mounts a canvas element (the game) in landscape', () => {
+    render(<Arcade />);
+    expect(document.querySelector('canvas')).not.toBeNull();
+  });
+
+  it('shows the SLIDE touch button in landscape', () => {
+    render(<Arcade />);
+    expect(screen.getByRole('button', { name: /slide/i })).toBeInTheDocument();
+  });
+
+  it('does not render the rotate prompt in landscape', () => {
+    render(<Arcade />);
+    expect(screen.queryByTestId('arcade-fallback-message')).toBeNull();
+  });
+});
+
+describe('Arcade section — tablet portrait (wide enough to play)', () => {
+  // coarse + portrait but NOT narrow: a portrait tablet should play, not see the prompt.
+  beforeEach(() => {
+    setupMatchMedia({ coarse: true, portrait: true, narrow: false });
+    vi.restoreAllMocks();
+  });
+
+  it('mounts the game (canvas) and does not show the rotate prompt', () => {
+    render(<Arcade />);
+    expect(document.querySelector('canvas')).not.toBeNull();
+    expect(screen.queryByTestId('arcade-fallback-message')).toBeNull();
   });
 });
