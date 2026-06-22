@@ -67,7 +67,7 @@ export default function Arcade() {
             textAlign: 'center',
             letterSpacing: '0.08em',
           }}>
-            {mode === 'touch' ? 'TAP TO JUMP · SLIDE BUTTON TO DUCK' : 'SPACE or CLICK TO JUMP'}
+            {mode === 'touch' ? 'JUMP / SLIDE BUTTONS · ⛶ FOR FULLSCREEN' : 'SPACE or CLICK TO JUMP'}
           </p>
         )}
       </div>

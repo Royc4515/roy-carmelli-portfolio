@@ -1,23 +1,50 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { GameEngine } from './GameEngine';
 import { CANVAS_CONFIG } from './config';
 
 interface MiniGameProps {
   onQuit?: () => void;
   /**
-   * When true, render on-screen touch controls (a SLIDE button) over the canvas.
-   * Tap-to-jump on the canvas works regardless; this only gates the visible chrome,
-   * so it should be set on touch phones in landscape.
+   * When true, render on-screen touch controls (JUMP / SLIDE buttons + a fullscreen
+   * toggle) over the canvas, and ignore taps on the canvas itself so the only way to
+   * act is via the buttons. Set on touch devices.
    */
   showTouchControls?: boolean;
+}
+
+// Best-effort native Fullscreen API (standard + WebKit). iOS Safari has neither for
+// arbitrary elements, so callers must also apply a CSS fixed-overlay fallback.
+function requestFs(el: HTMLElement): void {
+  const fn =
+    el.requestFullscreen ??
+    (el as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen;
+  try { void fn?.call(el); } catch { /* ignore */ }
+}
+function exitFs(): void {
+  const fn =
+    document.exitFullscreen ??
+    (document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen;
+  try { void fn?.call(document); } catch { /* ignore */ }
+}
+function fsElement(): Element | null {
+  return (
+    document.fullscreenElement ??
+    (document as unknown as { webkitFullscreenElement?: Element | null }).webkitFullscreenElement ??
+    null
+  );
 }
 
 export default function MiniGame({ onQuit, showTouchControls = false }: MiniGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
-  // Keep onQuit in a ref so the effect closure stays stable
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Keep latest props in refs so the engine effect closure stays stable.
   const onQuitRef = useRef(onQuit);
   useEffect(() => { onQuitRef.current = onQuit; }, [onQuit]);
+  const touchRef = useRef(showTouchControls);
+  useEffect(() => { touchRef.current = showTouchControls; }, [showTouchControls]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -48,12 +75,13 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
         onQuitRef.current?.();
       }
     };
-    const onClick = () => engine.handleInput();
-    // Non-passive so preventDefault() suppresses the synthetic 300ms click (no double
-    // jump), double-tap zoom, and page scroll. Inert on non-touch devices.
+    // Desktop mouse only — when touch controls are shown, the buttons are the only input.
+    const onClick = () => { if (!touchRef.current) engine.handleInput(); };
+    // Non-passive so preventDefault() suppresses double-tap zoom and page scroll. We do
+    // NOT jump on a canvas tap when touch controls are present (buttons only).
     const onTouchStart = (e: TouchEvent) => {
       e.preventDefault();
-      engine.handleInput();
+      if (!touchRef.current) engine.handleInput();
     };
 
     window.addEventListener('keydown', onKey);
@@ -69,71 +97,154 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     };
   }, []);
 
-  const canvas = (
+  // Sync local state when the user leaves native fullscreen via a system gesture.
+  useEffect(() => {
+    const onChange = () => { if (!fsElement()) setIsFullscreen(false); };
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('webkitfullscreenchange', onChange);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(prev => {
+      const next = !prev;
+      if (next) { if (wrapperRef.current) requestFs(wrapperRef.current); }
+      else if (fsElement()) exitFs();
+      return next;
+    });
+  };
+
+  const canvasStyle: CSSProperties = {
+    display: 'block',
+    imageRendering: 'pixelated',
+    cursor: 'pointer',
+    boxSizing: 'border-box',
+    touchAction: 'none',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    WebkitTouchCallout: 'none',
+    WebkitTapHighlightColor: 'transparent',
+    ...(showTouchControls
+      ? {
+          // Scale to fit the visible viewport, preserving the 800×446 ratio (canvas is a
+          // replaced element). dvh tracks the collapsing mobile URL bar.
+          maxWidth: isFullscreen ? '100vw' : '100%',
+          maxHeight: '100dvh',
+          ...(isFullscreen
+            ? {}
+            : { border: '3px solid var(--color-brass)', boxShadow: '4px 4px 0 var(--color-wood-dark)' }),
+        }
+      : {
+          maxWidth: '100%',
+          border: '3px solid var(--color-brass)',
+          boxShadow: '4px 4px 0 var(--color-wood-dark)',
+        }),
+  };
+
+  const canvasEl = (
     <canvas
       ref={canvasRef}
       width={CANVAS_CONFIG.width}
       height={CANVAS_CONFIG.height}
-      style={{
-        display: 'block',
-        imageRendering: 'pixelated',
-        cursor: 'pointer',
-        maxWidth: '100%',
-        // In touch mode the canvas may be enlarged to fill a landscape phone; cap its
-        // height to the viewport (dvh handles the iOS collapsing URL bar) while the
-        // 800×446 aspect ratio is preserved automatically (canvas is a replaced element).
-        ...(showTouchControls ? { maxHeight: '100dvh' } : {}),
-        border: '3px solid var(--color-brass)',
-        boxShadow: '4px 4px 0 var(--color-wood-dark)',
-        touchAction: 'none',
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        WebkitTouchCallout: 'none',
-        WebkitTapHighlightColor: 'transparent',
-      }}
-      aria-label="Roy Runner mini-game — press Space or click to play"
+      style={canvasStyle}
+      aria-label="Roy Runner mini-game"
     />
   );
 
-  if (!showTouchControls) return canvas;
+  if (!showTouchControls) return canvasEl;
 
-  // Touch layout: canvas + an overlaid SLIDE button anchored bottom-left.
+  // ── Touch layout: canvas + overlaid controls ────────────────────────────────
+  const wrapperStyle: CSSProperties = isFullscreen
+    ? {
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--color-forest-dark)',
+      }
+    : { position: 'relative', display: 'inline-block', maxWidth: '100%', lineHeight: 0 };
+
+  const btnBase: CSSProperties = {
+    position: 'absolute',
+    fontFamily: '"Press Start 2P", monospace',
+    color: 'var(--color-parchment)',
+    background: 'rgba(58, 40, 24, 0.6)',
+    border: '3px solid var(--color-brass)',
+    boxShadow: '3px 3px 0 var(--color-wood-dark)',
+    cursor: 'pointer',
+    imageRendering: 'pixelated',
+    touchAction: 'none',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    WebkitTapHighlightColor: 'transparent',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    lineHeight: 1.4,
+    zIndex: 5,
+  };
+  const actionBtn: CSSProperties = { ...btnBase, minWidth: '72px', minHeight: '72px', fontSize: '0.55rem', letterSpacing: '0.06em' };
+  const cornerBtn: CSSProperties = { ...btnBase, minWidth: '44px', minHeight: '44px', fontSize: '0.5rem', padding: '0 0.4rem' };
+  const safe = (px: number, side: string) => `calc(env(safe-area-inset-${side}, 0px) + ${px}px)`;
+
+  // pointerdown handler factory: act, and stop the event reaching the canvas.
+  const press = (fn: () => void) => (e: ReactPointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fn();
+  };
+
   return (
-    <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
-      {canvas}
+    <div ref={wrapperRef} style={wrapperStyle}>
+      {canvasEl}
+
+      {/* SLIDE — bottom-left */}
       <button
         type="button"
         aria-label="Slide / duck under obstacles"
-        onPointerDown={(e) => {
-          // Don't let the press bubble to the canvas touchstart (which would jump).
-          e.preventDefault();
-          e.stopPropagation();
-          engineRef.current?.handleSlide();
-        }}
-        style={{
-          position: 'absolute',
-          left: '12px',
-          bottom: '12px',
-          minWidth: '72px',
-          minHeight: '72px',
-          padding: '0 0.5rem',
-          fontFamily: '"Press Start 2P", monospace',
-          fontSize: '0.55rem',
-          letterSpacing: '0.06em',
-          color: 'var(--color-parchment)',
-          background: 'rgba(58, 40, 24, 0.55)',
-          border: '3px solid var(--color-brass)',
-          boxShadow: '3px 3px 0 var(--color-wood-dark)',
-          cursor: 'pointer',
-          imageRendering: 'pixelated',
-          touchAction: 'none',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          WebkitTapHighlightColor: 'transparent',
-        }}
+        onPointerDown={press(() => engineRef.current?.handleSlide())}
+        style={{ ...actionBtn, left: safe(14, 'left'), bottom: safe(14, 'bottom') }}
       >
         ▼<br />SLIDE
       </button>
+
+      {/* JUMP — bottom-right */}
+      <button
+        type="button"
+        aria-label="Jump"
+        onPointerDown={press(() => engineRef.current?.handleInput())}
+        style={{ ...actionBtn, right: safe(14, 'right'), bottom: safe(14, 'bottom') }}
+      >
+        ▲<br />JUMP
+      </button>
+
+      {/* Fullscreen toggle — top-right */}
+      <button
+        type="button"
+        aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+        onPointerDown={press(toggleFullscreen)}
+        style={{ ...cornerBtn, top: safe(10, 'top'), right: safe(10, 'right') }}
+      >
+        {isFullscreen ? '⤡' : '⛶'}
+      </button>
+
+      {/* QUIT — top-right, left of the fullscreen toggle (only when quitting is possible) */}
+      {onQuit && (
+        <button
+          type="button"
+          aria-label="Quit game"
+          onPointerDown={press(() => { if (isFullscreen) { setIsFullscreen(false); if (fsElement()) exitFs(); } onQuitRef.current?.(); })}
+          style={{ ...cornerBtn, top: safe(10, 'top'), right: safe(62, 'right') }}
+        >
+          ✕
+        </button>
+      )}
     </div>
   );
 }

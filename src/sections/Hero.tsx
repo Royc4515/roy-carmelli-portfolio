@@ -297,18 +297,17 @@ export default function Hero() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
             style={{
-              position: 'absolute',
-              inset: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '1rem',
-              // Landscape-phone play goes fullscreen above the navbar (z 100) with no
-              // top padding; otherwise keep the navbar-clearing layout.
+              // Touch play covers the actual viewport (fixed, above the navbar) so the
+              // canvas can be centered and fully visible — MiniGame owns its own QUIT +
+              // fullscreen controls. Desktop/rotate keep the in-section overlay.
               ...(mode === 'touch'
-                ? { padding: '0', zIndex: 200, background: 'var(--color-forest-dark)' }
-                : { padding: '80px 1rem 1rem' }),
+                ? { position: 'fixed', inset: 0, padding: '0', zIndex: 200, background: 'var(--color-forest-dark)' }
+                : { position: 'absolute', inset: 0, padding: '80px 1rem 1rem' }),
             }}
           >
             {mode === 'rotate' ? (
@@ -320,42 +319,36 @@ export default function Hero() {
               />
             )}
 
-            <button
-              onClick={() => setIsPlaying(false)}
-              style={{
-                fontFamily: '"Press Start 2P", monospace',
-                fontSize: '0.45rem',
-                color: 'var(--color-parchment)',
-                background: mode === 'touch' ? 'rgba(58, 40, 24, 0.55)' : 'transparent',
-                border: '2px solid var(--color-forest-light)',
-                padding: '0.5rem 1rem',
-                minWidth: '44px',
-                minHeight: '44px',
-                cursor: 'pointer',
-                letterSpacing: '0.1em',
-                transition: 'color 0.15s, border-color 0.15s',
-                // In fullscreen touch mode, float QUIT over the top-right corner
-                // (away from the game's top-left HUD), inside the safe-area inset.
-                ...(mode === 'touch'
-                  ? {
-                      position: 'absolute',
-                      top: 'calc(env(safe-area-inset-top, 0px) + 10px)',
-                      right: 'calc(env(safe-area-inset-right, 0px) + 10px)',
-                      zIndex: 210,
-                    }
-                  : {}),
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brass)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)';
-              }}
-            >
-              {mode === 'touch' ? '✕' : '[ESC] QUIT'}
-            </button>
+            {/* Desktop / rotate keep an explicit QUIT control; touch mode's QUIT lives
+                inside MiniGame's on-screen chrome. */}
+            {mode !== 'touch' && (
+              <button
+                onClick={() => setIsPlaying(false)}
+                style={{
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '0.45rem',
+                  color: 'var(--color-parchment)',
+                  background: 'transparent',
+                  border: '2px solid var(--color-forest-light)',
+                  padding: '0.5rem 1rem',
+                  minWidth: '44px',
+                  minHeight: '44px',
+                  cursor: 'pointer',
+                  letterSpacing: '0.1em',
+                  transition: 'color 0.15s, border-color 0.15s',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brass)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)';
+                }}
+              >
+                [ESC] QUIT
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
