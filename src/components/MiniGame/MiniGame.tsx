@@ -171,30 +171,40 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
       }
     : { position: 'relative', display: 'inline-block', maxWidth: '100%', lineHeight: 0 };
 
-  const btnVisual: CSSProperties = {
+  // Each control is a transparent button (the pressable hit area) wrapping a smaller
+  // visible box, so the tappable area is comfortably larger than the button graphic.
+  const outerBase: CSSProperties = {
     position: 'absolute',
+    background: 'transparent',
+    border: 'none',
+    boxShadow: 'none',
+    padding: 0,
+    margin: 0,
+    cursor: 'pointer',
+    touchAction: 'none',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    WebkitTapHighlightColor: 'transparent',
+    display: 'flex',
+    zIndex: 5,
+  };
+  const innerVisual: CSSProperties = {
     fontFamily: '"Press Start 2P", monospace',
     color: 'var(--color-parchment)',
     background: 'rgba(58, 40, 24, 0.55)',
     border: '2px solid var(--color-brass)',
     boxShadow: '2px 2px 0 var(--color-wood-dark)',
-    cursor: 'pointer',
     imageRendering: 'pixelated',
-    touchAction: 'none',
-    userSelect: 'none',
-    WebkitUserSelect: 'none',
-    WebkitTapHighlightColor: 'transparent',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
     lineHeight: 1.3,
-    zIndex: 5,
+    pointerEvents: 'none', // taps land on the larger outer button
   };
-  // Compact action buttons so they don't cover the character.
-  const actionBtn: CSSProperties = { ...btnVisual, width: '48px', height: '48px', fontSize: '0.32rem', gap: '2px' };
-  const cornerBtn: CSSProperties = { ...btnVisual, width: '36px', height: '36px', fontSize: '0.5rem', padding: 0 };
+  const innerAction: CSSProperties = { ...innerVisual, width: '48px', height: '48px', fontSize: '0.32rem', gap: '2px' };
+  const innerCorner: CSSProperties = { ...innerVisual, width: '36px', height: '36px', fontSize: '0.5rem' };
   const safe = (px: number, side: string) => `calc(env(safe-area-inset-${side}, 0px) + ${px}px)`;
 
   // pointerdown handler: act, and stop the event reaching the canvas.
@@ -208,15 +218,17 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     <div ref={wrapperRef} style={wrapperStyle}>
       {canvasEl}
 
-      {/* SLIDE — bottom-left */}
+      {/* SLIDE — bottom-left. 68px hit area, 48px visible, extending up/inward. */}
       <button
         type="button"
         aria-label="Slide / duck under obstacles"
         onPointerDown={press(() => engineRef.current?.handleSlide())}
-        style={{ ...actionBtn, left: safe(8, 'left'), bottom: safe(8, 'bottom') }}
+        style={{ ...outerBase, width: '68px', height: '68px', left: safe(8, 'left'), bottom: safe(8, 'bottom'), alignItems: 'flex-end', justifyContent: 'flex-start' }}
       >
-        <span style={{ fontSize: '0.6rem' }}>▼</span>
-        <span>SLIDE</span>
+        <span style={innerAction}>
+          <span style={{ fontSize: '0.6rem' }}>▼</span>
+          <span>SLIDE</span>
+        </span>
       </button>
 
       {/* JUMP — bottom-right */}
@@ -224,20 +236,22 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
         type="button"
         aria-label="Jump"
         onPointerDown={press(() => engineRef.current?.handleInput())}
-        style={{ ...actionBtn, right: safe(8, 'right'), bottom: safe(8, 'bottom') }}
+        style={{ ...outerBase, width: '68px', height: '68px', right: safe(8, 'right'), bottom: safe(8, 'bottom'), alignItems: 'flex-end', justifyContent: 'flex-end' }}
       >
-        <span style={{ fontSize: '0.6rem' }}>▲</span>
-        <span>JUMP</span>
+        <span style={innerAction}>
+          <span style={{ fontSize: '0.6rem' }}>▲</span>
+          <span>JUMP</span>
+        </span>
       </button>
 
-      {/* Fullscreen toggle — top-right */}
+      {/* Fullscreen toggle — top-right. 56px hit area, 36px visible. */}
       <button
         type="button"
         aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
         onPointerDown={press(toggleFullscreen)}
-        style={{ ...cornerBtn, top: safe(8, 'top'), right: safe(8, 'right') }}
+        style={{ ...outerBase, width: '56px', height: '56px', top: safe(8, 'top'), right: safe(8, 'right'), alignItems: 'flex-start', justifyContent: 'flex-end' }}
       >
-        {isFullscreen ? '⤡' : '⛶'}
+        <span style={innerCorner}>{isFullscreen ? '⤡' : '⛶'}</span>
       </button>
 
       {/* QUIT — top-right, left of the fullscreen toggle (only when quitting is possible) */}
@@ -246,9 +260,9 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
           type="button"
           aria-label="Quit game"
           onPointerDown={press(() => { if (isFullscreen) { setIsFullscreen(false); if (fsElement()) exitFs(); } onQuitRef.current?.(); })}
-          style={{ ...cornerBtn, top: safe(8, 'top'), right: safe(50, 'right') }}
+          style={{ ...outerBase, width: '56px', height: '56px', top: safe(8, 'top'), right: safe(52, 'right'), alignItems: 'flex-start', justifyContent: 'flex-end' }}
         >
-          ✕
+          <span style={innerCorner}>✕</span>
         </button>
       )}
     </div>
