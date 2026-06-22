@@ -108,6 +108,11 @@ export class GameEngine {
     if (this.state === 'PLAYING') this.player.slide();
   }
 
+  /** True while the game is waiting to be (re)started — i.e. a tap should begin play. */
+  isAwaitingStart(): boolean {
+    return this.state === 'IDLE' || this.state === 'GAMEOVER';
+  }
+
   // ── Game loop ───────────────────────────────────────────────────────────────
 
   private readonly loop = (ts: number): void => {

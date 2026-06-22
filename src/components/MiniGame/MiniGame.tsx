@@ -5,15 +5,16 @@ import { CANVAS_CONFIG } from './config';
 interface MiniGameProps {
   onQuit?: () => void;
   /**
-   * When true, render on-screen touch controls (JUMP / SLIDE buttons + a fullscreen
-   * toggle) over the canvas, and ignore taps on the canvas itself so the only way to
-   * act is via the buttons. Set on touch devices.
+   * When true, render on-screen touch controls (JUMP / SLIDE in a bar below the canvas,
+   * plus fullscreen + quit). Tapping the canvas starts/restarts the game but never jumps
+   * mid-play (jumping is via the button), so there are no accidental jumps. Set on touch
+   * devices.
    */
   showTouchControls?: boolean;
 }
 
 // Best-effort native Fullscreen API (standard + WebKit). iOS Safari has neither for
-// arbitrary elements, so callers must also apply a CSS fixed-overlay fallback.
+// arbitrary elements, so we also apply a CSS fixed-overlay fallback.
 function requestFs(el: HTMLElement): void {
   const fn =
     el.requestFullscreen ??
@@ -75,13 +76,14 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
         onQuitRef.current?.();
       }
     };
-    // Desktop mouse only — when touch controls are shown, the buttons are the only input.
+    // Desktop mouse: full input (start / jump / restart).
     const onClick = () => { if (!touchRef.current) engine.handleInput(); };
-    // Non-passive so preventDefault() suppresses double-tap zoom and page scroll. We do
-    // NOT jump on a canvas tap when touch controls are present (buttons only).
+    // Touch: a tap starts/restarts the game but does NOT jump mid-play (button only).
+    // preventDefault still suppresses double-tap zoom and page scroll.
     const onTouchStart = (e: TouchEvent) => {
       e.preventDefault();
-      if (!touchRef.current) engine.handleInput();
+      if (!touchRef.current) { engine.handleInput(); return; }
+      if (engine.isAwaitingStart()) engine.handleInput();
     };
 
     window.addEventListener('keydown', onKey);
@@ -129,10 +131,11 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     WebkitTapHighlightColor: 'transparent',
     ...(showTouchControls
       ? {
-          // Scale to fit the visible viewport, preserving the 800×446 ratio (canvas is a
-          // replaced element). dvh tracks the collapsing mobile URL bar.
+          // Fit the viewport, leaving room for the control bar below. The 800×446 ratio
+          // is preserved automatically (canvas is a replaced element). dvh tracks the
+          // collapsing mobile URL bar.
           maxWidth: isFullscreen ? '100vw' : '100%',
-          maxHeight: '100dvh',
+          maxHeight: 'calc(100dvh - 104px)',
           ...(isFullscreen
             ? {}
             : { border: '3px solid var(--color-brass)', boxShadow: '4px 4px 0 var(--color-wood-dark)' }),
@@ -156,21 +159,22 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
 
   if (!showTouchControls) return canvasEl;
 
-  // ── Touch layout: canvas + overlaid controls ────────────────────────────────
+  // ── Touch layout: canvas (with small corner controls) + a control bar below ──
   const wrapperStyle: CSSProperties = isFullscreen
     ? {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: '8px',
         background: 'var(--color-forest-dark)',
       }
-    : { position: 'relative', display: 'inline-block', maxWidth: '100%', lineHeight: 0 };
+    : { position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '8px', maxWidth: '100%' };
 
-  const btnBase: CSSProperties = {
-    position: 'absolute',
+  const btnVisual: CSSProperties = {
     fontFamily: '"Press Start 2P", monospace',
     color: 'var(--color-parchment)',
     background: 'rgba(58, 40, 24, 0.6)',
@@ -187,13 +191,12 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     justifyContent: 'center',
     textAlign: 'center',
     lineHeight: 1.4,
-    zIndex: 5,
   };
-  const actionBtn: CSSProperties = { ...btnBase, minWidth: '72px', minHeight: '72px', fontSize: '0.55rem', letterSpacing: '0.06em' };
-  const cornerBtn: CSSProperties = { ...btnBase, minWidth: '44px', minHeight: '44px', fontSize: '0.5rem', padding: '0 0.4rem' };
+  const actionBtn: CSSProperties = { ...btnVisual, minWidth: '76px', minHeight: '64px', fontSize: '0.55rem', letterSpacing: '0.06em', flexShrink: 0 };
+  const cornerBtn: CSSProperties = { ...btnVisual, position: 'absolute', minWidth: '44px', minHeight: '44px', fontSize: '0.5rem', padding: '0 0.4rem', zIndex: 5 };
   const safe = (px: number, side: string) => `calc(env(safe-area-inset-${side}, 0px) + ${px}px)`;
 
-  // pointerdown handler factory: act, and stop the event reaching the canvas.
+  // pointerdown handler: act, and stop the event reaching the canvas.
   const press = (fn: () => void) => (e: ReactPointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -202,49 +205,61 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
 
   return (
     <div ref={wrapperRef} style={wrapperStyle}>
-      {canvasEl}
+      {/* Canvas + small corner controls (over the sky, clear of the character) */}
+      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', maxWidth: '100%', lineHeight: 0 }}>
+        {canvasEl}
 
-      {/* SLIDE — bottom-left */}
-      <button
-        type="button"
-        aria-label="Slide / duck under obstacles"
-        onPointerDown={press(() => engineRef.current?.handleSlide())}
-        style={{ ...actionBtn, left: safe(14, 'left'), bottom: safe(14, 'bottom') }}
-      >
-        ▼<br />SLIDE
-      </button>
-
-      {/* JUMP — bottom-right */}
-      <button
-        type="button"
-        aria-label="Jump"
-        onPointerDown={press(() => engineRef.current?.handleInput())}
-        style={{ ...actionBtn, right: safe(14, 'right'), bottom: safe(14, 'bottom') }}
-      >
-        ▲<br />JUMP
-      </button>
-
-      {/* Fullscreen toggle — top-right */}
-      <button
-        type="button"
-        aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-        onPointerDown={press(toggleFullscreen)}
-        style={{ ...cornerBtn, top: safe(10, 'top'), right: safe(10, 'right') }}
-      >
-        {isFullscreen ? '⤡' : '⛶'}
-      </button>
-
-      {/* QUIT — top-right, left of the fullscreen toggle (only when quitting is possible) */}
-      {onQuit && (
+        {/* Fullscreen toggle — top-right */}
         <button
           type="button"
-          aria-label="Quit game"
-          onPointerDown={press(() => { if (isFullscreen) { setIsFullscreen(false); if (fsElement()) exitFs(); } onQuitRef.current?.(); })}
-          style={{ ...cornerBtn, top: safe(10, 'top'), right: safe(62, 'right') }}
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          onPointerDown={press(toggleFullscreen)}
+          style={{ ...cornerBtn, top: safe(10, 'top'), right: safe(10, 'right') }}
         >
-          ✕
+          {isFullscreen ? '⤡' : '⛶'}
         </button>
-      )}
+
+        {/* QUIT — top-right, left of the fullscreen toggle (only when quitting is possible) */}
+        {onQuit && (
+          <button
+            type="button"
+            aria-label="Quit game"
+            onPointerDown={press(() => { if (isFullscreen) { setIsFullscreen(false); if (fsElement()) exitFs(); } onQuitRef.current?.(); })}
+            style={{ ...cornerBtn, top: safe(10, 'top'), right: safe(62, 'right') }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Control bar BELOW the canvas — never covers the running character */}
+      <div style={{
+        display: 'flex',
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        padding: `0 ${safe(4, 'left')}`,
+        boxSizing: 'border-box',
+      }}>
+        <button
+          type="button"
+          aria-label="Slide / duck under obstacles"
+          onPointerDown={press(() => engineRef.current?.handleSlide())}
+          style={actionBtn}
+        >
+          ▼<br />SLIDE
+        </button>
+
+        <button
+          type="button"
+          aria-label="Jump"
+          onPointerDown={press(() => engineRef.current?.handleInput())}
+          style={actionBtn}
+        >
+          ▲<br />JUMP
+        </button>
+      </div>
     </div>
   );
 }
