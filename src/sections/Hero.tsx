@@ -85,7 +85,7 @@ export default function Hero() {
                     animation: 'hero-blink 1s step-end infinite',
                   }}
                 >
-                  ▶ PLAYER ONE — PRESS START
+                  ▶ PLAYER ONE - PRESS START
                 </button>
 
                 <h1 style={{
