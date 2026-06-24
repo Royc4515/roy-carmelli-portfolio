@@ -51,7 +51,7 @@ export default function Contact() {
 
           <PixelPanel variant="wood">
             <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '1rem', color: 'var(--color-parchment-dark)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
-              Available for software engineering and AI internships starting summer 2026 — part-time during the semester, full-time during breaks. Also open to research collaborations at the CS × neuroscience intersection.
+              Available for software engineering and AI internships starting summer 2026 - part-time during the semester, full-time during breaks. Also open to research collaborations at the CS × neuroscience intersection.
             </p>
             <div className="flex justify-center md:justify-start">
             <a

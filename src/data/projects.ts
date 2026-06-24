@@ -4,9 +4,9 @@ import { Project } from '../types/index';
 export const projects: Project[] = [
   {
     id: "ai-sidebar",
-    title: "Aside — AI Sidebar",
-    description: "Zero-build Chrome MV3 extension that puts a context-aware AI assistant in a sidebar on any webpage — Alt+A and it's already reading the page. Six providers (Claude, Gemini, OpenAI, Grok, Groq, local Ollama) with a per-provider model picker and a 'Custom…' option for models not yet on the list. Streaming token-by-token answers, one-tap actions (summarize, key points, translate, explain, find on page), per-site conversation history, light/dark/auto themes, and full English/Hebrew RTL. Privacy-first: keys and history stay in the browser, page text is sent only on your prompt. Architecture is the point: BaseProvider abstract class + Factory for runtime provider selection + Strategy for swappable backends + Template Method for the streaming flow — Grok and Groq extend a shared OpenAI-compatible provider, passing different endpoints to the parent constructor. Custom Markdown renderer and DOM sanitizer, ships with a GitHub Pages landing site.",
-    tech: ["JavaScript", "Chrome MV3", "OOP", "Factory Pattern", "Strategy Pattern", "Claude API", "Gemini API", "OpenAI API", "i18n / RTL"],
+    title: "Aside - AI Sidebar",
+    description: "Zero-build, framework-free Chrome MV3 extension that drops a context-aware AI assistant into a sidebar on any webpage - one keystroke (Alt+A) and it has already read the page. Six providers - Claude, Gemini, OpenAI, Grok, Groq, and local Ollama - sit behind a per-provider model picker with a 'Custom...' escape hatch for model ids not yet on the list, plus a compare mode that runs two models side by side so you can keep the better answer. Answers stream in token-by-token (SSE, or NDJSON for Ollama) and cancel mid-flight; one-tap actions cover summarize, extract, translate, explain, rewrite, and find-on-page, with per-site conversation history that picks up where you left off. Privacy-first BYOK: API keys and history live only in chrome.storage.local (never synced), and the readable page text is sent only on an explicit prompt. The architecture is the point - a BaseProvider abstract base defines the Template Method streaming flow, a Factory selects the provider at runtime, each provider is a swappable Strategy, and OpenAI, Grok, and Groq share one OpenAI-compatible parent that just hands a different endpoint to the constructor. Rounded out with a hand-written Markdown renderer and DOM sanitizer, light/dark/auto theming, a bilingual English/Hebrew RTL interface (replies in eight languages), a nonce-authenticated postMessage bridge between content script and sidebar iframe, and a GitHub Pages landing site.",
+    tech: ["JavaScript", "Chrome MV3", "Service Worker", "OOP", "Factory Pattern", "Strategy Pattern", "Template Method", "Streaming / SSE", "Claude API", "Gemini API", "OpenAI API", "Ollama", "i18n / RTL"],
     github: "https://github.com/Royc4515/Aside",
     live: "https://royc4515.github.io/Aside/",
     featured: true,
@@ -25,7 +25,7 @@ export const projects: Project[] = [
   {
     id: "sommelier-bot",
     title: "Sommelier Bot",
-    description: "Serverless Telegram bot — a personal AI sommelier that pairs meals with a live Google Sheets cellar inventory, advises on purchases, and holds open-ended sommelier conversations. Built a 4-model fallback chain with exponential backoff after I hit reliability gaps in production. Two-layer memory: rolling session history (30 messages, 1-hour TTL) + AI-compressed long-term summary. Zero-framework Python on Vercel webhooks for low cold-start latency.",
+    description: "Serverless Telegram bot - a personal AI sommelier that pairs meals with a live Google Sheets cellar inventory, advises on purchases, and holds open-ended sommelier conversations. Built a 4-model fallback chain with exponential backoff after I hit reliability gaps in production. Two-layer memory: rolling session history (30 messages, 1-hour TTL) + AI-compressed long-term summary. Zero-framework Python on Vercel webhooks for low cold-start latency.",
     tech: ["Python", "Gemini API", "Telegram Bot API", "Vercel", "Google Sheets", "unittest"],
     github: "https://github.com/Royc4515/gemini-sommelier-bot",
     featured: true,
@@ -34,7 +34,7 @@ export const projects: Project[] = [
   {
     id: "clr",
     title: "Culinary Logic Repository",
-    description: "(In active development.) AI ingestion pipeline for the recipes I actually cook: URL into Telegram → Groq LLM extracts and structures the content → normalized JSON consumed by a React web app. Architected end-to-end with agentic workflows — schema decisions, the UI scaffold, and the ingestion logic are all paired with AI as a first-class collaborator. The pipeline itself is the proof point that the methodology works.",
+    description: "(In active development.) AI ingestion pipeline for the recipes I actually cook: URL into Telegram → Groq LLM extracts and structures the content → normalized JSON consumed by a React web app. Architected end-to-end with agentic workflows - schema decisions, the UI scaffold, and the ingestion logic are all paired with AI as a first-class collaborator. The pipeline itself is the proof point that the methodology works.",
     tech: ["TypeScript", "Python", "Groq API", "Telegram API", "Vercel", "Agentic Workflows"],
     github: "https://github.com/Royc4515/Culinary-Logic-Repository",
     featured: true,
@@ -52,7 +52,7 @@ export const projects: Project[] = [
   {
     id: "portfolio",
     title: "This Portfolio",
-    description: "Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. The homepage character runs on a mini canvas game engine I wrote — OOP entity hierarchy, AABB collision, 7-state FSM, custom event bus for zero-prop-drilling component communication. Dark/light theme with system preference detection. Deployed on Vercel.",
+    description: "Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. The homepage character runs on a mini canvas game engine I wrote - OOP entity hierarchy, AABB collision, 7-state FSM, custom event bus for zero-prop-drilling component communication. Dark/light theme with system preference detection. Deployed on Vercel.",
     tech: ["React", "TypeScript", "Vite", "Tailwind CSS", "Framer Motion"],
     github: "https://github.com/Royc4515/roy-carmelli-portfolio",
     live: "https://roy-carmelli-portfolio.vercel.app/",
@@ -63,8 +63,8 @@ export const projects: Project[] = [
   // ───────────── Regular tier ─────────────
   {
     id: "signal-processing",
-    title: "Signal Processing — Synthetic Signals",
-    description: "Signal processing exercise for the Neuroscience Data Analysis track. Jupyter notebook applying filtering, spectral analysis, and feature extraction across multiple synthetic signal types. The point isn't a discovery — it's building intuition for how the same DSP toolkit behaves on different signal morphologies.",
+    title: "Signal Processing - Synthetic Signals",
+    description: "Signal processing exercise for the Neuroscience Data Analysis track. Jupyter notebook applying filtering, spectral analysis, and feature extraction across multiple synthetic signal types. The point isn't a discovery - it's building intuition for how the same DSP toolkit behaves on different signal morphologies.",
     tech: ["Python", "NumPy", "SciPy", "Matplotlib", "Jupyter"],
     github: "https://github.com/Royc4515/Project1_SignalProcessing",
     featured: false,
@@ -73,7 +73,7 @@ export const projects: Project[] = [
   {
     id: "cognitive-correlation",
     title: "Cognitive Outcomes Regression",
-    description: "Statistical investigation into socio-educational predictors of children's cognitive outcomes — Pandas, NumPy, SciPy, OLS regression. Built for a data-analysis-for-neuroscience course; demonstrates the full pipeline from raw survey data through hypothesis testing.",
+    description: "Statistical investigation into socio-educational predictors of children's cognitive outcomes - Pandas, NumPy, SciPy, OLS regression. Built for a data-analysis-for-neuroscience course; demonstrates the full pipeline from raw survey data through hypothesis testing.",
     tech: ["Python", "Pandas", "NumPy", "SciPy", "OLS Regression"],
     github: "https://github.com/Royc4515/background-cognitive-correlation",
     featured: false,
