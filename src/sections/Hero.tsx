@@ -67,8 +67,8 @@ export const HERO_NAV_H = 64;
 export const HERO_MAX_H = 880;
 /** ...unless the viewport is less than this much taller: then it fills it (no sliver of Zone 01). */
 export const HERO_FILL_SLACK = 96;
-/** Title-card width on the scene (fits two lg CTAs side by side at p-6). */
-export const HERO_CARD_W = 544;
+/** Title-card width on the scene (fits the two lg CTAs, 476px, side by side at p-5). */
+export const HERO_CARD_W = 520;
 /** Scale of the band on phones. */
 export const HERO_MOBILE_K = 3;
 /** Roy's sprite may take at most this share of the desktop scene height. */
@@ -112,13 +112,13 @@ const CARD_BOTTOM_AIR = 24;
 /** The card's drop reaches 12px below its box (4px frame + 8px drop). */
 const CARD_DROP = 12;
 /** Card height used before it has been measured. */
-const CARD_H_ESTIMATE = 520;
+const CARD_H_ESTIMATE = 456;
 /**
  * Narrowest compact card: the H1's longest line ("Carmelli", 8 glyphs) plus the card's padding,
- * below 768px (40px type, p-4) and from 768px (48px type, p-6).
+ * below 768px (32px type, p-4) and from 768px (40px type, p-5).
  */
-const CARD_MIN_W = 368;
-const CARD_MIN_W_MD = 432;
+const CARD_MIN_W = 288;
+const CARD_MIN_W_MD = 360;
 /** The HUD nameplate: 16px below the scene top, its box 266x89 plus a 4px frame and 8px drop. */
 const HUD_TOP = 16;
 const HUD_W = 266;

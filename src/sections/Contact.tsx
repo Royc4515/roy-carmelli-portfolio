@@ -146,7 +146,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-title" className="relative bg-bg px-dots py-16 md:py-24">
+    <section id="contact" aria-labelledby="contact-title" className="relative bg-bg px-dots py-12 md:py-16 min-[100rem]:py-20">
       <div className="relative mx-auto max-w-[1120px] px-4 md:px-6 lg:px-8">
         <Reveal>
           <ZoneHeader
@@ -178,14 +178,14 @@ export default function Contact() {
                 >
                   Email me
                 </Button>
-                {/* Icon + "Copy" from 640px; below, a 56px icon-only square. */}
+                {/* Icon + "Copy" from 640px; below, a 44px icon-only square (the lg height on phones). */}
                 <Button
                   variant="secondary"
                   size="lg"
                   aria-label="Copy email"
                   onClick={copyEmail}
                   leadingIcon={<PixelIcon name="copy" size={24} />}
-                  className="max-sm:w-14 max-sm:gap-0 max-sm:px-0"
+                  className="max-sm:w-11 max-sm:gap-0 max-sm:px-0 max-sm:[&_svg]:size-6"
                 >
                   <span className="max-sm:hidden">Copy</span>
                 </Button>

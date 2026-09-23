@@ -38,7 +38,7 @@ const paragraphs = bio.about
  */
 export default function About() {
   return (
-    <section id="about" aria-labelledby="about-title" className="relative bg-bg-alt px-dots py-16 md:py-24">
+    <section id="about" aria-labelledby="about-title" className="relative bg-bg-alt px-dots py-12 md:py-16 min-[100rem]:py-20">
       <div className="relative mx-auto max-w-[1120px] px-4 md:px-6 lg:px-8">
         <Reveal>
           <ZoneHeader

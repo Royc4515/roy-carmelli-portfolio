@@ -94,12 +94,32 @@
     }
   }
 
+  /* Phones: the md face (44px, 12px label) so full-width CTAs stay light;
+     from 640px the 16px label on a 48px face. */
   .px-btn--lg {
-    @apply text-display-s;
-    gap: 12px; /* step 10 (P2-19): was 10px, off the 4px grid */
-    min-height: 56px;
-    padding: 8px 24px;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 16px;
     text-transform: uppercase;
+
+    /* A 24px icon beside a 12px label reads as a different button: show it
+       at 12px (1:1 on its 12px grid, so it stays crisp). */
+    & .px-btn__icon > svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    @media (width >= 40rem) {
+      @apply text-display-s;
+      gap: 12px; /* step 10 (P2-19): was 10px, off the 4px grid */
+      min-height: 48px;
+      padding: 8px 20px;
+
+      & .px-btn__icon > svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
   }
 
   .px-btn--secondary,
@@ -116,10 +136,16 @@
     height: 48px;
     padding: 0;
 
+    /* Square partner of an lg button: the same height at every width. */
     &.px-btn--lg {
-      width: 56px;
-      height: 56px;
+      width: 44px;
+      height: 44px;
       padding: 0;
+
+      @media (width >= 40rem) {
+        width: 48px;
+        height: 48px;
+      }
     }
   }
 
@@ -406,7 +432,7 @@
 
   /* ── ZoneHeader ────────────────────────────────────────────────────── */
   .zone-header {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
   /* 2px down: the eyebrow's caps start 2px into its 16px line box. */

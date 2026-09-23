@@ -442,7 +442,14 @@ describe('hero layout per viewport', () => {
     [390, 844, true, 'stack', false],
     [360, 740, true, 'stack', false],
     [768, 1024, false, 'stack', false],
-    [800, 600, false, 'overlay', true],
+    // The smaller title card (density pass) fits the full title screen at 800x600.
+    [800, 600, false, 'overlay', false],
+    // Real laptop viewports: 14" at 150% and 125% Windows scaling, 14" MacBook.
+    [1280, 650, false, 'overlay', false],
+    [1536, 730, false, 'overlay', false],
+    [1470, 830, false, 'overlay', false],
+    // A phone with the browser bars showing.
+    [390, 664, true, 'stack', false],
     [844, 390, false, 'overlay', true],
     [640, 400, true, 'overlay', true],
     [667, 375, true, 'overlay', true],

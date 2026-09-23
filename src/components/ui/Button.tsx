@@ -15,7 +15,8 @@ interface CommonProps {
   /**
    * `sm` is a 44px face with a 12px pixel label and a focus ring that hugs the edge (dense
    * bars such as the navbar; icon buttons become 44×44); `md` is 48px tall with a 12px label;
-   * `lg` is 56px with a 16px label. Ghost ignores it.
+   * `lg` is 48px with a 16px label from 640px, and 44px with a 12px label (12px icons) on
+   * phones. Ghost ignores it.
    */
   size?: ButtonSize;
   /** Extra classes (Tailwind utilities win over the component styles). */

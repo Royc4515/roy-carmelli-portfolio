@@ -50,8 +50,8 @@ const defaultFrame: Record<PixelPanelVariant, PixelPanelFrame> = {
 // With a tab the top padding grows so content clears the plate.
 const paddingClasses: Record<PixelPanelPadding, { plain: string; tab: string }> = {
   sm: { plain: 'p-4', tab: 'px-4 pb-4 pt-8' },
-  md: { plain: 'p-4 md:p-6', tab: 'px-4 pb-4 pt-8 md:px-6 md:pb-6 md:pt-10' },
-  lg: { plain: 'p-6 md:p-8', tab: 'px-6 pb-6 pt-10 md:px-8 md:pb-8 md:pt-12' },
+  md: { plain: 'p-4 md:p-5', tab: 'px-4 pb-4 pt-8 md:px-5 md:pb-5 md:pt-9' },
+  lg: { plain: 'p-5 md:p-7', tab: 'px-5 pb-5 pt-9 md:px-7 md:pb-7 md:pt-11' },
 };
 
 const elevationClasses = { 0: '', 1: 'px-drop-sm', 2: 'px-drop' } as const;

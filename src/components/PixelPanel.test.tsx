@@ -7,7 +7,7 @@ describe('PixelPanel', () => {
     render(<PixelPanel data-testid="p">Hi</PixelPanel>);
     const panel = screen.getByTestId('p');
     expect(panel.tagName).toBe('DIV');
-    expect(panel).toHaveClass('px-panel', 'px-panel--wood', 'px-frame', 'p-4', 'md:p-6');
+    expect(panel).toHaveClass('px-panel', 'px-panel--wood', 'px-frame', 'p-4', 'md:p-5');
     expect(panel).not.toHaveClass('px-frame-subtle', 'px-drop-sm', 'px-drop');
     expect(panel).not.toHaveAttribute('style');
   });
@@ -53,7 +53,7 @@ describe('PixelPanel', () => {
       </PixelPanel>,
     );
     const panel = screen.getByRole('article', { name: 'Quest' });
-    expect(panel).toHaveClass('px-drop', 'p-6', 'md:p-8', 'mt-8');
+    expect(panel).toHaveClass('px-drop', 'p-5', 'md:p-7', 'mt-8');
   });
 
   it('renders a tab plate and makes room for it', () => {

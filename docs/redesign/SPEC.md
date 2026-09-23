@@ -93,13 +93,13 @@ self-hosted from `public/fonts` with `@font-face` URLs identical to the preload 
 
 | Utility (`text-*`) | Font | Base (mobile) | `md:` and up | Use |
 |---|---|---|---|---|
-| `display-xl` | pixel | 40/48, name on two lines | 48/56 | H1 (name) |
-| `display-l` | pixel | 24/32 | 32/40 | zone title (H2) |
+| `display-xl` | pixel | 32/40, name on two lines | 40/48 | H1 (name) |
+| `display-l` | pixel | 16/24 (< 640), 24/32 (640+) | 24/32; 32/40 from 1600 | zone title (H2) |
 | `display-m` | pixel | 16/24 | 24/32 | main-quest title, sheet titles |
 | `display-s` | pixel | 16/24 | 16/24 | card titles, large CTA |
 | `label` | pixel | 12/16, +0.04em | same | eyebrows, button labels (md), tier tags |
 | `hud` | mono 500 | 13/16, +0.06em | same | nav labels, chips, meta, stats |
-| `body-l` | sans 400 | 18/28 | 20/32 | hero lede |
+| `body-l` | sans 400 | 17/27 | 18/28 | hero lede |
 | `body` | sans 400 | 16/26 | same | paragraphs, card copy (max 68ch) |
 | `body-s` | sans 400 | 14/22 | same | captions, meta (floor) |
 
@@ -121,7 +121,9 @@ Floors everywhere: body 16px (14px only for captions/meta), HUD 12px (13 preferr
 - Container `max-w-[1120px]`, side gutters 16 (base) / 24 (`md`) / 32 (`lg`). Reading measure ≤ 68ch.
 - Grid: 12 columns ≥ 1024px (gap 24), 8 at 768-1023, 4 below (gap 16).
 - Breakpoints: Tailwind defaults `sm 640 · md 768 · lg 1024 · xl 1280`.
-- Section rhythm: `py-16` (64) base, `md:py-24` (96). Zone header → content 32. Card gap 24.
+- Section rhythm: `py-12` (48) base, `md:py-16` (64), `py-20` (80) from 1600px. Zone header → content 24.
+  Card gap 24. Density pass: sized for real viewports (14" laptops at 1280×650, 1536×730, 1470×830;
+  phones with browser bars at 390×664, 360×700), not the idealised 1280×800 / 390×844.
   Panel padding 16 (base) / 24 (`md`).
 - No `min-height: 100vh` except the hero (`min-h-[100svh]`, capped at 880px on desktop, or the
   full `100svh` when the viewport is 881-975px tall so no sliver of Zone 01 shows).
@@ -211,7 +213,7 @@ typed props, JSDoc on exported components.
 - Variants: `wood` (default, `surface`), `paper` (`paper` + `ink` text; sets `--color-focus` to
   `ink` inside), `inset` (`surface-sunken` + 2px inner `border-subtle` line, no frame), `ghost`
   (frame only, transparent).
-- Props: `variant`, `as` (element), `padding` (`sm` 16 / `md` 16→24 / `lg` 24→32), `elevation`
+- Props: `variant`, `as` (element), `padding` (`sm` 16 / `md` 16→20 / `lg` 20→28), `elevation`
   (0 none, 1 `px-drop-sm`, 2 `px-drop`), `frame` (`accent` default | `subtle` | `none`),
   optional `tab` (small brass title plate sitting on the top frame, pixel `label` text).
 
@@ -220,7 +222,8 @@ typed props, JSDoc on exported components.
 - Variants: `primary` (brass), `secondary` (wood with brass frame, `accent-fg` text), `ghost`
   (HUD text, dashed underline), `icon` (48×48 square, requires `aria-label`).
 - Sizes: `sm` 44px face with 12px label and a focus ring hugging the edge (navbar), `md` 48px
-  tall with `label` text, `lg` 56px tall with `display-s` text.
+  tall with `label` text, `lg` 48px tall with `display-s` text from 640px and 44px with `label`
+  text and 12px icons on phones (its square icon partner matches: 44 / 48).
   Touch targets are ≥ 44px in every size.
 - Optional leading/trailing `PixelIcon`.
 - States (CSS only):
@@ -320,7 +323,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   strip); a taller one is anchored to the bottom. Scene height is the hero height (see §2.3) minus 64px.
   The character's feet sit on forest column 182 on the grass line; its x is chosen per viewport
   so the title card never covers it, no baked-in bird sits on its head and the HUD stays clear.
-  Title card: wood panel, elevation 2, 544px, left-aligned to the page container, its top
+  Title card: wood panel, elevation 2, 520px, left-aligned to the page container, its top
   aligned with the HUD top: `PLAYER ONE`
   eyebrow, H1 name on two lines, role (`bio.role`), tagline, availability chip, `View projects`
   (primary lg) + `Resume` (secondary lg, PDF), ghost `Press start to play`. HUD nameplate
@@ -386,6 +389,8 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
 - **Accessibility:** skip link to `#projects`; landmarks; one H1; H2 per zone; focus visible
   everywhere; `aria-current` in nav; mobile menu `inert` when closed; icon-only buttons have
   `aria-label`; decorative sprites `aria-hidden`; text floors above; touch targets ≥ 44px.
+- **Viewports:** every change is checked at 1280×650, 1536×730, 1470×830, 390×664 and 360×700
+  as well as 1280×800 / 390×844: name, role and primary CTA fit the first screen on all of them.
 - **Performance:** first load ≤ 500KB transferred (was 7.7MB), initial JS ≤ 110KB gzip
   (MiniGame lazy-loaded), every `<img>` has `width`/`height`, below-the-fold images lazy,
   CLS < 0.02, no unused preloads.
