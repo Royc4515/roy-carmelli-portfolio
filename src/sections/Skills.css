@@ -24,10 +24,19 @@
     border-top: 2px dashed var(--color-border-subtle);
   }
 
+  /* ── Slot heading icon: brass like the zone icon; the potion and book keep
+     their second ink (the icon default). */
+  .skill-slot__icon {
+    color: var(--color-accent-fg);
+  }
+
   /* ── Item: HUD 13, 36px tall (at least 36 wide), sunken with a 2px inner
-     wood line. The hit area grows 4px on every side (44 x 44 or more),
-     exactly filling the 8px gaps. */
+     border-subtle line (>= 3:1 against the sunken fill and the wood panel, both
+     themes), brass when hovered, focused or open. The hit area grows 4px on
+     every side (44 x 44 or more), exactly filling the 8px gaps. */
   .skill-item {
+    --skill-line: var(--color-border-subtle);
+    --skill-cue: var(--color-border-subtle);
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -41,7 +50,7 @@
     color: var(--color-fg);
     white-space: nowrap;
     cursor: help;
-    box-shadow: inset 0 0 0 2px var(--color-wood-hi);
+    box-shadow: inset 0 0 0 2px var(--skill-line);
     transition:
       box-shadow var(--dur-fast) steps(2, end),
       color var(--dur-fast) steps(2, end);
@@ -54,16 +63,57 @@
 
     &:focus-visible,
     &[data-open] {
+      --skill-line: var(--color-accent);
+      --skill-cue: var(--color-accent-fg);
       color: var(--color-accent-fg);
-      box-shadow: inset 0 0 0 2px var(--color-accent);
     }
 
     @media (hover: hover) {
       &:hover {
+        --skill-line: var(--color-accent);
+        --skill-cue: var(--color-accent-fg);
         color: var(--color-accent-fg);
-        box-shadow: inset 0 0 0 2px var(--color-accent);
       }
     }
+  }
+
+  /* Inspect cue: a dotted pixel underline (2px dots, 2px gaps) under the label,
+     the usual "hover me for more" mark of a tooltip. */
+  .skill-item__label {
+    padding-bottom: 4px;
+    margin-bottom: -4px;
+    background: repeating-linear-gradient(to right, var(--skill-cue) 0 2px, transparent 2px 4px) 0 100% / 100% 2px
+      no-repeat;
+  }
+
+  /* ── Controls hint under the stats. Shown only while the grid has keyboard
+     focus; its space is always reserved, so nothing moves. */
+  .skill-keys {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 8px;
+    visibility: hidden;
+  }
+
+  .skill-panel:has(.skill-grid :focus-visible) .skill-keys {
+    visibility: visible;
+  }
+
+  .skill-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    background-color: var(--color-surface-sunken);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+    color: var(--color-fg);
+  }
+
+  .skill-key--wide {
+    padding: 0 6px;
   }
 
   /* ── Tooltip: paper card, 4px ink frame, hard drop. Hangs 12px under (or

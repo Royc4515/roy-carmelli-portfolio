@@ -160,6 +160,19 @@ describe('skillDetail', () => {
     expect(mcp.note).toBeNull();
     expect(skillDetail('Git', group('Tools'), projects).note).toBeNull();
   });
+
+  it('says "Certificate earned" for certifications no project lists', () => {
+    for (const item of group('Certifications').items) {
+      const d = skillDetail(item, group('Certifications'), projects);
+      expect(d.usedIn).toEqual([]);
+      expect(d.note).toBe('Certificate earned');
+    }
+  });
+
+  it('a used item never carries a note, whatever its category', () => {
+    const certs = { ...group('Certifications'), items: ['Python'] };
+    expect(skillDetail('Python', certs, projects).note).toBeNull();
+  });
 });
 
 describe('equipmentStats', () => {

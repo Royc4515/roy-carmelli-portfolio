@@ -15,7 +15,7 @@ function renderResume() {
 describe('Resume', () => {
   it('is a region labelled by its zone title', () => {
     renderResume();
-    const region = screen.getByRole('region', { name: 'Loot: my resume' });
+    const region = screen.getByRole('region', { name: 'Resume' });
     expect(region).toHaveAttribute('id', 'resume');
     expect(screen.getByText('Zone 04 · Resume Scroll')).toBeInTheDocument();
   });

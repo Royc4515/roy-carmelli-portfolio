@@ -6,21 +6,47 @@ import {
   useRef,
   useState,
   type Dispatch,
+  type KeyboardEvent as ReactKeyboardEvent,
   type MutableRefObject,
+  type ReactNode,
   type SetStateAction,
 } from 'react';
 import { skills } from '../data/bio';
 import { projects } from '../data/projects';
 import PixelPanel from '../components/PixelPanel';
-import PixelIcon from '../components/PixelIcon';
+import PixelIcon, { type PixelIconName } from '../components/PixelIcon';
 import Character from '../components/Character';
 import { SkillTooltip, SkillTooltipBody } from '../components/SkillTooltip';
 import { ZoneHeader } from '../components/ui/ZoneHeader';
 import { Reveal } from '../components/ui/Reveal';
 import { cx } from '../components/ui/cx';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { equipmentStats, skillDetail, type SkillDetail, type SkillGroup } from '../lib/skillUsage';
+import { moveInGrid, splitColumns, type GridPos } from '../lib/equipmentGrid';
 import './Skills.css';
+
+/** Slot heading icons (12px, existing set). Armor is the body slot, hence `person`. */
+const SLOT_ICONS: Readonly<Record<string, PixelIconName>> = {
+  Weapons: 'sword',
+  Armor: 'person',
+  Magic: 'star',
+  Potions: 'potion',
+  Tomes: 'book',
+  Trinkets: 'gear',
+  Achievements: 'trophy',
+};
+
+const ROW_LENGTHS = skills.map(group => group.items.length);
+/** First slot of the right-hand column (≥ 1280px). A fixed split, so opening a tooltip can
+    never rebalance the columns (CSS columns did, and the page jumped under the pointer). */
+const SPLIT = splitColumns(ROW_LENGTHS);
+const COLUMNS = [
+  { first: 0, groups: skills.slice(0, SPLIT) },
+  { first: SPLIT, groups: skills.slice(SPLIT) },
+].filter(column => column.groups.length > 0);
+
+const cellKey = ({ row, col }: GridPos) => `${row}-${col}`;
 
 /** How the open tooltip was opened: hover closes on leave, the others on blur / outside tap. */
 type OpenVia = 'hover' | 'focus' | 'tap';
@@ -39,9 +65,12 @@ interface PointerMemo {
 }
 
 interface ItemProps {
-  itemKey: string;
+  pos: GridPos;
   tipId: string;
   detail: SkillDetail;
+  /** The grid's single Tab stop (roving tabindex). */
+  active: boolean;
+  setActive: (pos: GridPos) => void;
   open: OpenItem | null;
   setOpen: Dispatch<SetStateAction<OpenItem | null>>;
   /** < 768px: details open in an inline row under the slot, by tap or focus only. */
@@ -49,16 +78,18 @@ interface ItemProps {
   pointer: MutableRefObject<PointerMemo>;
 }
 
-function SkillItem({ itemKey, tipId, detail, open, setOpen, inline, pointer }: ItemProps) {
-  const anchorRef = useRef<HTMLLIElement>(null);
+function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inline, pointer }: ItemProps) {
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const itemKey = cellKey(pos);
   const isOpen = open?.key === itemKey;
 
   const closeIf = (test: (current: OpenItem) => boolean) =>
     setOpen(current => (current && current.key === itemKey && test(current) ? null : current));
 
   return (
-    <li
+    <div
       ref={anchorRef}
+      role="gridcell"
       className="relative"
       data-skill-item={itemKey}
       onPointerEnter={e => {
@@ -72,6 +103,7 @@ function SkillItem({ itemKey, tipId, detail, open, setOpen, inline, pointer }: I
       <button
         type="button"
         className="skill-item text-hud"
+        tabIndex={active ? 0 : -1}
         aria-describedby={tipId}
         data-open={isOpen || undefined}
         onPointerDown={e => {
@@ -81,12 +113,14 @@ function SkillItem({ itemKey, tipId, detail, open, setOpen, inline, pointer }: I
           pointer.current = { type: e.pointerType, at: Date.now() };
         }}
         onFocus={() => {
+          setActive(pos);
           // A press focuses the button too; its click decides instead.
           if (Date.now() - pointer.current.at < POINTER_FOCUS_MS) return;
           setOpen({ key: itemKey, via: 'focus' });
         }}
         onBlur={() => closeIf(current => current.via !== 'hover')}
         onClick={() => {
+          setActive(pos);
           const type = Date.now() - pointer.current.at < POINTER_FOCUS_MS ? pointer.current.type : null;
           pointer.current = { type: null, at: 0 };
           if (type === 'mouse' && !inline) {
@@ -101,56 +135,67 @@ function SkillItem({ itemKey, tipId, detail, open, setOpen, inline, pointer }: I
           pointer.current = { type: null, at: 0 };
         }}
       >
-        {detail.name}
+        <span className="skill-item__label">{detail.name}</span>
       </button>
       <SkillTooltip id={tipId} detail={detail} open={isOpen && !inline} anchorRef={anchorRef} />
-    </li>
+    </div>
   );
 }
 
 interface SlotProps {
   group: SkillGroup;
-  groupIndex: number;
+  row: number;
   baseId: string;
+  active: GridPos;
+  setActive: (pos: GridPos) => void;
   open: OpenItem | null;
   setOpen: Dispatch<SetStateAction<OpenItem | null>>;
   inline: boolean;
   pointer: MutableRefObject<PointerMemo>;
 }
 
-function SkillSlot({ group, groupIndex, baseId, open, setOpen, inline, pointer }: SlotProps) {
+/** One slot = one grid row: its heading is the row header, its items are the cells. */
+function SkillSlot({ group, row, baseId, active, setActive, open, setOpen, inline, pointer }: SlotProps) {
   const details = useMemo(
     () => group.items.map(item => skillDetail(item, group, projects)),
     [group],
   );
-  const openIndex = details.findIndex((_, i) => open?.key === `${groupIndex}-${i}`);
+  const openIndex = details.findIndex((_, col) => open?.key === cellKey({ row, col }));
   const inlineDetail = inline && openIndex >= 0 ? details[openIndex] : null;
+  const icon = SLOT_ICONS[group.slot];
 
   return (
-    <Reveal index={groupIndex} className={cx('relative break-inside-avoid', openIndex >= 0 && 'z-10')}>
-      <h3 className="text-hud uppercase">
-        {/* Reads "Weapons: Languages"; the dot is visual only. */}
-        <span className="text-fg-subtle">
-          {group.slot}
-          <span aria-hidden="true"> ·</span>
-          <span className="sr-only">:</span>
-        </span>{' '}
-        <span className="text-accent-fg">{group.category}</span>
-      </h3>
-      <ul role="list" className="mt-3 flex flex-wrap gap-2">
-        {details.map((detail, i) => (
+    <Reveal index={row} role="row" className={cx('relative', openIndex >= 0 && 'z-10')}>
+      <div role="rowheader">
+        <h3 className="flex items-center gap-2 text-hud uppercase">
+          {icon && <PixelIcon name={icon} size={12} className="skill-slot__icon shrink-0" />}
+          <span>
+            {/* Reads "Weapons: Languages"; the dot is visual only. */}
+            <span className="text-fg-subtle">
+              {group.slot}
+              <span aria-hidden="true"> ·</span>
+              <span className="sr-only">:</span>
+            </span>{' '}
+            <span className="text-accent-fg">{group.category}</span>
+          </span>
+        </h3>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {details.map((detail, col) => (
           <SkillItem
             key={detail.name}
-            itemKey={`${groupIndex}-${i}`}
-            tipId={`${baseId}-tip-${groupIndex}-${i}`}
+            pos={{ row, col }}
+            tipId={`${baseId}-tip-${row}-${col}`}
             detail={detail}
+            active={active.row === row && active.col === col}
+            setActive={setActive}
             open={open}
             setOpen={setOpen}
             inline={inline}
             pointer={pointer}
           />
         ))}
-      </ul>
+      </div>
       {inlineDetail && (
         // Same text as the item's (hidden) tooltip, which is its accessible description.
         <div
@@ -165,23 +210,27 @@ function SkillSlot({ group, groupIndex, baseId, open, setOpen, inline, pointer }
   );
 }
 
-/** Left column: Roy in an inset well, his level and a few stats counted from the data. */
+/** A 20px keycap for the controls hint. */
+function Keycap({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
+  return <span className={cx('skill-key', wide && 'skill-key--wide')}>{children}</span>;
+}
+
+/**
+ * Left column (≥ 768px; phones skip it, Roy already stands in Hero, About and Contact):
+ * Roy in an inset well, his level, a few stats counted from the data, and the grid's
+ * controls, shown while the grid has keyboard focus.
+ */
 function CharacterFrame() {
   const stats = equipmentStats(skills, projects);
+  const wide = useMediaQuery('(min-width: 1024px)');
   return (
-    <Reveal className="flex items-center gap-6 lg:sticky lg:top-24 lg:flex-col lg:items-stretch lg:gap-0 lg:self-start">
+    <Reveal className="hidden items-center gap-6 md:flex lg:sticky lg:top-24 lg:flex-col lg:items-stretch lg:gap-0 lg:self-start">
       <PixelPanel
         variant="inset"
         padding="sm"
         className="skill-well flex h-[168px] w-24 shrink-0 items-end justify-center px-0 pt-0 pb-4 lg:h-[248px] lg:w-full"
       >
-        {/* Character.css sets display on the sprite itself, so the breakpoint lives on a wrapper. */}
-        <div className="lg:hidden">
-          <Character pose="idle" scale={2} decorative />
-        </div>
-        <div className="hidden lg:block">
-          <Character pose="idle" scale={3} decorative />
-        </div>
+        <Character pose="idle" scale={wide ? 3 : 2} decorative />
       </PixelPanel>
       <div className="min-w-0 flex-1 lg:mt-6">
         <p className="text-label text-accent-fg">
@@ -195,6 +244,28 @@ function CharacterFrame() {
             </div>
           ))}
         </dl>
+        {/* Visual only: screen readers announce the grid and its keys themselves. */}
+        <div className="skill-keys mt-4 text-hud uppercase text-fg-subtle" aria-hidden="true" data-testid="skill-keys">
+          <span className="flex items-center gap-1">
+            <Keycap>
+              <PixelIcon name="arrow-up" size={12} className="-rotate-90" />
+            </Keycap>
+            <Keycap>
+              <PixelIcon name="arrow-up" size={12} className="rotate-90" />
+            </Keycap>
+            <Keycap>
+              <PixelIcon name="arrow-up" size={12} />
+            </Keycap>
+            <Keycap>
+              <PixelIcon name="arrow-down" size={12} />
+            </Keycap>
+            <span className="ml-1">Move</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <Keycap wide>Esc</Keycap>
+            <span className="ml-1">Close</span>
+          </span>
+        </div>
       </div>
     </Reveal>
   );
@@ -202,17 +273,53 @@ function CharacterFrame() {
 
 /**
  * Zone 03 · Equipment (SPEC §4 Skills): the skills as an RPG equipment screen. Roy stands
- * in a frame on the left; each skill category is a slot of focusable items. Hovering,
- * focusing or tapping an item opens a tooltip whose "Used in" line is computed from the
- * projects' tech lists (src/lib/skillUsage.ts), never written by hand.
+ * in a frame on the left; each skill category is a slot of items. Hovering, focusing or
+ * tapping an item opens a tooltip whose "Used in" line is computed from the projects' tech
+ * lists (src/lib/skillUsage.ts), never written by hand.
+ *
+ * Keyboard: the slots form one ARIA layout grid (row = slot, cell = item) with a roving
+ * tabindex, so the whole screen is a single Tab stop. Arrows move between items (Left /
+ * Right in a slot, Up / Down across slots), Home / End go to the ends of a slot, Ctrl +
+ * Home / End to the ends of the grid (src/lib/equipmentGrid.ts). The tooltip follows focus;
+ * Esc closes it.
  */
 export default function Skills() {
   const baseId = useId();
   const inline = useIsMobile();
+  const gridRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<OpenItem | null>(null);
+  const [active, setActiveState] = useState<GridPos>({ row: 0, col: 0 });
   const pointer = useRef<PointerMemo>({ type: null, at: 0 });
+  /** Sticky column: where the last Up / Down landed and the column it was aiming for. */
+  const sticky = useRef<(GridPos & { preferred: number }) | null>(null);
 
   const close = useCallback(() => setOpen(null), []);
+  const setActive = useCallback(
+    (pos: GridPos) =>
+      setActiveState(current => (current.row === pos.row && current.col === pos.col ? current : pos)),
+    [],
+  );
+
+  const onGridKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.altKey || e.shiftKey) return;
+    const cell = e.target instanceof Element ? e.target.closest('[data-skill-item]') : null;
+    if (!cell) return;
+    const [row, col] = (cell.getAttribute('data-skill-item') ?? '0-0').split('-').map(Number);
+    const vertical = e.key === 'ArrowUp' || e.key === 'ArrowDown';
+    const memo = sticky.current;
+    const preferredCol = vertical && memo && memo.row === row && memo.col === col ? memo.preferred : col;
+    const next = moveInGrid(ROW_LENGTHS, { row, col }, e.key, {
+      ctrl: e.ctrlKey || e.metaKey,
+      preferredCol,
+    });
+    if (!next) return;
+    e.preventDefault();
+    sticky.current = vertical ? { ...next, preferred: preferredCol } : null;
+    if (next.row === row && next.col === col) return;
+    gridRef.current
+      ?.querySelector<HTMLButtonElement>(`[data-skill-item="${cellKey(next)}"] button`)
+      ?.focus();
+  };
 
   // While a tooltip is open: Esc dismisses it wherever focus is (WCAG 1.4.13), and a
   // press outside its item closes it (touch has no hover to leave).
@@ -256,23 +363,34 @@ export default function Skills() {
           />
         </Reveal>
 
-        <PixelPanel variant="wood" elevation={2} padding="lg">
+        <PixelPanel variant="wood" elevation={2} padding="lg" className="skill-panel">
           <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
             <CharacterFrame />
-            {/* Two balanced columns at xl (CSS columns, so a tall slot like Magic doesn't
-                leave a hole beside it); reading and tab order stay in data order. */}
-            <div className="space-y-8 xl:columns-2 xl:gap-x-10">
-              {skills.map((group, i) => (
-                <SkillSlot
-                  key={group.slot}
-                  group={group}
-                  groupIndex={i}
-                  baseId={baseId}
-                  open={open}
-                  setOpen={setOpen}
-                  inline={inline}
-                  pointer={pointer}
-                />
+            {/* Two fixed columns at xl; reading, Tab and arrow order stay in data order. */}
+            <div
+              ref={gridRef}
+              role="grid"
+              aria-label="Equipment"
+              className="skill-grid grid items-start gap-8 xl:grid-cols-2 xl:gap-x-10"
+              onKeyDown={onGridKeyDown}
+            >
+              {COLUMNS.map(column => (
+                <div key={column.first} className="space-y-8">
+                  {column.groups.map((group, i) => (
+                    <SkillSlot
+                      key={group.slot}
+                      group={group}
+                      row={column.first + i}
+                      baseId={baseId}
+                      active={active}
+                      setActive={setActive}
+                      open={open}
+                      setOpen={setOpen}
+                      inline={inline}
+                      pointer={pointer}
+                    />
+                  ))}
+                </div>
               ))}
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import Contact, { EMAIL_COPIED_MESSAGE, EMAIL_SELECTED_MESSAGE } from './Contact';
+import Contact, { EMAIL_COPIED_MESSAGE, EMAIL_SELECTED_MESSAGE, EMAIL_SHOWN } from './Contact';
 import { ToastProvider } from '../components/ui/Toast';
 import { bio } from '../data/bio';
 
@@ -42,7 +42,9 @@ describe('Contact', () => {
   it('renders the email, GitHub, LinkedIn and phone links with accessible names', () => {
     renderContact();
 
-    const email = screen.getByRole('link', { name: `Email me at ${bio.email}` });
+    // Shown and read in lowercase; the mailto: link keeps the canonical address.
+    expect(EMAIL_SHOWN).toBe('roy.y.carmelli@gmail.com');
+    const email = screen.getByRole('link', { name: `Email me at ${EMAIL_SHOWN}` });
     expect(email).toHaveAttribute('href', `mailto:${bio.email}`);
     expect(email).toHaveTextContent('Email me');
 
@@ -66,7 +68,7 @@ describe('Contact', () => {
   it('shows the contact blurb and the address as selectable text', () => {
     renderContact();
     expect(screen.getByText(/Available now for software engineering/)).toBeInTheDocument();
-    expect(screen.getByText(bio.email)).toHaveClass('select-all');
+    expect(screen.getByText(EMAIL_SHOWN)).toHaveClass('select-all');
   });
 
   it('copies the email with the Clipboard API and shows the save toast', async () => {
@@ -77,7 +79,7 @@ describe('Contact', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Copy email' }));
 
     expect(await within(screen.getByRole('status')).findByText(EMAIL_COPIED_MESSAGE)).toBeInTheDocument();
-    expect(writeText).toHaveBeenCalledWith(bio.email);
+    expect(writeText).toHaveBeenCalledWith(EMAIL_SHOWN);
   });
 
   it('falls back to a hidden input and execCommand without the Clipboard API', async () => {
@@ -96,7 +98,7 @@ describe('Contact', () => {
 
     expect(await screen.findByText(EMAIL_COPIED_MESSAGE)).toBeInTheDocument();
     expect(execCommand).toHaveBeenCalledWith('copy');
-    expect(copiedValue).toBe(bio.email);
+    expect(copiedValue).toBe(EMAIL_SHOWN);
     // The helper input is gone and focus is back on the button.
     expect(document.querySelector('input')).toBeNull();
     expect(button).toHaveFocus();
@@ -110,14 +112,54 @@ describe('Contact', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Copy email' }));
 
     expect(await screen.findByText(EMAIL_SELECTED_MESSAGE)).toBeInTheDocument();
-    expect(window.getSelection()?.toString()).toBe(bio.email);
+    expect(window.getSelection()?.toString()).toBe(EMAIL_SHOWN);
   });
 
-  it('keeps the save-point sprites out of the accessibility tree', () => {
+  it('labels the copy button "Copy" and shows the phone number as text', () => {
+    renderContact();
+    const copy = screen.getByRole('button', { name: 'Copy email' });
+    // The visible label (hidden below 640px by CSS) starts the accessible name.
+    expect(copy).toHaveTextContent('Copy');
+    const number = screen.getByText('+972 54 728 7807');
+    expect(number).toHaveAttribute('aria-hidden', 'true');
+    expect(number.closest('li')).toContainElement(screen.getByRole('link', { name: /^Phone / }));
+  });
+
+  it('draws Roy and the campfire once each, at one integer scale', () => {
+    const { container } = renderContact();
+    const roy = container.querySelectorAll<HTMLElement>('.px-character');
+    const fire = container.querySelectorAll<HTMLElement>('.px-campfire');
+    expect(roy).toHaveLength(1);
+    expect(fire).toHaveLength(1);
+    // jsdom has no matchMedia: the narrow (×2) scene. Roy's idle frame is 28×67.
+    expect(fire[0]).toHaveAttribute('data-scale', '2');
+    expect(roy[0].style.width).toBe('56px');
+    expect(roy[0].style.height).toBe('134px');
+  });
+
+  it('draws the save point at ×4 from 1024px up', () => {
+    const matchMedia = vi.fn((query: string) => ({
+      matches: query === '(min-width: 1024px)',
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal('matchMedia', matchMedia);
+    try {
+      const { container } = renderContact();
+      expect(container.querySelector('.px-campfire')).toHaveAttribute('data-scale', '4');
+      expect(container.querySelector<HTMLElement>('.px-character')!.style.height).toBe('268px');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('keeps the save-point sprites and caption out of the accessibility tree', () => {
     const { container } = renderContact();
     const sprites = container.querySelectorAll('.px-campfire, .px-character');
     expect(sprites.length).toBeGreaterThan(0);
     sprites.forEach(sprite => expect(sprite.closest('[aria-hidden="true"]')).not.toBeNull());
     expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByText(/Save point · progress saved/i).closest('[aria-hidden="true"]')).not.toBeNull();
   });
 });

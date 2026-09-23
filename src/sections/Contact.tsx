@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type CSSProperties } from 'react';
 import { bio } from '../data/bio';
 import PixelPanel from '../components/PixelPanel';
 import Character from '../components/Character';
@@ -8,16 +8,23 @@ import { Button } from '../components/ui/Button';
 import { ZoneHeader } from '../components/ui/ZoneHeader';
 import { Reveal } from '../components/ui/Reveal';
 import { useToast } from '../components/ui/Toast';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 /** Toast after the address lands on the clipboard. */
 export const EMAIL_COPIED_MESSAGE = 'Email copied · progress saved';
 /** Toast when the browser refuses both copy paths: the address is selected instead. */
 export const EMAIL_SELECTED_MESSAGE = 'Copy blocked · address selected below';
 
-/** Keeps "CS × neuroscience" on one line, so the "×" never starts or ends a line. */
-const blurb = bio.contactBlurb.replace(/ × /g, '\u00a0×\u00a0');
+/**
+ * The address as shown, read out and copied: lowercase reads cleaner (the domain is
+ * case-insensitive and Gmail ignores case in the local part). `mailto:` keeps `bio.email`.
+ */
+export const EMAIL_SHOWN = bio.email.toLowerCase();
 
-/** "+972547287807" → "+972 54 728 7807", so screen readers read digit groups, not one number. */
+/** Keeps "CS × neuroscience" on one line, so the "×" never starts or ends a line. */
+const blurb = bio.contactBlurb.replace(/ × /g, ' × ');
+
+/** "+972547287807" → "+972 54 728 7807": readable on screen, read as digit groups aloud. */
 const phoneSpoken = bio.phone.replace(/^(\+\d{3})(\d{2})(\d{3})(\d{4})$/, '$1 $2 $3 $4');
 
 interface Channel {
@@ -27,12 +34,21 @@ interface Channel {
   icon: PixelIconName;
   href: string;
   external: boolean;
+  /** Shown under the button from 640px up, where a `tel:` link may not dial anything. */
+  caption?: string;
 }
 
 const channels: Channel[] = [
   { label: 'GitHub', name: 'GitHub profile', icon: 'github', href: bio.github, external: true },
   { label: 'LinkedIn', name: 'LinkedIn profile', icon: 'linkedin', href: bio.linkedin, external: true },
-  { label: 'Phone', name: `Phone ${phoneSpoken}`, icon: 'phone', href: `tel:${bio.phone}`, external: false },
+  {
+    label: 'Phone',
+    name: `Phone ${phoneSpoken}`,
+    icon: 'phone',
+    href: `tel:${bio.phone}`,
+    external: false,
+    caption: phoneSpoken,
+  },
 ];
 
 /**
@@ -73,45 +89,34 @@ async function copyText(text: string): Promise<boolean> {
   return copied;
 }
 
-/**
- * Ground the fire lights: its own width in `accent`, then one more sprite pixel (4 native px
- * × scale) each side in `accent-press`, drawn over the 4px ground line.
- */
-function LitGround({ scale }: { scale: 3 | 4 }) {
-  const reach = scale === 4 ? '-inset-x-4' : '-inset-x-3';
-  return (
-    <>
-      <span className={`absolute -bottom-1 h-1 bg-accent-press ${reach}`} />
-      <span className="absolute inset-x-0 -bottom-1 h-1 bg-accent" />
-    </>
-  );
-}
+/** ≥ 1024px the save point fills its column at Roy ×4; below, it shrinks to ×2. */
+const WIDE_QUERY = '(min-width: 1024px)';
 
-/** The "save point": Roy standing by a campfire on a 4px ground line. Decorative. */
+/**
+ * The "save point": Roy standing by a campfire on a 4px ground line. Decorative, so hidden
+ * from assistive tech. Roy and the fire render once each at ONE integer scale (their pixels
+ * match), and distances in the scene are counted in sprite pixels (`--sp` is one sprite pixel
+ * on screen): 8 between Roy and the fire, 2 of dimmer lit ground each side of the fire.
+ *
+ * ≥ 1024 the ground spans the column and the caption hangs below it, out of the flow, so the
+ * ground can sit level with the bottom frame of the contact panel beside it.
+ */
 function SavePoint() {
+  const scale = useMediaQuery(WIDE_QUERY) ? 4 : 2;
+  const vars = { '--sp': `${scale}px` } as CSSProperties;
+
   return (
-    <div className="flex flex-col items-center">
-      <div
-        className="flex items-end justify-center gap-6 border-b-4 border-border-subtle px-10 lg:gap-8 lg:px-14"
-        aria-hidden="true"
-      >
-        {/* One sprite per breakpoint: both render at integer scale, CSS picks one. */}
-        <span className="block lg:hidden">
-          <Character pose="idle" scale={2} decorative />
-        </span>
-        <span className="hidden lg:block">
-          <Character pose="idle" scale={3} decorative />
-        </span>
-        <span className="relative block lg:hidden">
-          <Campfire scale={3} />
-          <LitGround scale={3} />
-        </span>
-        <span className="relative hidden lg:block">
-          <Campfire scale={4} />
-          <LitGround scale={4} />
+    <div className="relative flex flex-col items-center lg:items-stretch" style={vars} aria-hidden="true">
+      <div className="flex items-end justify-center gap-[calc(var(--sp)*8)] border-b-4 border-border-subtle px-10">
+        <Character pose="idle" scale={scale} decorative />
+        <span className="relative block">
+          <Campfire scale={scale} />
+          {/* The ground the fire lights, drawn over the ground line. */}
+          <span className="absolute -inset-x-[calc(var(--sp)*2)] -bottom-1 h-1 bg-accent-press" />
+          <span className="absolute inset-x-0 -bottom-1 h-1 bg-accent" />
         </span>
       </div>
-      <p className="mt-4 flex items-center gap-2 text-hud uppercase text-fg-subtle">
+      <p className="mt-4 flex items-center justify-center gap-2 text-hud uppercase text-fg-subtle lg:absolute lg:inset-x-0 lg:top-full">
         <PixelIcon name="check" size={12} className="text-xp" />
         Save point · progress saved
       </p>
@@ -122,14 +127,14 @@ function SavePoint() {
 /**
  * Zone 05 · Save Point (SPEC §4 Contact). No form (there is no backend): a `mailto:` button,
  * a copy-to-clipboard button with a toast, the address as selectable text, and GitHub,
- * LinkedIn and Phone as labelled secondary buttons.
+ * LinkedIn and Phone as labelled secondary buttons (the number shown under Phone).
  */
 export default function Contact() {
   const toast = useToast();
   const addressRef = useRef<HTMLParagraphElement>(null);
 
   const copyEmail = async () => {
-    if (await copyText(bio.email)) {
+    if (await copyText(EMAIL_SHOWN)) {
       toast.show(EMAIL_COPIED_MESSAGE, { icon: <PixelIcon name="check" size={24} /> });
       return;
     }
@@ -154,7 +159,8 @@ export default function Contact() {
         </Reveal>
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end lg:gap-6">
-          <Reveal index={1} className="lg:col-span-5">
+          {/* -mb-1: the ground line sits level with the panel's 4px bottom frame. */}
+          <Reveal index={1} className="lg:col-span-5 lg:-mb-1">
             <SavePoint />
           </Reveal>
 
@@ -166,23 +172,31 @@ export default function Contact() {
                 <Button
                   href={`mailto:${bio.email}`}
                   size="lg"
-                  aria-label={`Email me at ${bio.email}`}
+                  aria-label={`Email me at ${EMAIL_SHOWN}`}
                   leadingIcon={<PixelIcon name="mail" size={24} />}
                   className="flex-1 sm:flex-none"
                 >
                   Email me
                 </Button>
-                <Button variant="icon" size="lg" aria-label="Copy email" onClick={copyEmail}>
-                  <PixelIcon name="copy" size={24} />
+                {/* Icon + "Copy" from 640px; below, a 56px icon-only square. */}
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  aria-label="Copy email"
+                  onClick={copyEmail}
+                  leadingIcon={<PixelIcon name="copy" size={24} />}
+                  className="max-sm:w-14 max-sm:gap-0 max-sm:px-0"
+                >
+                  <span className="max-sm:hidden">Copy</span>
                 </Button>
               </div>
               <p ref={addressRef} className="mt-6 select-all break-all text-hud text-fg-muted">
-                {bio.email}
+                {EMAIL_SHOWN}
               </p>
 
               <ul className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3 lg:flex lg:flex-wrap">
                 {channels.map(channel => (
-                  <li key={channel.label}>
+                  <li key={channel.label} className="flex flex-col items-center">
                     <Button
                       variant="secondary"
                       href={channel.href}
@@ -193,6 +207,12 @@ export default function Contact() {
                     >
                       {channel.label}
                     </Button>
+                    {channel.caption && (
+                      // Same text as the link's accessible name: shown, not read out twice.
+                      <p aria-hidden="true" className="mt-4 hidden select-all text-hud text-fg-muted sm:block">
+                        {channel.caption}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>

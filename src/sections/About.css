@@ -59,7 +59,7 @@
     grid-template-columns: 6rem minmax(0, 1fr);
     column-gap: 16px;
     align-items: baseline;
-    padding-block: 10px;
+    padding-block: 12px;
     background-image: repeating-linear-gradient(
       to right,
       var(--color-border-subtle) 0 4px,

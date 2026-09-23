@@ -30,7 +30,7 @@ export default function Resume() {
           <ZoneHeader
             zone={4}
             name="Resume Scroll"
-            title="Loot: my resume"
+            title="Resume"
             icon={<PixelIcon name="scroll" size={36} />}
             id="resume-title"
           />

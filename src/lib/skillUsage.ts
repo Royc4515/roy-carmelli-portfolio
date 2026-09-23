@@ -67,6 +67,15 @@ export function shortProjectTitle(title: string): string {
 /** The category whose unused items read "Studied in coursework". */
 export const COURSEWORK_CATEGORY = 'CS Foundations';
 
+/** The category whose unused items read "Certificate earned". */
+export const CERTIFICATION_CATEGORY = 'Certifications';
+
+/** Notes for items no project lists, by category; other categories show the category only. */
+const UNUSED_NOTES: Readonly<Record<string, string>> = {
+  [COURSEWORK_CATEGORY]: 'Studied in coursework',
+  [CERTIFICATION_CATEGORY]: 'Certificate earned',
+};
+
 export interface SkillGroup {
   slot: string;
   category: string;
@@ -80,7 +89,10 @@ export interface SkillDetail {
   category: string;
   /** Short titles of the projects that list this skill, in data order. */
   usedIn: string[];
-  /** "Studied in coursework" for unused CS Foundations items, otherwise null. */
+  /**
+   * Shown instead of "Used in" when no project lists the item: "Studied in coursework"
+   * (CS Foundations) or "Certificate earned" (Certifications); otherwise null (category only).
+   */
   note: string | null;
 }
 
@@ -92,7 +104,7 @@ export function skillDetail(item: string, group: SkillGroup, list: readonly Proj
     slot: group.slot,
     category: group.category,
     usedIn,
-    note: usedIn.length === 0 && group.category === COURSEWORK_CATEGORY ? 'Studied in coursework' : null,
+    note: usedIn.length === 0 ? (UNUSED_NOTES[group.category] ?? null) : null,
   };
 }
 

@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Skills from './Skills';
@@ -8,12 +8,19 @@ import { placeTooltip } from '../components/SkillTooltip';
 
 const originalMatchMedia = window.matchMedia;
 
-/** `mobile` answers the < 768px query; reduced motion is on so Reveal renders plain elements. */
+/**
+ * `mobile` answers the < 768px query (and the opposite for ≥ 1024px); reduced motion is on
+ * so Reveal renders plain elements.
+ */
 function mockMedia({ mobile }: { mobile: boolean }) {
+  const answers: Record<string, boolean> = {
+    '(prefers-reduced-motion: reduce)': true,
+    '(max-width: 767px)': mobile,
+    '(min-width: 1024px)': !mobile,
+  };
   window.matchMedia = (query: string) =>
     ({
-      matches:
-        query === '(prefers-reduced-motion: reduce)' ? true : query === '(max-width: 767px)' ? mobile : false,
+      matches: answers[query] ?? false,
       media: query,
       onchange: null,
       addListener: vi.fn(),
@@ -140,6 +147,180 @@ describe('Skills (equipment screen)', () => {
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     expect(item('Java 17')).toHaveFocus();
+  });
+
+  it('renders the Character once, at x3 from 1024px', () => {
+    render(<Skills />);
+    const sprites = document.querySelectorAll('#skills [data-pose]');
+    expect(sprites).toHaveLength(1);
+    expect(sprites[0]).toHaveAttribute('aria-hidden', 'true');
+    expect((sprites[0] as HTMLElement).style.width).toBe(`${28 * 3}px`);
+  });
+
+  it('gives every slot heading its pixel icon', () => {
+    render(<Skills />);
+    const icons = screen.getAllByRole('heading', { level: 3 }).map(h => h.querySelector('svg')?.dataset.icon);
+    expect(icons).toEqual(['sword', 'person', 'star', 'potion', 'book', 'gear', 'trophy']);
+  });
+
+  it('certifications say "Certificate earned" instead of an empty "Used in"', () => {
+    render(<Skills />);
+    act(() => item('Claude 101').focus());
+    const tip = screen.getByRole('tooltip');
+    expect(tip).toHaveTextContent('Certificate earned');
+    expect(tip).not.toHaveTextContent(/Used in/i);
+  });
+});
+
+describe('Skills keyboard grid (roving tabindex)', () => {
+  beforeEach(() => mockMedia({ mobile: false }));
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+  });
+
+  const allItems = () => screen.getAllByRole('button').filter(b => b.closest('[role="grid"]'));
+  const tabStops = () => allItems().filter(b => b.tabIndex === 0);
+  const tip = () => screen.getByRole('tooltip');
+
+  /** The section between two outside buttons, so Tab has somewhere to go on both sides. */
+  function renderBetween() {
+    render(
+      <>
+        <button type="button">Before</button>
+        <Skills />
+        <button type="button">After</button>
+      </>,
+    );
+  }
+
+  it('is one labelled grid: a row per slot (its heading as row header), a cell per item', () => {
+    render(<Skills />);
+    const grid = screen.getByRole('grid', { name: 'Equipment' });
+    const rows = within(grid).getAllByRole('row');
+    expect(rows).toHaveLength(skills.length);
+    rows.forEach((row, i) => {
+      const header = within(row).getByRole('rowheader');
+      expect(within(header).getByRole('heading', { level: 3 })).toHaveAccessibleName(
+        `${skills[i].slot}: ${skills[i].category}`,
+      );
+      const cells = within(row).getAllByRole('gridcell');
+      expect(cells.map(c => within(c).getByRole('button').textContent)).toEqual(skills[i].items);
+    });
+  });
+
+  it('the whole grid is a single Tab stop (was one per item)', () => {
+    render(<Skills />);
+    const total = skills.reduce((n, g) => n + g.items.length, 0);
+    expect(allItems()).toHaveLength(total);
+    expect(tabStops()).toEqual([item('Java 17')]);
+    expect(allItems().filter(b => b.tabIndex === -1)).toHaveLength(total - 1);
+  });
+
+  it('Tab enters the grid once and leaves on the next Tab; Shift+Tab returns to the last item', async () => {
+    const user = userEvent.setup();
+    renderBetween();
+    act(() => screen.getByRole('button', { name: 'Before' }).focus());
+
+    await user.tab();
+    expect(item('Java 17')).toHaveFocus();
+    await user.keyboard('{ArrowRight}{ArrowRight}');
+    expect(item('C')).toHaveFocus();
+    expect(tabStops()).toEqual([item('C')]);
+
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'After' })).toHaveFocus();
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+    await user.tab({ shift: true });
+    expect(item('C')).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(screen.getByRole('button', { name: 'Before' })).toHaveFocus();
+  });
+
+  it('arrows, Home and End move focus, and the tooltip follows it', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    await user.tab();
+
+    await user.keyboard('{ArrowRight}');
+    expect(item('Python')).toHaveFocus();
+    expect(screen.getAllByRole('tooltip')).toHaveLength(1);
+    expect(tip()).toHaveTextContent('Sommelier Bot');
+    expect(item('Python')).toHaveAttribute('aria-describedby', tip().id);
+
+    await user.keyboard('{ArrowDown}'); // Armor, same column
+    expect(item('Vite')).toHaveFocus();
+    expect(tip()).toHaveTextContent('Web & Full Stack');
+    await user.keyboard('{ArrowUp}');
+    expect(item('Python')).toHaveFocus();
+
+    await user.keyboard('{End}');
+    expect(item('x86 Assembly')).toHaveFocus();
+    await user.keyboard('{ArrowRight}'); // end of the slot: stays
+    expect(item('x86 Assembly')).toHaveFocus();
+    await user.keyboard('{Home}');
+    expect(item('Java 17')).toHaveFocus();
+    await user.keyboard('{ArrowLeft}{ArrowUp}'); // first item of the first slot: stays
+    expect(item('Java 17')).toHaveFocus();
+
+    await user.keyboard('{Control>}{End}{/Control}');
+    expect(item('Claude 101')).toHaveFocus();
+    expect(tip()).toHaveTextContent('Certificate earned');
+    await user.keyboard('{ArrowDown}'); // last slot: stays
+    expect(item('Claude 101')).toHaveFocus();
+    await user.keyboard('{Control>}{Home}{/Control}');
+    expect(item('Java 17')).toHaveFocus();
+    expect(tip()).toHaveTextContent('Arkanoid Game');
+  });
+
+  it('Up / Down keep a sticky column through shorter slots', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    act(() => item('Telegram Bot API').focus()); // Magic, column 8 of 8
+    expect(tabStops()).toEqual([item('Telegram Bot API')]);
+
+    await user.keyboard('{ArrowDown}'); // Potions has 5 items
+    expect(item('Jupyter')).toHaveFocus();
+    await user.keyboard('{ArrowDown}'); // Tomes has 5
+    expect(item('Systems Programming')).toHaveFocus();
+    await user.keyboard('{ArrowDown}'); // Trinkets has 8: back to column 8
+    expect(item('GitHub Pages')).toHaveFocus();
+    await user.keyboard('{ArrowLeft}{ArrowUp}'); // a sideways move resets the column
+    expect(item('Systems Programming')).toHaveFocus();
+  });
+
+  it('Esc closes the tooltip and keeps focus; the next arrow opens the next item', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    await user.tab();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(item('Java 17')).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(item('Python')).toHaveFocus();
+    expect(tip()).toHaveTextContent('Python');
+  });
+
+  it('handled keys never scroll the page; Tab, Enter and Alt+arrows pass through', () => {
+    render(<Skills />);
+    const java = item('Java 17');
+    act(() => java.focus());
+    // fireEvent returns false when the default was prevented.
+    expect(fireEvent.keyDown(java, { key: 'ArrowUp' })).toBe(false); // an edge, still handled
+    expect(fireEvent.keyDown(java, { key: 'ArrowDown' })).toBe(false);
+    expect(item('React')).toHaveFocus();
+    expect(fireEvent.keyDown(item('React'), { key: 'Tab' })).toBe(true);
+    expect(fireEvent.keyDown(item('React'), { key: 'Enter' })).toBe(true);
+    expect(fireEvent.keyDown(item('React'), { key: 'ArrowLeft', altKey: true })).toBe(true);
+    expect(item('React')).toHaveFocus();
+  });
+
+  it('a click moves the Tab stop to the clicked item', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    await user.click(item('Pandas'));
+    expect(tabStops()).toEqual([item('Pandas')]);
   });
 });
 
