@@ -48,13 +48,13 @@ describe('Contact', () => {
     expect(email).toHaveAttribute('href', `mailto:${bio.email}`);
     expect(email).toHaveTextContent('Email me');
 
-    const github = screen.getByRole('link', { name: 'GitHub profile' });
+    const github = screen.getByRole('link', { name: 'GitHub profile (opens in a new tab)' });
     expect(github).toHaveAttribute('href', bio.github);
     expect(github).toHaveAttribute('target', '_blank');
     expect(github).toHaveAttribute('rel', 'noreferrer');
     expect(github).toHaveTextContent('GitHub');
 
-    const linkedin = screen.getByRole('link', { name: 'LinkedIn profile' });
+    const linkedin = screen.getByRole('link', { name: 'LinkedIn profile (opens in a new tab)' });
     expect(linkedin).toHaveAttribute('href', bio.linkedin);
     expect(linkedin).toHaveAttribute('target', '_blank');
     expect(linkedin).toHaveTextContent('LinkedIn');
@@ -107,12 +107,18 @@ describe('Contact', () => {
   it('selects the address when the browser blocks both copy paths', async () => {
     mockClipboard(vi.fn().mockRejectedValue(new Error('denied')));
     mockExecCommand(() => false);
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
     renderContact();
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy email' }));
 
     expect(await screen.findByText(EMAIL_SELECTED_MESSAGE)).toBeInTheDocument();
     expect(window.getSelection()?.toString()).toBe(EMAIL_SHOWN);
+    // The toast points "below", so the selected address is brought on screen.
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    expect(scrollIntoView.mock.contexts[0]).toHaveTextContent(EMAIL_SHOWN);
+    delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
   });
 
   it('labels the copy button "Copy" and shows the phone number as text', () => {

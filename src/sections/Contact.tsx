@@ -39,8 +39,8 @@ interface Channel {
 }
 
 const channels: Channel[] = [
-  { label: 'GitHub', name: 'GitHub profile', icon: 'github', href: bio.github, external: true },
-  { label: 'LinkedIn', name: 'LinkedIn profile', icon: 'linkedin', href: bio.linkedin, external: true },
+  { label: 'GitHub', name: 'GitHub profile (opens in a new tab)', icon: 'github', href: bio.github, external: true },
+  { label: 'LinkedIn', name: 'LinkedIn profile (opens in a new tab)', icon: 'linkedin', href: bio.linkedin, external: true },
   {
     label: 'Phone',
     name: `Phone ${phoneSpoken}`,
@@ -146,6 +146,8 @@ export default function Contact() {
     // Last resort: select the visible address so a manual copy is one keystroke away.
     const address = addressRef.current;
     const selection = window.getSelection();
+    // The toast says "below": make sure the address is on screen (Copy can sit at the fold).
+    address?.scrollIntoView?.({ block: 'nearest' });
     if (address && selection) selection.selectAllChildren(address);
     toast.show(EMAIL_SELECTED_MESSAGE, { icon: <PixelIcon name="copy" size={24} /> });
   };
