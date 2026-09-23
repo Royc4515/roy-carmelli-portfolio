@@ -3,8 +3,9 @@
    logs. Imported by src/components/QuestCard.tsx.
 
    Everything sits in `@layer components` so Tailwind utilities passed through
-   `className` still win; only the hover/focus lift lives in `utilities`, where
-   it has to beat the panel's `px-drop` utility.
+   `className` still win; only the card padding and the hover/focus lift live
+   in `utilities`, where they have to beat the panel's padding and `px-drop`
+   utilities.
    Colours are semantic tokens (see src/index.css and components.css).
    ========================================================================== */
 
@@ -63,8 +64,11 @@
      Parts are direct children so a parent grid can line them up across
      cards with subgrid (see the lists below). Spacing between parts is
      margin/padding, which subgrid tracks include. */
+  /* --quest-pad is the card's padding (set in the utilities layer below, over
+     PixelPanel's p-4 md:p-5) and the visual's bleed to the frame, so the two
+     can never drift apart: 16, 20 from 768px, 16 on short laptop screens. */
   .quest-card {
-    --quest-pad: 16px; /* mirrors PixelPanel padding "md": 16 → 24 at md */
+    --quest-pad: 16px;
     display: flex;
     flex-direction: column;
     transition: transform var(--dur-fast) steps(2, end);
@@ -339,9 +343,9 @@
     }
   }
 
-  @media (min-width: 768px) {
+  @media (width >= 48rem) {
     .quest-card {
-      --quest-pad: 24px;
+      --quest-pad: 20px;
     }
   }
 
@@ -463,14 +467,14 @@
        main      item well      | meta · title · tagline · highlights · chips · actions
        side      head · title   | tagline · chips · actions
 
-     Cards pad 16 (`short:p-4` on the panel); from the meta line down the
+     Cards pad 16 (--quest-pad); from the meta line down the
      parts step 8 · 8 · 12 · 12 · 12 apart, which keeps the lead card inside
      424px even if its tagline takes a third line (text a few % wider on
      another OS). The DOM order (so the reading and focus order) is the same
      as everywhere else. */
   @media (width >= 64rem) and (height <= 60rem) {
     .quest-card {
-      --quest-pad: 20px; /* 16 padding + the 4px frame */
+      --quest-pad: 16px;
     }
 
     .quest-card--feature,
@@ -704,11 +708,19 @@
   }
 }
 
-/* Hover (and keyboard focus inside): the frame brightens and, with motion
-   allowed, the card lifts 4px while its drop stays on the ground. The lift
-   never moves the hit area: while hovered, ::after fills the 4px strip the
-   card leaves behind, so a pointer resting on the bottom edge stays on it. */
 @layer utilities {
+  /* The card's padding, from --quest-pad (see .quest-card): two classes, so it
+     beats the panel's single-class p-4 md:p-5 whatever their order. The
+     visual's negative margins then end exactly on the inner edge of the 4px
+     frame (a box-shadow outside the box) and never paint over it. */
+  .px-panel.quest-card {
+    padding: var(--quest-pad);
+  }
+
+  /* Hover (and keyboard focus inside): the frame brightens and, with motion
+     allowed, the card lifts 4px while its drop stays on the ground. The lift
+     never moves the hit area: while hovered, ::after fills the 4px strip the
+     card leaves behind, so a pointer resting on the bottom edge stays on it. */
   @media (hover: hover) {
     .quest-card:hover {
       --px-frame: var(--color-accent-hover);

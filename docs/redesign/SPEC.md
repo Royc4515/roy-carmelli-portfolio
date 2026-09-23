@@ -372,7 +372,9 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   Headings: one H3 per tier (the Research logs tab plate is the visible H3; main/side are
   screen-reader only because every card shows its tier tag), card titles H4. Side quests cap chips
   at 4 + `+N`. An open quest log never stretches its neighbour (`:has()` releases the subgrid).
-  Hover lift keeps its hit area. Item art uses fixed bitmap colours with a half-strength night
+  Hover lift keeps its hit area. The visual's backdrop bleeds to the inner edge of the 4px frame,
+  never over it: the card padding and the bleed are one value (`--quest-pad`: 16, 20 from `md`,
+  16 on short laptops). Item art uses fixed bitmap colours with a half-strength night
   wash. Below 640px: Live/Code side by side, highlights on the lead card only, 120px item band,
   research `Code` as a 44px icon button. Card actions (Live / Code) use Button `sm`. The item band is
   120px with the item at ×4 below 1600px, 184px at ×6 above.

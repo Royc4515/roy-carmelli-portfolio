@@ -350,7 +350,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
         variant="paper"
         elevation={2}
         aria-labelledby={titleId}
-        className={cx('quest-card quest-card--main short:p-4', `quest-card--${layout}`, className)}
+        className={cx('quest-card quest-card--main', `quest-card--${layout}`, className)}
       >
         <QuestVisual project={project} layout={layout} />
         {layout === 'feature' ? <div className="quest-body">{body}</div> : body}
@@ -364,7 +364,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
       variant="wood"
       elevation={1}
       aria-labelledby={titleId}
-      className={cx('quest-card quest-card--side short:p-4', className)}
+      className={cx('quest-card quest-card--side', className)}
     >
       {/* Head and title: `display: contents` (they are rows of the side list's subgrid)
           except on short laptop screens, where they form the card's left column. */}

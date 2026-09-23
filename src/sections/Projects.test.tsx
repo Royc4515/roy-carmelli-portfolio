@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { render, screen, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import Projects, { byTier } from './Projects';
@@ -81,5 +83,27 @@ describe('<Projects>', () => {
     expect(screen.queryByRole('list', { name: 'Main quests' })).not.toBeInTheDocument();
     expect(screen.getByRole('list', { name: 'Side quests' })).toBeInTheDocument();
     expect(screen.queryByRole('list', { name: 'Research logs' })).not.toBeInTheDocument();
+  });
+});
+
+describe('Projects.css card padding', () => {
+  // Read from disk: the Vitest config stubs CSS imports (css: false).
+  const css = readFileSync(resolve(import.meta.dirname, './Projects.css'), 'utf8');
+
+  it('pads the card and bleeds the visual by one value, so the visual never covers the frame', () => {
+    // The card's padding is --quest-pad itself (over the panel's p-4 md:p-5)...
+    expect(css).toMatch(/\.px-panel\.quest-card \{\s*padding: var\(--quest-pad\);\s*\}/);
+    // ...and every negative margin of the visual is that same value (0 and the 24px gap
+    // under a top visual are the only other parts).
+    const margins = [...css.matchAll(/\.quest-visual \{[^}]*?margin: ([^;]+);/g)].map(m => m[1]);
+    expect(margins.length).toBe(3);
+    for (const margin of margins) {
+      const parts = margin.replace(/calc\(var\(--quest-pad\) \* -1\)/g, 'PAD').split(/\s+/);
+      expect(parts).toContain('PAD');
+      for (const part of parts) expect(['PAD', '0', '24px']).toContain(part);
+    }
+    // 16 · 20 from 768px · 16 on short laptop screens, on the 4px grid.
+    const pads = [...css.matchAll(/--quest-pad: (\d+)px;/g)].map(m => Number(m[1]));
+    expect(pads).toEqual([16, 20, 16]);
   });
 });
