@@ -26,7 +26,7 @@ export default function Arcade() {
         <div className="flex flex-wrap items-center gap-6 mb-8">
           <ZoneLabel
             lines={['ARCADE', 'ZONE']}
-            icon="/assets/sprites/icon-home.png"
+            icon="joystick"
           />
           <motion.h2
             initial={{ opacity: 0, y: 20 }}

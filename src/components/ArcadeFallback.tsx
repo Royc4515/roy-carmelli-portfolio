@@ -1,19 +1,12 @@
 import PixelPanel from './PixelPanel';
+import PixelIcon from './PixelIcon';
 
 export default function ArcadeFallback() {
   return (
     <div className="w-full max-w-md mx-auto">
       <PixelPanel variant="dark">
         <div className="flex flex-col items-center gap-6 py-8 text-center">
-          <span style={{
-            fontSize: '3rem',
-            lineHeight: 1,
-            imageRendering: 'pixelated',
-            display: 'inline-block',
-            transform: 'rotate(90deg)',
-          }}>
-            📱
-          </span>
+          <PixelIcon name="rotate-phone" size={48} />
 
           <h3 style={{
             fontFamily: 'var(--font-pixel)',

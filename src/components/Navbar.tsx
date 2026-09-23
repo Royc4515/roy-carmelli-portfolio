@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import type { Theme } from '../hooks/useTheme';
 import { useIsMobile } from '../hooks/useIsMobile';
+import PixelIcon, { type PixelIconName } from './PixelIcon';
+import { pixelSprites } from '../theme/pixelSprites';
 
-const links = [
-  { label: 'Home',    href: '#hero',     icon: '🍄' },
-  { label: 'Library', href: '#projects', icon: '📖' },
-  { label: 'About',   href: '#about',    icon: '👤' },
-  { label: 'Contact', href: '#contact',  icon: '📮' },
+const links: { label: string; href: string; icon: PixelIconName }[] = [
+  { label: 'Home',    href: '#hero',     icon: 'home' },
+  { label: 'Library', href: '#projects', icon: 'book' },
+  { label: 'About',   href: '#about',    icon: 'person' },
+  { label: 'Contact', href: '#contact',  icon: 'mail' },
 ];
 
 function triggerArcade() {
@@ -95,9 +97,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                       e.currentTarget.style.color = 'var(--color-parchment)';
                     }}
                   >
-                    <span style={{ fontSize: '1.4rem', lineHeight: 1, imageRendering: 'pixelated' }}>
-                      {link.icon}
-                    </span>
+                    <PixelIcon name={link.icon} size={24} />
                     {link.label}
                   </a>
                 </li>
@@ -131,7 +131,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                     (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
                   }}
                 >
-                  <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🕹️</span>
+                  <PixelIcon name="joystick" size={24} />
                   Arcade
                 </button>
               </li>
@@ -167,11 +167,12 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
             </button>
 
             <img
-              src="/assets/sprites/face-small.png"
+              src={pixelSprites.face.src}
               alt="Roy Carmelli"
+              width={pixelSprites.face.w}
+              height={pixelSprites.face.h}
               style={{
-                height: '48px',
-                width: 'auto',
+                boxSizing: 'content-box',
                 imageRendering: 'pixelated',
                 borderRadius: 0,
                 border: '2px solid var(--color-brass)',
@@ -254,7 +255,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                 e.currentTarget.style.color = 'var(--color-parchment)';
               }}
             >
-              <span style={{ fontSize: '2rem' }}>{link.icon}</span>
+              <PixelIcon name={link.icon} size={36} />
               {link.label}
             </a>
           ))}
@@ -284,7 +285,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
               (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
             }}
           >
-            <span style={{ fontSize: '2rem' }}>🕹️</span>
+            <PixelIcon name="joystick" size={36} />
             Arcade
           </button>
           </div>

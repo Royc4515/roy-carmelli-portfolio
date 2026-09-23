@@ -1,7 +1,10 @@
+import PixelIcon, { type PixelIconName } from './PixelIcon';
+
 interface ZoneLabelProps {
   lines: string[];
   align?: 'left' | 'right';
-  icon?: string;
+  /** PixelIcon name shown above the label at 48px. */
+  icon?: PixelIconName;
 }
 
 export default function ZoneLabel({ lines, align = 'left', icon }: ZoneLabelProps) {
@@ -16,16 +19,7 @@ export default function ZoneLabel({ lines, align = 'left', icon }: ZoneLabelProp
       }}
     >
       {icon && (
-        <img
-          src={icon}
-          alt=""
-          style={{
-            width: '64px',
-            height: '64px',
-            imageRendering: 'pixelated',
-            marginBottom: '0.25rem',
-          }}
-        />
+        <PixelIcon name={icon} size={48} className="text-[var(--color-brass)]" />
       )}
       {lines.map((line, i) => (
         <span

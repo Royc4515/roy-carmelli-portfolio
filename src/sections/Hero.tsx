@@ -7,6 +7,7 @@ import ArcadeFallback from '../components/ArcadeFallback';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useGameDisplayMode } from '../hooks/useGameDisplayMode';
 import { HERO_CHARACTER_OFFSET_X } from '../theme/tokens';
+import { pixelSprites } from '../theme/pixelSprites';
 
 export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -183,7 +184,7 @@ export default function Hero() {
                     transition={{ duration: 0.8, delay: 0.25 }}
                     className="flex-1 flex justify-end"
                   >
-                    <Character pose="wave" scale={1.1} ariaLabel="Roy waving hello" />
+                    <Character pose="wave" scale={2} label="Roy waving hello" />
                   </motion.div>
                 </div>
 
@@ -264,9 +265,11 @@ export default function Hero() {
                     zIndex: 10,
                   }}>
                     <img
-                      src="/assets/sprites/face-large.png"
+                      src={pixelSprites.face.src}
                       alt="Roy Carmelli pixel avatar"
-                      style={{ height: '56px', width: 'auto', imageRendering: 'pixelated', background: 'var(--color-forest-dark)' }}
+                      width={pixelSprites.face.w}
+                      height={pixelSprites.face.h}
+                      style={{ imageRendering: 'pixelated', background: 'var(--color-forest-dark)' }}
                     />
                     <div>
                       <div style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-brass)', marginBottom: '0.3rem' }}>PLAYER 1</div>
@@ -277,7 +280,7 @@ export default function Hero() {
                     </div>
                   </div>
                   <div style={{ transform: `translateX(${HERO_CHARACTER_OFFSET_X}px)` }}>
-                    <Character pose="wave" scale={1.4} ariaLabel="Roy waving hello" />
+                    <Character pose="wave" scale={3} label="Roy waving hello" />
                   </div>
                 </motion.div>
               )}

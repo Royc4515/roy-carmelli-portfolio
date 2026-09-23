@@ -90,7 +90,8 @@ describe('Hero — phone portrait', () => {
 
   it('renders the waving character sprite on mobile (no player card)', () => {
     render(<Hero />);
-    expect(screen.getByAltText(/roy waving hello/i)).toBeInTheDocument();
+    // The sprite is a sprite-sheet <div role="img"> (not an <img>) since step 02.
+    expect(screen.getByRole('img', { name: /roy waving hello/i })).toBeInTheDocument();
     expect(screen.queryByAltText(/pixel avatar/i)).toBeNull();
   });
 });

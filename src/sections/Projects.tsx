@@ -3,6 +3,7 @@ import { projects } from '../data/projects';
 import PixelPanel from '../components/PixelPanel';
 import ZoneLabel from '../components/ZoneLabel';
 import Character from '../components/Character';
+import PixelIcon from '../components/PixelIcon';
 
 export default function Projects() {
   const featured = projects.filter(p => p.featured);
@@ -24,8 +25,8 @@ export default function Projects() {
 
         {/* Zone label + character sidebar */}
         <div className="flex flex-col items-center gap-6 pt-2 flex-shrink-0 md:w-36">
-          <ZoneLabel lines={['LIBRARY', 'READING', 'NOOK']} icon="/assets/sprites/icon-library.png" />
-          <Character pose="sit" scale={0.95} ariaLabel="Roy reading in the library" />
+          <ZoneLabel lines={['LIBRARY', 'READING', 'NOOK']} icon="book" />
+          <Character pose="sit" scale={3} label="Roy reading in the library" />
         </div>
 
         <motion.div
@@ -51,7 +52,7 @@ export default function Projects() {
               <motion.div key={project.id} whileHover={{ y: -4 }} transition={{ duration: 0.15 }}>
                 <PixelPanel variant="parchment">
                   <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.45rem', color: '#7a5610', marginBottom: '0.6rem', letterSpacing: '0.1em' }}>
-                    ★ FEATURED
+                    <PixelIcon name="star" size={12} className="inline-block align-middle" />{' '}FEATURED
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem', gap: '0.5rem' }}>
                     <h3 style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.6rem', color: 'var(--color-wood-dark)', lineHeight: 1.6, flex: 1 }}>
@@ -61,13 +62,13 @@ export default function Projects() {
                       {project.github && (
                         <a href={project.github} target="_blank" rel="noreferrer"
                           style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-wood)', background: 'var(--color-brass)', padding: '3px 6px', textDecoration: 'none' }}>
-                          GH→
+                          <PixelIcon name="code" size={12} className="inline-block align-middle" />{' '}GH
                         </a>
                       )}
                       {project.live && (
                         <a href={project.live} target="_blank" rel="noreferrer"
                           style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-parchment)', background: 'var(--color-forest-light)', padding: '3px 6px', textDecoration: 'none' }}>
-                          ↗
+                          <PixelIcon name="external" size={12} title="Live demo" className="inline-block align-middle" />
                         </a>
                       )}
                     </div>
@@ -115,13 +116,13 @@ export default function Projects() {
                       {project.github && (
                         <a href={project.github} target="_blank" rel="noreferrer"
                           style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-parchment)', background: 'var(--color-forest-light)', padding: '5px 8px', textDecoration: 'none', boxShadow: '2px 2px 0 var(--color-forest-dark)' }}>
-                          GH→
+                          <PixelIcon name="code" size={12} className="inline-block align-middle" />{' '}GH
                         </a>
                       )}
                       {project.live && (
                         <a href={project.live} target="_blank" rel="noreferrer"
                           style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-forest-dark)', background: 'var(--color-brass)', padding: '5px 8px', textDecoration: 'none', boxShadow: '2px 2px 0 var(--color-wood)' }}>
-                          ↗
+                          <PixelIcon name="external" size={12} title="Live demo" className="inline-block align-middle" />
                         </a>
                       )}
                     </div>

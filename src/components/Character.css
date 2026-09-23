@@ -1,0 +1,36 @@
+/*
+ * Sprite-sheet character (Character.tsx). The element is exactly frameW x frameH x scale and
+ * the sheet is drawn at the same integer scale, so every sprite pixel is a whole CSS pixel.
+ * Frames advance with steps(n) by sliding the sheet left by its full width per cycle.
+ */
+.px-character {
+  display: block;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}
+
+.px-character--animated {
+  animation: px-character-frames var(--px-duration) steps(var(--px-frames)) infinite;
+}
+
+.px-character--paused {
+  animation-play-state: paused;
+}
+
+@keyframes px-character-frames {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: var(--px-sheet-end) 0;
+  }
+}
+
+/* Reduced motion: no animation, the sheet rests on frame 0. */
+@media (prefers-reduced-motion: reduce) {
+  .px-character--animated {
+    animation: none;
+  }
+}

@@ -3,12 +3,13 @@ import { bio } from '../data/bio';
 import PixelPanel from '../components/PixelPanel';
 import ZoneLabel from '../components/ZoneLabel';
 import Character from '../components/Character';
+import PixelIcon, { type PixelIconName } from '../components/PixelIcon';
 
-const socials = [
-  { href: bio.github,            label: 'GitHub',   icon: '🐙' },
-  { href: bio.linkedin,          label: 'LinkedIn', icon: '💼' },
-  { href: `mailto:${bio.email}`, label: 'Email',    icon: '✉️' },
-  { href: `tel:${bio.phone}`,    label: 'Phone',    icon: '📞' },
+const socials: { href: string; label: string; icon: PixelIconName }[] = [
+  { href: bio.github,            label: 'GitHub',   icon: 'github' },
+  { href: bio.linkedin,          label: 'LinkedIn', icon: 'linkedin' },
+  { href: `mailto:${bio.email}`, label: 'Email',    icon: 'mail' },
+  { href: `tel:${bio.phone}`,    label: 'Phone',    icon: 'phone' },
 ];
 
 export default function Contact() {
@@ -28,8 +29,8 @@ export default function Contact() {
 
         {/* Zone label + character sidebar — full-width on mobile so items center properly */}
         <div className="flex flex-col items-center gap-6 flex-shrink-0 w-full md:w-28">
-          <ZoneLabel lines={['CONTACT', 'ZONE']} icon="/assets/sprites/icon-contact.png" />
-          <Character pose="idle" scale={1} ariaLabel="Roy standing" />
+          <ZoneLabel lines={['CONTACT', 'ZONE']} icon="mail" />
+          <Character pose="idle" scale={2} label="Roy standing" />
         </div>
 
         <motion.div
@@ -46,7 +47,7 @@ export default function Contact() {
             color: 'var(--color-parchment)',
             textShadow: '2px 2px 0 var(--color-forest-dark)',
           }}>
-            Let's Talk 📮
+            Let's Talk <PixelIcon name="mail" size={24} className="inline-block align-middle" />
           </h2>
 
           <PixelPanel variant="wood">
@@ -79,7 +80,7 @@ export default function Contact() {
                 (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 var(--color-wood)';
               }}
             >
-              ✉ {bio.email}
+              <PixelIcon name="mail" size={12} className="inline-block align-middle" />{' '}{bio.email}
             </a>
             </div>
 
@@ -118,7 +119,7 @@ export default function Contact() {
                     (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 var(--color-shadow-deep)';
                   }}
                 >
-                  <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{icon}</span>
+                  <PixelIcon name={icon} size={24} />
                   <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.3rem', color: 'var(--color-parchment-dark)', letterSpacing: '0.05em' }}>{label}</span>
                 </a>
               ))}

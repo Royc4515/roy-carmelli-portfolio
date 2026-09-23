@@ -1,4 +1,5 @@
 import PixelPanel from '../components/PixelPanel';
+import PixelIcon from '../components/PixelIcon';
 
 export default function Resume() {
   return (
@@ -15,7 +16,7 @@ export default function Resume() {
       <div style={{ maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <PixelPanel variant="wood">
           <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.5rem', color: 'var(--color-brass)', marginBottom: '0.75rem', letterSpacing: '0.08em' }}>
-            📜 RESUME SCROLL
+            <PixelIcon name="scroll" size={12} className="inline-block align-middle" />{' '}RESUME SCROLL
           </p>
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-parchment-dark)', marginBottom: '1.25rem', lineHeight: 1.6 }}>
             Full breakdown - coursework with grades, project deep-dives, IDF reserve service, certifications.
@@ -38,7 +39,7 @@ export default function Resume() {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translate(2px,2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 var(--color-wood-dark)'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 var(--color-wood-dark)'; }}
           >
-            ⬇ Download Resume
+            <PixelIcon name="download" size={12} className="inline-block align-middle" />{' '}Download Resume
           </a>
         </PixelPanel>
       </div>

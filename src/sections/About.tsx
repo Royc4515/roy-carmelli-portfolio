@@ -22,7 +22,7 @@ export default function About() {
 
         {/* Zone label sidebar */}
         <div className="flex flex-col items-center gap-6 flex-shrink-0 md:w-36">
-          <ZoneLabel lines={['ABOUT', 'THE', 'ADVENTURER']} icon="/assets/sprites/icon-about.png" />
+          <ZoneLabel lines={['ABOUT', 'THE', 'ADVENTURER']} icon="person" />
         </div>
 
         {/* Content */}

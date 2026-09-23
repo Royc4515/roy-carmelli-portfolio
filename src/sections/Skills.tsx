@@ -20,7 +20,7 @@ export default function Skills() {
 
         {/* Zone label sidebar */}
         <div className="pt-2 flex-shrink-0 md:w-28">
-          <ZoneLabel lines={['SKILL', 'TREE', '── LVL UP ──']} icon="/assets/sprites/icon-skills.jpg" />
+          <ZoneLabel lines={['SKILL', 'TREE', '── LVL UP ──']} icon="gear" />
         </div>
 
         <motion.div
