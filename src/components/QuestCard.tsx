@@ -23,8 +23,10 @@ export const QUEST_SCREENSHOTS: Readonly<Record<string, QuestScreenshot>> = {
   'ai-sidebar': {
     src: '/assets/projects/aside-1280.webp',
     srcSet: '/assets/projects/aside-640.webp 640w, /assets/projects/aside-1280.webp 1280w',
-    // lg: 7/12 of the card minus the backdrop margins · md: full card · mobile: full width.
-    sizes: '(min-width: 1024px) 540px, (min-width: 768px) 656px, calc(100vw - 80px)',
+    // Short laptop screens: 5/12 of the card · lg: 7/12 of the card minus the backdrop
+    // margins · md: full card · mobile: full width.
+    sizes:
+      '(min-width: 1024px) and (max-height: 960px) 400px, (min-width: 1024px) 540px, (min-width: 768px) 656px, calc(100vw - 80px)',
     width: 1280,
     height: 720,
     alt: 'Aside landing page: "Every AI model. One sidebar." beside a preview of the sidebar open next to a web page.',
@@ -38,6 +40,8 @@ export interface QuestCardProps {
   /**
    * `feature`: the lead main quest; visual left (7/12) and text right (5/12) from 1024px.
    * `standard` (default): visual on top. Side quests ignore it.
+   * On short laptop screens every card is one full-width row, visual 5/12 and text 7/12
+   * (see Projects.css).
    */
   layout?: QuestCardLayout;
   className?: string;
@@ -168,7 +172,8 @@ function Monitor({ shot }: { shot: QuestScreenshot }) {
 
 /**
  * Dotted backdrop holding the screenshot (feature) or the item at x6 (standard). Below 1600px
- * Projects.css draws the item at x4 in a shorter band (still an integer scale of the SVG).
+ * Projects.css draws the item at x4 in a shorter band (still an integer scale of the SVG),
+ * except on short laptop screens, where the backdrop is the card's tall left well (x6).
  */
 function QuestVisual({ project, layout }: { project: Project; layout: QuestCardLayout }) {
   const shot = QUEST_SCREENSHOTS[project.id];
@@ -276,8 +281,11 @@ function QuestLog({ project, open, surface }: { project: Project; open: boolean;
  * compact wood cards with the item in a slot. Both end with a "Quest log" disclosure that
  * holds the full description.
  *
- * The card's parts are direct children of the article, so a parent grid can align them
- * across cards with `grid-rows-subgrid` (see Projects.css).
+ * The card's parts are direct children of the article (a side quest's head and title sit in a
+ * `display: contents` wrapper), so a parent grid can align them across cards with
+ * `grid-rows-subgrid` (see Projects.css). On short laptop screens the same parts form one
+ * full-width row per card: visual (or a side quest's head and title) on the left, text on the
+ * right, in unchanged reading order.
  */
 export default function QuestCard({ project, layout = 'standard', className }: QuestCardProps) {
   const [open, setOpen] = useState(false);
@@ -296,10 +304,14 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
           id={titleId}
           title={project.title}
           className="quest-title text-ink"
-          nameClass={layout === 'feature' ? 'text-display-m' : 'text-display-s lg:text-display-m'}
+          // Short laptop screens: the subtitle follows the name on its line (it wraps whole).
+          nameClass={cx(
+            layout === 'feature' ? 'text-display-m' : 'text-display-s lg:text-display-m',
+            'short:inline',
+          )}
           // Never larger than the pixel name above it: 16 while the name is 16, 20 once it is 24.
           subtitleClass={cx(
-            'text-body text-ink-muted',
+            'text-body text-ink-muted short:mt-0 short:ml-2 short:inline-block',
             layout === 'feature' ? 'md:text-[1.25rem] md:leading-7' : 'lg:text-[1.25rem] lg:leading-7',
           )}
         />
@@ -338,7 +350,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
         variant="paper"
         elevation={2}
         aria-labelledby={titleId}
-        className={cx('quest-card quest-card--main', `quest-card--${layout}`, className)}
+        className={cx('quest-card quest-card--main short:p-4', `quest-card--${layout}`, className)}
       >
         <QuestVisual project={project} layout={layout} />
         {layout === 'feature' ? <div className="quest-body">{body}</div> : body}
@@ -352,23 +364,27 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
       variant="wood"
       elevation={1}
       aria-labelledby={titleId}
-      className={cx('quest-card quest-card--side', className)}
+      className={cx('quest-card quest-card--side short:p-4', className)}
     >
-      <div className="quest-row quest-row--head">
-        <ItemSlot project={project} scale={2} />
-        {/* No min-w-0: the tag never shrinks, so on a narrow card this block wraps under the slot. */}
-        <div className="flex flex-1 flex-col items-start gap-2">
-          <TierTag tier="side" surface="wood" />
-          <QuestMeta project={project} surface="wood" />
+      {/* Head and title: `display: contents` (they are rows of the side list's subgrid)
+          except on short laptop screens, where they form the card's left column. */}
+      <div className="quest-id">
+        <div className="quest-row quest-row--head">
+          <ItemSlot project={project} scale={2} />
+          {/* No min-w-0: the tag never shrinks, so on a narrow card this block wraps under the slot. */}
+          <div className="flex flex-1 flex-col items-start gap-2">
+            <TierTag tier="side" surface="wood" />
+            <QuestMeta project={project} surface="wood" />
+          </div>
         </div>
+        <QuestTitle
+          id={titleId}
+          title={project.title}
+          className="quest-title text-fg"
+          nameClass="text-display-s"
+          subtitleClass="text-body text-accent-fg"
+        />
       </div>
-      <QuestTitle
-        id={titleId}
-        title={project.title}
-        className="quest-title text-fg"
-        nameClass="text-display-s"
-        subtitleClass="text-body text-accent-fg"
-      />
       <div className="quest-tagline flex flex-col items-start gap-3">
         {project.status === 'in-development' && <StatusChip surface="wood" />}
         <p className="text-body text-fg">{project.tagline}</p>

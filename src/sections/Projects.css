@@ -85,6 +85,12 @@
     gap: 8px 12px;
   }
 
+  /* A side quest's head and title. Not a box (its parts are rows of the side
+     list's subgrid) except on short laptop screens: the card's left column. */
+  .quest-id {
+    display: contents;
+  }
+
   /* Wraps the meta under the slot on narrow cards; lines stay packed at the top
      even when the shared subgrid row is taller than this card's header. */
   .quest-row--head {
@@ -337,7 +343,12 @@
     .quest-card {
       --quest-pad: 24px;
     }
+  }
 
+  /* From 768px, except on short laptop screens (1024px+ wide, 960px or less
+     tall: the `short` variant in index.css), which list every card on its
+     own row (see "Short laptop screens" below). */
+  @media (width >= 48rem) and (not ((width >= 64rem) and (height <= 60rem))) {
     /* Main quests: the lead card spans both columns, the other two share a
        row and line their parts up through subgrid (8 rows each). */
     .quest-list--main {
@@ -382,7 +393,7 @@
     align-self: start;
   }
 
-  @media (min-width: 768px) {
+  @media (width >= 48rem) and (not ((width >= 64rem) and (height <= 60rem))) {
     .quest-list--main:has(> li:not(:first-child) .quest-log:not([hidden])) > li:not(:first-child),
     .quest-list--main:has(> li:not(:first-child) .quest-log:not([hidden])) > li:not(:first-child) > .quest-card,
     .quest-list--side:has(.quest-log:not([hidden])) > li,
@@ -439,6 +450,127 @@
     display: flex;
     min-width: 0;
     flex-direction: column;
+  }
+
+  /* ── Short laptop screens ──────────────────────────────────────────────
+     1024px+ wide and 960px or less tall (the `short` variant in index.css:
+     1097x516, 1280x602, 1536x730, 1470x830, 1920x950...). Each card fits one
+     screen under the nav; at 1097x516 that is 424px (516 - 68 nav - 24 air).
+     Every card is a full-width row split 5/12 · 7/12 like the 12-column grid
+     (gap 24), so the text columns line up down the zone:
+
+       feature   screenshot     | meta · title · tagline · highlights · chips · actions
+       main      item well      | meta · title · tagline · highlights · chips · actions
+       side      head · title   | tagline · chips · actions
+
+     Cards pad 16 (`short:p-4` on the panel); from the meta line down the
+     parts step 8 · 8 · 12 · 12 · 12 apart, which keeps the lead card inside
+     424px even if its tagline takes a third line (text a few % wider on
+     another OS). The DOM order (so the reading and focus order) is the same
+     as everywhere else. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    .quest-card {
+      --quest-pad: 20px; /* 16 padding + the 4px frame */
+    }
+
+    .quest-card--feature,
+    .quest-card--standard,
+    .quest-card--side {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: 24px;
+    }
+
+    .quest-card .quest-title {
+      margin-top: 12px;
+    }
+
+    .quest-card--main .quest-title {
+      margin-top: 8px;
+    }
+
+    .quest-card .quest-tagline {
+      margin-top: 8px;
+    }
+
+    .quest-highlights {
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .quest-card .quest-chips {
+      margin-top: 12px;
+    }
+
+    .quest-actions {
+      padding-top: 12px;
+    }
+
+    .quest-card--feature .quest-monitor {
+      width: calc(100% - 48px);
+    }
+
+    /* Main quest: the item's dotted well fills the left column and bleeds to
+       the frame, like the screenshot's backdrop; the actions row takes any
+       spare height so the buttons sit on the bottom edge. */
+    .quest-card--standard {
+      grid-template-rows: repeat(5, auto) 1fr auto;
+    }
+
+    .quest-card--standard > .quest-visual {
+      grid-row: 1 / -1;
+      grid-column: 1;
+      height: auto;
+      margin: calc(var(--quest-pad) * -1) 0 calc(var(--quest-pad) * -1) calc(var(--quest-pad) * -1);
+    }
+
+    .quest-card--standard > :not(.quest-visual) {
+      grid-column: 2;
+    }
+
+    /* The well is tall enough for the x6 item at every width. */
+    .quest-card--standard .quest-visual--item .item-slot--xl {
+      --bob: -6px;
+      width: 152px;
+      height: 152px;
+    }
+
+    .quest-card--standard .quest-visual--item .item-slot__sprite {
+      width: 144px;
+      height: 144px;
+    }
+
+    /* Side quest: slot, tag, meta and title on the left; the tagline starts
+       level with the slot and Live · Code · Quest log share one row. */
+    .quest-list--side {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .quest-card--side {
+      grid-template-rows: auto auto 1fr auto;
+    }
+
+    .quest-card--side > .quest-id {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      grid-row: 1 / -1;
+      grid-column: 1;
+    }
+
+    .quest-card--side > :not(.quest-id) {
+      grid-column: 2;
+    }
+
+    .quest-card--side .quest-tagline {
+      margin-top: 0;
+    }
+
+    .quest-actions--stacked {
+      flex-direction: row;
+      align-items: center;
+      gap: 24px;
+    }
   }
 
   /* ── Research logs ─────────────────────────────────────────────────

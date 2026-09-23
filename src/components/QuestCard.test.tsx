@@ -12,6 +12,12 @@ const byId = (id: string): Project => {
   return p;
 };
 
+/** True when every element comes after the one before it in document order. */
+const inDocumentOrder = (elements: Element[]) =>
+  elements.every(
+    (el, i) => i === 0 || Boolean(elements[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING),
+  );
+
 describe('splitTitle', () => {
   it('splits on the first " - "', () => {
     expect(splitTitle('Aside - AI Sidebar')).toEqual({ name: 'Aside', subtitle: 'AI Sidebar' });
@@ -65,6 +71,13 @@ describe('<QuestCard> main quest (feature)', () => {
     expect(img).toHaveAttribute('height', '720');
     expect(img).toHaveAttribute('loading', 'lazy');
     expect(img).not.toHaveClass('pixelated');
+  });
+
+  it('asks for the smaller 5/12 screenshot on short laptop screens first (the first match wins)', () => {
+    render(<QuestCard project={aside} layout="feature" />);
+    const sizes = screen.getByRole('img').getAttribute('sizes')!.split(', ');
+    expect(sizes[0]).toBe('(min-width: 1024px) and (max-height: 960px) 400px');
+    expect(sizes[1]).toBe('(min-width: 1024px) 540px');
   });
 
   it('lists the highlights, on phones too (the lead card keeps them)', () => {
@@ -131,6 +144,24 @@ describe('<QuestCard> main quest (standard)', () => {
     expect(container.querySelector('.quest-actions')).not.toHaveClass('quest-actions--pair');
   });
 
+  it('reads tier, title, tagline, highlights, tech, then actions (every layout keeps this order)', () => {
+    const career = byId('career-predictor');
+    render(<QuestCard project={career} />);
+    const card = screen.getByRole('article', { name: career.title });
+    expect(
+      inDocumentOrder([
+        within(card).getByText('Main quest'),
+        within(card).getByRole('heading', { level: 4, name: career.title }),
+        within(card).getByText(career.tagline),
+        within(card).getByText(career.highlights![0]),
+        within(card).getByRole('list', { name: 'Built with' }),
+        within(card).getByRole('link', { name: /^Live demo/ }),
+        within(card).getByRole('link', { name: /^Code on GitHub/ }),
+        within(card).getByRole('button', { name: /^Quest log/ }),
+      ]),
+    ).toBe(true);
+  });
+
   it('marks its highlights as secondary (hidden below 640px, restated in the quest log)', () => {
     const career = byId('career-predictor');
     render(<QuestCard project={career} />);
@@ -150,6 +181,27 @@ describe('<QuestCard> side quest', () => {
     expect(container.querySelector('svg[data-item="recipe-book"]')).toHaveAttribute('width', '48');
     // highlights are for main quests only; the chip list is the only list
     expect(within(card).getAllByRole('list')).toHaveLength(1);
+  });
+
+  it('groups the head and title first (the left column on short laptop screens)', () => {
+    const clr = byId('clr');
+    const { container } = render(<QuestCard project={clr} />);
+    const card = screen.getByRole('article', { name: clr.title });
+    const id = container.querySelector('.quest-id')!;
+    expect(card.firstElementChild).toBe(id);
+    expect(id).toContainElement(within(card).getByText('Side quest'));
+    expect(id).toContainElement(within(card).getByRole('heading', { level: 4, name: clr.title }));
+    expect(id).not.toContainElement(within(card).getByText(clr.tagline));
+    expect(
+      inDocumentOrder([
+        id,
+        within(card).getByText('In development'),
+        within(card).getByText(clr.tagline),
+        within(card).getByRole('list', { name: 'Built with' }),
+        within(card).getByRole('link', { name: /^Code on GitHub/ }),
+        within(card).getByRole('button', { name: /^Quest log/ }),
+      ]),
+    ).toBe(true);
   });
 
   it('shows no status chip when the project has none', () => {
