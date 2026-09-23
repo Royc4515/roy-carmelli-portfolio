@@ -1,131 +1,204 @@
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import { bio } from '../data/bio';
 import PixelPanel from '../components/PixelPanel';
-import ZoneLabel from '../components/ZoneLabel';
 import Character from '../components/Character';
+import Campfire from '../components/Campfire';
 import PixelIcon, { type PixelIconName } from '../components/PixelIcon';
+import { Button } from '../components/ui/Button';
+import { ZoneHeader } from '../components/ui/ZoneHeader';
+import { Reveal } from '../components/ui/Reveal';
+import { useToast } from '../components/ui/Toast';
 
-const socials: { href: string; label: string; icon: PixelIconName }[] = [
-  { href: bio.github,            label: 'GitHub',   icon: 'github' },
-  { href: bio.linkedin,          label: 'LinkedIn', icon: 'linkedin' },
-  { href: `mailto:${bio.email}`, label: 'Email',    icon: 'mail' },
-  { href: `tel:${bio.phone}`,    label: 'Phone',    icon: 'phone' },
+/** Toast after the address lands on the clipboard. */
+export const EMAIL_COPIED_MESSAGE = 'Email copied · progress saved';
+/** Toast when the browser refuses both copy paths: the address is selected instead. */
+export const EMAIL_SELECTED_MESSAGE = 'Copy blocked · address selected below';
+
+/** Keeps "CS × neuroscience" on one line, so the "×" never starts or ends a line. */
+const blurb = bio.contactBlurb.replace(/ × /g, '\u00a0×\u00a0');
+
+/** "+972547287807" → "+972 54 728 7807", so screen readers read digit groups, not one number. */
+const phoneSpoken = bio.phone.replace(/^(\+\d{3})(\d{2})(\d{3})(\d{4})$/, '$1 $2 $3 $4');
+
+interface Channel {
+  label: string;
+  /** Accessible name; starts with the visible label. */
+  name: string;
+  icon: PixelIconName;
+  href: string;
+  external: boolean;
+}
+
+const channels: Channel[] = [
+  { label: 'GitHub', name: 'GitHub profile', icon: 'github', href: bio.github, external: true },
+  { label: 'LinkedIn', name: 'LinkedIn profile', icon: 'linkedin', href: bio.linkedin, external: true },
+  { label: 'Phone', name: `Phone ${phoneSpoken}`, icon: 'phone', href: `tel:${bio.phone}`, external: false },
 ];
 
-export default function Contact() {
+/**
+ * Copies `text`: the async Clipboard API first, then a hidden read-only input with
+ * `execCommand('copy')` (older browsers, insecure contexts). Resolves `false` when both fail.
+ */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Permission denied or not a secure context: try the legacy path.
+  }
+  if (typeof document.execCommand !== 'function') return false;
+
+  const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const input = document.createElement('input');
+  input.value = text;
+  input.readOnly = true; // no on-screen keyboard on touch devices
+  input.tabIndex = -1;
+  input.setAttribute('aria-hidden', 'true');
+  input.className = 'pointer-events-none fixed left-0 top-0 h-px w-px opacity-0';
+  document.body.append(input);
+  // select() alone does not always focus, and execCommand copies the focused selection.
+  input.focus({ preventScroll: true });
+  input.select();
+  input.setSelectionRange(0, text.length);
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch {
+    copied = false;
+  }
+  input.remove();
+  previous?.focus({ preventScroll: true });
+  return copied;
+}
+
+/**
+ * Ground the fire lights: its own width in `accent`, then one more sprite pixel (4 native px
+ * × scale) each side in `accent-press`, drawn over the 4px ground line.
+ */
+function LitGround({ scale }: { scale: 3 | 4 }) {
+  const reach = scale === 4 ? '-inset-x-4' : '-inset-x-3';
   return (
-    <section
-      id="contact"
-      className="dot-grid"
-      style={{
-        position: 'relative',
-        minHeight: '80vh',
-        background: 'var(--color-forest)',
-        padding: '80px 2rem 4rem',
-      }}
-    >
-      {/* Mobile-first: stack vertically, side-by-side from md */}
-      <div className="flex flex-col md:flex-row gap-10 items-start mx-auto" style={{ maxWidth: '900px' }}>
+    <>
+      <span className={`absolute -bottom-1 h-1 bg-accent-press ${reach}`} />
+      <span className="absolute inset-x-0 -bottom-1 h-1 bg-accent" />
+    </>
+  );
+}
 
-        {/* Zone label + character sidebar — full-width on mobile so items center properly */}
-        <div className="flex flex-col items-center gap-6 flex-shrink-0 w-full md:w-28">
-          <ZoneLabel lines={['CONTACT', 'ZONE']} icon="mail" />
-          <Character pose="idle" scale={2} label="Roy standing" />
-        </div>
+/** The "save point": Roy standing by a campfire on a 4px ground line. Decorative. */
+function SavePoint() {
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        className="flex items-end justify-center gap-6 border-b-4 border-border-subtle px-10 lg:gap-8 lg:px-14"
+        aria-hidden="true"
+      >
+        {/* One sprite per breakpoint: both render at integer scale, CSS picks one. */}
+        <span className="block lg:hidden">
+          <Character pose="idle" scale={2} decorative />
+        </span>
+        <span className="hidden lg:block">
+          <Character pose="idle" scale={3} decorative />
+        </span>
+        <span className="relative block lg:hidden">
+          <Campfire scale={3} />
+          <LitGround scale={3} />
+        </span>
+        <span className="relative hidden lg:block">
+          <Campfire scale={4} />
+          <LitGround scale={4} />
+        </span>
+      </div>
+      <p className="mt-4 flex items-center gap-2 text-hud uppercase text-fg-subtle">
+        <PixelIcon name="check" size={12} className="text-xp" />
+        Save point · progress saved
+      </p>
+    </div>
+  );
+}
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.15 }}
-          transition={{ duration: 0.7 }}
-          className="flex-1 min-w-0 flex flex-col"
-          style={{ gap: '1.5rem' }}
-        >
-          <h2 className="text-center md:text-left" style={{
-            fontFamily: 'var(--font-pixel)',
-            fontSize: 'clamp(0.7rem, 1.8vw, 1.1rem)',
-            color: 'var(--color-parchment)',
-            textShadow: '2px 2px 0 var(--color-forest-dark)',
-          }}>
-            Let's Talk <PixelIcon name="mail" size={24} className="inline-block align-middle" />
-          </h2>
+/**
+ * Zone 05 · Save Point (SPEC §4 Contact). No form (there is no backend): a `mailto:` button,
+ * a copy-to-clipboard button with a toast, the address as selectable text, and GitHub,
+ * LinkedIn and Phone as labelled secondary buttons.
+ */
+export default function Contact() {
+  const toast = useToast();
+  const addressRef = useRef<HTMLParagraphElement>(null);
 
-          <PixelPanel variant="wood">
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: 'var(--color-parchment-dark)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
-              Available for software engineering and AI internships starting summer 2026 - part-time during the semester, full-time during breaks. Also open to research collaborations at the CS × neuroscience intersection.
-            </p>
-            <div className="flex justify-center md:justify-start">
-            <a
-              href={`mailto:${bio.email}`}
-              style={{
-                display: 'inline-block',
-                fontFamily: 'var(--font-pixel)',
-                fontSize: '0.5rem',
-                padding: '0.85rem 1.25rem',
-                minHeight: '44px',
-                background: 'var(--color-brass)',
-                color: 'var(--color-forest-dark)',
-                textDecoration: 'none',
-                letterSpacing: '0.04em',
-                boxShadow: '4px 4px 0 var(--color-wood)',
-                wordBreak: 'break-all',
-                transition: 'transform 0.08s, box-shadow 0.08s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.transform = 'translate(2px,2px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 var(--color-wood)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.transform = '';
-                (e.currentTarget as HTMLElement).style.boxShadow = '4px 4px 0 var(--color-wood)';
-              }}
-            >
-              <PixelIcon name="mail" size={12} className="inline-block align-middle" />{' '}{bio.email}
-            </a>
-            </div>
+  const copyEmail = async () => {
+    if (await copyText(bio.email)) {
+      toast.show(EMAIL_COPIED_MESSAGE, { icon: <PixelIcon name="check" size={24} /> });
+      return;
+    }
+    // Last resort: select the visible address so a manual copy is one keystroke away.
+    const address = addressRef.current;
+    const selection = window.getSelection();
+    if (address && selection) selection.selectAllChildren(address);
+    toast.show(EMAIL_SELECTED_MESSAGE, { icon: <PixelIcon name="copy" size={24} /> });
+  };
 
-            <div className="flex flex-wrap gap-3 justify-center md:justify-start" style={{ borderTop: '1px solid var(--color-forest-light)', marginTop: '1.25rem', paddingTop: '1.25rem' }}>
-              {socials.map(({ href, label, icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target={href.startsWith('http') ? '_blank' : undefined}
-                  rel={href.startsWith('http') ? 'noreferrer' : undefined}
-                  aria-label={label}
-                  style={{
-                    display: 'inline-flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '4px',
-                    width: '64px',
-                    minHeight: '44px',
-                    padding: '8px 4px',
-                    background: 'var(--color-forest-dark)',
-                    border: '2px solid var(--color-forest-light)',
-                    color: 'var(--color-parchment)',
-                    textDecoration: 'none',
-                    boxShadow: '3px 3px 0 var(--color-shadow-deep)',
-                    transition: 'border-color 0.15s, transform 0.08s, box-shadow 0.08s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brass)';
-                    (e.currentTarget as HTMLElement).style.transform = 'translate(1px,1px)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '2px 2px 0 var(--color-shadow-deep)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)';
-                    (e.currentTarget as HTMLElement).style.transform = '';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 var(--color-shadow-deep)';
-                  }}
+  return (
+    <section id="contact" aria-labelledby="contact-title" className="relative bg-bg px-dots py-16 md:py-24">
+      <div className="relative mx-auto max-w-[1120px] px-4 md:px-6 lg:px-8">
+        <Reveal>
+          <ZoneHeader
+            zone={5}
+            name="Save Point"
+            title="Let's Talk"
+            icon={<PixelIcon name="mail" size={36} />}
+            id="contact-title"
+          />
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end lg:gap-6">
+          <Reveal index={1} className="lg:col-span-5">
+            <SavePoint />
+          </Reveal>
+
+          <Reveal index={2} className="lg:col-span-7">
+            <PixelPanel variant="wood" elevation={2}>
+              <p className="max-w-[60ch] text-body text-fg">{blurb}</p>
+
+              <div className="mt-6 flex gap-4">
+                <Button
+                  href={`mailto:${bio.email}`}
+                  size="lg"
+                  aria-label={`Email me at ${bio.email}`}
+                  leadingIcon={<PixelIcon name="mail" size={24} />}
+                  className="flex-1 sm:flex-none"
                 >
-                  <PixelIcon name={icon} size={24} />
-                  <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.3rem', color: 'var(--color-parchment-dark)', letterSpacing: '0.05em' }}>{label}</span>
-                </a>
-              ))}
-            </div>
-          </PixelPanel>
-        </motion.div>
+                  Email me
+                </Button>
+                <Button variant="icon" size="lg" aria-label="Copy email" onClick={copyEmail}>
+                  <PixelIcon name="copy" size={24} />
+                </Button>
+              </div>
+              <p ref={addressRef} className="mt-6 select-all break-all text-hud text-fg-muted">
+                {bio.email}
+              </p>
+
+              <ul className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3 lg:flex lg:flex-wrap">
+                {channels.map(channel => (
+                  <li key={channel.label}>
+                    <Button
+                      variant="secondary"
+                      href={channel.href}
+                      external={channel.external}
+                      aria-label={channel.name}
+                      leadingIcon={<PixelIcon name={channel.icon} size={12} />}
+                      className="w-full"
+                    >
+                      {channel.label}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </PixelPanel>
+          </Reveal>
+        </div>
       </div>
     </section>
   );

@@ -122,7 +122,7 @@ Floors everywhere: body 16px (14px only for captions/meta), HUD 12px (13 preferr
   Panel padding 16 (base) / 24 (`md`).
 - No `min-height: 100vh` except the hero (`min-h-[100svh]`, capped at 880px on desktop).
 - Zone grounds alternate: hero scene · Projects `bg` · About `bg-alt` · Skills `bg` ·
-  Resume paper band on `bg-alt` · Contact `bg-alt` · Footer `surface-sunken`.
+  Resume paper band on `bg-alt` · Contact `bg` · Footer `surface-sunken`. Every zone carries `px-dots`.
 
 ### 2.4 Pixel language
 
