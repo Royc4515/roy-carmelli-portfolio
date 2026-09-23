@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { skills } from '../data/bio';
-import { moveInGrid, splitColumns } from './equipmentGrid';
+import { moveInGrid } from './equipmentGrid';
 
 // Rows of different lengths, like the equipment slots: 3, 5, 2, 4 items.
 const rows = [3, 5, 2, 4];
@@ -47,23 +46,5 @@ describe('moveInGrid', () => {
 
   it('clamps an out-of-range position before moving', () => {
     expect(moveInGrid(rows, at(9, 9), 'ArrowLeft')).toEqual(at(3, 2));
-  });
-});
-
-describe('splitColumns', () => {
-  it('balances item counts plus a heading weight per slot', () => {
-    expect(splitColumns([4, 4])).toBe(1);
-    expect(splitColumns([10, 1, 1, 1])).toBe(1);
-    expect(splitColumns([1, 1, 1, 10])).toBe(3);
-  });
-
-  it('splits the real slots after Magic: Weapons, Armor, Magic | Potions to Achievements', () => {
-    const split = splitColumns(skills.map(g => g.items.length));
-    expect(skills[split].slot).toBe('Potions');
-  });
-
-  it('handles a single slot and no slots', () => {
-    expect(splitColumns([5])).toBe(0);
-    expect(splitColumns([])).toBe(0);
   });
 });

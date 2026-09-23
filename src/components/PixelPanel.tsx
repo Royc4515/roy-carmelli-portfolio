@@ -25,7 +25,7 @@ export interface PixelPanelProps extends HTMLAttributes<HTMLElement> {
   variant?: PixelPanelVariant;
   /** Element to render. Default `div`. */
   as?: PixelPanelElement;
-  /** `sm` 16 · `md` 16 → 24 at md (default) · `lg` 24 → 32 at md. */
+  /** `sm` 16 · `md` 16 → 20 at md (default) · `lg` 20 → 28 at md. */
   padding?: PixelPanelPadding;
   /** 0 flat (default) · 1 `px-drop-sm` (4px) · 2 `px-drop` (8px). */
   elevation?: 0 | 1 | 2;

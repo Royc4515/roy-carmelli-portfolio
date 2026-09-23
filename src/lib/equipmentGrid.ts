@@ -62,27 +62,3 @@ export function moveInGrid(
       return null;
   }
 }
-
-/**
- * Where to split the slots into two columns (≥ 1280px): the index of the first slot of the
- * second column, chosen so both columns carry about the same height. A slot's weight is its
- * item count plus `headingWeight` for its heading and the gap after it. Reading, Tab and
- * arrow order stay in data order (left column, then right column).
- */
-export function splitColumns(rowLengths: readonly number[], headingWeight = 3): number {
-  const weights = rowLengths.map(n => n + headingWeight);
-  const total = weights.reduce((a, b) => a + b, 0);
-  let best = 0;
-  let bestDiff = Infinity;
-  let left = 0;
-  for (let i = 0; i <= weights.length; i++) {
-    const diff = Math.abs(total - 2 * left);
-    // Strict `<` keeps the earlier split on a tie.
-    if (diff < bestDiff) {
-      best = i;
-      bestDiff = diff;
-    }
-    left += weights[i] ?? 0;
-  }
-  return best;
-}

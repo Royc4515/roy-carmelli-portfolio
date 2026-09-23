@@ -124,7 +124,7 @@ Floors everywhere: body 16px (14px only for captions/meta), HUD 12px (13 preferr
 - Section rhythm: `py-12` (48) base, `md:py-16` (64), `py-20` (80) from 1600px. Zone header → content 24.
   Card gap 24. Density pass: sized for real viewports (14" laptops at 1280×650, 1536×730, 1470×830;
   phones with browser bars at 390×664, 360×700), not the idealised 1280×800 / 390×844.
-  Panel padding 16 (base) / 24 (`md`).
+  Panel padding 16 (base) / 20 (`md`).
 - **Short laptops** (`short:` variant, `@media (width >= 64rem) and (height <= 60rem)`: 14" laptops
   at 125-175% scaling with tabs and bookmarks bar, e.g. 1097×516, 1280×602, 1366×600, 1536×730,
   1470×830, and 1440×900): section padding `short:py-6` (24), zone header → content 16, header
