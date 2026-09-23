@@ -1,0 +1,142 @@
+/* ==========================================================================
+   Zone 03 · Equipment (Skills.tsx, SkillTooltip.tsx). Semantic tokens only.
+   In the components layer, so Tailwind utilities passed as classes still win.
+   ========================================================================== */
+
+@layer components {
+  /* ── Character well: Roy stands on a wooden floor, a 4px wood-hi edge over a
+     12px surface band, inside the inset panel's 2px line. */
+  .skill-well {
+    background-image:
+      linear-gradient(var(--color-wood-hi), var(--color-wood-hi)),
+      linear-gradient(var(--color-surface), var(--color-surface));
+    background-repeat: no-repeat;
+    background-size:
+      calc(100% - 4px) 4px,
+      calc(100% - 4px) 14px;
+    /* top of the edge = bottom of the sprite (the panel's 16px bottom padding) */
+    background-position:
+      2px calc(100% - 12px),
+      2px calc(100% - 2px);
+  }
+
+  .skill-stat + .skill-stat {
+    border-top: 2px dashed var(--color-border-subtle);
+  }
+
+  /* ── Item: HUD 13, 36px tall (at least 36 wide), sunken with a 2px inner
+     wood line. The hit area grows 4px on every side (44 x 44 or more),
+     exactly filling the 8px gaps. */
+  .skill-item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    min-width: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 0;
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    white-space: nowrap;
+    cursor: help;
+    box-shadow: inset 0 0 0 2px var(--color-wood-hi);
+    transition:
+      box-shadow var(--dur-fast) steps(2, end),
+      color var(--dur-fast) steps(2, end);
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -4px;
+    }
+
+    &:focus-visible,
+    &[data-open] {
+      color: var(--color-accent-fg);
+      box-shadow: inset 0 0 0 2px var(--color-accent);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-accent-fg);
+        box-shadow: inset 0 0 0 2px var(--color-accent);
+      }
+    }
+  }
+
+  /* ── Tooltip: paper card, 4px ink frame, hard drop. Hangs 12px under (or
+     over) its item, shifted by --tip-x so it stays inside the viewport. */
+  .skill-tip {
+    --px-frame: var(--color-ink);
+    position: absolute;
+    top: calc(100% + 12px);
+    left: var(--tip-x, 0px);
+    z-index: 30;
+    width: max-content;
+    min-width: 13rem;
+    max-width: min(20rem, calc(100vw - 2rem));
+    animation: skill-tip-in var(--dur-base) var(--ease-snap) both;
+
+    &[hidden] {
+      display: none;
+    }
+
+    /* Bridge over the gap, so the pointer can travel onto the tooltip. */
+    &::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      bottom: 100%;
+      height: 16px;
+    }
+
+    &[data-side="top"] {
+      top: auto;
+      bottom: calc(100% + 12px);
+      animation-name: skill-tip-in-top;
+
+      &::before {
+        top: 100%;
+        bottom: auto;
+      }
+    }
+  }
+
+  .skill-detail {
+    --px-frame: var(--color-ink);
+    animation: skill-tip-in var(--dur-base) var(--ease-snap) both;
+  }
+
+  /* 2px dashed ink rule (4px dash, 4px gap) above the "Used in" line. */
+  .skill-tip__rule {
+    background: repeating-linear-gradient(to right, var(--color-ink-muted) 0 4px, transparent 4px 8px)
+      0 0 / 100% 2px no-repeat;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skill-item {
+      transition: none;
+    }
+
+    .skill-tip,
+    .skill-detail {
+      animation: none;
+    }
+  }
+}
+
+@keyframes skill-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes skill-tip-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
