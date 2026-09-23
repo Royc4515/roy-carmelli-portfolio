@@ -234,7 +234,7 @@ describe('Hero — desktop', () => {
     expect(document.getElementById('contact')).toHaveAttribute('inert');
   });
 
-  it('leaves the game when an in-page link outside the hero is followed, keeping focus on it', async () => {
+  it('leaves the game when an in-page link outside the hero is followed, without pulling focus back to PRESS START', async () => {
     render(
       <>
         <header>
@@ -760,7 +760,7 @@ describe('compact title screen geometry', () => {
     expect(s.forestY + forest.h * k + s.groundExtraH).toBe(viewH + 300);
   });
 
-  it('keeps the full 544px card on landscape phones and narrows it at 200% zoom', () => {
+  it('keeps the full 520px card on landscape phones and narrows it at 200% zoom', () => {
     expect(compactOverlayFit(844, 326)).toEqual({ k: 3, cardW: HERO_CARD_W });
     expect(compactOverlayFit(640, 336)?.k).toBe(3);
     expect(compactOverlayFit(640, 336)!.cardW).toBeLessThan(HERO_CARD_W);

@@ -11,7 +11,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { AnimatePresence, LazyMotion, domAnimation, m, steps, type Transition } from 'framer-motion';
+import { AnimatePresence, m, steps, type Transition } from 'framer-motion';
 import { bio } from '../data/bio';
 import Character from '../components/Character';
 import ArcadeFallback from '../components/ArcadeFallback';
@@ -328,7 +328,7 @@ function spriteTopFor(k: number, forestY: number): number {
 }
 
 /**
- * Desktop placement of Roy's sprite in a `width` x `sceneH` title screen (544px card, scale
+ * Desktop placement of Roy's sprite in a `width` x `sceneH` title screen (520px card, scale
  * `sceneScale`), or null when he does not fit beside the title card.
  */
 export function placeOverlaySprite(width: number, sceneH: number): OverlayPlacement | null {
@@ -357,7 +357,7 @@ function placeCompact(width: number, viewH: number, { k, cardW }: CompactFit): O
 /**
  * Compact title screen for a viewport whose scene area is `viewH` px tall: the scale whose forest
  * best fills the first screen (Roy whole, with 4 rows of air over his head), stepping down one
- * scale to keep the full 544px card, else narrowing the card (widest first, never under its
+ * scale to keep the full 520px card, else narrowing the card (widest first, never under its
  * minimum). The first candidate where the card slices no bird wins. Null when nothing fits: the
  * band layout takes over.
  */
@@ -1052,157 +1052,155 @@ export default function Hero() {
         : '@container px-dots absolute inset-x-0 bottom-0 top-16 z-20 flex max-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-4 bg-bg px-4 pb-4 pt-3';
 
   return (
-    <LazyMotion features={domAnimation}>
-      <section
-        id="hero"
-        aria-labelledby="hero-title"
-        data-layout={layout}
-        data-compact={compact || undefined}
-        className={cx(
-          'relative bg-bg pt-16',
-          overlay ? 'hero--overlay flex flex-col overflow-hidden' : 'overflow-x-clip pb-1',
-        )}
+    <section
+      id="hero"
+      aria-labelledby="hero-title"
+      data-layout={layout}
+      data-compact={compact || undefined}
+      className={cx(
+        'relative bg-bg pt-16',
+        overlay ? 'hero--overlay flex flex-col overflow-hidden' : 'overflow-x-clip pb-1',
+      )}
+    >
+      {/* ── The world: forest + Roy at one integer scale ─────────────────── */}
+      <div
+        ref={sceneRef}
+        className={cx('hero-scene overflow-hidden', overlay ? 'absolute inset-x-0 bottom-0 top-16' : 'relative')}
+        style={overlay ? undefined : { height: `${scene.sceneH}px` }}
       >
-        {/* ── The world: forest + Roy at one integer scale ─────────────────── */}
-        <div
-          ref={sceneRef}
-          className={cx('hero-scene overflow-hidden', overlay ? 'absolute inset-x-0 bottom-0 top-16' : 'relative')}
-          style={overlay ? undefined : { height: `${scene.sceneH}px` }}
+        {forestTiles.map(tile => (
+          <img
+            key={tile.x}
+            src={FOREST.src}
+            alt=""
+            width={FOREST.w * k}
+            height={FOREST.h * k}
+            decoding="async"
+            draggable={false}
+            className={cx('pixelated absolute max-w-none select-none', tile.mirrored && '-scale-x-100')}
+            style={{
+              left: `${tile.x}px`,
+              top: `${scene.forestY}px`,
+              width: `${FOREST.w * k}px`,
+              height: `${FOREST.h * k}px`,
+            }}
+          />
+        ))}
+        {scene.groundExtraH > 0 && (
+          <GroundStrips
+            k={k}
+            forestX={scene.forestX}
+            top={scene.forestY + FOREST.h * k}
+            depth={scene.groundExtraH}
+          />
+        )}
+        {/* Night: the world gets two moonlight washes, Roy (between them) one, so he stays lit. */}
+        <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
+        <m.div
+          className="absolute"
+          style={{ left: `${scene.spriteX}px`, bottom: `${scene.groundH}px` }}
+          initial={false}
+          animate={{ opacity: isPlaying ? 0 : 1 }}
+          transition={sceneTransition}
         >
-          {forestTiles.map(tile => (
-            <img
-              key={tile.x}
-              src={FOREST.src}
-              alt=""
-              width={FOREST.w * k}
-              height={FOREST.h * k}
-              decoding="async"
-              draggable={false}
-              className={cx('pixelated absolute max-w-none select-none', tile.mirrored && '-scale-x-100')}
-              style={{
-                left: `${tile.x}px`,
-                top: `${scene.forestY}px`,
-                width: `${FOREST.w * k}px`,
-                height: `${FOREST.h * k}px`,
-              }}
-            />
-          ))}
-          {scene.groundExtraH > 0 && (
-            <GroundStrips
-              k={k}
-              forestX={scene.forestX}
-              top={scene.forestY + FOREST.h * k}
-              depth={scene.groundExtraH}
-            />
+          {k <= 4 ? (
+            <Character pose="wave" scale={k} label={spriteLabel} />
+          ) : (
+            <HeroSprite scale={k} label={spriteLabel} paused={isPlaying} />
           )}
-          {/* Night: the world gets two moonlight washes, Roy (between them) one, so he stays lit. */}
-          <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
+        </m.div>
+        <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
+      </div>
+
+      {/* ── HUD nameplate (desktop) ─────────────────────────────────────── */}
+      {overlay && scene.hudClear && (
+        <div className="pointer-events-none absolute inset-x-0 top-16 z-10">
+          <div className="mx-auto flex max-w-[1120px] justify-end px-6 pt-4 lg:px-8">
+            <m.div
+              ref={hudRef}
+              initial={false}
+              animate={isPlaying ? { opacity: 0, y: -16 } : { opacity: 1, y: 0 }}
+              transition={slide(16)}
+            >
+              <HudNameplate />
+            </m.div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Title card ──────────────────────────────────────────────────── */}
+      <m.div
+        ref={titleRef}
+        className={cx(
+          'relative z-10',
+          overlay && 'mx-auto w-full max-w-[1120px] flex-1 px-4 pb-9 md:px-6 lg:px-8',
+        )}
+        style={overlay ? { paddingTop: `${cardTop}px` } : undefined}
+        initial={false}
+        animate={isPlaying ? { opacity: 0, x: -24 } : { opacity: 1, x: 0 }}
+        transition={slide(24)}
+      >
+        {titleCard}
+      </m.div>
+
+      {/* ── Scroll cue (desktop), on the dirt under the grass ───────────── */}
+      {showScrollCue && (
+        <m.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 z-10 flex items-center justify-center gap-2 text-hud text-fg"
+          style={{ bottom: `${Math.round((scene.dirtH - 16) / 2)}px` }}
+          initial={false}
+          animate={{ opacity: isPlaying ? 0 : 1 }}
+          transition={sceneTransition}
+        >
+          SCROLL
+          <PixelIcon name="arrow-down" size={12} />
+        </m.div>
+      )}
+
+      {/* ── Game / rotate prompt ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {isPlaying && (
           <m.div
-            className="absolute"
-            style={{ left: `${scene.spriteX}px`, bottom: `${scene.groundH}px` }}
-            initial={false}
-            animate={{ opacity: isPlaying ? 0 : 1 }}
+            key="game"
+            ref={gameRef}
+            tabIndex={-1}
+            role="region"
+            aria-label="Roy Runner"
+            className={cx('hero-game', gameClass, 'outline-none')}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={sceneTransition}
           >
-            {k <= 4 ? (
-              <Character pose="wave" scale={k} label={spriteLabel} />
+            {mode === 'rotate' ? (
+              <ArcadeFallback />
             ) : (
-              <HeroSprite scale={k} label={spriteLabel} paused={isPlaying} />
+              <Suspense fallback={<p className="text-label text-fg">Loading...</p>}>
+                <MiniGame onQuit={quit} showTouchControls={mode === 'touch'} />
+              </Suspense>
+            )}
+
+            {/* Touch play has its own QUIT inside the game chrome. */}
+            {mode !== 'touch' && (
+              <div className="hero-game__controls flex shrink-0 flex-wrap items-center justify-center gap-x-6 gap-y-4">
+                <div className="flex items-center gap-4">
+                  <Button variant="secondary" onClick={quit} leadingIcon={<PixelIcon name="close" size={12} />}>
+                    Quit
+                  </Button>
+                  {mode === 'desktop' && (
+                    <Chip>
+                      <kbd className="font-[inherit]">Esc</kbd>
+                    </Chip>
+                  )}
+                </div>
+                {mode === 'desktop' && <ControlsHint />}
+              </div>
             )}
           </m.div>
-          <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
-        </div>
-
-        {/* ── HUD nameplate (desktop) ─────────────────────────────────────── */}
-        {overlay && scene.hudClear && (
-          <div className="pointer-events-none absolute inset-x-0 top-16 z-10">
-            <div className="mx-auto flex max-w-[1120px] justify-end px-6 pt-4 lg:px-8">
-              <m.div
-                ref={hudRef}
-                initial={false}
-                animate={isPlaying ? { opacity: 0, y: -16 } : { opacity: 1, y: 0 }}
-                transition={slide(16)}
-              >
-                <HudNameplate />
-              </m.div>
-            </div>
-          </div>
         )}
-
-        {/* ── Title card ──────────────────────────────────────────────────── */}
-        <m.div
-          ref={titleRef}
-          className={cx(
-            'relative z-10',
-            overlay && 'mx-auto w-full max-w-[1120px] flex-1 px-4 pb-9 md:px-6 lg:px-8',
-          )}
-          style={overlay ? { paddingTop: `${cardTop}px` } : undefined}
-          initial={false}
-          animate={isPlaying ? { opacity: 0, x: -24 } : { opacity: 1, x: 0 }}
-          transition={slide(24)}
-        >
-          {titleCard}
-        </m.div>
-
-        {/* ── Scroll cue (desktop), on the dirt under the grass ───────────── */}
-        {showScrollCue && (
-          <m.div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 z-10 flex items-center justify-center gap-2 text-hud text-fg"
-            style={{ bottom: `${Math.round((scene.dirtH - 16) / 2)}px` }}
-            initial={false}
-            animate={{ opacity: isPlaying ? 0 : 1 }}
-            transition={sceneTransition}
-          >
-            SCROLL
-            <PixelIcon name="arrow-down" size={12} />
-          </m.div>
-        )}
-
-        {/* ── Game / rotate prompt ────────────────────────────────────────── */}
-        <AnimatePresence>
-          {isPlaying && (
-            <m.div
-              key="game"
-              ref={gameRef}
-              tabIndex={-1}
-              role="region"
-              aria-label="Roy Runner"
-              className={cx('hero-game', gameClass, 'outline-none')}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={sceneTransition}
-            >
-              {mode === 'rotate' ? (
-                <ArcadeFallback />
-              ) : (
-                <Suspense fallback={<p className="text-label text-fg">Loading...</p>}>
-                  <MiniGame onQuit={quit} showTouchControls={mode === 'touch'} />
-                </Suspense>
-              )}
-
-              {/* Touch play has its own QUIT inside the game chrome. */}
-              {mode !== 'touch' && (
-                <div className="hero-game__controls flex shrink-0 flex-wrap items-center justify-center gap-x-6 gap-y-4">
-                  <div className="flex items-center gap-4">
-                    <Button variant="secondary" onClick={quit} leadingIcon={<PixelIcon name="close" size={12} />}>
-                      Quit
-                    </Button>
-                    {mode === 'desktop' && (
-                      <Chip>
-                        <kbd className="font-[inherit]">Esc</kbd>
-                      </Chip>
-                    )}
-                  </div>
-                  {mode === 'desktop' && <ControlsHint />}
-                </div>
-              )}
-            </m.div>
-          )}
-        </AnimatePresence>
-      </section>
-    </LazyMotion>
+      </AnimatePresence>
+    </section>
   );
 }
 
