@@ -757,7 +757,13 @@ export default function Hero() {
   const showScrollCue = overlay && cardTop + cardH + CARD_DROP <= scene.sceneH - scene.dirtH;
 
   useEffect(() => {
-    const handler = () => setIsPlaying(true);
+    const handler = () => {
+      // The game opens inside the hero and the page scroll then locks: if the hero is not at
+      // the top of the viewport (a scroll that was cut short), jump there first.
+      const top = document.getElementById('hero')?.getBoundingClientRect().top ?? 0;
+      if (Math.abs(top) > 1) window.scrollTo({ top: window.scrollY + top, behavior: 'instant' });
+      setIsPlaying(true);
+    };
     window.addEventListener('arcade:play', handler);
     return () => window.removeEventListener('arcade:play', handler);
   }, []);

@@ -99,28 +99,71 @@ describe('Navbar — desktop', () => {
     }
   });
 
-  it('Play scrolls to the hero, then dispatches arcade:play after 400ms', async () => {
-    vi.useFakeTimers();
-    try {
+  describe('Play', () => {
+    /** A hero `top` px below the viewport top (0 = already in place). */
+    function mountHero(top: number) {
       const hero = document.createElement('section');
       hero.id = 'hero';
       hero.scrollIntoView = vi.fn();
+      hero.getBoundingClientRect = () => ({ top }) as DOMRect;
       document.body.append(hero);
+      return hero;
+    }
+
+    it('scrolls to the hero and starts the game only once the scroll has settled', () => {
+      vi.useFakeTimers();
+      const hero = mountHero(-3000);
       const onPlay = vi.fn();
       window.addEventListener('arcade:play', onPlay);
+      try {
+        render(<Navbar {...defaultProps} />);
+        act(() => screen.getByRole('button', { name: /play/i }).click());
+        expect(hero.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+        // A long scroll: well past the old fixed 400ms, still no game.
+        act(() => { vi.advanceTimersByTime(800); });
+        expect(onPlay).not.toHaveBeenCalled();
+        act(() => { window.dispatchEvent(new Event('scrollend')); });
+        expect(onPlay).toHaveBeenCalledOnce();
+        // The fallback timer was cleared: no second start.
+        act(() => { vi.advanceTimersByTime(2000); });
+        expect(onPlay).toHaveBeenCalledOnce();
+      } finally {
+        window.removeEventListener('arcade:play', onPlay);
+        hero.remove();
+        vi.useRealTimers();
+      }
+    });
 
-      render(<Navbar {...defaultProps} />);
-      act(() => screen.getByRole('button', { name: /play/i }).click());
-      expect(hero.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
-      expect(onPlay).not.toHaveBeenCalled();
-      act(() => { vi.advanceTimersByTime(400); });
-      expect(onPlay).toHaveBeenCalledOnce();
+    it('falls back to a timeout where scrollend never fires', () => {
+      vi.useFakeTimers();
+      const hero = mountHero(-3000);
+      const onPlay = vi.fn();
+      window.addEventListener('arcade:play', onPlay);
+      try {
+        render(<Navbar {...defaultProps} />);
+        act(() => screen.getByRole('button', { name: /play/i }).click());
+        act(() => { vi.advanceTimersByTime(1200); });
+        expect(onPlay).toHaveBeenCalledOnce();
+      } finally {
+        window.removeEventListener('arcade:play', onPlay);
+        hero.remove();
+        vi.useRealTimers();
+      }
+    });
 
-      window.removeEventListener('arcade:play', onPlay);
-      hero.remove();
-    } finally {
-      vi.useRealTimers();
-    }
+    it('starts at once when the hero is already in place', () => {
+      const hero = mountHero(0);
+      const onPlay = vi.fn();
+      window.addEventListener('arcade:play', onPlay);
+      try {
+        render(<Navbar {...defaultProps} />);
+        act(() => screen.getByRole('button', { name: /play/i }).click());
+        expect(onPlay).toHaveBeenCalledOnce();
+      } finally {
+        window.removeEventListener('arcade:play', onPlay);
+        hero.remove();
+      }
+    });
   });
 });
 

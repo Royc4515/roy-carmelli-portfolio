@@ -121,6 +121,20 @@ describe('Hero — desktop', () => {
     await findCanvas();
   });
 
+  it('jumps back to the hero if arcade:play arrives while it is off-screen', async () => {
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    try {
+      render(<Hero />);
+      const hero = document.getElementById('hero')!;
+      hero.getBoundingClientRect = () => ({ top: -2900 }) as DOMRect;
+      fireEvent(window, new CustomEvent('arcade:play'));
+      expect(scrollTo).toHaveBeenCalledWith({ top: window.scrollY - 2900, behavior: 'instant' });
+      await findCanvas();
+    } finally {
+      scrollTo.mockRestore();
+    }
+  });
+
   it('quits with Esc and hands focus back to PRESS START', async () => {
     render(<Hero />);
     const pressStart = screen.getByRole('button', { name: /press start/i });

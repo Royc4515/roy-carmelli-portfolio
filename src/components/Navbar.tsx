@@ -41,7 +41,8 @@ const SPY_IDS = ZONES.map(zone => zone.id);
 const LAST_LINK_ID = 'contact';
 
 const SCROLLED_AFTER_PX = 8;
-const ARCADE_DELAY_MS = 400;
+/** Longest wait for the smooth scroll to the hero where the browser has no `scrollend` event. */
+const ARCADE_MAX_WAIT_MS = 1200;
 const PAUSE_MENU_ID = 'pause-menu';
 const WIDE_QUERY = '(min-width: 1280px)';
 
@@ -228,10 +229,29 @@ function focusZoneHeading(sectionId: string) {
   });
 }
 
-/** Scroll to the hero, then ask it to start the game (Hero listens for `arcade:play`). */
+/**
+ * Scroll to the hero, then ask it to start the game (Hero listens for `arcade:play`). The event
+ * waits until the scroll has settled (`scrollend`, or a timeout where it is unsupported): a fixed
+ * delay could start the game while the hero is still off-screen. Hero also brings itself into
+ * view if it is not there when the event arrives.
+ */
 function triggerArcade(reducedMotion: boolean) {
-  document.getElementById('hero')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
-  window.setTimeout(() => window.dispatchEvent(new CustomEvent('arcade:play')), ARCADE_DELAY_MS);
+  const hero = document.getElementById('hero');
+  const play = () => window.dispatchEvent(new CustomEvent('arcade:play'));
+  if (!hero || reducedMotion || Math.abs(hero.getBoundingClientRect().top) < 2) {
+    hero?.scrollIntoView({ behavior: 'auto' });
+    play();
+    return;
+  }
+  let timer = 0;
+  const settled = () => {
+    window.removeEventListener('scrollend', settled);
+    window.clearTimeout(timer);
+    play();
+  };
+  window.addEventListener('scrollend', settled);
+  timer = window.setTimeout(settled, ARCADE_MAX_WAIT_MS);
+  hero.scrollIntoView({ behavior: 'smooth' });
 }
 
 /** `scrolled`: past the first 8px (the bar gains its drop). `atBottom`: a scrollable page is at its end. */
