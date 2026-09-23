@@ -249,6 +249,11 @@
    ========================================================================== */
 
 @layer base {
+  /* Anchor jumps land below the fixed 64px nav + its 4px frame line. */
+  html {
+    scroll-padding-top: 72px;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;

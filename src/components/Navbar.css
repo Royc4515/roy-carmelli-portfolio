@@ -1,0 +1,189 @@
+/* ==========================================================================
+   Navbar + pause menu (docs/redesign/SPEC.md §4 Navbar).
+   Layout lives in Tailwind classes in Navbar.tsx. This file holds the state
+   styling: the frame and scroll drop, link cursor/underline states, the
+   pause-menu rows and open/close transition, and a nav-sized focus ring.
+   It sits in the components layer, so Tailwind utilities still win.
+   ========================================================================== */
+
+@layer components {
+  /* Icons in the header use brass for their second ink (the default is HP
+     red, which would make the book spine the loudest thing in the bar). */
+  .site-nav {
+    --pi-accent: var(--color-accent);
+  }
+
+  /* ── Bar ───────────────────────────────────────────────────────────────
+     The 4px frame hangs below the 64px bar as a box-shadow line, so the
+     layout height stays 64. After 8px of scroll `px-drop-sm` sets --px-drop
+     and a hard 4px drop appears under the frame. */
+  .site-nav__bar {
+    box-shadow:
+      0 4px 0 0 var(--color-border),
+      var(--px-drop, 0 0 transparent);
+    transition:
+      background-color 350ms ease,
+      box-shadow var(--dur-fast) steps(2, end);
+  }
+
+  /* Nav buttons are 44px faces in a 64px bar: the stock ring (8px out, 4px
+     under the drop) would be clipped by the viewport top and sit on the
+     frame. Here it hugs the 4px edge instead: 3px of focus colour right
+     outside the edge and right under the drop. */
+  .site-nav__bar .px-btn:focus-visible::after {
+    inset: -4px -4px calc(0px - var(--btn-drop) + var(--btn-press) * var(--btn-motion));
+  }
+
+  /* ── Brand ─────────────────────────────────────────────────────────── */
+  .site-nav__brand {
+    color: var(--color-fg);
+    text-decoration: none;
+    transition: color var(--dur-fast) steps(2, end);
+  }
+
+  .site-nav__brand:hover {
+    color: var(--color-accent-fg);
+    text-decoration: none;
+  }
+
+  .site-nav__brand:focus-visible {
+    outline-offset: 0;
+  }
+
+  /* ── Section links ─────────────────────────────────────────────────── */
+  .nav-link {
+    color: var(--color-fg);
+    text-decoration: none;
+    transition: color var(--dur-fast) steps(2, end);
+  }
+
+  .nav-link:hover {
+    text-decoration: none;
+  }
+
+  .nav-link:focus-visible {
+    outline-offset: 0;
+  }
+
+  .nav-link[aria-current="true"] {
+    color: var(--color-accent-fg);
+  }
+
+  .nav-link__cursor {
+    visibility: hidden;
+  }
+
+  .nav-link[aria-current="true"] .nav-link__cursor {
+    visibility: visible;
+  }
+
+  /* Absolutely positioned, so a later mini-map path can sit between items. */
+  .nav-link__underline {
+    background-color: transparent;
+    transition: background-color var(--dur-fast) steps(2, end);
+  }
+
+  .nav-link:hover .nav-link__underline {
+    background-color: var(--color-border-subtle);
+  }
+
+  .nav-link[aria-current="true"] .nav-link__underline {
+    background-color: var(--color-accent);
+  }
+
+  /* ── Pause menu ────────────────────────────────────────────────────────
+     Open/close: --dur-slow in 4 steps. Closed, it stays hidden (visibility)
+     only after the fade has finished. */
+  .pause-menu {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity var(--dur-slow) steps(4, end),
+      visibility 0s linear 0s;
+  }
+
+  .pause-menu:not([data-open]) {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-slow) steps(4, end),
+      visibility 0s linear var(--dur-slow);
+  }
+
+  /* 8px in 4 steps: whole-pixel positions only. */
+  .pause-menu__panel {
+    transform: translateY(0);
+    transition: transform var(--dur-slow) steps(4, end);
+  }
+
+  .pause-menu:not([data-open]) .pause-menu__panel {
+    transform: translateY(8px);
+  }
+
+  .pause-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 0;
+    background-color: transparent;
+    color: var(--color-fg);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) steps(2, end),
+      color var(--dur-fast) steps(2, end);
+  }
+
+  .pause-item[aria-current="true"] {
+    color: var(--color-accent-fg);
+  }
+
+  .pause-item:is(:hover, :focus) {
+    background-color: var(--color-surface-raised);
+    color: var(--color-accent-fg);
+    text-decoration: none;
+  }
+
+  .pause-item:focus-visible {
+    outline-offset: 0;
+  }
+
+  /* One cursor at a time: the hovered row, else the focused row. */
+  .pause-item__cursor {
+    visibility: hidden;
+    color: var(--color-accent-fg);
+  }
+
+  .pause-item:is(:hover, :focus) .pause-item__cursor {
+    visibility: visible;
+  }
+
+  .pause-menu__items:hover .pause-item:not(:hover) {
+    background-color: transparent;
+  }
+
+  .pause-menu__items:hover .pause-item:not(:hover):not([aria-current="true"]) {
+    color: var(--color-fg);
+  }
+
+  .pause-menu__items:hover .pause-item:not(:hover) .pause-item__cursor {
+    visibility: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav__bar,
+    .site-nav__brand,
+    .nav-link,
+    .nav-link__underline,
+    .pause-menu,
+    .pause-menu:not([data-open]),
+    .pause-menu__panel,
+    .pause-item {
+      transition: none;
+    }
+  }
+}

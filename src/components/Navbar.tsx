@@ -1,19 +1,87 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Theme } from '../hooks/useTheme';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useActiveSection } from '../hooks/useActiveSection';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { Button } from './ui/Button';
+import { cx } from './ui/cx';
 import PixelIcon, { type PixelIconName } from './PixelIcon';
+import PixelPanel from './PixelPanel';
 import { pixelSprites } from '../theme/pixelSprites';
+import { bio } from '../data/bio';
+import './Navbar.css';
 
-const links: { label: string; href: string; icon: PixelIconName }[] = [
-  { label: 'Home',    href: '#hero',     icon: 'home' },
-  { label: 'Library', href: '#projects', icon: 'book' },
-  { label: 'About',   href: '#about',    icon: 'person' },
-  { label: 'Contact', href: '#contact',  icon: 'mail' },
+interface SectionLink {
+  id: string;
+  label: string;
+  icon: PixelIconName;
+}
+
+const LINKS: readonly SectionLink[] = [
+  { id: 'projects', label: 'Projects', icon: 'book' },
+  { id: 'about', label: 'About', icon: 'person' },
+  { id: 'skills', label: 'Skills', icon: 'sword' },
+  { id: 'contact', label: 'Contact', icon: 'mail' },
 ];
 
-function triggerArcade() {
-  document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
-  setTimeout(() => window.dispatchEvent(new CustomEvent('arcade:play')), 400);
+/** Sections the scroll-spy watches, in page order. `resume` has no link: nothing is lit there. */
+const SPY_IDS = ['projects', 'about', 'skills', 'resume', 'contact'];
+/** Contact is short and last: its top may never reach the spy line, so the page bottom lights it. */
+const LAST_LINK_ID = 'contact';
+
+const SCROLLED_AFTER_PX = 8;
+const ARCADE_DELAY_MS = 400;
+const PAUSE_MENU_ID = 'pause-menu';
+const WIDE_QUERY = '(min-width: 1280px)';
+
+const PLAY_LABEL = 'Play the mini-game';
+
+/** Scroll to the hero, then ask it to start the game (Hero listens for `arcade:play`). */
+function triggerArcade(reducedMotion: boolean) {
+  document.getElementById('hero')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+  window.setTimeout(() => window.dispatchEvent(new CustomEvent('arcade:play')), ARCADE_DELAY_MS);
+}
+
+function matchesQuery(query: string): boolean {
+  return typeof window.matchMedia === 'function' && window.matchMedia(query).matches;
+}
+
+/** Live `matchMedia` result (the nav only needs one breakpoint beyond `useIsMobile`). */
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() => matchesQuery(query));
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatches(mql.matches);
+    onChange();
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [query]);
+  return matches;
+}
+
+/** `scrolled`: past the first 8px (the bar gains its drop). `atBottom`: a scrollable page is at its end. */
+function useScrollState() {
+  const [state, setState] = useState({ scrolled: false, atBottom: false });
+  useEffect(() => {
+    const update = () => {
+      const y = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const scrolled = y > SCROLLED_AFTER_PX;
+      const atBottom = maxScroll > 0 && y >= maxScroll - 2;
+      setState(prev =>
+        prev.scrolled === scrolled && prev.atBottom === atBottom ? prev : { scrolled, atBottom },
+      );
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+  return state;
 }
 
 interface NavbarProps {
@@ -21,276 +89,310 @@ interface NavbarProps {
   onToggleTheme: () => void;
 }
 
+/**
+ * Site header (SPEC §4 Navbar): a fixed 64px wood bar with the brand (face + name, back to top),
+ * the section links with a scroll-spy cursor, and the Resume / Play / theme actions.
+ * Below 768px the links move into a full-screen "PAUSED" menu: `inert` while closed, focus moves
+ * to its first item on open, Tab stays inside the header, Esc closes and returns focus to the Menu
+ * button, and the page does not scroll behind it.
+ */
 export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const isMobile = useIsMobile();
+  const isWide = useMediaQuery(WIDE_QUERY);
+  const reducedMotion = usePrefersReducedMotion();
+  const { scrolled, atBottom } = useScrollState();
+  const spied = useActiveSection(SPY_IDS);
+  const current = atBottom ? LAST_LINK_ID : spied;
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+  const headerRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
+  const firstItemRef = useRef<HTMLAnchorElement>(null);
+
+  const themeLabel = theme === 'night' ? 'Switch to day mode' : 'Switch to night mode';
+  const themeIcon: PixelIconName = theme === 'night' ? 'sun' : 'moon';
+
+  /** Close the pause menu; `returnFocus` puts focus back on the Menu button. */
+  const closeMenu = useCallback((returnFocus: boolean) => {
+    setMenuOpen(false);
+    if (returnFocus) menuButtonRef.current?.focus();
   }, []);
 
+  // The menu only exists below 768px.
   useEffect(() => {
-    // Close menu if viewport resizes to desktop
     if (!isMobile) setMenuOpen(false);
   }, [isMobile]);
 
+  // Open: focus the first item, lock the page scroll.
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (!menuOpen) return;
+    firstItemRef.current?.focus({ preventScroll: true });
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [menuOpen]);
 
+  // Open: Esc closes; Tab cycles through the header (bar + menu) only.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMenu(true);
+        return;
+      }
+      if (event.key !== 'Tab' || !headerRef.current) return;
+      const focusables = Array.from(
+        headerRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (!headerRef.current.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen, closeMenu]);
+
+  const play = () => triggerArcade(reducedMotion);
+
+  const brand = (
+    <a
+      href="#hero"
+      aria-label="Roy Carmelli, back to top"
+      className="site-nav__brand flex h-[50px] shrink-0 items-center gap-3"
+      onClick={() => menuOpen && closeMenu(false)}
+    >
+      {/* 49px tall: pinned to the top of the 50px box so it lands on whole pixels. */}
+      <img
+        src={pixelSprites.face.src}
+        alt=""
+        width={pixelSprites.face.w}
+        height={pixelSprites.face.h}
+        className="pixelated block self-start"
+      />
+      <span className="site-nav__name relative top-px text-label md:max-lg:hidden">{bio.name}</span>
+    </a>
+  );
+
+  // Hidden while closed (`inert` + aria-hidden). React 18 has no typed `inert` prop yet.
+  const inertWhenClosed: Record<string, string> = menuOpen ? {} : { inert: '' };
+
   return (
-    <>
-      <nav
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          background: 'var(--color-forest)',
-          borderBottom: scrolled
-            ? '3px solid var(--color-brass)'
-            : '3px solid var(--color-forest-light)',
-          transition: 'border-color 0.3s',
-        }}
-      >
+    <header ref={headerRef} className="site-nav fixed inset-x-0 top-0 z-[100]">
+      <nav aria-label="Main">
+        {/* -ml-1/pl-1: the bar starts 4px off-screen so the 4px-right drop reaches the left edge. */}
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 1.5rem',
-            height: '60px',
-          }}
+          className={cx('site-nav__bar relative z-10 -ml-1 h-16 bg-surface pl-1', scrolled && 'px-drop-sm')}
         >
-          {/* Desktop nav links — hidden on mobile */}
-          {!isMobile && (
-            <ul style={{ display: 'flex', gap: 0, listStyle: 'none', alignItems: 'center' }}>
-              {links.map(link => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '8px 20px',
-                      textDecoration: 'none',
-                      fontFamily: 'var(--font-pixel)',
-                      fontSize: '0.5rem',
-                      color: 'var(--color-parchment)',
-                      letterSpacing: '0.05em',
-                      transition: 'color 0.15s, background 0.15s',
-                      borderRight: '1px solid var(--color-forest-light)',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = 'rgba(201,162,74,0.15)';
-                      e.currentTarget.style.color = 'var(--color-brass)';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'var(--color-parchment)';
-                    }}
+          {/* pb-1: items centre on the 60px above the buttons' floor, so their 8px drop clears the frame. */}
+          <div className="mx-auto flex h-full max-w-[1120px] items-center gap-4 px-4 pb-1 md:px-6 lg:px-8">
+            {brand}
+
+            {!isMobile && (
+              <>
+                <ul className="mx-auto flex items-center gap-1 xl:gap-2" role="list">
+                  {LINKS.map(link => {
+                    const active = current === link.id;
+                    return (
+                      <li key={link.id} className="flex">
+                        <a
+                          href={`#${link.id}`}
+                          aria-current={active ? 'true' : undefined}
+                          className="nav-link relative flex h-12 items-center gap-2 pl-4 pr-2 text-hud"
+                        >
+                          <PixelIcon
+                            name="play"
+                            size={12}
+                            className="nav-link__cursor absolute inset-y-0 left-0 my-auto"
+                          />
+                          <PixelIcon name={link.icon} size={24} className="hidden shrink-0 lg:block" />
+                          <span className="relative top-px">{link.label}</span>
+                          <span aria-hidden="true" className="nav-link__underline absolute bottom-0 left-4 right-2 h-1" />
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                <div className="flex shrink-0 items-center gap-4">
+                  <Button
+                    href={bio.resume.href}
+                    download={bio.resume.fileName}
+                    title="Download resume (PDF)"
+                    leadingIcon={<PixelIcon name="download" size={12} />}
+                    className="min-h-11"
                   >
-                    <PixelIcon name={link.icon} size={24} />
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-              <li>
-                <button
-                  onClick={triggerArcade}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '8px 20px',
-                    background: 'none',
-                    border: 'none',
-                    borderRight: '1px solid var(--color-forest-light)',
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-pixel)',
-                    fontSize: '0.5rem',
-                    color: 'var(--color-parchment)',
-                    letterSpacing: '0.05em',
-                    transition: 'color 0.15s, background 0.15s',
-                    height: '60px',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.background = 'rgba(201,162,74,0.15)';
-                    (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.background = 'transparent';
-                    (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
-                  }}
-                >
-                  <PixelIcon name="joystick" size={24} />
-                  Arcade
-                </button>
-              </li>
-            </ul>
-          )}
+                    Resume
+                  </Button>
+                  {isWide ? (
+                    <Button
+                      variant="secondary"
+                      title={PLAY_LABEL}
+                      leadingIcon={<PixelIcon name="joystick" size={12} />}
+                      className="min-h-11"
+                      onClick={play}
+                    >
+                      Play
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="icon"
+                      aria-label={PLAY_LABEL}
+                      title={PLAY_LABEL}
+                      className="size-11 min-h-11"
+                      onClick={play}
+                    >
+                      <PixelIcon name="joystick" size={24} />
+                    </Button>
+                  )}
+                  <Button
+                    variant="icon"
+                    aria-label={themeLabel}
+                    title={themeLabel}
+                    className="size-11 min-h-11"
+                    onClick={onToggleTheme}
+                  >
+                    <PixelIcon name={themeIcon} size={24} />
+                  </Button>
+                </div>
+              </>
+            )}
 
-          {/* Right side: theme toggle + face + hamburger (mobile only) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' }}>
-            <button
-              onClick={onToggleTheme}
-              aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
-              title={theme === 'night' ? 'Switch to day' : 'Switch to night'}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '44px',
-                height: '44px',
-                background: 'var(--color-forest-dark)',
-                border: '2px solid var(--color-brass)',
-                color: 'var(--color-brass)',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-pixel)',
-                fontSize: '1rem',
-                lineHeight: 1,
-                padding: 0,
-                transition: 'transform 0.12s, color 0.15s, border-color 0.15s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translate(-1px,-1px)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; }}
-            >
-              {theme === 'night' ? '☀' : '☾'}
-            </button>
-
-            <img
-              src={pixelSprites.face.src}
-              alt="Roy Carmelli"
-              width={pixelSprites.face.w}
-              height={pixelSprites.face.h}
-              style={{
-                boxSizing: 'content-box',
-                imageRendering: 'pixelated',
-                borderRadius: 0,
-                border: '2px solid var(--color-brass)',
-                background: 'var(--color-forest-dark)',
-              }}
-            />
-
-            {/* Hamburger — only rendered on mobile */}
             {isMobile && (
-              <button
-                onClick={() => setMenuOpen(p => !p)}
-                aria-label="Toggle menu"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '48px',
-                  height: '48px',
-                  background: 'none',
-                  border: '2px solid var(--color-brass)',
-                  cursor: 'pointer',
-                  color: 'var(--color-parchment)',
-                  fontFamily: 'var(--font-pixel)',
-                  fontSize: '0.8rem',
-                }}
-              >
-                {menuOpen ? '✕' : '☰'}
-              </button>
+              <div className="ml-auto flex shrink-0 items-center gap-4">
+                <Button
+                  variant="icon"
+                  href={bio.resume.href}
+                  download={bio.resume.fileName}
+                  aria-label="Download resume"
+                  className="size-11 min-h-11"
+                >
+                  <PixelIcon name="download" size={24} />
+                </Button>
+                <Button
+                  ref={menuButtonRef}
+                  variant="icon"
+                  aria-label="Toggle menu"
+                  aria-expanded={menuOpen}
+                  aria-controls={PAUSE_MENU_ID}
+                  className="size-11 min-h-11"
+                  onClick={() => (menuOpen ? closeMenu(false) : setMenuOpen(true))}
+                >
+                  <PixelIcon name={menuOpen ? 'close' : 'menu'} size={24} />
+                </Button>
+              </div>
             )}
           </div>
         </div>
-      </nav>
 
-      {/* Mobile overlay — only mounted on mobile */}
-      {isMobile && (
-        <div
-          data-testid="mobile-menu-overlay"
-          aria-hidden={menuOpen ? 'false' : 'true'}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99,
-            background: 'var(--color-forest-dark)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '2rem',
-            opacity: menuOpen ? 1 : 0,
-            pointerEvents: menuOpen ? 'all' : 'none',
-            transition: 'opacity 0.25s ease',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '1rem', width: '100%', maxWidth: '300px', padding: '0 1.5rem' }}>
-          {links.map(link => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                fontSize: '1rem',
-                color: 'var(--color-parchment)',
-                textDecoration: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0.875rem 2rem',
-                minHeight: '44px',
-                border: '3px solid var(--color-forest-light)',
-                textAlign: 'center',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'var(--color-brass)';
-                e.currentTarget.style.color = 'var(--color-brass)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'var(--color-forest-light)';
-                e.currentTarget.style.color = 'var(--color-parchment)';
-              }}
-            >
-              <PixelIcon name={link.icon} size={36} />
-              {link.label}
-            </a>
-          ))}
-          <button
-            onClick={() => { setMenuOpen(false); triggerArcade(); }}
-            style={{
-              fontFamily: 'var(--font-pixel)',
-              fontSize: '1rem',
-              color: 'var(--color-parchment)',
-              background: 'none',
-              border: '3px solid var(--color-forest-light)',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '0.875rem 2rem',
-              minHeight: '44px',
-              textAlign: 'center',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brass)';
-              (e.currentTarget as HTMLElement).style.color = 'var(--color-brass)';
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-forest-light)';
-              (e.currentTarget as HTMLElement).style.color = 'var(--color-parchment)';
-            }}
+        {isMobile && (
+          <div
+            id={PAUSE_MENU_ID}
+            data-testid="mobile-menu-overlay"
+            data-open={menuOpen || undefined}
+            aria-hidden={menuOpen ? 'false' : 'true'}
+            {...inertWhenClosed}
+            className="pause-menu px-dots fixed inset-0 z-0 flex flex-col overflow-y-auto overscroll-contain bg-bg px-6 pb-10 pt-[100px]"
           >
-            <PixelIcon name="joystick" size={36} />
-            Arcade
-          </button>
+            <PixelPanel
+              variant="wood"
+              elevation={2}
+              tab="Paused"
+              className="pause-menu__panel mx-auto my-auto w-full max-w-[360px]"
+            >
+              <div className="pause-menu__items">
+                <ul role="list">
+                  {LINKS.map((link, index) => {
+                    const active = current === link.id;
+                    return (
+                      <li key={link.id}>
+                        <a
+                          ref={index === 0 ? firstItemRef : undefined}
+                          href={`#${link.id}`}
+                          aria-current={active ? 'true' : undefined}
+                          className="pause-item"
+                          onClick={() => closeMenu(false)}
+                        >
+                          <PixelIcon name="play" size={12} className="pause-item__cursor shrink-0" />
+                          <PixelIcon name={link.icon} size={24} className="shrink-0" />
+                          <span className="relative top-px whitespace-nowrap text-display-s uppercase">{link.label}</span>
+                          {active && (
+                            <span aria-hidden="true" className="ml-auto whitespace-nowrap pl-2 text-hud uppercase text-fg-subtle">
+                              Here
+                            </span>
+                          )}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                <div aria-hidden="true" className="px-divider my-3" />
+
+                <ul role="list">
+                  <li>
+                    <a
+                      href={bio.resume.href}
+                      download={bio.resume.fileName}
+                      className="pause-item"
+                      onClick={() => closeMenu(true)}
+                    >
+                      <PixelIcon name="play" size={12} className="pause-item__cursor shrink-0" />
+                      <PixelIcon name="download" size={24} className="shrink-0" />
+                      <span className="relative top-px whitespace-nowrap text-display-s uppercase">Resume</span>
+                      <span className="ml-auto whitespace-nowrap pl-2 text-hud uppercase text-fg-subtle">PDF</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      className="pause-item"
+                      onClick={() => {
+                        closeMenu(true);
+                        play();
+                      }}
+                    >
+                      <PixelIcon name="play" size={12} className="pause-item__cursor shrink-0" />
+                      <PixelIcon name="joystick" size={24} className="shrink-0" />
+                      <span className="relative top-px whitespace-nowrap text-display-s uppercase">Play</span>
+                      <span className="ml-auto whitespace-nowrap pl-2 text-hud uppercase text-fg-subtle">Mini-game</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" className="pause-item" aria-label={themeLabel} onClick={onToggleTheme}>
+                      <PixelIcon name="play" size={12} className="pause-item__cursor shrink-0" />
+                      <PixelIcon name={themeIcon} size={24} className="shrink-0" />
+                      <span className="relative top-px whitespace-nowrap text-display-s uppercase">{theme === 'night' ? 'Day mode' : 'Night mode'}</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              <Button
+                variant="secondary"
+                className="mt-6 w-full"
+                leadingIcon={<PixelIcon name="play" size={12} />}
+                onClick={() => closeMenu(true)}
+              >
+                Resume game
+              </Button>
+            </PixelPanel>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </nav>
+    </header>
   );
 }
