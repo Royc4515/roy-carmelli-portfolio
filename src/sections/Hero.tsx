@@ -770,17 +770,19 @@ export default function Hero() {
   // The scroll cue sits in the dirt at the bottom centre; skip it when the card reaches down there.
   const showScrollCue = overlay && cardTop + cardH + CARD_DROP <= scene.sceneH - scene.dirtH;
 
-  useEffect(() => {
-    const handler = () => {
-      // The game opens inside the hero and the page scroll then locks: if the hero is not at
-      // the top of the viewport (a scroll that was cut short), jump there first.
-      const top = document.getElementById('hero')?.getBoundingClientRect().top ?? 0;
-      if (Math.abs(top) > 1) window.scrollTo({ top: window.scrollY + top, behavior: 'instant' });
-      setIsPlaying(true);
-    };
-    window.addEventListener('arcade:play', handler);
-    return () => window.removeEventListener('arcade:play', handler);
+  // Press start and the navbar's Play (`arcade:play`) both open the game here. It opens inside
+  // the hero and the page scroll then locks, so the hero must be at the top of the viewport
+  // first: jump there (a page scrolled past the title card, a Play scroll cut short).
+  const startGame = useCallback(() => {
+    const top = document.getElementById('hero')?.getBoundingClientRect().top ?? 0;
+    if (Math.abs(top) > 1) window.scrollTo({ top: window.scrollY + top, behavior: 'instant' });
+    setIsPlaying(true);
   }, []);
+
+  useEffect(() => {
+    window.addEventListener('arcade:play', startGame);
+    return () => window.removeEventListener('arcade:play', startGame);
+  }, [startGame]);
 
   // Lock body scroll while the game is open so taps don't bleed into page scroll.
   useEffect(() => {
@@ -918,7 +920,7 @@ export default function Hero() {
       ref={pressStartRef}
       variant="ghost"
       className={className}
-      onClick={() => setIsPlaying(true)}
+      onClick={startGame}
       leadingIcon={<PixelIcon name="joystick" size={24} />}
     >
       Press start to play

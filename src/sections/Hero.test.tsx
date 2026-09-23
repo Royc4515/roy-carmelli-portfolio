@@ -136,6 +136,38 @@ describe('Hero — desktop', () => {
     }
   });
 
+  it('brings the hero to the top before locking the scroll when PRESS START is clicked on a scrolled page', async () => {
+    const overflowAtScroll: string[] = [];
+    const scrollTo = vi
+      .spyOn(window, 'scrollTo')
+      .mockImplementation(() => overflowAtScroll.push(document.body.style.overflow));
+    try {
+      render(<Hero />);
+      const hero = document.getElementById('hero')!;
+      hero.getBoundingClientRect = () => ({ top: -300 }) as DOMRect;
+      await userEvent.click(screen.getByRole('button', { name: /press start/i }));
+      expect(scrollTo).toHaveBeenCalledWith({ top: window.scrollY - 300, behavior: 'instant' });
+      // The jump happens while the page can still scroll.
+      expect(overflowAtScroll).toEqual(['']);
+      await findCanvas();
+      expect(document.body.style.overflow).toBe('hidden');
+    } finally {
+      scrollTo.mockRestore();
+    }
+  });
+
+  it('does not scroll when PRESS START is clicked with the hero already at the top', async () => {
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    try {
+      render(<Hero />);
+      await userEvent.click(screen.getByRole('button', { name: /press start/i }));
+      await findCanvas();
+      expect(scrollTo).not.toHaveBeenCalled();
+    } finally {
+      scrollTo.mockRestore();
+    }
+  });
+
   it('quits with Esc and hands focus back to PRESS START', async () => {
     render(<Hero />);
     const pressStart = screen.getByRole('button', { name: /press start/i });
