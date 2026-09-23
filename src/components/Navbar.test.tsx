@@ -1,4 +1,4 @@
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { render, screen, act, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Navbar, { mapProgress, nodeState, pathState, walkKeyframes } from './Navbar';
@@ -146,6 +146,70 @@ describe('Navbar — desktop', () => {
         expect(onPlay).toHaveBeenCalledOnce();
       } finally {
         window.removeEventListener('arcade:play', onPlay);
+        hero.remove();
+        vi.useRealTimers();
+      }
+    });
+
+    it.each([
+      ['a nav link to another zone', () => screen.getByRole('link', { name: 'Contact' }).click()],
+      ['a pointer press anywhere', () => fireEvent.pointerDown(document.body)],
+      ['the wheel', () => fireEvent.wheel(document.body, { deltaY: 120 })],
+      ['a touch', () => fireEvent.touchStart(document.body)],
+      ['a key', () => fireEvent.keyDown(document.body, { key: 'PageDown' })],
+    ])('cancels the pending start when the visitor moves on with %s', (_, moveOn) => {
+      vi.useFakeTimers();
+      const hero = mountHero(-3000);
+      const onPlay = vi.fn();
+      window.addEventListener('arcade:play', onPlay);
+      try {
+        render(<Navbar {...defaultProps} />);
+        act(() => screen.getByRole('button', { name: /play/i }).click());
+        act(() => { vi.advanceTimersByTime(150); });
+        act(() => { moveOn(); });
+        // Neither the end of the scroll it started nor the fallback timer starts the game.
+        act(() => { window.dispatchEvent(new Event('scrollend')); });
+        act(() => { vi.advanceTimersByTime(2000); });
+        expect(onPlay).not.toHaveBeenCalled();
+      } finally {
+        window.removeEventListener('arcade:play', onPlay);
+        hero.remove();
+        vi.useRealTimers();
+      }
+    });
+
+    it('removes every listener it added, whether the scroll settles or the visitor moves on', () => {
+      vi.useFakeTimers();
+      const hero = mountHero(-3000);
+      const add = vi.spyOn(window, 'addEventListener');
+      const remove = vi.spyOn(window, 'removeEventListener');
+      const key = ([type, listener, options]: unknown[]) =>
+        [type, listener, typeof options === 'object' ? Boolean((options as AddEventListenerOptions)?.capture) : Boolean(options)];
+      const leftover = () => {
+        const removed = remove.mock.calls.map(key);
+        return add.mock.calls
+          .map(key)
+          .filter(([type]) => type !== 'arcade:play')
+          .filter(a => !removed.some(r => r.every((v, i) => v === a[i])));
+      };
+      try {
+        render(<Navbar {...defaultProps} />);
+        const play = screen.getByRole('button', { name: /play/i });
+        add.mockClear();
+        remove.mockClear();
+        act(() => play.click());
+        expect(add.mock.calls.length).toBeGreaterThan(1);
+        act(() => { window.dispatchEvent(new Event('scrollend')); });
+        expect(leftover()).toEqual([]);
+
+        add.mockClear();
+        remove.mockClear();
+        act(() => play.click());
+        act(() => fireEvent.wheel(document.body));
+        expect(leftover()).toEqual([]);
+      } finally {
+        add.mockRestore();
+        remove.mockRestore();
         hero.remove();
         vi.useRealTimers();
       }

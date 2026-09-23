@@ -229,11 +229,15 @@ function focusZoneHeading(sectionId: string) {
   });
 }
 
+/** What a visitor does to go somewhere else while the Play scroll is still running. */
+const PLAY_CANCEL_EVENTS = ['pointerdown', 'click', 'wheel', 'touchstart', 'keydown'] as const;
+
 /**
  * Scroll to the hero, then ask it to start the game (Hero listens for `arcade:play`). The event
  * waits until the scroll has settled (`scrollend`, or a timeout where it is unsupported): a fixed
  * delay could start the game while the hero is still off-screen. Hero also brings itself into
- * view if it is not there when the event arrives.
+ * view if it is not there when the event arrives. Any click, wheel, touch or key before then (a
+ * nav link to another zone, say) cancels the start, so the page is not yanked back to the hero.
  */
 function triggerArcade(reducedMotion: boolean) {
   const hero = document.getElementById('hero');
@@ -244,12 +248,19 @@ function triggerArcade(reducedMotion: boolean) {
     return;
   }
   let timer = 0;
-  const settled = () => {
+  const done = () => {
     window.removeEventListener('scrollend', settled);
     window.clearTimeout(timer);
+    PLAY_CANCEL_EVENTS.forEach(type => window.removeEventListener(type, done, true));
+  };
+  const settled = () => {
+    done();
     play();
   };
   window.addEventListener('scrollend', settled);
+  // Capture phase, on the window: seen before any handler can stop it. The click that pressed
+  // Play has already passed the window's capture phase, so it does not cancel itself.
+  PLAY_CANCEL_EVENTS.forEach(type => window.addEventListener(type, done, { capture: true, passive: true }));
   timer = window.setTimeout(settled, ARCADE_MAX_WAIT_MS);
   hero.scrollIntoView({ behavior: 'smooth' });
 }
