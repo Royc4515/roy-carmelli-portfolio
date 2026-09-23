@@ -12,6 +12,7 @@ import Hero, {
   computeHeroScene,
   containerContentLeft,
   heroHeight,
+  isTightCard,
   placeOverlaySprite,
   planHero,
   sceneScale,
@@ -445,6 +446,55 @@ describe('hero height', () => {
 });
 
 /* ── Small and short viewports (P1-04) ─────────────────────────────────── */
+
+describe('tight title card (short laptop screens)', () => {
+  it.each([
+    // Windows at 175% / 150% with tabs and bookmarks bar, a 1366x768 laptop in a browser.
+    [516, HERO_CARD_W, true],
+    [560, HERO_CARD_W, true],
+    [602, HERO_CARD_W, true],
+    [650, HERO_CARD_W, false],
+    [830, HERO_CARD_W, false],
+    // A compact card too narrow for the one-line name keeps the two-line layout.
+    [516, 400, false],
+  ])('viewport %ipx tall, card %ipx → tight %s', (vh, cardW, tight) => {
+    expect(isTightCard(vh, cardW)).toBe(tight);
+  });
+
+  describe('rendered at 1097x516 (Windows 175%)', () => {
+    beforeEach(() => {
+      setupMatchMedia({ mobileWidth: false, coarse: false, portrait: false });
+      setViewport(1097, 516);
+    });
+    afterEach(() => setViewport(1024, 768));
+
+    it('puts the name on one line and the CTAs right under the role', () => {
+      render(<Hero />);
+      const h1 = screen.getByRole('heading', { level: 1 });
+      expect(h1).toHaveClass('hero-name--tight');
+      const role = screen.getByText(bio.role);
+      const cta = screen.getByRole('link', { name: /view projects/i });
+      const tagline = screen.getByText(bio.tagline);
+      // Document order: role, CTAs, then the tagline.
+      expect(role.compareDocumentPosition(cta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(cta.compareDocumentPosition(tagline) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      // Every piece of content is still there.
+      expect(screen.getByText(bio.availability)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /press start/i })).toBeInTheDocument();
+    });
+  });
+
+  it('keeps the two-line name on taller screens', () => {
+    setupMatchMedia({ mobileWidth: false, coarse: false, portrait: false });
+    setViewport(1280, 800);
+    try {
+      render(<Hero />);
+      expect(screen.getByRole('heading', { level: 1 })).not.toHaveClass('hero-name--tight');
+    } finally {
+      setViewport(1024, 768);
+    }
+  });
+});
 
 describe('hero layout per viewport', () => {
   it.each([

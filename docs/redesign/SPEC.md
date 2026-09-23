@@ -343,6 +343,10 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   screen: the same overlay composition with k chosen so the forest fills the first screen and
   the character stands whole, a narrower card when needed (never slicing a bird), and CTAs
   directly under the role below 560px tall. Name, role and primary CTA are always above the fold.
+  Tight title card: when the first screen under the nav is shorter than 560px (laptops at 150-175%
+  Windows scaling with tabs and bookmarks bar, e.g. 1097×516, 1280×602, 1366×600), the card keeps all
+  its content but sets the name on one 32px line, the role and tagline at 16px, 16px padding and a
+  tighter rhythm (CTAs under the role), so the whole card, Press start included, fits the first screen.
 - **Projects (Zone 01 · The Library).** ZoneHeader "Things I've Built". Main quests: the first
   spans full width (visual 7/12, text 5/12), the other two side by side; side quests in a 3-col
   grid (compact wood cards); research logs as a compact list. QuestCard anatomy: visual (16:10,
@@ -391,7 +395,8 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
 - **Accessibility:** skip link to `#projects`; landmarks; one H1; H2 per zone; focus visible
   everywhere; `aria-current` in nav; mobile menu `inert` when closed; icon-only buttons have
   `aria-label`; decorative sprites `aria-hidden`; text floors above; touch targets ≥ 44px.
-- **Viewports:** every change is checked at 1280×650, 1536×730, 1470×830, 390×664 and 360×700
+- **Viewports:** every change is checked at 1097×516 (Windows 175%), 1280×602, 1280×650, 1536×730,
+  1470×830, 390×664 and 360×700
   as well as 1280×800 / 390×844: name, role and primary CTA fit the first screen on all of them.
 - **Performance:** first load ≤ 500KB transferred (was 7.7MB), initial JS ≤ 110KB gzip
   (MiniGame lazy-loaded), every `<img>` has `width`/`height`, below-the-fold images lazy,

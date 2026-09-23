@@ -82,6 +82,20 @@ export const HERO_SHORT_VH = 700;
  * 524px down (nav, 16px, the card down to the CTA's drop). Shorter ones move the CTAs up.
  */
 export const HERO_FULL_CARD_VH = 560;
+/**
+ * First screens (scene area under the nav) shorter than this get the tight title card: the
+ * name on one 32px line, a 16px tagline, 16px padding, tighter rhythm. Laptops at 150-175%
+ * Windows scaling with the browser's tabs and bookmarks bar show 450-540px here.
+ */
+export const HERO_TIGHT_SCENE_H = 560;
+/** The one-line 32px name needs this much card width (12 glyphs x 32px + 16px padding each side). */
+const TIGHT_NAME_CARD_W = 416;
+
+/** True when the overlay title card should use its tight density for a viewport `vh` px tall. */
+export function isTightCard(vh: number, cardW: number): boolean {
+  return heroHeight(vh) - HERO_NAV_H < HERO_TIGHT_SCENE_H && cardW >= TIGHT_NAME_CARD_W;
+}
+
 /** Native rows the band always keeps: Roy (67), the ground under his feet (11) and 4 rows of air. */
 export const HERO_BAND_MIN_ROWS = FOREST.h - FOREST.groundRow + WAVE.frameH + 4;
 /**
@@ -841,7 +855,8 @@ export default function Hero() {
      - band (phones): eyebrow, name, role, availability, CTAs, tagline, Press start;
        from 768px the CTAs and Press start take a second column beside the text. */
   const fullCard = overlay && scene.cardW >= HERO_CARD_W;
-  const titleOrder = overlay && fullCard && (!compact || vh >= HERO_FULL_CARD_VH);
+  const tight = overlay && isTightCard(vh, scene.cardW);
+  const titleOrder = overlay && fullCard && !tight && (!compact || vh >= HERO_FULL_CARD_VH);
   const wideBand = !overlay && width >= 768;
 
   const eyebrow = (
@@ -851,13 +866,15 @@ export default function Hero() {
     </p>
   );
   const name = (
-    <h1 id="hero-title" className="mt-3 text-display-xl text-fg">
+    <h1 id="hero-title" className={cx('text-display-xl text-fg', tight ? 'hero-name--tight mt-2' : 'mt-3')}>
       {splitName(bio.name)}
     </h1>
   );
-  const role = <p className="mt-2 text-body-l font-semibold text-accent-fg">{bio.role}</p>;
+  const role = (
+    <p className={cx('font-semibold text-accent-fg', tight ? 'mt-1 text-body' : 'mt-2 text-body-l')}>{bio.role}</p>
+  );
   const tagline = (className: string) => (
-    <p className={cx(className, 'text-pretty text-body-l text-fg')}>{bio.tagline}</p>
+    <p className={cx(className, 'text-pretty text-fg', tight ? 'text-body' : 'text-body-l')}>{bio.tagline}</p>
   );
   const availability = (className: string) => (
     <div className={cx(className, 'flex')}>
@@ -909,7 +926,19 @@ export default function Hero() {
   );
 
   let cardBody: ReactNode;
-  if (titleOrder) {
+  if (tight) {
+    cardBody = (
+      <>
+        {eyebrow}
+        {name}
+        {role}
+        {ctas(cx('mt-4', fullCard ? 'flex-row' : 'flex-col'), fullCard ? 'w-auto' : 'w-full')}
+        {availability('mt-4')}
+        {tagline('mt-3')}
+        {pressStart('mt-2')}
+      </>
+    );
+  } else if (titleOrder) {
     cardBody = (
       <>
         {eyebrow}
@@ -973,6 +1002,7 @@ export default function Hero() {
       <PixelPanel
         variant="wood"
         elevation={overlay ? 2 : 0}
+        padding={tight ? 'sm' : 'md'}
         className={overlay ? undefined : 'w-full px-4 pb-10 pt-6 md:px-6 md:pt-8'}
       >
         <div className={overlay ? undefined : wideBand ? 'mx-auto max-w-[1120px]' : 'mx-auto max-w-[544px]'}>

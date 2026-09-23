@@ -35,3 +35,14 @@
     transition: none;
   }
 }
+
+/* Tight title card (short first screens, see HERO_TIGHT_SCENE_H): the name on one line at
+   32px, still on Press Start 2P's 8px grid. */
+.hero-name--tight {
+  font-size: 32px;
+  line-height: 40px;
+
+  & > span {
+    display: inline;
+  }
+}
