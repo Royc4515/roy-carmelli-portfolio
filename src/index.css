@@ -13,6 +13,12 @@
 @import "./styles/pixel.css";
 @import "./styles/components.css";
 
+/* Short laptop screens (SPEC §2.3): at least 1024px wide and at most 960px
+   tall, e.g. 14" laptops at 125-175% Windows scaling with the browser's tabs
+   and bookmarks bar (1097x516, 1280x602, 1536x730) or a 14" MacBook (1470x830).
+   Every zone except Projects fits one screen under the nav there. */
+@custom-variant short (@media (width >= 64rem) and (height <= 60rem));
+
 /* The spec quotes class names in prose; don't generate CSS for them. */
 @source not "../docs";
 @source not "../.claude";

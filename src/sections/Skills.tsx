@@ -344,7 +344,7 @@ export default function Skills() {
   useEffect(() => close(), [inline, close]);
 
   return (
-    <section id="skills" aria-labelledby="skills-title" className="relative z-[1] bg-bg px-dots py-12 md:py-16 min-[100rem]:py-20">
+    <section id="skills" aria-labelledby="skills-title" className="relative z-[1] bg-bg px-dots py-12 md:py-16 min-[100rem]:py-20 short:py-6">
       <div className="relative mx-auto max-w-[1120px] px-4 md:px-6 lg:px-8">
         <Reveal>
           <ZoneHeader

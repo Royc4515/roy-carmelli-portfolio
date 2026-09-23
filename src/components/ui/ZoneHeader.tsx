@@ -111,7 +111,7 @@ export function ZoneHeader({ zone, name, title, subtitle, icon, id, className }:
       </div>
       <div
         ref={ruleRef}
-        className="zone-header__rule mt-4 md:mt-5"
+        className="zone-header__rule mt-4 md:mt-5 short:mt-3"
         data-draw={reduced ? undefined : ruleInView ? 'run' : 'pending'}
       >
         <div className="px-divider" aria-hidden="true" />

@@ -435,6 +435,14 @@
     margin-bottom: 24px;
   }
 
+  /* Short laptop screens (the `short` variant, index.css): 16px, so the
+     zone below fits one screen. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    .zone-header {
+      margin-bottom: 16px;
+    }
+  }
+
   /* 2px down: the eyebrow's caps start 2px into its 16px line box. */
   .zone-header__icon {
     display: flex;
