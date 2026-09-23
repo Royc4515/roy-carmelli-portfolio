@@ -150,6 +150,8 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     });
 
     const onKey = (e: KeyboardEvent) => {
+      // Ctrl/Cmd/Alt combinations are the browser's (Ctrl+S saves, Alt+ArrowUp...), not moves.
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (JUMP_KEYS.has(e.code)) {
         if (e.code === 'Space' && isControl(e.target)) return;
         e.preventDefault();

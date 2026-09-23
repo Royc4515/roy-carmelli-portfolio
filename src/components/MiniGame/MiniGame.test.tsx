@@ -24,6 +24,8 @@ vi.mock('./GameEngine', () => ({
   },
 }));
 
+beforeEach(() => Object.values(engine).forEach(spy => spy.mockClear()));
+
 /** A promise resolved from outside: an engine whose sprites are still loading. */
 function deferred() {
   let resolve!: () => void;
@@ -58,16 +60,46 @@ describe('MiniGame', () => {
     expect(screen.getByRole('button', { name: /quit/i })).toBeInTheDocument();
   });
 
-  it('pressing JUMP / SLIDE does not throw even before the engine is ready', () => {
-    render(<MiniGame showTouchControls />);
-    expect(() => fireEvent.pointerDown(screen.getByRole('button', { name: /slide/i }))).not.toThrow();
-    expect(() => fireEvent.pointerDown(screen.getByRole('button', { name: /^jump/i }))).not.toThrow();
+  it('JUMP and SLIDE do nothing, without throwing, when the canvas has no 2D context (no engine)', () => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = (() => null) as unknown as typeof getContext;
+    try {
+      render(<MiniGame showTouchControls />);
+      expect(() => fireEvent.pointerDown(screen.getByRole('button', { name: /slide/i }))).not.toThrow();
+      expect(() => fireEvent.pointerDown(screen.getByRole('button', { name: /^jump/i }))).not.toThrow();
+      expect(engine.handleSlide).not.toHaveBeenCalled();
+      expect(engine.handleInput).not.toHaveBeenCalled();
+    } finally {
+      HTMLCanvasElement.prototype.getContext = getContext;
+    }
   });
 
-  it('toggling fullscreen does not throw (jsdom lacks the Fullscreen API)', () => {
-    render(<MiniGame showTouchControls />);
-    const fs = screen.getByRole('button', { name: /enter fullscreen/i });
-    expect(() => fireEvent.pointerDown(fs)).not.toThrow();
+  it('falls back to the CSS overlay where the Fullscreen API is missing (iPhone Safari)', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<MiniGame showTouchControls />);
+    expect(container.querySelector('.minigame')!.requestFullscreen).toBeUndefined();
+    await user.click(screen.getByRole('button', { name: /enter fullscreen/i }));
+    expect(container.querySelector('.minigame')).toHaveClass('minigame--fullscreen');
+    await user.click(screen.getByRole('button', { name: /exit fullscreen/i }));
+    expect(container.querySelector('.minigame')).not.toHaveClass('minigame--fullscreen');
+  });
+
+  it('asks for native fullscreen on the game wrapper and shrugs off a refusal', async () => {
+    const user = userEvent.setup();
+    const request = vi.fn(function (this: HTMLElement) {
+      return Promise.reject(new Error('Permissions check failed'));
+    });
+    Object.defineProperty(HTMLElement.prototype, 'requestFullscreen', { configurable: true, value: request });
+    try {
+      const { container } = render(<MiniGame showTouchControls />);
+      await user.click(screen.getByRole('button', { name: /enter fullscreen/i }));
+      expect(request).toHaveBeenCalledOnce();
+      expect(request.mock.contexts[0]).toBe(container.querySelector('.minigame'));
+      // The refusal is caught; the CSS overlay still covers the screen.
+      expect(container.querySelector('.minigame')).toHaveClass('minigame--fullscreen');
+    } finally {
+      delete (HTMLElement.prototype as { requestFullscreen?: unknown }).requestFullscreen;
+    }
   });
 
   it('frames the canvas with the 4px notched px-frame, not a border or inline style', () => {
@@ -124,7 +156,6 @@ describe('MiniGame input routing (engine running)', () => {
 
   beforeEach(() => {
     HTMLCanvasElement.prototype.getContext = (() => ({})) as unknown as typeof getContext;
-    Object.values(engine).forEach(spy => spy.mockClear());
   });
 
   afterEach(() => {
@@ -146,6 +177,37 @@ describe('MiniGame input routing (engine running)', () => {
     await act(async () => loading.resolve());
     // Starting now would leave a rAF loop running with nothing left to stop it.
     expect(engine.start).not.toHaveBeenCalled();
+  });
+
+  it('JUMP and SLIDE reach the engine while its sprites are still loading', () => {
+    engine.init.mockImplementationOnce(() => deferred().promise);
+    render(<MiniGame showTouchControls />);
+    expect(() => fireEvent.pointerDown(screen.getByRole('button', { name: /^jump/i }))).not.toThrow();
+    expect(() => fireEvent.pointerDown(screen.getByRole('button', { name: /slide/i }))).not.toThrow();
+    expect(engine.start).not.toHaveBeenCalled();
+    expect(engine.handleInput).toHaveBeenCalledOnce();
+    expect(engine.handleSlide).toHaveBeenCalledOnce();
+  });
+
+  it('leaves Ctrl, Cmd and Alt shortcuts to the browser (Ctrl+S saves, it does not slide)', () => {
+    render(<MiniGame />);
+    const shortcuts = [
+      { code: 'KeyS', key: 's', ctrlKey: true },
+      { code: 'KeyS', key: 's', metaKey: true },
+      { code: 'ArrowDown', key: 'ArrowDown', altKey: true },
+      { code: 'ArrowUp', key: 'ArrowUp', altKey: true },
+      { code: 'KeyW', key: 'w', ctrlKey: true },
+      { code: 'Space', key: ' ', metaKey: true },
+    ];
+    for (const init of shortcuts) {
+      const allowed = fireEvent.keyDown(window, init);
+      expect(allowed, `${JSON.stringify(init)} keeps its default action`).toBe(true);
+    }
+    expect(engine.handleSlide).not.toHaveBeenCalled();
+    expect(engine.handleInput).not.toHaveBeenCalled();
+    // Plain keys still play.
+    expect(fireEvent.keyDown(window, { code: 'KeyS', key: 's' })).toBe(false);
+    expect(engine.handleSlide).toHaveBeenCalledOnce();
   });
 
   it('a tap on JUMP jumps once: on pointerdown, not again on the click that follows', () => {
