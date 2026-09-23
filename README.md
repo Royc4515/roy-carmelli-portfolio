@@ -1,8 +1,8 @@
-# Roy Carmelli — Portfolio
+# Roy Carmelli - Portfolio
 
 Live: https://roy-carmelli-portfolio.vercel.app/
 
-Personal portfolio for a CS × Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. The arcade theme is committed enough that the homepage character runs on a mini canvas game engine I wrote in this repo — OOP entity hierarchy, AABB collision, 7-state FSM, custom event bus. Day/night theme with system preference detection.
+Personal portfolio for a CS & Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. Press start and the title screen becomes Roy Runner, an endless runner on a small canvas engine built for this site: a game-state machine, a 7-state player animation machine, AABB collision and a speed that keeps climbing. Day/night theme with system preference detection.
 
 The page is a map of five zones: Projects (quest cards), About (character sheet), Skills (equipment screen with "used in" tooltips), Resume and Contact (save point). On desktop the nav doubles as a mini-map of those zones.
 
@@ -42,4 +42,4 @@ npm run build
 
 ## Deploy
 
-Hosted on Vercel — auto-deploys on push to `main`.
+Hosted on Vercel; auto-deploys on push to `main`.

@@ -40,7 +40,7 @@ export default function ArcadeFallback() {
         <h2 className="text-label text-accent-fg">Arcade zone</h2>
 
         <p data-testid="arcade-fallback-message" className="max-w-[32ch] text-body text-fg">
-          Turn your phone sideways to landscape to play Roy Runner, or open this page on a desktop.
+          Turn your phone sideways to play Roy Runner, or open this page on a computer.
         </p>
       </div>
     </PixelPanel>

@@ -257,7 +257,7 @@ export class GameEngine {
     // Hint
     ctx.font      = FONT_SM;
     ctx.fillStyle = C.forestLight;
-    ctx.fillText('SPACE or CLICK', canvasW / 2, canvasH * 0.91);
+    ctx.fillText('SPACE, CLICK OR TAP', canvasW / 2, canvasH * 0.91);
   }
 
   private drawScoreHUD(): void {

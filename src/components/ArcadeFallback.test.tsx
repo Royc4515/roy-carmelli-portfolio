@@ -40,7 +40,7 @@ describe('ArcadeFallback', () => {
     // Should communicate that a larger screen / desktop is required
     const message = screen.getByTestId('arcade-fallback-message');
     expect(message).toBeInTheDocument();
-    expect(message.textContent?.toLowerCase()).toMatch(/desktop|larger screen|landscape/);
+    expect(message.textContent?.toLowerCase()).toMatch(/computer|desktop|larger screen|sideways|landscape/);
   });
 
   it('does NOT mount a canvas element', () => {
