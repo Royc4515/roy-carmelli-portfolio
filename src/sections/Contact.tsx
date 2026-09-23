@@ -21,9 +21,6 @@ export const EMAIL_SELECTED_MESSAGE = 'Copy blocked · address selected below';
  */
 export const EMAIL_SHOWN = bio.email.toLowerCase();
 
-/** Keeps "CS × neuroscience" on one line, so the "×" never starts or ends a line. */
-const blurb = bio.contactBlurb.replace(/ × /g, ' × ');
-
 /** "+972547287807" → "+972 54 728 7807": readable on screen, read as digit groups aloud. */
 const phoneSpoken = bio.phone.replace(/^(\+\d{3})(\d{2})(\d{3})(\d{4})$/, '$1 $2 $3 $4');
 
@@ -175,7 +172,7 @@ export default function Contact() {
               4px above and 8px below their box, so the visual gaps come out at 10-15px. */}
           <Reveal index={2} className="lg:col-span-7">
             <PixelPanel variant="wood" elevation={2} className="short:p-4">
-              <p className="max-w-[60ch] text-body text-fg">{blurb}</p>
+              <p className="max-w-[60ch] text-body text-fg">{bio.contactBlurb}</p>
 
               <div className="mt-6 flex gap-4 short:mt-3">
                 <Button

@@ -26,7 +26,7 @@ describe('<Projects>', () => {
     expect(section).toHaveAttribute('aria-labelledby', title.id);
     expect(screen.getByText('Zone 01 · The Library')).toBeInTheDocument();
     expect(
-      screen.getByText("Start with the main quests: the three I'd demo first. Side quests and coursework are below."),
+      screen.getByText("Start with the main quests: the three I'd walk you through first. Side quests and coursework are below."),
     ).toBeInTheDocument();
   });
 

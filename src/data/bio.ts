@@ -34,7 +34,7 @@ export const skills = [
   { slot: "Armor", category: "Web & Full-Stack",     items: ["React", "Node.js", "Express", "MongoDB", "React Native", "Tailwind CSS", "Vite"] },
   { slot: "Magic", category: "AI & Agents",          items: ["Claude API", "Gemini API", "OpenAI API", "Groq API", "MCP", "Claude Code", "Telegram Bot API"] },
   { slot: "Potions", category: "Data & Analysis",    items: ["NumPy", "Pandas", "SciPy", "Matplotlib", "Jupyter"] },
-  { slot: "Tomes", category: "CS Foundations",       items: ["OOP", "Data Structures", "Design Patterns", "Systems Programming", "Computer Architecture"] },
-  { slot: "Trinkets", category: "Tools & Platforms", items: ["Git", "GitHub Actions", "Docker", "Vercel", "Render", "GitHub Pages", "VS Code", "IntelliJ"] },
+  { slot: "Tomes", category: "CS Foundations",       items: ["OOP", "Data Structures", "Design Patterns", "Systems Programming"] },
+  { slot: "Trinkets", category: "Tools & Platforms", items: ["Git", "GitHub Actions", "Docker", "Vercel", "Render", "GitHub Pages"] },
   { slot: "Achievements", category: "Certifications", items: ["Claude Code in Action", "Claude Code 101", "Claude 101", "AI Fluency"] },
 ];

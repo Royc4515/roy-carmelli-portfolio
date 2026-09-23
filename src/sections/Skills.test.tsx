@@ -296,12 +296,12 @@ describe('Skills keyboard grid (roving tabindex)', () => {
 
     await user.keyboard('{ArrowDown}'); // Potions has 5 items
     expect(item('Jupyter')).toHaveFocus();
-    await user.keyboard('{ArrowDown}'); // Tomes has 5
-    expect(item('Computer Architecture')).toHaveFocus();
-    await user.keyboard('{ArrowDown}'); // Trinkets has 8: back to column 7
-    expect(item('VS Code')).toHaveFocus();
+    await user.keyboard('{ArrowDown}'); // Tomes has 4
+    expect(item('Systems Programming')).toHaveFocus();
+    await user.keyboard('{ArrowDown}'); // Trinkets has 6: toward column 7 again, clamped to 6
+    expect(item('GitHub Pages')).toHaveFocus();
     await user.keyboard('{ArrowLeft}{ArrowUp}'); // a sideways move resets the column
-    expect(item('Computer Architecture')).toHaveFocus();
+    expect(item('Systems Programming')).toHaveFocus();
   });
 
   it('Esc closes the tooltip and keeps focus; the next arrow opens the next item', async () => {
@@ -453,7 +453,7 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     expect(item('NumPy')).toHaveFocus(); // Potions, the next line down
     await user.keyboard('{ArrowUp}');
     expect(item('Claude API')).toHaveFocus();
-    // Magic wraps onto a second line there: Right runs on through the wrap, in reading order.
+    // Magic wraps onto a second line on the narrower short screens: Right runs on through the wrap.
     act(() => item('Claude Code').focus());
     await user.keyboard('{ArrowRight}');
     expect(item('Telegram Bot API')).toHaveFocus();

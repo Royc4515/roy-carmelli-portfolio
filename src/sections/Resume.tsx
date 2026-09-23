@@ -47,7 +47,7 @@ export default function Resume() {
 
             <div className="min-w-0">
               <p className="max-w-[60ch] text-body text-pretty text-ink">
-                One page: education with grades, projects, IDF service, skills and certifications.
+                Education with grades, projects, IDF service, skills and certifications.
               </p>
               <p className="mt-2 text-hud text-ink-muted">{meta}</p>
             </div>

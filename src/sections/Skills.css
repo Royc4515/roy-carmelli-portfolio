@@ -170,9 +170,9 @@
      each slot is one line of items beside its heading, in a heading column
      the slot rows share through subgrids (Skills.tsx), the slot name over its
      category so the column stays ~160px. Sizes:
-       items 36px tall with 8px padding, 4px apart in a line (Tomes, the
-       widest line, needs 628px of the 643px item column), 8px between Magic's
-       two lines, 16px between the columns; 28px between slots, so the last
+       items 36px tall with 8px padding, 4px apart in a line (Armor, the
+       widest one-line slot, needs 599px of the 634px item column), 8px between
+       Magic's two lines, 16px between the columns; 28px between slots, so the last
        one ends level with the frame column (both 464px).
      Every width from xl lays out the same: the zone is capped at 1120px. */
   @media (width >= 80rem) and (height > 60rem) {
@@ -218,8 +218,8 @@
      under 600px tall (1097x516: a 14" laptop at 175% with the browser's bars)
        items 24px (the WCAG 2.2 2.5.8 minimum), 4px between lines, a 12px
        status gap, 8px / 12px panel padding.
-     Magic's eight items need 1031px, so they take two lines; every other slot
-     takes one from 1024px wide. */
+     Magic's seven items need 720px, so they take two lines up to ~1100px wide
+     and one from 1280px; every other slot takes one from 1024px wide. */
   @media (width >= 64rem) and (height <= 60rem) {
     .skill-panel {
       --skill-h: 28px;

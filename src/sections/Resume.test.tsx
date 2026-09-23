@@ -27,7 +27,7 @@ describe('Resume', () => {
         (_, el) =>
           el?.tagName === 'P' &&
           el.textContent ===
-            'One page: education with grades, projects, IDF service, skills and certifications.',
+            'Education with grades, projects, IDF service, skills and certifications.',
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(bio.resume.meta)).toBeInTheDocument();
