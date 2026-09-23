@@ -100,7 +100,9 @@ const XL_QUERY = '(min-width: 1600px)';
  * on screen): 8 between Roy and the fire, 2 of dimmer lit ground each side of the fire.
  *
  * ≥ 1024 the ground spans the column and the caption hangs below it, out of the flow, so the
- * ground can sit level with the bottom frame of the contact panel beside it.
+ * ground can sit level with the bottom frame of the contact panel beside it. On short laptop
+ * screens the section's 24px bottom padding can't hold it, so it floats above the scene
+ * instead, in the flow (the column has room to spare above Roy).
  */
 function SavePoint() {
   const wide = useMediaQuery(WIDE_QUERY);
@@ -119,7 +121,7 @@ function SavePoint() {
           <span className="absolute inset-x-0 -bottom-1 h-1 bg-accent" />
         </span>
       </div>
-      <p className="mt-4 flex items-center justify-center gap-2 text-hud uppercase text-fg-subtle lg:absolute lg:inset-x-0 lg:top-full">
+      <p className="mt-4 flex items-center justify-center gap-2 text-hud uppercase text-fg-subtle lg:absolute lg:inset-x-0 lg:top-full short:static short:order-first short:mb-4 short:mt-0">
         <PixelIcon name="check" size={12} className="text-xp" />
         Save point · progress saved
       </p>
@@ -167,11 +169,13 @@ export default function Contact() {
             <SavePoint />
           </Reveal>
 
+          {/* Short laptop screens: 16px padding and a tighter rhythm (12/16/16/16); buttons draw
+              4px above and 8px below their box, so the visual gaps come out at 10-15px. */}
           <Reveal index={2} className="lg:col-span-7">
-            <PixelPanel variant="wood" elevation={2}>
+            <PixelPanel variant="wood" elevation={2} className="short:p-4">
               <p className="max-w-[60ch] text-body text-fg">{blurb}</p>
 
-              <div className="mt-6 flex gap-4">
+              <div className="mt-6 flex gap-4 short:mt-3">
                 <Button
                   href={`mailto:${bio.email}`}
                   size="lg"
@@ -193,11 +197,11 @@ export default function Contact() {
                   <span className="max-sm:hidden">Copy</span>
                 </Button>
               </div>
-              <p ref={addressRef} className="mt-6 select-all break-all text-hud text-fg-muted">
+              <p ref={addressRef} className="mt-6 select-all break-all text-hud text-fg-muted short:mt-4">
                 {EMAIL_SHOWN}
               </p>
 
-              <ul className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3 lg:flex lg:flex-wrap">
+              <ul className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3 lg:flex lg:flex-wrap short:mt-4">
                 {channels.map(channel => (
                   <li key={channel.label} className="flex flex-col items-center">
                     <Button

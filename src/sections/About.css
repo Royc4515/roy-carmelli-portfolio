@@ -86,4 +86,65 @@
     background-color: var(--color-surface-sunken);
     box-shadow: inset 0 0 0 2px var(--color-accent);
   }
+
+  /* The letter's sign-off on short screens (About.tsx): floated into the end
+     of the story's last line, or onto a line of its own when that one is
+     full. 26px tall like the story's lines. */
+  .about-signoff {
+    float: right;
+    margin-left: 16px;
+    line-height: 26px;
+  }
+
+  /* Short laptop screens (the `short` variant, index.css): the zone fits one
+     screen under the nav. The sheet is a column whose stat rows share any
+     height the story gives it, so both panels end on one line: at their
+     natural height the rows sit edge to edge on their rules, and they open up
+     as the panel grows. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    /* Never taller than the screen below the header, so the whole sheet shows
+       when a nav jump lands on the zone (the story may run on below the fold):
+       72 (nav + scroll-padding) + 24 (section padding) + 96 (compact zone
+       header) + 4 (bottom frame). Never shorter than its content either. */
+    .about-sheet-panel {
+      max-height: calc(100vh - 196px);
+      max-height: calc(100svh - 196px);
+      min-height: min-content;
+    }
+
+    .about-sheet {
+      display: flex;
+      flex: 1 0 auto;
+      flex-direction: column;
+      row-gap: 8px;
+    }
+
+    /* The face at ×1 (--face-short-*, About.tsx) with 4px around it. */
+    .about-portrait {
+      padding: 4px;
+
+      & > img {
+        width: var(--face-short-w);
+        height: var(--face-short-h);
+      }
+    }
+
+    .about-stats {
+      display: flex;
+      flex: 1 0 auto;
+      flex-direction: column;
+    }
+
+    .about-stats__row {
+      flex: 1 0 auto;
+      grid-template-columns: 5.5rem minmax(0, 1fr);
+      align-content: center;
+      column-gap: 12px;
+      padding-block: 0;
+    }
+
+    .about-achievement {
+      padding: 8px 12px;
+    }
+  }
 }

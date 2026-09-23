@@ -58,6 +58,27 @@ describe('About', () => {
     expect(img).toHaveClass('pixelated');
   });
 
+  it('gives the portrait a whole-number ×1 size for short laptop screens', () => {
+    const { container } = render(<About />);
+    const well = container.querySelector('img')?.parentElement;
+    expect(well?.style.getPropertyValue('--face-short-w')).toBe(`${pixelSprites.face.w}px`);
+    expect(well?.style.getPropertyValue('--face-short-h')).toBe(`${pixelSprites.face.h}px`);
+  });
+
+  it('signs the letter at its foot and, for short screens, at the end of the last paragraph, both hidden from assistive tech', () => {
+    const { container } = render(<About />);
+    const signatures = screen.getAllByText('- Roy');
+    expect(signatures).toHaveLength(2);
+    for (const el of signatures) expect(el).toHaveAttribute('aria-hidden', 'true');
+
+    // The inline one closes the last paragraph, and only the short layout shows it.
+    const paragraphs = container.querySelectorAll('.px-panel--paper p:not([aria-hidden])');
+    const inline = signatures.find(el => el.tagName === 'SPAN');
+    expect(inline?.parentElement).toBe(paragraphs[paragraphs.length - 1]);
+    expect(inline).toHaveClass('hidden', 'short:block');
+    expect(signatures.find(el => el.tagName === 'P')).toHaveClass('short:hidden');
+  });
+
   it('shows the achievement derived from the bio', () => {
     render(<About />);
     expect(screen.getByText('Achievement')).toBeInTheDocument();
