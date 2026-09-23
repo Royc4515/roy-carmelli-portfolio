@@ -1,13 +1,15 @@
 import { createElement, type HTMLAttributes, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { materialize } from '../../theme/motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
+// `m` components carry no animation features of their own: they use the ones the app
+// loads once through `<LazyMotion features={domAnimation}>` in main.tsx.
 const motionTags = {
-  div: motion.div,
-  li: motion.li,
-  article: motion.article,
-  section: motion.section,
+  div: m.div,
+  li: m.li,
+  article: m.article,
+  section: m.section,
 } as const;
 
 export type RevealTag = keyof typeof motionTags;
@@ -41,6 +43,9 @@ export interface RevealProps extends Omit<HTMLAttributes<HTMLElement>, Conflicti
  *
  * Under reduced motion it renders a plain element: no `initial` state, so the
  * content is visible from the first paint.
+ *
+ * Built on `m.*`, so it needs a `LazyMotion` ancestor with `domAnimation` (or more) to
+ * animate; main.tsx wraps the app in one.
  */
 export function Reveal({ as = 'div', index = 0, children, ...rest }: RevealProps) {
   const reduced = usePrefersReducedMotion();
@@ -49,7 +54,7 @@ export function Reveal({ as = 'div', index = 0, children, ...rest }: RevealProps
     return createElement(as, rest, children);
   }
 
-  const MotionTag = motionTags[as] as typeof motion.div;
+  const MotionTag = motionTags[as] as typeof m.div;
   return (
     <MotionTag
       {...rest}

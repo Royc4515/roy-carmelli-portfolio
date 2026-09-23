@@ -16,15 +16,17 @@ describe('PixelPanel', () => {
     expect(NamedPixelPanel).toBe(PixelPanel);
   });
 
-  it('maps the legacy variants: parchment → paper, dark → subtle frame', () => {
+  it('renders each variant as its own surface class', () => {
     render(
       <>
-        <PixelPanel variant="parchment" data-testid="parchment" />
-        <PixelPanel variant="dark" data-testid="dark" />
+        <PixelPanel variant="paper" data-testid="paper" />
+        <PixelPanel variant="ghost" data-testid="ghost" />
+        <PixelPanel frame="subtle" data-testid="subtle" />
       </>,
     );
-    expect(screen.getByTestId('parchment')).toHaveClass('px-panel--paper', 'px-frame');
-    expect(screen.getByTestId('dark')).toHaveClass('px-panel--dark', 'px-frame', 'px-frame-subtle');
+    expect(screen.getByTestId('paper')).toHaveClass('px-panel--paper', 'px-frame');
+    expect(screen.getByTestId('ghost')).toHaveClass('px-panel--ghost', 'px-frame');
+    expect(screen.getByTestId('subtle')).toHaveClass('px-panel--wood', 'px-frame', 'px-frame-subtle');
   });
 
   it('draws no frame on inset unless asked', () => {

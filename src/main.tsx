@@ -1,6 +1,6 @@
 import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MotionConfig } from 'framer-motion';
+import { LazyMotion, MotionConfig, domAnimation } from 'framer-motion';
 import './index.css';
 import App from './App';
 import { ToastProvider } from './components/ui/Toast';
@@ -13,17 +13,21 @@ const showGallery =
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* Honour the OS "reduce motion" setting in every Framer Motion animation. */}
-    <MotionConfig reducedMotion="user">
-      <ToastProvider>
-        {showGallery && Gallery ? (
-          <Suspense fallback={null}>
-            <Gallery />
-          </Suspense>
-        ) : (
-          <App />
-        )}
-      </ToastProvider>
-    </MotionConfig>
+    {/* `m.*` components (Reveal) get their animation features here, once. Not `strict`:
+        plain `motion.*` components keep working while the sections migrate to `m`. */}
+    <LazyMotion features={domAnimation}>
+      {/* Honour the OS "reduce motion" setting in every Framer Motion animation. */}
+      <MotionConfig reducedMotion="user">
+        <ToastProvider>
+          {showGallery && Gallery ? (
+            <Suspense fallback={null}>
+              <Gallery />
+            </Suspense>
+          ) : (
+            <App />
+          )}
+        </ToastProvider>
+      </MotionConfig>
+    </LazyMotion>
   </StrictMode>
 );

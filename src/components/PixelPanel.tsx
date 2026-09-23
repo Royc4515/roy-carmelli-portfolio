@@ -5,11 +5,8 @@ import { cx } from './ui/cx';
  * `wood` (default, `surface`), `paper` (parchment + ink; focus ring and links
  * switch to ink), `inset` (sunken well with a 2px inner line, no frame),
  * `ghost` (frame only, transparent).
- *
- * Legacy aliases kept for the current sections: `parchment` → `paper`,
- * `dark` → the page ground (`bg`) with a subtle frame.
  */
-export type PixelPanelVariant = 'wood' | 'paper' | 'inset' | 'ghost' | 'parchment' | 'dark';
+export type PixelPanelVariant = 'wood' | 'paper' | 'inset' | 'ghost';
 export type PixelPanelPadding = 'sm' | 'md' | 'lg';
 export type PixelPanelFrame = 'accent' | 'subtle' | 'none';
 export type PixelPanelElement =
@@ -33,8 +30,8 @@ export interface PixelPanelProps extends HTMLAttributes<HTMLElement> {
   /** 0 flat (default) · 1 `px-drop-sm` (4px) · 2 `px-drop` (8px). */
   elevation?: 0 | 1 | 2;
   /**
-   * 4px notched frame colour. Default `accent` (brass); `subtle` for `dark`;
-   * `inset` has no frame unless you ask for one (it then replaces the inner line).
+   * 4px notched frame colour. Default `accent` (brass); `inset` has no frame
+   * unless you ask for one (it then replaces the inner line).
    */
   frame?: PixelPanelFrame;
   /** Small brass title plate on the top frame (pixel `label` text). Leave ~20px above the panel. */
@@ -43,23 +40,11 @@ export interface PixelPanelProps extends HTMLAttributes<HTMLElement> {
   children?: ReactNode;
 }
 
-type Surface = 'wood' | 'paper' | 'inset' | 'ghost' | 'dark';
-
-const surfaceOf: Record<PixelPanelVariant, Surface> = {
-  wood: 'wood',
-  paper: 'paper',
-  parchment: 'paper',
-  inset: 'inset',
-  ghost: 'ghost',
-  dark: 'dark',
-};
-
-const defaultFrame: Record<Surface, PixelPanelFrame> = {
+const defaultFrame: Record<PixelPanelVariant, PixelPanelFrame> = {
   wood: 'accent',
   paper: 'accent',
   inset: 'none',
   ghost: 'accent',
-  dark: 'subtle',
 };
 
 // With a tab the top padding grows so content clears the plate.
@@ -90,13 +75,12 @@ export function PixelPanel({
   children,
   ...rest
 }: PixelPanelProps) {
-  const surface = surfaceOf[variant];
-  const resolvedFrame = frame ?? defaultFrame[surface];
+  const resolvedFrame = frame ?? defaultFrame[variant];
   const hasTab = tab != null && tab !== false;
 
   const frameClass =
     resolvedFrame === 'none'
-      ? surface === 'inset'
+      ? variant === 'inset'
         ? '' // the inset surface draws its own line and drop
         : 'px-panel--frameless'
       : resolvedFrame === 'subtle'
@@ -109,7 +93,7 @@ export function PixelPanel({
       ...rest,
       className: cx(
         'px-panel',
-        `px-panel--${surface}`,
+        `px-panel--${variant}`,
         frameClass,
         elevationClasses[elevation],
         hasTab ? paddingClasses[padding].tab : paddingClasses[padding].plain,

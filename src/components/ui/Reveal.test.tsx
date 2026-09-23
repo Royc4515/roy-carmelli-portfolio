@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, afterEach, vi } from 'vitest';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import { Reveal } from './Reveal';
 
 const originalMatchMedia = window.matchMedia;
@@ -18,9 +19,38 @@ function mockReducedMotion(reduced: boolean) {
     }) as MediaQueryList;
 }
 
+const originalIntersectionObserver = window.IntersectionObserver;
+
+/** An IntersectionObserver that reports every observed element as fully on screen. */
+function mockAlwaysInView() {
+  window.IntersectionObserver = class {
+    constructor(private readonly callback: IntersectionObserverCallback) {}
+    observe(target: Element) {
+      const entry = { target, isIntersecting: true, intersectionRatio: 1 } as IntersectionObserverEntry;
+      queueMicrotask(() => this.callback([entry], this as unknown as IntersectionObserver));
+    }
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof IntersectionObserver;
+}
+
 describe('Reveal', () => {
   afterEach(() => {
     window.matchMedia = originalMatchMedia;
+    window.IntersectionObserver = originalIntersectionObserver;
+  });
+
+  it('materializes once in view, with the features LazyMotion loads (m.* components)', async () => {
+    mockReducedMotion(false);
+    mockAlwaysInView();
+    render(
+      <LazyMotion features={domAnimation}>
+        <Reveal data-testid="card">Quest</Reveal>
+      </LazyMotion>,
+    );
+    const el = screen.getByTestId('card');
+    expect(el.style.opacity).toBe('0');
+    await waitFor(() => expect(el.style.opacity).toBe('1'), { timeout: 2000 });
   });
 
   it('starts hidden (opacity 0) until it scrolls into view', () => {

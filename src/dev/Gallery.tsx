@@ -11,6 +11,7 @@ import { ZoneHeader } from '../components/ui/ZoneHeader';
 import { Reveal } from '../components/ui/Reveal';
 import { useToast } from '../components/ui/Toast';
 import PixelPanel from '../components/PixelPanel';
+import PixelIcon, { PIXEL_ICON_NAMES } from '../components/PixelIcon';
 
 type Theme = 'day' | 'night';
 type GalleryState = 'default' | 'hover' | 'active' | 'focus' | 'disabled';
@@ -58,132 +59,6 @@ function useScopedThemeTokens() {
     document.head.append(style);
     return () => style.remove();
   }, []);
-}
-
-/* ── Placeholder icons ──────────────────────────────────────────────────────
-   PixelIcon arrives with step 02; these 12×12 bitmaps only stand in for it
-   so the icon slots can be checked for size and alignment. */
-
-const BITMAPS = {
-  play: [
-    '............',
-    '..X.........',
-    '..XX........',
-    '..XXX.......',
-    '..XXXX......',
-    '..XXXXX.....',
-    '..XXXXX.....',
-    '..XXXX......',
-    '..XXX.......',
-    '..XX........',
-    '..X.........',
-    '............',
-  ],
-  download: [
-    '.....XX.....',
-    '.....XX.....',
-    '.....XX.....',
-    '.....XX.....',
-    '..XX.XX.XX..',
-    '...XXXXXX...',
-    '....XXXX....',
-    '.....XX.....',
-    '............',
-    'XX........XX',
-    'XX........XX',
-    'XXXXXXXXXXXX',
-  ],
-  external: [
-    '.....XXXXXXX',
-    '.........XXX',
-    '........XXXX',
-    '.......XXX.X',
-    '......XXX..X',
-    'XXXX.XXX....',
-    'XX..XXX.....',
-    'XX...X......',
-    'XX..........',
-    'XX.......XX.',
-    'XX.......XX.',
-    'XXXXXXXXXXX.',
-  ],
-  copy: [
-    '....XXXXXXXX',
-    '....X......X',
-    '....X......X',
-    'XXXXXXXXX..X',
-    'X.......X..X',
-    'X.......X..X',
-    'X.......X..X',
-    'X.......XXXX',
-    'X.......X...',
-    'X.......X...',
-    'X.......X...',
-    'XXXXXXXXX...',
-  ],
-  book: [
-    'XXXXXXXXXX..',
-    'X........XX.',
-    'X.XXXXXX.XX.',
-    'X........XX.',
-    'X.XXXXX..XX.',
-    'X........XX.',
-    'X........XX.',
-    'X........XX.',
-    'X........XX.',
-    'XXXXXXXXXXX.',
-    'X........X..',
-    'XXXXXXXXXX..',
-  ],
-  check: [
-    '............',
-    '............',
-    '..........XX',
-    '.........XX.',
-    '........XX..',
-    'XX.....XX...',
-    '.XX...XX....',
-    '..XX.XX.....',
-    '...XXX......',
-    '....X.......',
-    '............',
-    '............',
-  ],
-  star: [
-    '.....XX.....',
-    '.....XX.....',
-    '....XXXX....',
-    'XXXXXXXXXXXX',
-    '.XXXXXXXXXX.',
-    '..XXXXXXXX..',
-    '...XXXXXX...',
-    '...XXXXXX...',
-    '..XXX..XXX..',
-    '..XX....XX..',
-    '.XX......XX.',
-    '............',
-  ],
-} as const;
-
-type DemoIconName = keyof typeof BITMAPS;
-
-function DemoIcon({ name, size = 12 }: { name: DemoIconName; size?: 12 | 24 | 36 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 12 12"
-      shapeRendering="crispEdges"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      {BITMAPS[name].flatMap((row, y) =>
-        Array.from(row).map((cell, x) =>
-          cell === 'X' ? <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} /> : null,
-        ),
-      )}
-    </svg>
-  );
 }
 
 /* ── Layout helpers ─────────────────────────────────────────────────────── */
@@ -238,35 +113,35 @@ function ThemeColumn({ theme }: { theme: Theme }) {
           name="The Library"
           title="Things I've Built"
           subtitle="Three main quests, three side quests, three research logs."
-          icon={<DemoIcon name="book" size={36} />}
+          icon={<PixelIcon name="book" size={36} />}
         />
       </Block>
 
       <Block title="Button · variants (md)">
         <div className="flex flex-wrap items-center gap-x-8 gap-y-8">
-          <Button href="#projects" leadingIcon={<DemoIcon name="play" />}>
+          <Button href="#projects" leadingIcon={<PixelIcon name="play" size={12} />}>
             View projects
           </Button>
-          <Button variant="secondary" href="#resume" leadingIcon={<DemoIcon name="download" size={24} />}>
+          <Button variant="secondary" href="#resume" leadingIcon={<PixelIcon name="download" size={12} />}>
             Resume
           </Button>
           <Button variant="ghost">Quest log</Button>
           <Button variant="icon" aria-label="Copy email">
-            <DemoIcon name="copy" size={24} />
+            <PixelIcon name="copy" size={24} />
           </Button>
         </div>
       </Block>
 
       <Block title="Button · lg, trailing icon, external">
         <div className="flex flex-wrap items-center gap-x-8 gap-y-8">
-          <Button size="lg" href="https://example.com" external trailingIcon={<DemoIcon name="external" size={24} />}>
+          <Button size="lg" href="https://example.com" external trailingIcon={<PixelIcon name="external" size={24} />}>
             Live
           </Button>
           <Button size="lg" variant="secondary">
             Code
           </Button>
           <Button size="lg" variant="icon" aria-label="Copy email">
-            <DemoIcon name="copy" size={24} />
+            <PixelIcon name="copy" size={24} />
           </Button>
         </div>
       </Block>
@@ -279,7 +154,7 @@ function ThemeColumn({ theme }: { theme: Theme }) {
                 <Cell key={state} caption={`${variant} · ${state}`}>
                   {variant === 'icon' ? (
                     <Button variant="icon" aria-label={`Copy (${state})`} {...stateProps(state)}>
-                      <DemoIcon name="copy" size={24} />
+                      <PixelIcon name="copy" size={24} />
                     </Button>
                   ) : (
                     <Button variant={variant} {...stateProps(state)}>
@@ -291,7 +166,7 @@ function ThemeColumn({ theme }: { theme: Theme }) {
             </div>
           ))}
           <Cell caption="link · aria-disabled">
-            <Button href="/resume.pdf" disabled leadingIcon={<DemoIcon name="download" />}>
+            <Button href="/resume.pdf" disabled leadingIcon={<PixelIcon name="download" size={12} />}>
               Resume
             </Button>
           </Cell>
@@ -332,14 +207,6 @@ function ThemeColumn({ theme }: { theme: Theme }) {
             <p className="text-label text-accent-fg">ghost</p>
             <p className="mt-2 text-body">Frame only.</p>
           </PixelPanel>
-          <PixelPanel variant="dark">
-            <p className="text-label text-accent-fg">dark (legacy)</p>
-            <p className="mt-2 text-body">Page ground, subtle frame.</p>
-          </PixelPanel>
-          <PixelPanel variant="parchment">
-            <p className="text-label">parchment (legacy)</p>
-            <p className="mt-2 text-body">Alias of paper.</p>
-          </PixelPanel>
         </div>
       </Block>
 
@@ -372,7 +239,7 @@ function ThemeColumn({ theme }: { theme: Theme }) {
           className="mt-14"
           tab={
             <>
-              <DemoIcon name="star" />
+              <PixelIcon name="star" size={12} />
               Main quest
             </>
           }
@@ -384,7 +251,7 @@ function ThemeColumn({ theme }: { theme: Theme }) {
           </p>
           <ChipList className="mt-6" items={TECH} accentCount={3} max={5} surface="paper" />
           <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-8">
-            <Button href="https://example.com" external trailingIcon={<DemoIcon name="external" />}>
+            <Button href="https://example.com" external trailingIcon={<PixelIcon name="external" size={12} />}>
               Live
             </Button>
             <Button variant="secondary" href="https://example.com" external>
@@ -392,7 +259,7 @@ function ThemeColumn({ theme }: { theme: Theme }) {
             </Button>
             <Button variant="ghost">Quest log</Button>
             <Button variant="icon" aria-label="Copy link">
-              <DemoIcon name="copy" size={24} />
+              <PixelIcon name="copy" size={24} />
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap items-start gap-x-8 gap-y-8">
@@ -412,17 +279,31 @@ function ThemeColumn({ theme }: { theme: Theme }) {
         </PixelPanel>
       </Block>
 
+      <Block title="PixelIcon · set (24 · 12, accent via --pi-accent)">
+        <ul className="grid grid-cols-[repeat(auto-fill,minmax(144px,1fr))] gap-x-4 gap-y-6">
+          {PIXEL_ICON_NAMES.map(name => (
+            <li key={name} className="flex flex-col items-start gap-2">
+              <span className="flex items-end gap-3 text-fg">
+                <PixelIcon name={name} size={24} />
+                <PixelIcon name={name} size={12} />
+              </span>
+              <span className="text-hud text-fg-subtle">{name}</span>
+            </li>
+          ))}
+        </ul>
+      </Block>
+
       <Block title="Toast">
         <div className="flex flex-wrap items-center gap-x-8 gap-y-8">
           <Button
             variant="secondary"
-            onClick={() => toast.show('Email copied · progress saved', { icon: <DemoIcon name="check" size={24} /> })}
+            onClick={() => toast.show('Email copied · progress saved', { icon: <PixelIcon name="check" size={24} /> })}
           >
             Copy toast
           </Button>
           <Button
             variant="secondary"
-            onClick={() => toast.show('Loot acquired: Roy_Carmelli_CV.pdf', { icon: <DemoIcon name="download" size={24} /> })}
+            onClick={() => toast.show('Loot acquired: Roy_Carmelli_CV.pdf', { icon: <PixelIcon name="download" size={24} /> })}
           >
             Loot toast
           </Button>
@@ -453,8 +334,8 @@ export default function Gallery() {
       <header className="px-4 py-8 md:px-8">
         <h1 className="text-display-m">Component gallery</h1>
         <p className="mt-2 text-body text-fg-muted">
-          Step 03 shared UI. Dev only (<code className="font-mono">?gallery</code>). Forced states use{' '}
-          <code className="font-mono">data-gallery-state</code>; icons are placeholders until PixelIcon lands.
+          Shared UI. Dev only (<code className="font-mono">?gallery</code>). Forced states use{' '}
+          <code className="font-mono">data-gallery-state</code>.
         </p>
       </header>
       <div className="grid lg:grid-cols-2">

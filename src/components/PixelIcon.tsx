@@ -4,8 +4,9 @@
  * Bitmap legend (rows top to bottom, 12 characters each):
  *   `.` transparent · `#` ink (`currentColor`) · `+` accent (`--pi-accent`, default HP red)
  *
- * Each icon is converted once into as few `<rect>`s as possible: horizontal runs of the same
- * ink per row, then identical runs on consecutive rows merged into one taller rect.
+ * Each icon is converted once into as few rectangles as possible (horizontal runs of the same
+ * ink per row, then identical runs on consecutive rows merged into one taller rect), and the
+ * rectangles of one ink are drawn as the subpaths of a single `<path>`.
  * Review sheet: `python3 scripts/pixelate/review.py --out <dir>` renders every icon at x1/x2/x4.
  */
 
@@ -416,6 +417,36 @@ const ICONS = {
     '.#..#.#...#.',
     '.##########.',
   ],
+  // Four corner brackets pointing out: "make the screen bigger".
+  fullscreen: [
+    '####....####',
+    '####....####',
+    '##........##',
+    '##........##',
+    '............',
+    '............',
+    '............',
+    '............',
+    '##........##',
+    '##........##',
+    '####....####',
+    '####....####',
+  ],
+  // The same brackets turned inward: "back to the window".
+  'fullscreen-exit': [
+    '..##....##..',
+    '..##....##..',
+    '####....####',
+    '####....####',
+    '............',
+    '............',
+    '............',
+    '............',
+    '####....####',
+    '####....####',
+    '..##....##..',
+    '..##....##..',
+  ],
 } as const satisfies Record<string, readonly string[]>;
 
 export type PixelIconName = keyof typeof ICONS;
@@ -471,15 +502,25 @@ function toRects(rows: readonly string[]): Record<Ink, Rect[]> {
   return out;
 }
 
-const rectCache = new Map<PixelIconName, Record<Ink, Rect[]>>();
 
-function rectsFor(name: PixelIconName): Record<Ink, Rect[]> {
-  let rects = rectCache.get(name);
-  if (!rects) {
-    rects = toRects(ICONS[name]);
-    rectCache.set(name, rects);
+/** One `d` string per ink: every merged rect becomes a closed `M x y h w v h h -w z` subpath. */
+export type PixelIconPaths = Record<Ink, string>;
+
+function toPath(rects: readonly Rect[]): string {
+  return rects.map(r => `M${r.x} ${r.y}h${r.w}v${r.h}h-${r.w}z`).join('');
+}
+
+const pathCache = new Map<PixelIconName, PixelIconPaths>();
+
+/** The path data PixelIcon draws for an icon: `#` → `currentColor`, `+` → the accent ink. */
+export function pixelIconPaths(name: PixelIconName): PixelIconPaths {
+  let paths = pathCache.get(name);
+  if (!paths) {
+    const rects = toRects(ICONS[name]);
+    paths = { '#': toPath(rects['#']), '+': toPath(rects['+']) };
+    pathCache.set(name, paths);
   }
-  return rects;
+  return paths;
 }
 
 const ACCENT_FILL = 'var(--pi-accent, var(--color-hp, #ef7d70))';
@@ -497,6 +538,7 @@ export interface PixelIconProps {
 /**
  * A 12x12 pixel icon drawn with `currentColor` (and an optional accent ink set through the
  * `--pi-accent` custom property). Decorative by default; pass `title` when it carries meaning.
+ * Each ink is a single `<path>`, so an icon costs at most two DOM nodes however detailed it is.
  */
 export default function PixelIcon({ name, size = 24, title, className }: PixelIconProps) {
   if (!Object.prototype.hasOwnProperty.call(ICONS, name)) {
@@ -505,7 +547,7 @@ export default function PixelIcon({ name, size = 24, title, className }: PixelIc
     }
     return null;
   }
-  const rects = rectsFor(name);
+  const paths = pixelIconPaths(name);
   const a11y = title
     ? { role: 'img' as const, 'aria-label': title }
     : { 'aria-hidden': true as const };
@@ -522,20 +564,8 @@ export default function PixelIcon({ name, size = 24, title, className }: PixelIc
       {...a11y}
     >
       {title && <title>{title}</title>}
-      {rects['#'].length > 0 && (
-        <g fill="currentColor">
-          {rects['#'].map(r => (
-            <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w} height={r.h} />
-          ))}
-        </g>
-      )}
-      {rects['+'].length > 0 && (
-        <g fill={ACCENT_FILL}>
-          {rects['+'].map(r => (
-            <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w} height={r.h} />
-          ))}
-        </g>
-      )}
+      {paths['#'] && <path fill="currentColor" d={paths['#']} />}
+      {paths['+'] && <path fill={ACCENT_FILL} d={paths['+']} />}
     </svg>
   );
 }

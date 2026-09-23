@@ -31,7 +31,7 @@ the character, both themes and all existing content.
 | Nav | Brand (face + ROY CARMELLI) links to top · Projects · About · Skills · Contact · Resume (primary CTA) · Play · theme toggle. "Library" becomes the *zone name* of Projects, not a nav label. |
 | Project tiers | main: `ai-sidebar`, `career-predictor`, `sommelier-bot` · side: `clr`, `arkanoid-game`, `portfolio` · research: `signal-processing`, `cognitive-correlation`, `white-matter-game`. |
 | Availability | Hero chip: `bio.availability`. Contact paragraph: `bio.contactBlurb`. |
-| Assets | Site UI uses native-resolution art in `public/assets/pixel/`. Files the mini-game loads stay untouched in `public/assets/sprites/`. Unused files are deleted; hi-res sources the pixel pipeline needs move to `design-src/`. |
+| Assets | Site UI uses native-resolution art in `public/assets/pixel/`. Files the mini-game loads stay in `public/assets/sprites/` with the same names and pixel dimensions (no engine change); they may be re-encoded in place (256-colour palette + lossless PNG optimisation) when the game shows no visible difference at 100%. Unused files are deleted; hi-res sources the pixel pipeline needs move to `design-src/`. |
 | Hero | Game title screen: forest backdrop at integer scale, character on the ground line at the same pixel scale, title card, HUD nameplate. |
 | Contact | No form (no backend). `mailto:` plus copy-to-clipboard with a toast. |
 | Icons | One pixel icon set (`PixelIcon`). No emoji anywhere in the UI. |

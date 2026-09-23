@@ -1,0 +1,194 @@
+/*
+ * Roy Runner chrome (MiniGame.tsx). The canvas keeps its 800x446 backing store; CSS only
+ * sizes it. Its frame is the 4px notched `px-frame` (box-shadow, so it takes no layout
+ * space), never a border.
+ *
+ * Touch play: the controls sit in rails beside the screen (landscape) or in bars above and
+ * below it (portrait), so no control ever covers the playfield, the player card or the
+ * score. The wrapper is a size container: the canvas takes the largest width that leaves
+ * room for the controls, capped at its native 800px (1:1 pixels), and the controls line up
+ * with the canvas frame.
+ */
+
+.minigame__canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Touch layout ─────────────────────────────────────────────────────── */
+
+.minigame {
+  position: relative;
+  container: minigame / size;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: max(8px, env(safe-area-inset-top)) env(safe-area-inset-right)
+    max(8px, env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  background-color: var(--color-bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* CSS fallback when the Fullscreen API is missing (iPhone Safari): cover the viewport. */
+.minigame--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.minigame__layout {
+  /* Rails: each needs room for an 80px key plus 12px either side (its 4px edge
+     then clears the canvas frame and the screen edge by 8px). */
+  --mg-rail: 104px;
+  --mg-canvas-fit: min(
+    800px,
+    (100cqh - 8px) * 800 / 446,
+    100cqw - 2 * var(--mg-rail) - 8px
+  );
+  --mg-canvas-w: var(--mg-canvas-fit);
+  --mg-canvas-h: calc(var(--mg-canvas-w) * 446 / 800);
+  --mg-key-w: clamp(80px, (100cqw - var(--mg-canvas-w) - 8px) / 2 - 24px, 104px);
+  --mg-key-h: calc(var(--mg-key-w) + 8px);
+
+  position: relative; /* paints above the px-dots star layer (::before) of the wrapper */
+  display: grid;
+  grid-template-columns: 1fr calc(var(--mg-canvas-w) + 8px) 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "quit  screen fs"
+    ".     screen ."
+    "slide screen jump";
+  width: 100cqw;
+  height: calc(var(--mg-canvas-h) + 8px);
+}
+
+/* Whole CSS pixels for the canvas, and a whole-pixel top edge, where the browser can
+   round: a pixelated canvas on a half pixel smears one row of its frame. */
+@supports (width: round(down, 10.5px, 1px)) {
+  .minigame__layout {
+    --mg-canvas-w: round(down, var(--mg-canvas-fit), 1px);
+    --mg-canvas-h: round(var(--mg-canvas-w) * 446 / 800, 1px);
+
+    align-self: start;
+    margin-top: round(down, (100cqh - var(--mg-canvas-h) - 8px) / 2, 1px);
+  }
+
+  .minigame__screen .minigame__canvas {
+    height: var(--mg-canvas-h);
+  }
+}
+
+.minigame__screen {
+  grid-area: screen;
+  align-self: center;
+  padding: 4px; /* room for the frame */
+}
+
+.minigame__screen .minigame__canvas {
+  width: var(--mg-canvas-w);
+  max-width: none;
+}
+
+/* Controls: every one is a design-system Button. The corner buttons' 4px edge
+   lines up with the top of the canvas frame; the keys' 8px base with its bottom. */
+.minigame__quit,
+.minigame__fs {
+  align-self: start;
+  justify-self: center;
+  margin-top: 4px;
+}
+
+.minigame__quit { grid-area: quit; }
+.minigame__fs { grid-area: fs; }
+
+.minigame__key {
+  flex-direction: column;
+  gap: 8px;
+  align-self: end;
+  justify-self: center;
+  width: var(--mg-key-w);
+  height: var(--mg-key-h);
+  margin-bottom: 8px;
+  padding: 8px 4px;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+.minigame__slide { grid-area: slide; }
+.minigame__jump { grid-area: jump; }
+
+/* Portrait (tablets): a bar of utility buttons above the screen, the keys below. */
+@container minigame (orientation: portrait) {
+  .minigame__layout {
+    --mg-key-w: 120px;
+    --mg-key-h: 96px;
+    --mg-canvas-fit: min(
+      800px,
+      100cqw - 32px,
+      (100cqh - 8px - 56px - 24px - var(--mg-key-h) - 8px - 24px) * 800 / 446
+    );
+
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "quit   fs"
+      "screen screen"
+      "slide  jump";
+    row-gap: 24px;
+    align-self: center;
+    width: calc(var(--mg-canvas-w) + 8px);
+    height: auto;
+    margin-top: 0;
+  }
+
+  /* Inset 4px so each button's 4px edge lines up with the canvas frame. */
+  .minigame__quit,
+  .minigame__slide {
+    justify-self: start;
+    margin-left: 4px;
+  }
+
+  .minigame__fs,
+  .minigame__jump {
+    justify-self: end;
+    margin-right: 4px;
+  }
+}
+
+/* A game key held down (set by useKeyPress on pointerdown): the Button's full press,
+   applied at once instead of waiting for the browser's :active. */
+.minigame .px-btn[data-pressed] {
+  --btn-press: 4px;
+  --btn-bevel-a: var(--btn-lo);
+  --btn-bevel-b: var(--btn-hi);
+  transition-duration: var(--dur-instant);
+}
+
+.minigame .px-btn--primary[data-pressed] {
+  --btn-bg: var(--color-accent-press);
+}
+
+/* Touch screens keep :hover on the last element tapped, which would leave a key
+   half-pressed after every tap. Here the keys pop back up between taps. */
+@media (hover: none) {
+  .minigame .px-btn:hover:not(:active, [data-pressed]) {
+    --btn-press: 0px;
+  }
+
+  .minigame .px-btn--primary:hover:not(:active, [data-pressed]) {
+    --btn-bg: var(--color-accent);
+  }
+
+  .minigame :is(.px-btn--secondary, .px-btn--icon):hover:not(:active, [data-pressed]) {
+    --btn-bg: var(--color-surface);
+  }
+}
