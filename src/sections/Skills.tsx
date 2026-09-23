@@ -31,7 +31,7 @@ export default function Skills() {
           className="flex-1 min-w-0"
         >
           <h2 style={{
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: 'var(--font-pixel)',
             fontSize: 'clamp(0.7rem, 1.8vw, 1.1rem)',
             color: 'var(--color-parchment)',
             textShadow: '2px 2px 0 var(--color-wood-dark)',
@@ -52,7 +52,7 @@ export default function Skills() {
               >
                 <PixelPanel variant="wood">
                   <h3 style={{
-                    fontFamily: '"Press Start 2P", monospace',
+                    fontFamily: 'var(--font-pixel)',
                     fontSize: '0.45rem',
                     color: 'var(--color-brass)',
                     letterSpacing: '0.08em',
@@ -64,7 +64,7 @@ export default function Skills() {
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
                     {group.items.map(item => (
                       <span key={item} style={{
-                        fontFamily: '"Inter", sans-serif',
+                        fontFamily: 'var(--font-sans)',
                         fontSize: '0.78rem',
                         color: 'var(--color-parchment)',
                         background: 'var(--color-forest)',

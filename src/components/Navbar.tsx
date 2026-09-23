@@ -79,7 +79,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                       gap: '4px',
                       padding: '8px 20px',
                       textDecoration: 'none',
-                      fontFamily: '"Press Start 2P", monospace',
+                      fontFamily: 'var(--font-pixel)',
                       fontSize: '0.5rem',
                       color: 'var(--color-parchment)',
                       letterSpacing: '0.05em',
@@ -115,7 +115,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                     border: 'none',
                     borderRight: '1px solid var(--color-forest-light)',
                     cursor: 'pointer',
-                    fontFamily: '"Press Start 2P", monospace',
+                    fontFamily: 'var(--font-pixel)',
                     fontSize: '0.5rem',
                     color: 'var(--color-parchment)',
                     letterSpacing: '0.05em',
@@ -154,7 +154,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                 border: '2px solid var(--color-brass)',
                 color: 'var(--color-brass)',
                 cursor: 'pointer',
-                fontFamily: '"Press Start 2P", monospace',
+                fontFamily: 'var(--font-pixel)',
                 fontSize: '1rem',
                 lineHeight: 1,
                 padding: 0,
@@ -194,7 +194,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                   border: '2px solid var(--color-brass)',
                   cursor: 'pointer',
                   color: 'var(--color-parchment)',
-                  fontFamily: '"Press Start 2P", monospace',
+                  fontFamily: 'var(--font-pixel)',
                   fontSize: '0.8rem',
                 }}
               >
@@ -232,7 +232,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
               href={link.href}
               onClick={() => setMenuOpen(false)}
               style={{
-                fontFamily: '"Press Start 2P", monospace',
+                fontFamily: 'var(--font-pixel)',
                 fontSize: '1rem',
                 color: 'var(--color-parchment)',
                 textDecoration: 'none',
@@ -261,7 +261,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
           <button
             onClick={() => { setMenuOpen(false); triggerArcade(); }}
             style={{
-              fontFamily: '"Press Start 2P", monospace',
+              fontFamily: 'var(--font-pixel)',
               fontSize: '1rem',
               color: 'var(--color-parchment)',
               background: 'none',

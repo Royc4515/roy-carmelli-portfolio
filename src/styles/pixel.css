@@ -1,95 +1,131 @@
-/* Pixel-perfect image rendering */
-img,
-canvas,
-.pixel-render {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+/* ==========================================================================
+   Pixel language utilities (docs/redesign/SPEC.md §2.4)
+   Everything is drawn on a 4px grid with hard edges: no blur, no radius.
+   ========================================================================== */
+
+/* The frame colour and the drop are set per element, never inherited:
+   without this a `px-drop` panel would leak its drop onto every nested
+   `px-frame` (custom properties inherit by default). */
+@property --px-frame {
+  syntax: "*";
+  inherits: false;
+}
+@property --px-drop {
+  syntax: "*";
+  inherits: false;
 }
 
-/* Pixel border using box-shadow (no border-radius) */
-.pixel-border {
+/* 4px frame with notched corners (the corner pixel is missing), drawn with
+   box-shadow so it takes no layout space. Compose with px-drop / px-drop-sm
+   and px-frame-subtle. */
+@utility px-frame {
   box-shadow:
-    0 -4px 0 0 var(--color-brass),
-    0  4px 0 0 var(--color-brass),
-    -4px 0 0 0 var(--color-brass),
-    4px  0 0 0 var(--color-brass),
-    -4px -4px 0 0 var(--color-brass),
-    4px  4px 0 0 var(--color-brass);
+    0 -4px 0 0 var(--px-frame, var(--color-border)),
+    0 4px 0 0 var(--px-frame, var(--color-border)),
+    -4px 0 0 0 var(--px-frame, var(--color-border)),
+    4px 0 0 0 var(--px-frame, var(--color-border)),
+    var(--px-drop, 0 0 #0000);
 }
 
-.pixel-border-sm {
-  box-shadow:
-    0 -2px 0 0 var(--color-brass),
-    0  2px 0 0 var(--color-brass),
-    -2px 0 0 0 var(--color-brass),
-    2px  0 0 0 var(--color-brass);
+@utility px-frame-subtle {
+  --px-frame: var(--color-border-subtle);
 }
 
-.pixel-border-dark {
-  box-shadow:
-    0 -4px 0 0 var(--color-wood),
-    0  4px 0 0 var(--color-wood),
-    -4px 0 0 0 var(--color-wood),
-    4px  0 0 0 var(--color-wood);
+/* Hard drop shadow, down-right (light from the top-left). */
+@utility px-drop-sm {
+  --px-drop: 4px 8px 0 0 var(--color-shadow);
 }
 
-/* Pixel shadow */
-.pixel-shadow {
-  filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.7));
+@utility px-drop {
+  --px-drop: 8px 12px 0 0 var(--color-shadow);
 }
 
-/* Pixel text shadow */
-.pixel-text-shadow {
-  text-shadow: 3px 3px 0px rgba(0,0,0,0.8), -1px -1px 0px rgba(0,0,0,0.4);
-}
-
-/* Retro OS bevel (for MenuBar) */
-.bevel-out {
-  border-top: 2px solid #ffffff88;
-  border-left: 2px solid #ffffff88;
-  border-bottom: 2px solid #00000088;
-  border-right: 2px solid #00000088;
-}
-
-.bevel-in {
-  border-top: 2px solid #00000088;
-  border-left: 2px solid #00000088;
-  border-bottom: 2px solid #ffffff88;
-  border-right: 2px solid #ffffff88;
-}
-
-/* Pixel button press effect */
-.pixel-btn {
-  cursor: pointer;
-  transition: transform 0.05s, box-shadow 0.05s;
+/* Nearest-neighbour scaling for sprites and pixel art. Opt-in: photos and
+   screenshots must keep smooth scaling. */
+@utility pixelated {
   image-rendering: pixelated;
 }
-.pixel-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: none !important;
+
+/* Dot grid: square 2px dots centred in 32px cells, in --color-dot.
+   Night adds a sparse, twinkling star layer on ::before, so the host must be
+   positioned (relative/absolute). The twinkle is off under reduced motion. */
+@utility px-dots {
+  background-image: conic-gradient(at 2px 2px, transparent 75%, var(--color-dot) 0);
+  background-size: 32px 32px;
+  background-position: 15px 15px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, var(--color-dot) 1.5px, transparent 1.5px);
+    background-size: 96px 96px;
+    background-position: 18px 42px;
+    opacity: 0;
+    transition: opacity 600ms ease;
+  }
+
+  :root[data-theme="night"] &::before {
+    opacity: 0.55;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root[data-theme="night"] &::before {
+      animation: twinkle 4.5s ease-in-out infinite;
+    }
+  }
 }
 
-/* Zone label text */
-.zone-label-text {
-  font-family: var(--font-pixel);
-  color: var(--color-parchment);
-  text-shadow: 2px 2px 0 var(--color-forest-dark), -1px -1px 0 rgba(0,0,0,0.5);
-  letter-spacing: 0.1em;
-  line-height: 1.8;
+/* Legacy name used by the current sections. */
+@utility dot-grid {
+  @apply px-dots;
 }
 
-/* Scanline overlay for retro feel */
-.scanlines::after {
-  content: '';
-  position: absolute;
-  inset: 0;
+@keyframes twinkle {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.18; }
+}
+
+/* Divider: 4px dashed accent line (8px dash, 8px gap) with a 12px pixel
+   diamond in the middle. Use on an <hr> or an aria-hidden <div>. */
+@utility px-divider {
+  position: relative;
+  display: block;
+  height: 12px;
+  border: 0;
   background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.04) 2px,
-    rgba(0, 0, 0, 0.04) 4px
+      to right,
+      var(--color-accent) 0 8px,
+      transparent 8px 16px
+    )
+    0 50% / 100% 4px no-repeat;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: calc(50% - 6px);
+    width: 12px;
+    height: 12px;
+    background: var(--color-accent);
+    /* 6×6 grid of 2px pixels:  ..XX.. / .XXXX. / XXXXXX / XXXXXX / .XXXX. / ..XX.. */
+    clip-path: polygon(
+      4px 0, 8px 0, 8px 2px, 10px 2px, 10px 4px, 12px 4px,
+      12px 8px, 10px 8px, 10px 10px, 8px 10px, 8px 12px, 4px 12px,
+      4px 10px, 2px 10px, 2px 8px, 0 8px, 0 4px, 2px 4px, 2px 2px, 4px 2px
+    );
+  }
+}
+
+/* 2px checkerboard over the element's fill, for disabled states.
+   Uses background-image, so set the fill with background-color. */
+@utility px-dither {
+  background-image: conic-gradient(
+    var(--px-dither, color-mix(in srgb, var(--color-shadow) 50%, transparent)) 0 25%,
+    transparent 0 50%,
+    var(--px-dither, color-mix(in srgb, var(--color-shadow) 50%, transparent)) 0 75%,
+    transparent 0
   );
-  pointer-events: none;
-  z-index: 1;
+  background-size: 4px 4px;
 }

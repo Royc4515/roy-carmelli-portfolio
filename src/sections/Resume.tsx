@@ -14,10 +14,10 @@ export default function Resume() {
     >
       <div style={{ maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <PixelPanel variant="wood">
-          <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.5rem', color: 'var(--color-brass)', marginBottom: '0.75rem', letterSpacing: '0.08em' }}>
+          <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.5rem', color: 'var(--color-brass)', marginBottom: '0.75rem', letterSpacing: '0.08em' }}>
             📜 RESUME SCROLL
           </p>
-          <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.9rem', color: 'var(--color-parchment-dark)', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--color-parchment-dark)', marginBottom: '1.25rem', lineHeight: 1.6 }}>
             Full breakdown - coursework with grades, project deep-dives, IDF reserve service, certifications.
           </p>
           <a
@@ -25,7 +25,7 @@ export default function Resume() {
             download="Roy_Carmelli_CV.pdf"
             style={{
               display: 'inline-block',
-              fontFamily: '"Press Start 2P", monospace',
+              fontFamily: 'var(--font-pixel)',
               fontSize: '0.5rem',
               padding: '0.75rem 1.5rem',
               background: 'var(--color-brass)',

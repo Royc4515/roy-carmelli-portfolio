@@ -72,7 +72,7 @@ export default function Hero() {
                 <button
                   onClick={handlePressStart}
                   style={{
-                    fontFamily: '"Press Start 2P", monospace',
+                    fontFamily: 'var(--font-pixel)',
                     fontSize: '0.6rem',
                     color: 'var(--color-brass)',
                     letterSpacing: '0.15em',
@@ -82,14 +82,13 @@ export default function Hero() {
                     cursor: 'pointer',
                     padding: 0,
                     display: 'block',
-                    animation: 'hero-blink 1s step-end infinite',
                   }}
                 >
                   ▶ PLAYER ONE - PRESS START
                 </button>
 
                 <h1 style={{
-                  fontFamily: '"Press Start 2P", monospace',
+                  fontFamily: 'var(--font-pixel)',
                   fontSize: 'clamp(1.2rem, 3.5vw, 2.4rem)',
                   color: 'var(--color-parchment)',
                   lineHeight: 1.4,
@@ -100,7 +99,7 @@ export default function Hero() {
                 </h1>
 
                 <h2 style={{
-                  fontFamily: '"Press Start 2P", monospace',
+                  fontFamily: 'var(--font-pixel)',
                   fontSize: 'clamp(0.45rem, 1.2vw, 0.75rem)',
                   color: 'var(--color-brass)',
                   lineHeight: 2,
@@ -110,7 +109,7 @@ export default function Hero() {
                 </h2>
 
                 <p style={{
-                  fontFamily: '"Inter", sans-serif',
+                  fontFamily: 'var(--font-sans)',
                   fontSize: '1.05rem',
                   color: 'var(--color-parchment)',
                   lineHeight: 1.75,
@@ -126,7 +125,7 @@ export default function Hero() {
                     <a
                       href="#projects"
                       style={{
-                        fontFamily: '"Press Start 2P", monospace',
+                        fontFamily: 'var(--font-pixel)',
                         fontSize: '0.65rem',
                         padding: '1rem 1.5rem',
                         background: 'var(--color-brass)',
@@ -152,7 +151,7 @@ export default function Hero() {
                     <a
                       href="#contact"
                       style={{
-                        fontFamily: '"Press Start 2P", monospace',
+                        fontFamily: 'var(--font-pixel)',
                         fontSize: '0.5rem',
                         padding: '0.6rem 0.875rem',
                         background: 'transparent',
@@ -193,7 +192,7 @@ export default function Hero() {
                   <a
                     href="#projects"
                     style={{
-                      fontFamily: '"Press Start 2P", monospace',
+                      fontFamily: 'var(--font-pixel)',
                       fontSize: '0.6rem',
                       padding: '1rem 2rem',
                       background: 'var(--color-brass)',
@@ -219,7 +218,7 @@ export default function Hero() {
                   <a
                     href="#contact"
                     style={{
-                      fontFamily: '"Press Start 2P", monospace',
+                      fontFamily: 'var(--font-pixel)',
                       fontSize: '0.45rem',
                       padding: '0.75rem 1.25rem',
                       background: 'transparent',
@@ -270,8 +269,8 @@ export default function Hero() {
                       style={{ height: '56px', width: 'auto', imageRendering: 'pixelated', background: 'var(--color-forest-dark)' }}
                     />
                     <div>
-                      <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-brass)', marginBottom: '0.3rem' }}>PLAYER 1</div>
-                      <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: 'var(--color-parchment)', lineHeight: 2 }}>
+                      <div style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-brass)', marginBottom: '0.3rem' }}>PLAYER 1</div>
+                      <div style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.35rem', color: 'var(--color-parchment)', lineHeight: 2 }}>
                         <div>HP ████████ MAX</div>
                         <div>XP █████░░░ LVL 3</div>
                       </div>
@@ -325,7 +324,7 @@ export default function Hero() {
               <button
                 onClick={() => setIsPlaying(false)}
                 style={{
-                  fontFamily: '"Press Start 2P", monospace',
+                  fontFamily: 'var(--font-pixel)',
                   fontSize: '0.45rem',
                   color: 'var(--color-parchment)',
                   background: 'transparent',
@@ -352,13 +351,6 @@ export default function Hero() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <style>{`
-        @keyframes hero-blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-      `}</style>
     </section>
   );
 }

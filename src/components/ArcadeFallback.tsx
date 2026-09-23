@@ -16,7 +16,7 @@ export default function ArcadeFallback() {
           </span>
 
           <h3 style={{
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: 'var(--font-pixel)',
             fontSize: '0.65rem',
             color: 'var(--color-brass)',
             letterSpacing: '0.12em',
@@ -27,7 +27,7 @@ export default function ArcadeFallback() {
           <p
             data-testid="arcade-fallback-message"
             style={{
-              fontFamily: '"Press Start 2P", monospace',
+              fontFamily: 'var(--font-pixel)',
               fontSize: '0.45rem',
               color: 'var(--color-parchment)',
               lineHeight: 2.2,
@@ -42,7 +42,7 @@ export default function ArcadeFallback() {
           </p>
 
           <div style={{
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: 'var(--font-pixel)',
             fontSize: '0.38rem',
             color: 'var(--color-secondary-text)',
             border: '2px solid var(--color-forest-light)',

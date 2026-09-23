@@ -34,7 +34,7 @@ export default function Arcade() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             style={{
-              fontFamily: '"Press Start 2P", monospace',
+              fontFamily: 'var(--font-pixel)',
               fontSize: 'clamp(0.85rem, 2vw, 1.2rem)',
               color: 'var(--color-parchment)',
               textShadow: '2px 2px 0 var(--color-wood-dark)',
@@ -60,7 +60,7 @@ export default function Arcade() {
         {/* Controls hint — adapts to input method */}
         {mode !== 'rotate' && (
           <p style={{
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: 'var(--font-pixel)',
             fontSize: '0.4rem',
             color: 'var(--color-forest-light)',
             marginTop: '0.85rem',

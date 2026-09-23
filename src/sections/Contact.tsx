@@ -41,7 +41,7 @@ export default function Contact() {
           style={{ gap: '1.5rem' }}
         >
           <h2 className="text-center md:text-left" style={{
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: 'var(--font-pixel)',
             fontSize: 'clamp(0.7rem, 1.8vw, 1.1rem)',
             color: 'var(--color-parchment)',
             textShadow: '2px 2px 0 var(--color-forest-dark)',
@@ -50,7 +50,7 @@ export default function Contact() {
           </h2>
 
           <PixelPanel variant="wood">
-            <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '1rem', color: 'var(--color-parchment-dark)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: 'var(--color-parchment-dark)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
               Available for software engineering and AI internships starting summer 2026 - part-time during the semester, full-time during breaks. Also open to research collaborations at the CS × neuroscience intersection.
             </p>
             <div className="flex justify-center md:justify-start">
@@ -58,7 +58,7 @@ export default function Contact() {
               href={`mailto:${bio.email}`}
               style={{
                 display: 'inline-block',
-                fontFamily: '"Press Start 2P", monospace',
+                fontFamily: 'var(--font-pixel)',
                 fontSize: '0.5rem',
                 padding: '0.85rem 1.25rem',
                 minHeight: '44px',
@@ -119,7 +119,7 @@ export default function Contact() {
                   }}
                 >
                   <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{icon}</span>
-                  <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.3rem', color: 'var(--color-parchment-dark)', letterSpacing: '0.05em' }}>{label}</span>
+                  <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.3rem', color: 'var(--color-parchment-dark)', letterSpacing: '0.05em' }}>{label}</span>
                 </a>
               ))}
             </div>

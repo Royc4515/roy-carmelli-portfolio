@@ -36,7 +36,7 @@ export default function Projects() {
           className="flex-1 min-w-0"
         >
           <h2 style={{
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: 'var(--font-pixel)',
             fontSize: 'clamp(0.7rem, 1.8vw, 1.1rem)',
             color: 'var(--color-parchment)',
             textShadow: '2px 2px 0 var(--color-forest-dark)',
@@ -50,34 +50,34 @@ export default function Projects() {
             {featured.map(project => (
               <motion.div key={project.id} whileHover={{ y: -4 }} transition={{ duration: 0.15 }}>
                 <PixelPanel variant="parchment">
-                  <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: '#7a5610', marginBottom: '0.6rem', letterSpacing: '0.1em' }}>
+                  <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.45rem', color: '#7a5610', marginBottom: '0.6rem', letterSpacing: '0.1em' }}>
                     ★ FEATURED
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem', gap: '0.5rem' }}>
-                    <h3 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.6rem', color: 'var(--color-wood-dark)', lineHeight: 1.6, flex: 1 }}>
+                    <h3 style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.6rem', color: 'var(--color-wood-dark)', lineHeight: 1.6, flex: 1 }}>
                       {project.title}
                     </h3>
                     <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
                       {project.github && (
                         <a href={project.github} target="_blank" rel="noreferrer"
-                          style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-wood)', background: 'var(--color-brass)', padding: '3px 6px', textDecoration: 'none' }}>
+                          style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-wood)', background: 'var(--color-brass)', padding: '3px 6px', textDecoration: 'none' }}>
                           GH→
                         </a>
                       )}
                       {project.live && (
                         <a href={project.live} target="_blank" rel="noreferrer"
-                          style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-parchment)', background: 'var(--color-forest-light)', padding: '3px 6px', textDecoration: 'none' }}>
+                          style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-parchment)', background: 'var(--color-forest-light)', padding: '3px 6px', textDecoration: 'none' }}>
                           ↗
                         </a>
                       )}
                     </div>
                   </div>
-                  <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: '#5a3a20', lineHeight: 1.65, marginBottom: '0.85rem' }}>
+                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: '#5a3a20', lineHeight: 1.65, marginBottom: '0.85rem' }}>
                     {project.description}
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
                     {project.tech.map(t => (
-                      <span key={t} style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: 'var(--color-wood-dark)', background: 'var(--color-parchment-dark)', padding: '3px 7px' }}>
+                      <span key={t} style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.35rem', color: 'var(--color-wood-dark)', background: 'var(--color-parchment-dark)', padding: '3px 7px' }}>
                         {t}
                       </span>
                     ))}
@@ -97,15 +97,15 @@ export default function Projects() {
                 <PixelPanel variant="wood">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
-                      <h3 style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.55rem', color: 'var(--color-parchment)', marginBottom: '0.45rem', lineHeight: 1.6 }}>
+                      <h3 style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.55rem', color: 'var(--color-parchment)', marginBottom: '0.45rem', lineHeight: 1.6 }}>
                         {project.title}
                       </h3>
-                      <p style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: 'var(--color-parchment)', lineHeight: 1.65, marginBottom: '0.6rem' }}>
+                      <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--color-parchment)', lineHeight: 1.65, marginBottom: '0.6rem' }}>
                         {project.description}
                       </p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
                         {project.tech.map(t => (
-                          <span key={t} style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.35rem', color: 'var(--color-parchment)', background: 'var(--color-forest)', padding: '3px 7px', border: '1px solid var(--color-forest-light)' }}>
+                          <span key={t} style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.35rem', color: 'var(--color-parchment)', background: 'var(--color-forest)', padding: '3px 7px', border: '1px solid var(--color-forest-light)' }}>
                             {t}
                           </span>
                         ))}
@@ -114,13 +114,13 @@ export default function Projects() {
                     <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                       {project.github && (
                         <a href={project.github} target="_blank" rel="noreferrer"
-                          style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-parchment)', background: 'var(--color-forest-light)', padding: '5px 8px', textDecoration: 'none', boxShadow: '2px 2px 0 var(--color-forest-dark)' }}>
+                          style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-parchment)', background: 'var(--color-forest-light)', padding: '5px 8px', textDecoration: 'none', boxShadow: '2px 2px 0 var(--color-forest-dark)' }}>
                           GH→
                         </a>
                       )}
                       {project.live && (
                         <a href={project.live} target="_blank" rel="noreferrer"
-                          style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.4rem', color: 'var(--color-forest-dark)', background: 'var(--color-brass)', padding: '5px 8px', textDecoration: 'none', boxShadow: '2px 2px 0 var(--color-wood)' }}>
+                          style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.4rem', color: 'var(--color-forest-dark)', background: 'var(--color-brass)', padding: '5px 8px', textDecoration: 'none', boxShadow: '2px 2px 0 var(--color-wood)' }}>
                           ↗
                         </a>
                       )}

@@ -13,7 +13,7 @@ export default function Footer() {
     >
       <p
         style={{
-          fontFamily: '"Press Start 2P", monospace',
+          fontFamily: 'var(--font-pixel)',
           fontSize: '0.5rem',
           color: 'var(--color-parchment-dark)',
           letterSpacing: '0.08em',
@@ -23,7 +23,7 @@ export default function Footer() {
       </p>
       <p
         style={{
-          fontFamily: '"Press Start 2P", monospace',
+          fontFamily: 'var(--font-pixel)',
           fontSize: '0.4rem',
           color: 'var(--color-forest-light)',
           letterSpacing: '0.05em',

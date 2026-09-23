@@ -35,7 +35,7 @@ export default function About() {
           style={{ gap: '1.5rem' }}
         >
           <h2 style={{
-            fontFamily: '"Press Start 2P", monospace',
+            fontFamily: 'var(--font-pixel)',
             fontSize: 'clamp(0.85rem, 2vw, 1.2rem)',
             color: 'var(--color-parchment)',
             textShadow: '2px 2px 0 var(--color-wood-dark)',
@@ -46,7 +46,7 @@ export default function About() {
           <PixelPanel variant="parchment">
             {bio.about.split('\n\n').map((para, i) => (
               <p key={i} style={{
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: 'var(--font-sans)',
                 fontSize: '0.95rem',
                 color: 'var(--color-wood-dark)',
                 lineHeight: 1.8,
@@ -59,7 +59,7 @@ export default function About() {
 
           <PixelPanel variant="wood">
             <p style={{
-              fontFamily: '"Press Start 2P", monospace',
+              fontFamily: 'var(--font-pixel)',
               fontSize: '0.5rem',
               color: 'var(--color-brass)',
               letterSpacing: '0.1em',
@@ -78,10 +78,10 @@ export default function About() {
                 padding: '0.65rem 0',
                 borderBottom: i < arr.length - 1 ? '1px solid var(--color-forest-light)' : 'none',
               }}>
-                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '0.45rem', color: 'var(--color-parchment-dark)', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.45rem', color: 'var(--color-parchment-dark)', whiteSpace: 'nowrap' }}>
                   {label}
                 </span>
-                <span style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.85rem', color: 'var(--color-parchment)' }}>
+                <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--color-parchment)' }}>
                   {value}
                 </span>
               </div>
