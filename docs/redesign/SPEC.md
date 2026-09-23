@@ -125,6 +125,12 @@ Floors everywhere: body 16px (14px only for captions/meta), HUD 12px (13 preferr
   Card gap 24. Density pass: sized for real viewports (14" laptops at 1280×650, 1536×730, 1470×830;
   phones with browser bars at 390×664, 360×700), not the idealised 1280×800 / 390×844.
   Panel padding 16 (base) / 24 (`md`).
+- **Short laptops** (`short:` variant, `@media (width >= 64rem) and (height <= 60rem)`: 14" laptops
+  at 125-175% scaling with tabs and bookmarks bar, e.g. 1097×516, 1280×602, 1366×600, 1536×730,
+  1470×830, and 1440×900): section padding `short:py-6` (24), zone header → content 16, header
+  rule `mt-3`. Every zone except Projects fits one screen under the 64px nav; in Projects every
+  card fits one screen on its own (see the zone sections below). Phones, tablets and taller
+  desktops are unaffected.
 - No `min-height: 100vh` except the hero (`min-h-[100svh]`, capped at 880px on desktop, or the
   full `100svh` when the viewport is 881-975px tall so no sliver of Zone 01 shows).
 - Zone grounds alternate: hero scene · Projects `bg` · About `bg-alt` · Skills `bg` ·
