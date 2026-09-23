@@ -363,8 +363,9 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   its content but sets the name on one 32px line, the role and tagline at 16px, 16px padding and a
   tighter rhythm (CTAs under the role), so the whole card, Press start included, fits the first screen.
 - **Projects (Zone 01 · The Library).** ZoneHeader "Things I've Built". Main quests: the first
-  spans full width (visual 7/12, text 5/12), the other two side by side; side quests in a 3-col
-  grid (compact wood cards); research logs as a compact list. QuestCard anatomy: visual (16:10,
+  spans full width (visual 7/12, text 5/12), the other two side by side; side quests (compact wood
+  cards) two per row from 640px, the third spanning the row, and three per row from 1024px, their
+  parts lined up through subgrid from 768px (24px between rows); research logs as a compact list. QuestCard anatomy: visual (16:10,
   pixel bezel) · tier tag (`star` icon + `MAIN QUEST` / `SIDE QUEST` / `RESEARCH LOG`) · kind ·
   year · title · `tagline` · `highlights` (main only) · ≤ 4 chips + `+N` · actions: `Live` (primary,
   external icon), `Code` (secondary, code icon), `Quest log` (ghost, `<details>` holding the full

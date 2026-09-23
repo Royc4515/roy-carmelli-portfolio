@@ -351,9 +351,11 @@
     flex: 1;
   }
 
-  /* Side quests: 1 → 2 (640) → 3 (768) columns. With two columns the third
-     card takes the whole row instead of sitting alone at half width. */
-  @media (min-width: 640px) {
+  /* Side quests: 1 → 2 (640) → 3 (1024) columns. With two columns the third
+     card takes the whole row instead of sitting alone at half width (three
+     columns at 768 made ~226px cards: titles on three lines, one chip per
+     row). */
+  @media (width >= 640px) {
     .quest-list--side {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -392,13 +394,10 @@
       grid-template-rows: subgrid;
     }
 
+    /* Side quests line their parts up through subgrid (6 rows each), in
+       rows of two until 1024px, then of three. */
     .quest-list--side {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
       row-gap: 0;
-    }
-
-    .quest-list--side > li:last-child:nth-child(odd) {
-      grid-column: auto;
     }
 
     .quest-list--side > li,
@@ -406,6 +405,27 @@
       display: grid;
       grid-row: span 6;
       grid-template-rows: subgrid;
+    }
+  }
+
+  /* Rows of two: the subgrid rows take no gap, so every card with a row
+     under it keeps 24px below (its margin grows its last track, like the
+     lead main quest's). That is every card but the last, and but the one
+     before the last when the two share the last row (an even count). */
+  @media (768px <= width < 1024px) {
+    .quest-list--side > li:not(:last-child, :nth-last-child(2):nth-child(odd)) {
+      margin-bottom: 24px;
+    }
+  }
+
+  /* Taller than the short laptop screens (which list one card per row). */
+  @media (width >= 64rem) and (height > 60rem) {
+    .quest-list--side {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .quest-list--side > li:last-child:nth-child(odd) {
+      grid-column: auto;
     }
   }
 
