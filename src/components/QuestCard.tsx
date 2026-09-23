@@ -167,7 +167,7 @@ function Monitor({ shot }: { shot: QuestScreenshot }) {
 }
 
 /**
- * Dotted backdrop holding the screenshot (feature) or the item at x6 (standard). Below 640px
+ * Dotted backdrop holding the screenshot (feature) or the item at x6 (standard). Below 1600px
  * Projects.css draws the item at x4 in a shorter band (still an integer scale of the SVG).
  */
 function QuestVisual({ project, layout }: { project: Project; layout: QuestCardLayout }) {
@@ -209,6 +209,7 @@ function QuestActions({
         <Button
           href={project.live}
           external
+          size="sm"
           trailingIcon={<PixelIcon name="external" size={12} />}
           aria-label={liveLabel(project.title)}
         >
@@ -220,6 +221,7 @@ function QuestActions({
           href={project.github}
           external
           variant="secondary"
+          size="sm"
           leadingIcon={<PixelIcon name="code" size={12} />}
           aria-label={codeLabel(project.title)}
         >
@@ -402,6 +404,7 @@ export function ResearchLogItem({ project }: { project: Project }) {
           href={project.github}
           external
           variant="secondary"
+          size="sm"
           // 24px for the icon-only button, drawn at 12px next to the label (both integer scales).
           leadingIcon={<PixelIcon name="code" size={24} className="research-log__icon" />}
           aria-label={codeLabel(project.title)}

@@ -79,7 +79,7 @@ export function ZoneHeader({ zone, name, title, subtitle, icon, id, className }:
         {/* leading-5 + -my-0.5: 16px lines with a 4px gap when the eyebrow wraps. */}
         <p
           className={cx(
-            'zone-header__eyebrow relative -my-0.5 text-balance text-label leading-5 text-accent-fg',
+            'zone-header__eyebrow relative -my-0.5 text-balance text-label leading-5 text-fg-subtle sm:text-accent-fg',
             hasIcon && 'col-start-2 row-start-1',
           )}
           data-banner={showBanner || undefined}

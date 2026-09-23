@@ -95,7 +95,7 @@ self-hosted from `public/fonts` with `@font-face` URLs identical to the preload 
 |---|---|---|---|---|
 | `display-xl` | pixel | 32/40, name on two lines | 40/48 | H1 (name) |
 | `display-l` | pixel | 16/24 (< 640), 24/32 (640+) | 24/32; 32/40 from 1600 | zone title (H2) |
-| `display-m` | pixel | 16/24 | 24/32 | main-quest title, sheet titles |
+| `display-m` | pixel | 16/24 | 16/24; 24/32 from 1600 | main-quest title, sheet titles |
 | `display-s` | pixel | 16/24 | 16/24 | card titles, large CTA |
 | `label` | pixel | 12/16, +0.04em | same | eyebrows, button labels (md), tier tags |
 | `hud` | mono 500 | 13/16, +0.06em | same | nav labels, chips, meta, stats |
@@ -268,6 +268,7 @@ Reference CSS (from the approved prototype):
   `fg`) · optional subline (`body`, `fg-muted`, ≤ 90 chars) · `px-divider` below.
 - Props: `zone` (number), `name`, `title`, `subtitle?`, `icon`, `id` for the H2 (used by
   `aria-labelledby` on the section). The H2 has `tabIndex={-1}` so menu jumps can focus it.
+- Eyebrow is `accent-fg` from 640px and `fg-subtle` on phones (where the title is 16px and must lead).
 - Eyebrow breaks only after the dot (`ZONE 02 ·` / `THE ADVENTURER`), 4px row gap. Below 640px
   the icon is 24px, inline with the eyebrow, and the H2 takes the full width.
 - Hosts the zone-entered `ZoneBanner` (absolute over the eyebrow, `aria-hidden`) and the divider
@@ -354,7 +355,8 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   at 4 + `+N`. An open quest log never stretches its neighbour (`:has()` releases the subgrid).
   Hover lift keeps its hit area. Item art uses fixed bitmap colours with a half-strength night
   wash. Below 640px: Live/Code side by side, highlights on the lead card only, 120px item band,
-  research `Code` as a 48px icon button.
+  research `Code` as a 44px icon button. Card actions (Live / Code) use Button `sm`. The item band is
+  120px with the item at ×4 below 1600px, 184px at ×6 above.
 - **About (Zone 02 · The Adventurer).** 7/12 story on a paper panel (≤ 65ch) + 5/12 "Character
   sheet" (inset panel): face ×2, the existing at-a-glance rows (HUD labels, Plex values), one
   achievement row derived from the bio ("Field medic · scaled a unit from 12 to 30+").
@@ -374,7 +376,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   `bio.resume.meta`, `Download` (primary, `download` attr) + `View` (secondary, new tab).
   Download shows toast "Loot acquired: Roy_Carmelli_CV.pdf".
 - **Contact (Zone 05 · Save Point).** Pixel campfire (21×21 native, 3 frames, one `<path>` per
-  colour) rendered at exactly the character's scale (×4 desktop, ×2 below 1024) so both share one
+  colour) rendered at exactly the character's scale (×4 from 1600, ×3 on laptops 1024-1599, ×2 below) so both share one
   pixel grid; the ground line is level with the panel's bottom frame. Caption `aria-hidden`. Title "Let's Talk". `bio.contactBlurb`. Primary `Email me` (mailto) + icon button
   `Copy email` (toast "Email copied · progress saved"; visible `Copy` label from 640px). Email shown
   in lowercase (`mailto:` keeps `bio.email`). Secondary buttons with icon + readable label: GitHub,

@@ -89,8 +89,9 @@ async function copyText(text: string): Promise<boolean> {
   return copied;
 }
 
-/** ≥ 1024px the save point fills its column at Roy ×4; below, it shrinks to ×2. */
+/** The save point's scale: Roy ×4 from 1600px, ×3 on laptops (1024-1599), ×2 below. */
 const WIDE_QUERY = '(min-width: 1024px)';
+const XL_QUERY = '(min-width: 1600px)';
 
 /**
  * The "save point": Roy standing by a campfire on a 4px ground line. Decorative, so hidden
@@ -102,7 +103,9 @@ const WIDE_QUERY = '(min-width: 1024px)';
  * ground can sit level with the bottom frame of the contact panel beside it.
  */
 function SavePoint() {
-  const scale = useMediaQuery(WIDE_QUERY) ? 4 : 2;
+  const wide = useMediaQuery(WIDE_QUERY);
+  const xl = useMediaQuery(XL_QUERY);
+  const scale = xl ? 4 : wide ? 3 : 2;
   const vars = { '--sp': `${scale}px` } as CSSProperties;
 
   return (

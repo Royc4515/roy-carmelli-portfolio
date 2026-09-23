@@ -137,9 +137,12 @@ describe('Contact', () => {
     expect(roy[0].style.height).toBe('134px');
   });
 
-  it('draws the save point at ×4 from 1024px up', () => {
+  it.each([
+    ['laptops (1024-1599px)', ['(min-width: 1024px)'], '3', '201px'],
+    ['large screens (1600px+)', ['(min-width: 1024px)', '(min-width: 1600px)'], '4', '268px'],
+  ])('draws the save point larger on %s', (_label, matching, scale, royHeight) => {
     const matchMedia = vi.fn((query: string) => ({
-      matches: query === '(min-width: 1024px)',
+      matches: matching.includes(query),
       media: query,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -147,8 +150,8 @@ describe('Contact', () => {
     vi.stubGlobal('matchMedia', matchMedia);
     try {
       const { container } = renderContact();
-      expect(container.querySelector('.px-campfire')).toHaveAttribute('data-scale', '4');
-      expect(container.querySelector<HTMLElement>('.px-character')!.style.height).toBe('268px');
+      expect(container.querySelector('.px-campfire')).toHaveAttribute('data-scale', scale);
+      expect(container.querySelector<HTMLElement>('.px-character')!.style.height).toBe(royHeight);
     } finally {
       vi.unstubAllGlobals();
     }

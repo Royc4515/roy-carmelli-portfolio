@@ -251,13 +251,14 @@
     aspect-ratio: 16 / 10;
   }
 
-  /* Item reveal: a fixed band with the x6 item on its plate (x4 on phones:
-     the SVG is redrawn at 96px, still an integer scale of its 24px grid). */
+  /* Item reveal: a fixed band with the x6 item on its plate from 1600px; below,
+     x4 in a 120px band (the SVG is redrawn at 96px, still an integer scale of its
+     24px grid). */
   .quest-visual--item {
     height: 184px;
   }
 
-  @media (max-width: 639px) {
+  @media (max-width: 1599px) {
     .quest-visual--item {
       height: 120px;
     }
