@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,15 +10,19 @@ import { placeTooltip } from '../components/SkillTooltip';
 
 const originalMatchMedia = window.matchMedia;
 
+/** The `short` variant's query (src/index.css), which Skills.css repeats as a plain @media. */
+const SHORT_QUERY = '(width >= 64rem) and (height <= 60rem)';
+
 /**
- * `mobile` answers the < 768px query (and the opposite for ≥ 1024px); reduced motion is on
- * so Reveal renders plain elements.
+ * `mobile` answers the < 768px query (and the opposite for ≥ 1024px); `short` answers the
+ * short-laptop query; reduced motion is on so Reveal renders plain elements.
  */
-function mockMedia({ mobile }: { mobile: boolean }) {
+function mockMedia({ mobile, short = false }: { mobile: boolean; short?: boolean }) {
   const answers: Record<string, boolean> = {
     '(prefers-reduced-motion: reduce)': true,
     '(max-width: 767px)': mobile,
     '(min-width: 1024px)': !mobile,
+    [SHORT_QUERY]: short,
   };
   window.matchMedia = (query: string) =>
     ({
@@ -353,6 +359,105 @@ describe('Skills on mobile (< 768px)', () => {
     expect(screen.getByTestId('skill-detail')).toBeInTheDocument();
     await user.click(screen.getByRole('heading', { level: 2 }));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();
+  });
+});
+
+/*
+ * Short laptop screens (≥ 1024 wide, ≤ 960 tall, e.g. 1097x516 at 175% Windows scaling): a
+ * compact inventory, one line of items per slot under a status line. The layout is CSS only
+ * (`short:` classes + Skills.css), which jsdom does not apply, so these tests pin what the
+ * layout relies on: one DOM for every screen, the order it stacks, the subgrid hooks, the key
+ * moves across the stacked slots, and the stylesheet's sizes.
+ */
+describe('Skills on short laptop screens (the `short` variant)', () => {
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+  });
+
+  const withStableIds = (html: string) => html.replace(/:r[0-9a-z]+:/g, ':id:');
+
+  it('is CSS only: the same DOM whether or not the short query matches', () => {
+    mockMedia({ mobile: false, short: false });
+    const tall = render(<Skills />);
+    const tallHtml = withStableIds(tall.container.innerHTML);
+    tall.unmount();
+
+    mockMedia({ mobile: false, short: true });
+    const short = render(<Skills />);
+    expect(withStableIds(short.container.innerHTML)).toBe(tallHtml);
+  });
+
+  it('stacks top to bottom in reading order: the status line, then every slot in data order', () => {
+    mockMedia({ mobile: false, short: true });
+    render(<Skills />);
+    const status = document.querySelector<HTMLElement>('#skills .skill-status')!;
+    const grid = screen.getByRole('grid', { name: 'Equipment' });
+    expect(status.compareDocumentPosition(grid) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // The level, the stats and the keycap hint all ride the status line.
+    expect(within(status).getByText(/Roy · LVL 3/)).toBeInTheDocument();
+    expect(status.querySelector('dl')?.textContent).toContain(`Projects${projects.length}`);
+    expect(within(status).getByTestId('skill-keys')).toBeInTheDocument();
+    // The column wrappers dissolve, so the rows stack in data order.
+    expect(within(grid).getAllByRole('row').map(r => within(r).getByRole('heading').textContent)).toEqual(
+      skills.map(g => `${g.slot} ·: ${g.category}`),
+    );
+  });
+
+  it('has the hooks the one-line-per-slot layout needs (subgrids, dissolving columns, no well)', () => {
+    mockMedia({ mobile: false, short: true });
+    render(<Skills />);
+    const grid = screen.getByRole('grid', { name: 'Equipment' });
+    const layout = grid.parentElement!;
+    expect(layout).toHaveClass('short:grid-cols-[max-content_minmax(0,1fr)]');
+    expect(grid).toHaveClass('short:col-span-2', 'short:grid-cols-subgrid');
+    for (const column of grid.children) expect(column).toHaveClass('short:contents', 'short:space-y-0');
+    for (const row of within(grid).getAllByRole('row')) {
+      expect(row).toHaveClass('short:col-span-2', 'short:grid-cols-subgrid');
+    }
+    const status = layout.querySelector('.skill-status')!;
+    expect(status).toHaveClass('short:col-span-2', 'short:grid-cols-subgrid');
+    expect(status.querySelector('.skill-well')).toHaveClass('short:hidden');
+  });
+
+  it('Up / Down cross the column split: the next slot is the line right below', async () => {
+    mockMedia({ mobile: false, short: true });
+    const user = userEvent.setup();
+    render(<Skills />);
+    act(() => item('Claude API').focus()); // Magic, the last slot of the first column
+    await user.keyboard('{ArrowDown}');
+    expect(item('NumPy')).toHaveFocus(); // Potions, the first slot of the second column
+    await user.keyboard('{ArrowUp}');
+    expect(item('Claude API')).toHaveFocus();
+    // Magic wraps onto a second line there: Right runs on through the wrap, in reading order.
+    act(() => item('Prompt Engineering').focus());
+    await user.keyboard('{ArrowRight}');
+    expect(item('Serverless Functions')).toHaveFocus();
+    await user.keyboard('{ArrowUp}');
+    expect(item('Google OAuth')).toHaveFocus(); // Armor, same column (clamped to its last item)
+  });
+});
+
+describe('Skills.css short-mode sizes', () => {
+  const read = (path: string) => readFileSync(resolve(import.meta.dirname, path), 'utf8');
+  // Read from disk: the Vitest config stubs CSS imports (css: false).
+  const skillsCss = read('./Skills.css');
+  const indexCss = read('../index.css');
+  const values = (name: string) =>
+    [...skillsCss.matchAll(new RegExp(`--${name}:\\s*(\\d+)px;`, 'g'))].map(m => Number(m[1]));
+
+  it('repeats the `short` variant query exactly', () => {
+    expect(indexCss).toContain(`@custom-variant short (@media ${SHORT_QUERY});`);
+    expect(skillsCss).toContain(`@media ${SHORT_QUERY} {`);
+  });
+
+  it('keeps every item at least 24px tall (WCAG 2.2 2.5.8) and every gap on the 4px grid', () => {
+    expect(values('skill-h')).toEqual([28, 24]);
+    const spacing = ['gap-x', 'row-gap', 'col-gap', 'status-gap', 'panel-pt', 'panel-pb'];
+    for (const name of spacing.map(s => `skill-${s}`)) {
+      const found = values(name);
+      expect(found.length).toBeGreaterThan(0);
+      for (const px of found) expect(px % 4).toBe(0);
+    }
   });
 });
 

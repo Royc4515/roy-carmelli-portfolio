@@ -165,6 +165,93 @@
       0 0 / 100% 2px no-repeat;
   }
 
+  /* ── Short laptop screens (the `short` variant, index.css): a compact
+     inventory that fits one screen under the nav. Skills.tsx lays it out: a
+     slot-heading column and an item column shared through subgrids by a
+     status line and the slots, one line of items per slot. Sizes:
+       items 28px tall, 4px apart in a line, 8px between lines; 16px between
+       the columns, under the status line and inside the panel;
+     under 600px tall (1097x516: a 14" laptop at 175% with the browser's bars)
+       items 24px (the WCAG 2.2 2.5.8 minimum), 4px between lines, a 12px
+       status gap, 8px / 12px panel padding.
+     Magic's eight items need 1031px, so they take two lines; every other slot
+     takes one from 1024px wide. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    .skill-panel {
+      --skill-h: 28px;
+      --skill-gap-x: 4px;
+      --skill-row-gap: 8px;
+      --skill-col-gap: 16px;
+      --skill-status-gap: 16px;
+      --skill-panel-pt: 16px;
+      --skill-panel-pb: 16px;
+    }
+
+    .skill-slot__header {
+      display: flex;
+      align-items: center;
+      min-height: var(--skill-h);
+    }
+
+    /* flex, not inline-flex: no line box around it, so its cell is exactly
+       as tall as the item */
+    .skill-item {
+      display: flex;
+      height: var(--skill-h);
+      padding: 0 8px;
+
+      /* the hit area still fills the gaps exactly */
+      &::before {
+        inset: calc(var(--skill-row-gap) / -2) calc(var(--skill-gap-x) / -2);
+      }
+    }
+
+    .skill-item__label {
+      padding-bottom: 2px;
+      margin-bottom: -2px;
+    }
+
+    /* The status line's rule (the character sheet's 2px dashed line), drawn
+       in the middle of the gap under it, so it takes no height. */
+    .skill-status::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      top: calc(100% + (var(--skill-status-gap) - 2px) / 2);
+      border-top: 2px dashed var(--color-border-subtle);
+    }
+
+    /* Stats on one line, split by the same 2px dashed rule, standing up. */
+    .skill-stat + .skill-stat {
+      border-top: 0;
+      border-left: 2px dashed var(--color-border-subtle);
+      margin-left: 12px;
+      padding-left: 12px;
+    }
+  }
+
+  @media (width >= 64rem) and (height < 37.5rem) {
+    .skill-panel {
+      --skill-h: 24px;
+      --skill-row-gap: 4px;
+      --skill-status-gap: 12px;
+      --skill-panel-pt: 8px;
+      --skill-panel-pb: 12px;
+    }
+
+    /* The label rides 1px high and its cue hugs the glyphs, so the dots stay
+       clear of the item's bottom line; the slot headings ride along. */
+    .skill-item,
+    .skill-slot__header {
+      padding-bottom: 2px;
+    }
+
+    .skill-item__label {
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .skill-item {
       transition: none;

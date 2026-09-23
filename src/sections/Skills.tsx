@@ -165,8 +165,15 @@ function SkillSlot({ group, row, baseId, active, setActive, open, setOpen, inlin
   const icon = SLOT_ICONS[group.slot];
 
   return (
-    <Reveal index={row} role="row" className={cx('relative', openIndex >= 0 && 'z-10')}>
-      <div role="rowheader">
+    <Reveal
+      index={row}
+      role="row"
+      className={cx(
+        'relative short:col-span-2 short:grid short:grid-cols-subgrid short:items-start',
+        openIndex >= 0 && 'z-10',
+      )}
+    >
+      <div role="rowheader" className="skill-slot__header">
         <h3 className="flex items-center gap-2 text-hud uppercase">
           {icon && <PixelIcon name={icon} size={12} className="skill-slot__icon shrink-0" />}
           <span>
@@ -180,7 +187,7 @@ function SkillSlot({ group, row, baseId, active, setActive, open, setOpen, inlin
           </span>
         </h3>
       </div>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-2 short:mt-0 short:gap-x-(--skill-gap-x) short:gap-y-(--skill-row-gap)">
         {details.map((detail, col) => (
           <SkillItem
             key={detail.name}
@@ -219,33 +226,44 @@ function Keycap({ children, wide = false }: { children: ReactNode; wide?: boolea
  * Left column (≥ 768px; phones skip it, Roy already stands in Hero, About and Contact):
  * Roy in an inset well, his level, a few stats counted from the data, and the grid's
  * controls, shown while the grid has keyboard focus.
+ *
+ * Short laptop screens (`short:`): a status line over the slots instead. The well goes (Roy
+ * stands in Hero and Contact too); the level sits in the slot-heading column, the stats and
+ * the keycap hint in the item column (the frame joins the panel's subgrid, see Skills).
  */
 function CharacterFrame() {
   const stats = equipmentStats(skills, projects);
   const wide = useMediaQuery('(min-width: 1024px)');
   return (
-    <Reveal className="hidden items-center gap-6 md:flex lg:sticky lg:top-24 lg:flex-col lg:items-stretch lg:gap-0 lg:self-start">
+    <Reveal className="skill-status hidden items-center gap-6 md:flex lg:sticky lg:top-24 lg:flex-col lg:items-stretch lg:gap-0 lg:self-start short:relative short:top-auto short:col-span-2 short:grid short:grid-cols-subgrid short:items-center short:gap-x-(--skill-col-gap) short:self-auto">
       <PixelPanel
         variant="inset"
         padding="sm"
-        className="skill-well flex h-[168px] w-24 shrink-0 items-end justify-center px-0 pt-0 pb-4 lg:h-[248px] lg:w-full"
+        className="skill-well flex h-[168px] w-24 shrink-0 items-end justify-center px-0 pt-0 pb-4 lg:h-[248px] lg:w-full short:hidden"
       >
         <Character pose="idle" scale={wide ? 3 : 2} decorative />
       </PixelPanel>
-      <div className="min-w-0 flex-1 lg:mt-6">
-        <p className="text-label text-accent-fg">
+      <div className="min-w-0 flex-1 lg:mt-6 short:contents">
+        <p className="text-label text-accent-fg short:col-start-1 short:row-start-1">
           Roy · LVL 3<span className="sr-only">, third-year student</span>
         </p>
-        <dl className="mt-3">
+        <dl className="mt-3 short:col-start-2 short:row-start-1 short:mt-0 short:flex short:items-center">
           {stats.map(stat => (
-            <div key={stat.label} className="skill-stat flex items-baseline justify-between gap-4 py-2">
+            <div
+              key={stat.label}
+              className="skill-stat flex items-baseline justify-between gap-4 py-2 short:gap-2 short:py-0"
+            >
               <dt className="text-hud uppercase text-fg-subtle">{stat.label}</dt>
               <dd className="text-hud text-fg tabular-nums">{stat.value}</dd>
             </div>
           ))}
         </dl>
         {/* Visual only: screen readers announce the grid and its keys themselves. */}
-        <div className="skill-keys mt-4 text-hud uppercase text-fg-subtle" aria-hidden="true" data-testid="skill-keys">
+        <div
+          className="skill-keys mt-4 text-hud uppercase text-fg-subtle short:col-start-2 short:row-start-1 short:-my-0.5 short:justify-self-end"
+          aria-hidden="true"
+          data-testid="skill-keys"
+        >
           <span className="flex items-center gap-1">
             <Keycap>
               <PixelIcon name="arrow-up" size={12} className="-rotate-90" />
@@ -273,7 +291,9 @@ function CharacterFrame() {
 
 /**
  * Zone 03 · Equipment (SPEC §4 Skills): the skills as an RPG equipment screen. Roy stands
- * in a frame on the left; each skill category is a slot of items. Hovering, focusing or
+ * in a frame on the left; each skill category is a slot of items. On short laptop screens
+ * (`short:`, CSS only) it becomes a compact inventory that fits one screen: a status line,
+ * then one line of items per slot beside its heading. Hovering, focusing or
  * tapping an item opens a tooltip whose "Used in" line is computed from the projects' tech
  * lists (src/lib/skillUsage.ts), never written by hand.
  *
@@ -363,19 +383,28 @@ export default function Skills() {
           />
         </Reveal>
 
-        <PixelPanel variant="wood" elevation={2} padding="lg" className="skill-panel">
-          <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
+        {/* Short laptop screens: a compact inventory, one line per slot. One grid of two
+            columns (slot headings, items) shared through subgrids by the status line and every
+            slot row; the column wrappers dissolve (`contents`), so the slots stack in data order,
+            the order the arrow keys already follow. */}
+        <PixelPanel
+          variant="wood"
+          elevation={2}
+          padding="lg"
+          className="skill-panel short:px-4 short:pt-(--skill-panel-pt) short:pb-(--skill-panel-pb)"
+        >
+          <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 short:grid-cols-[max-content_minmax(0,1fr)] short:gap-x-(--skill-col-gap) short:gap-y-(--skill-status-gap)">
             <CharacterFrame />
             {/* Two fixed columns at xl; reading, Tab and arrow order stay in data order. */}
             <div
               ref={gridRef}
               role="grid"
               aria-label="Equipment"
-              className="skill-grid grid items-start gap-8 xl:grid-cols-2 xl:gap-x-10"
+              className="skill-grid grid items-start gap-8 xl:grid-cols-2 xl:gap-x-10 short:col-span-2 short:grid-cols-subgrid short:gap-x-(--skill-col-gap) short:gap-y-(--skill-row-gap)"
               onKeyDown={onGridKeyDown}
             >
               {COLUMNS.map(column => (
-                <div key={column.first} className="space-y-8">
+                <div key={column.first} className="space-y-8 short:contents short:space-y-0">
                   {column.groups.map((group, i) => (
                     <SkillSlot
                       key={group.slot}
