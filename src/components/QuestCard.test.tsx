@@ -64,6 +64,13 @@ describe('<QuestCard> main quest (feature)', () => {
     expect(within(card).getByText(aside.tagline)).toBeInTheDocument();
   });
 
+  it('sets the subtitle on the type scale (body, body-l from md), semibold throughout', () => {
+    render(<QuestCard project={aside} layout="feature" />);
+    const subtitle = screen.getByText('AI Sidebar');
+    expect(subtitle).toHaveClass('text-body', 'md:text-body-l', 'font-semibold', 'md:font-semibold');
+    expect(subtitle.className).not.toMatch(/text-\[/);
+  });
+
   it('shows the real screenshot, responsive, lazy and not pixelated', () => {
     render(<QuestCard project={aside} layout="feature" />);
     const img = screen.getByRole('img', { name: /Every AI model\. One sidebar\./ });

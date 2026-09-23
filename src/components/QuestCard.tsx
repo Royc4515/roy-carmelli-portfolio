@@ -326,10 +326,11 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
             layout === 'feature' ? 'text-display-m' : 'text-display-s lg:text-display-m',
             'short:inline',
           )}
-          // Never larger than the pixel name above it: 16 while the name is 16, 20 once it is 24.
+          // On the type scale: body (16), then body-l (18) from md on the lead card, lg on the
+          // others (semibold again there: body-l sets its own weight).
           subtitleClass={cx(
             'text-body text-ink-muted short:mt-0 short:ml-2 short:inline-block',
-            layout === 'feature' ? 'md:text-[1.25rem] md:leading-7' : 'lg:text-[1.25rem] lg:leading-7',
+            layout === 'feature' ? 'md:text-body-l md:font-semibold' : 'lg:text-body-l lg:font-semibold',
           )}
         />
         <p className="quest-tagline text-body text-ink">{project.tagline}</p>
