@@ -6,6 +6,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ComponentType,
   type CSSProperties,
   type ReactNode,
   type RefObject,
@@ -14,6 +15,7 @@ import { AnimatePresence, LazyMotion, domAnimation, m, steps, type Transition } 
 import { bio } from '../data/bio';
 import Character from '../components/Character';
 import ArcadeFallback from '../components/ArcadeFallback';
+import GameLoadFailed from '../components/GameLoadFailed';
 import PixelPanel from '../components/PixelPanel';
 import PixelIcon from '../components/PixelIcon';
 import { Button } from '../components/ui/Button';
@@ -27,8 +29,14 @@ import { pixelSprites } from '../theme/pixelSprites';
 import { duration, ease, seconds } from '../theme/motion';
 import './Hero.css';
 
-/** The game (engine, sprites, canvas) loads only when someone presses start. */
-const MiniGame = lazy(() => import('../components/MiniGame/MiniGame'));
+/**
+ * The game (engine, sprites, canvas) loads only when someone presses start. When its code cannot
+ * be fetched (offline, a flaky network, a tab left open across a redeploy that removed the old
+ * chunk) the game area shows GameLoadFailed instead of an error that would unmount the page.
+ */
+const MiniGame = lazy<ComponentType<{ onQuit: () => void; showTouchControls: boolean }>>(() =>
+  import('../components/MiniGame/MiniGame').catch(() => ({ default: GameLoadFailed })),
+);
 
 /* ── Scene geometry ────────────────────────────────────────────────────────
    The forest (240x112 native) and Roy share one pixel grid: both are drawn at
@@ -1141,7 +1149,7 @@ export default function Hero() {
               tabIndex={-1}
               role="region"
               aria-label="Roy Runner"
-              className={cx(gameClass, 'outline-none')}
+              className={cx('hero-game', gameClass, 'outline-none')}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -1157,7 +1165,7 @@ export default function Hero() {
 
               {/* Touch play has its own QUIT inside the game chrome. */}
               {mode !== 'touch' && (
-                <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-6 gap-y-4">
+                <div className="hero-game__controls flex shrink-0 flex-wrap items-center justify-center gap-x-6 gap-y-4">
                   <div className="flex items-center gap-4">
                     <Button variant="secondary" onClick={quit} leadingIcon={<PixelIcon name="close" size={12} />}>
                       Quit

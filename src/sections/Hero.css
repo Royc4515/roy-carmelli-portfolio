@@ -46,3 +46,9 @@
     display: inline;
   }
 }
+
+/* A game that failed to load shows its own Retry and Quit (GameLoadFailed): the desktop
+   controls row (Quit, Esc, jump/slide hint) has nothing left to control. */
+.hero-game:has([data-game-load-failed]) .hero-game__controls {
+  display: none;
+}
