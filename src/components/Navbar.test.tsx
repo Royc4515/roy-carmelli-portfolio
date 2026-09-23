@@ -333,7 +333,8 @@ describe('Navbar — active section', () => {
     expect(document.querySelector('.zone-chip')).toBeNull();
 
     scrollSectionsTo({ projects: -2400, about: -1600, skills: -800, resume: 100, contact: 900 });
-    const chip = screen.getByRole('button', { name: 'Zone 4 of 5: Resume. Open the menu' });
+    // The name starts with the visible text (WCAG 2.5.3 label in name).
+    const chip = screen.getByRole('button', { name: 'Zone 4/5: Resume, open the menu' });
     expect(chip).toHaveTextContent('Zone 4/5Resume');
     expect(chip).toHaveAttribute('aria-expanded', 'false');
 
@@ -461,6 +462,50 @@ describe('Navbar — mobile', () => {
     expect(screen.getByRole('link', { name: /back to top/i })).toHaveFocus();
     await userEvent.tab({ shift: true });
     expect(resumeGame).toHaveFocus();
+  });
+
+  it('is a dialog named "Paused" while open', async () => {
+    render(<Navbar {...defaultProps} />);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: /toggle menu/i }));
+    expect(screen.getByRole('dialog', { name: 'Paused' })).toBe(screen.getByTestId('mobile-menu-overlay'));
+  });
+
+  it('makes the page behind the open menu inert (skip link, main, footer) and restores only that', async () => {
+    render(
+      <>
+        <a href="#projects">Skip to projects</a>
+        <Navbar {...defaultProps} />
+        <main>
+          <section id="projects">Quests</section>
+        </main>
+        <footer>Footer</footer>
+        {/* React 18 has no typed inert prop: pass the attribute as a string. */}
+        <aside {...{ inert: '' }}>Already inert</aside>
+      </>,
+    );
+    const behind = [
+      screen.getByRole('link', { name: 'Skip to projects' }),
+      document.querySelector('main')!,
+      document.querySelector('footer')!,
+    ];
+    const header = screen.getByRole('banner');
+    behind.forEach(el => expect(el).not.toHaveAttribute('inert'));
+
+    const hamburger = screen.getByRole('button', { name: /toggle menu/i });
+    await userEvent.click(hamburger);
+    behind.forEach(el => expect(el).toHaveAttribute('inert'));
+    expect(header).not.toHaveAttribute('inert');
+
+    await userEvent.keyboard('{Escape}');
+    behind.forEach(el => expect(el).not.toHaveAttribute('inert'));
+    expect(document.querySelector('aside')).toHaveAttribute('inert');
+    expect(hamburger).toHaveFocus();
+
+    // Leaving through a zone link restores the page too.
+    await userEvent.click(hamburger);
+    await userEvent.click(screen.getByTestId('mobile-menu-overlay').querySelector('a[href="#projects"]')!);
+    behind.forEach(el => expect(el).not.toHaveAttribute('inert'));
   });
 
   it('shows a resume download icon button and the menu items', async () => {

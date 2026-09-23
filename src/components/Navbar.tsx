@@ -4,6 +4,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useActiveSection } from '../hooks/useActiveSection';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { useInertWhile } from '../hooks/useInertWhile';
 import { Button } from './ui/Button';
 import { cx } from './ui/cx';
 import PixelIcon, { type PixelIconName } from './PixelIcon';
@@ -297,9 +298,9 @@ interface NavbarProps {
 /**
  * Site header (SPEC §4 Navbar): a fixed 64px wood bar with the brand (face + name, back to top),
  * the section links with a scroll-spy cursor, and the Resume / Play / theme actions.
- * Below 768px the links move into a full-screen "PAUSED" menu: `inert` while closed, focus moves
- * to its first item on open, Tab stays inside the header, Esc closes and returns focus to the Menu
- * button, and the page does not scroll behind it.
+ * Below 768px the links move into a full-screen "PAUSED" menu (a dialog): `inert` while closed,
+ * focus moves to its first item on open, Tab stays inside the header, the page behind it is
+ * `inert`, Esc closes and returns focus to the Menu button, and the page does not scroll behind it.
  */
 export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -364,6 +365,14 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
       document.body.style.overflow = previousOverflow;
     };
   }, [menuOpen]);
+
+  // Open: the page behind the menu (the header's siblings: skip link, main, footer) leaves the
+  // tab order and the accessibility tree, so a screen reader's virtual cursor stays in the header
+  // as Tab does. Closing restores only what this changed (the game may have made more inert).
+  useInertWhile(menuOpen, () => {
+    const header = headerRef.current;
+    return header?.parentElement ? [...header.parentElement.children].filter(el => el !== header) : [];
+  });
 
   // Open: Esc closes; Tab cycles through the header (bar + menu) only.
   useEffect(() => {
@@ -538,7 +547,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                 ref={zoneChipRef}
                 type="button"
                 className="zone-chip max-[359px]:hidden"
-                aria-label={`Zone ${zoneIndex + 1} of ${ZONES.length}: ${ZONES[zoneIndex].label}. Open the menu`}
+                aria-label={`Zone ${zoneIndex + 1}/${ZONES.length}: ${ZONES[zoneIndex].label}, open the menu`}
                 aria-expanded={menuOpen}
                 aria-controls={PAUSE_MENU_ID}
                 onClick={() => toggleMenu(zoneChipRef.current)}
@@ -585,6 +594,10 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
             id={PAUSE_MENU_ID}
             data-testid="mobile-menu-overlay"
             data-open={menuOpen || undefined}
+            // A dialog, but not aria-modal: the bar above it (Menu, theme, resume) stays in the
+            // header's Tab cycle; the page behind is inert instead.
+            role="dialog"
+            aria-label="Paused"
             aria-hidden={menuOpen ? 'false' : 'true'}
             {...inertWhenClosed}
             className="pause-menu px-dots fixed inset-0 z-0 flex flex-col overflow-y-auto overscroll-contain bg-bg px-6 pb-10 pt-[100px]"

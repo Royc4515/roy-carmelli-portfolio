@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Hero, {
@@ -20,6 +20,7 @@ import Hero, {
   titleCardTop,
 } from './Hero';
 import { ToastProvider } from '../components/ui/Toast';
+import Navbar from '../components/Navbar';
 import { bio } from '../data/bio';
 import { pixelSprites } from '../theme/pixelSprites';
 
@@ -284,6 +285,53 @@ describe('Hero — desktop', () => {
     expect(segments).toHaveLength(16);
     segments.forEach(seg => expect(seg).toHaveClass('h-3', 'w-2'));
     expect(segments[0].parentElement).toHaveClass('gap-1');
+  });
+});
+
+describe('Hero — with the pause menu (narrow window, mouse)', () => {
+  beforeEach(() => {
+    setupMatchMedia({ mobileWidth: true, coarse: false, portrait: false });
+    vi.restoreAllMocks();
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+  afterEach(() => {
+    document.body.style.overflow = '';
+  });
+
+  it('Play from the menu hands the page from the menu\'s inert to the game\'s, and quitting leaves none', async () => {
+    render(
+      <>
+        <a href="#projects">Skip to projects</a>
+        <Navbar theme="night" onToggleTheme={() => {}} />
+        <main>
+          <Hero />
+          <section id="projects">Quests</section>
+        </main>
+        <footer>Footer</footer>
+      </>,
+    );
+    const skip = screen.getByRole('link', { name: 'Skip to projects' });
+    const main = document.querySelector('main')!;
+    const projects = document.getElementById('projects')!;
+    const footer = document.querySelector('footer')!;
+
+    await userEvent.click(screen.getByRole('button', { name: /toggle menu/i }));
+    expect(main).toHaveAttribute('inert');
+    expect(skip).toHaveAttribute('inert');
+
+    await userEvent.click(within(screen.getByRole('dialog', { name: 'Paused' })).getByRole('button', { name: /play/i }));
+    await findCanvas();
+    // The menu gave the page back; the game made the rest of it inert, the hero stays live.
+    expect(main).not.toHaveAttribute('inert');
+    expect(skip).not.toHaveAttribute('inert');
+    expect(projects).toHaveAttribute('inert');
+    expect(footer).toHaveAttribute('inert');
+    expect(screen.getByRole('region', { name: 'Roy Runner' })).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(document.querySelector('canvas')).toBeNull());
+    for (const el of [skip, main, projects, footer]) expect(el).not.toHaveAttribute('inert');
+    expect(document.body.style.overflow).toBe('');
   });
 });
 

@@ -24,6 +24,7 @@ import { useToast } from '../components/ui/Toast';
 import { cx } from '../components/ui/cx';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useGameDisplayMode } from '../hooks/useGameDisplayMode';
+import { useInertWhile } from '../hooks/useInertWhile';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { pixelSprites } from '../theme/pixelSprites';
 import { duration, ease, seconds } from '../theme/motion';
@@ -588,22 +589,6 @@ function useSpriteRunning(ref: RefObject<HTMLElement>, enabled: boolean): boolea
   return inView && pageVisible;
 }
 
-/**
- * While the game is open, the rest of the page (main's other sections and the footer) leaves
- * the tab order and the accessibility tree; quitting restores exactly what it changed.
- */
-function useInertPageWhile(active: boolean) {
-  useEffect(() => {
-    if (!active) return;
-    const others = [
-      ...document.querySelectorAll<HTMLElement>('main > :not(#hero)'),
-      ...document.querySelectorAll<HTMLElement>('main ~ footer'),
-    ].filter(el => !el.hasAttribute('inert'));
-    others.forEach(el => el.setAttribute('inert', ''));
-    return () => others.forEach(el => el.removeAttribute('inert'));
-  }, [active]);
-}
-
 /* ── Pieces ────────────────────────────────────────────────────────────── */
 
 /**
@@ -831,7 +816,12 @@ export default function Hero() {
     };
   }, [isPlaying]);
 
-  useInertPageWhile(isPlaying);
+  // While the game is open, the rest of the page (main's other sections and the footer) leaves
+  // the tab order and the accessibility tree; quitting restores exactly what it changed.
+  useInertWhile(isPlaying, () => [
+    ...document.querySelectorAll('main > :not(#hero)'),
+    ...document.querySelectorAll('main ~ footer'),
+  ]);
 
   const quit = useCallback(() => setIsPlaying(false), []);
 
