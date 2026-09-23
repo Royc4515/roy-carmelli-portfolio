@@ -319,9 +319,12 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   map is `aria-hidden` decoration. Right: `Resume` (primary md, download icon, links to the PDF),
   `Play` (secondary md, joystick) and theme toggle (icon button, sun/moon). Mobile (< 768px):
   brand left (replaced inside a zone by a two-line HUD plate `ZONE n/5` / zone name that opens
-  the menu; brand name hidden below 360px); right: Resume icon button + Menu button. Menu = full-screen "PAUSED" panel, list
+  the menu, named "Zone n/5: <zone>, open the menu"; brand name hidden below 360px); right: Resume
+  icon button + Menu button. Menu = full-screen "PAUSED" panel (`role="dialog"`, "Paused"), list
   with `play` cursor on hover/focus, "Continue" closes it; `inert` when closed, focus moves to
-  the first item on open, Esc closes, focus returns to the Menu button.
+  the first item on open, the page behind it (skip link, main, footer) is `inert` while open, Esc
+  closes, focus returns to the Menu button. A pending `Play` (waiting for the scroll to the hero)
+  is cancelled by any click, wheel, touch or key before it settles.
 - **Hero (title screen).** Forest (`pixelSprites.forest`, 240×112, true grid 11.47px,
   `groundRow` 101) and character share ONE integer scale `k`, so their pixels are identical.
   `k = max(ceil(W / 240), floor(H / 112))`, lowered to `floor(H / 112)` when covering the width
@@ -338,9 +341,14 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   top-right (omitted when it would collide). Static `SCROLL` cue on the dirt. Night: moonlight
   washes over the forest (stronger) and the character (lighter). Pressing start fades the card
   and HUD out (`--dur-scene`, stepped slide) and fades the lazily loaded game in over the dimmed
-  scene; Esc/Quit return focus to Press start. During desktop play the game sits on an opaque
-  `bg` backdrop, the rest of `main` and the footer are `inert`, an HTML controls hint sits next
-  to Esc, and following an in-page nav link quits the game first (focus stays on the link).
+  scene; Esc/Quit return focus to Press start. Press start and `Play` first bring the hero to
+  the top of the viewport (the page scroll then locks). During desktop play the game sits on an
+  opaque `bg` backdrop no taller than the first screen under the nav, the rest of `main` and the
+  footer are `inert`, an HTML controls hint sits next to Esc, and following an in-page nav link
+  quits the game first (focus stays on the link). The canvas keeps 800:446 and shrinks (whole CSS
+  pixels) so the canvas, Quit and the hint always fit that screen (1097×516: 624×348). If the
+  game's code cannot be fetched, a wood panel ("Couldn't load the game. Check your connection and
+  try again.") offers Reload and Quit instead of the game.
   Phones and portrait tablets (< 1024 portrait): a scene band (×3 phones, ×4 tablets, ×2 below
   700px tall) at most 38% of the viewport height, canopy cropped and anchored at the bottom so
   the character and grass stay, then the title card as a full-bleed wood slab. Phone card order:
