@@ -81,9 +81,8 @@ Measured WCAG contrast (all text pairs ≥ 4.5:1, all component borders ≥ 3:1)
 on accent 6.1 (night 11.8) · `ink`/`ink-muted` on paper 11.2/6.6 (night 9.6/5.6) · `border-subtle`
 on bg/surface 3.9/3.8 (night 4.2/3.6). The old `forest-light` (#4a6b2e) is **never** text (2.4:1).
 
-Legacy tokens (`forest-dark`, `forest`, `forest-light`, `parchment`, `parchment-dark`, `brass`,
-`wood`, `wood-dark`, `shadow-deep`, `secondary-text`) stay as aliases until the last component
-stops using them; QA removes them.
+The pre-redesign tokens (`forest*`, `parchment*`, `brass`, `wood`, `wood-dark`, `shadow-deep`,
+`secondary-text`) were removed in QA; only the semantic set above exists.
 
 ### 2.2 Typography
 

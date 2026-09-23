@@ -143,10 +143,28 @@
     }
   }
 
-  /* hover: half press */
-  .px-btn:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
-    --btn-bg: var(--color-accent-hover);
-    --btn-press: 2px;
+  /* hover: half press. Only where hover is real: touch browsers keep :hover
+     after a tap, which would leave the button half pressed. */
+  @media (hover: hover) {
+    .px-btn:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+      --btn-bg: var(--color-accent-hover);
+      --btn-press: 2px;
+    }
+
+    .px-btn--secondary:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]),
+    .px-btn--icon:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+      --btn-bg: var(--color-surface-raised);
+    }
+
+    /* Ghost: no face to press. Hover brightens and solidifies the underline. */
+    .px-btn--ghost:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+      --btn-fg: var(--color-fg);
+      --btn-press: 0px;
+
+      & .px-btn__label {
+        text-decoration-style: solid;
+      }
+    }
   }
 
   /* active: full press, bevel inverted */
@@ -158,27 +176,12 @@
     transition-duration: var(--dur-instant);
   }
 
-  .px-btn--secondary:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]),
-  .px-btn--icon:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
-    --btn-bg: var(--color-surface-raised);
-  }
-
   .px-btn--secondary:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]),
   .px-btn--icon:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
     --btn-bg: var(--color-surface);
   }
 
-  /* Ghost: no face to press. Hover brightens and solidifies the underline;
-     active nudges 2px. */
-  .px-btn--ghost:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
-    --btn-fg: var(--color-fg);
-    --btn-press: 0px;
-
-    & .px-btn__label {
-      text-decoration-style: solid;
-    }
-  }
-
+  /* Ghost: active nudges 2px. */
   .px-btn--ghost:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
     --btn-press: 2px;
   }
@@ -292,11 +295,6 @@
 
   .px-panel--ghost {
     background-color: transparent;
-  }
-
-  .px-panel--dark {
-    background-color: var(--color-bg);
-    color: var(--color-fg);
   }
 
   .px-panel--frameless {

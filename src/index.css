@@ -94,20 +94,6 @@
   --color-dot: #34521f;
   --color-star: #f5e9b8; /* night sky only: the sparse twinkle layer of px-dots */
 
-  /* ── Color: legacy (remove in QA once no component uses them) ──────
-     Aliased where the semantic token has the same value in both themes;
-     the rest keep their old values so current sections look unchanged. */
-  --color-forest-dark: var(--color-bg);
-  --color-brass: var(--color-accent);
-  --color-parchment-dark: var(--color-fg-muted);
-  --color-forest: #2d4a1e;
-  --color-forest-light: #4a6b2e;
-  --color-parchment: #e8d8a8;
-  --color-wood-dark: #3a2818;
-  --color-wood: #6b4a2e;
-  --color-shadow-deep: #0f1c09;
-  --color-secondary-text: #8aaa6a;
-
   /* ── Motion (SPEC §2.5, mirrored in src/theme/motion.ts) ───────────── */
   --dur-instant: 80ms;
   --dur-fast: 120ms; /* pair with steps(2) */
@@ -148,14 +134,6 @@
   --color-hp: #f07a6e;
   --color-xp: #8fd07a;
   --color-dot: #27305a; /* dim slate: same quiet weight as the day grid (1.5:1 on bg) */
-
-  /* legacy */
-  --color-forest: #141b33;
-  --color-forest-light: #2a3356;
-  --color-wood-dark: #05080f;
-  --color-wood: #1a2138;
-  --color-shadow-deep: #02040a;
-  --color-secondary-text: #6f7ba8;
 }
 
 /* ==========================================================================

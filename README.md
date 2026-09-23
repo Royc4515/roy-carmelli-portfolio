@@ -15,7 +15,7 @@ The game ("Roy Runner") is playable on **desktop** and **mobile**:
 
 - Vite + React 18 + TypeScript
 - Tailwind CSS v4 (Vite plugin), design tokens in `@theme`
-- Framer Motion (reveals and scene transitions only)
+- Framer Motion via `LazyMotion` + `m` (reveals and scene transitions only)
 - Vitest + Testing Library
 
 ## Design system

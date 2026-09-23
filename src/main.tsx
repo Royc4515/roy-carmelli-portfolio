@@ -13,9 +13,9 @@ const showGallery =
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* `m.*` components (Reveal) get their animation features here, once. Not `strict`:
-        plain `motion.*` components keep working while the sections migrate to `m`. */}
-    <LazyMotion features={domAnimation}>
+    {/* `m.*` components get their animation features here, once. `strict` throws if a
+        full-size `motion.*` component comes back and silently re-inflates the bundle. */}
+    <LazyMotion features={domAnimation} strict>
       {/* Honour the OS "reduce motion" setting in every Framer Motion animation. */}
       <MotionConfig reducedMotion="user">
         <ToastProvider>

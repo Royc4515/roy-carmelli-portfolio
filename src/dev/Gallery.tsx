@@ -4,10 +4,11 @@
  * main.tsx lazy-loads this file behind `import.meta.env.DEV`, so production
  * builds never include it.
  */
-import { useLayoutEffect, type ReactNode } from 'react';
+import { useLayoutEffect, useState, type ReactNode } from 'react';
 import { Button } from '../components/ui/Button';
 import { Chip, ChipList } from '../components/ui/Chip';
 import { ZoneHeader } from '../components/ui/ZoneHeader';
+import { ZoneBanner } from '../components/ui/ZoneBanner';
 import { Reveal } from '../components/ui/Reveal';
 import { useToast } from '../components/ui/Toast';
 import PixelPanel from '../components/PixelPanel';
@@ -62,6 +63,21 @@ function useScopedThemeTokens() {
 }
 
 /* ── Layout helpers ─────────────────────────────────────────────────────── */
+
+/** Replays the "zone entered" card on demand (it plays once per mount). */
+function ZoneBannerDemo() {
+  const [run, setRun] = useState(0);
+  return (
+    <div className="flex flex-col items-start gap-8">
+      <div className="relative h-20 w-full">
+        <ZoneBanner key={run} zone={2} name="The Adventurer" />
+      </div>
+      <Button variant="secondary" onClick={() => setRun(r => r + 1)}>
+        Replay
+      </Button>
+    </div>
+  );
+}
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -130,6 +146,24 @@ function ThemeColumn({ theme }: { theme: Theme }) {
             <PixelIcon name="copy" size={24} />
           </Button>
         </div>
+      </Block>
+
+      <Block title="Button · sm (navbar)">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-8">
+          <Button size="sm" leadingIcon={<PixelIcon name="download" size={12} />}>
+            Resume
+          </Button>
+          <Button size="sm" variant="secondary" leadingIcon={<PixelIcon name="joystick" size={12} />}>
+            Play
+          </Button>
+          <Button size="sm" variant="icon" aria-label="Toggle theme">
+            <PixelIcon name="moon" size={24} />
+          </Button>
+        </div>
+      </Block>
+
+      <Block title="ZoneBanner · zone entered">
+        <ZoneBannerDemo />
       </Block>
 
       <Block title="Button · lg, trailing icon, external">
