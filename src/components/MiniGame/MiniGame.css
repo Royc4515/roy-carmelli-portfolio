@@ -22,6 +22,51 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Desktop layout ───────────────────────────────────────────────────── */
+
+/*
+ * Desktop play sits in Hero's game area (a flex column no taller than the first screen under
+ * the nav, an inline-size container) with the controls row below it. The screen box asks for
+ * the canvas's natural height (800px wide, or the area's width) plus room for the frame (4px)
+ * and the drop (8px down); when the area is shorter it shrinks, and the canvas takes the
+ * largest 800:446 box that fits it, so the canvas, the controls and Quit always fit the first
+ * screen. The box is a size container: `cqw`/`cqh` inside it measure its content box.
+ */
+.minigame-desk {
+  container: minigame-desk / size;
+  display: grid;
+  place-items: center;
+  flex: 0 1 auto;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 0;
+  height: calc(min(800px, 100cqw - 8px) * 446 / 800 + 12px);
+  padding: 4px 4px 8px;
+}
+
+.minigame-desk .minigame__canvas {
+  --mg-desk-w: min(800px, 100cqw, 100cqh * 800 / 446);
+
+  width: var(--mg-desk-w);
+  height: calc(var(--mg-desk-w) * 446 / 800);
+  max-width: none;
+}
+
+/* Whole CSS pixels and a whole-pixel left edge, as in the touch layout below. The box rounds
+   its height up so a full-width canvas never loses its last pixel column to float error. */
+@supports (width: round(down, 10.5px, 1px)) {
+  .minigame-desk {
+    height: calc(round(up, min(800px, 100cqw - 8px) * 446 / 800, 1px) + 12px);
+  }
+
+  .minigame-desk .minigame__canvas {
+    width: round(down, var(--mg-desk-w), 1px);
+    height: round(var(--mg-desk-w) * 446 / 800, 1px);
+    justify-self: start;
+    margin-left: round(down, (100cqw - var(--mg-desk-w)) / 2, 1px);
+  }
+}
+
 /* ── Touch layout ─────────────────────────────────────────────────────── */
 
 .minigame {

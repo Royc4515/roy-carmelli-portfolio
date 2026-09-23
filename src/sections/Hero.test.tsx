@@ -264,6 +264,18 @@ describe('Hero — desktop', () => {
     expect(game.textContent).not.toMatch(/[\u2190-\u21ff]/u);
   });
 
+  it('keeps desktop play inside the first screen under the nav, the controls row never shrinking', async () => {
+    render(<Hero />);
+    await userEvent.click(screen.getByRole('button', { name: /press start/i }));
+    const canvas = await findCanvas();
+    const game = screen.getByRole('region', { name: 'Roy Runner' });
+    // The area stops at the fold (jsdom has no layout: the geometry is checked in a browser).
+    expect(game).toHaveClass('top-16', 'max-h-[calc(100svh-4rem)]', '@container', 'flex-col');
+    // The canvas sits in the shrinkable screen box; the Quit row keeps its height.
+    expect(canvas!.parentElement).toHaveClass('minigame-desk');
+    expect(screen.getByRole('button', { name: /^quit$/i }).closest('.shrink-0')).not.toBeNull();
+  });
+
   it('draws the HUD meters on the 4px grid (8x12 segments, 4px apart)', () => {
     const { container } = render(<Hero />);
     const segments = container.querySelectorAll('[data-meter-segment]');

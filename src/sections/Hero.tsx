@@ -1014,12 +1014,15 @@ export default function Hero() {
     </div>
   );
 
+  // Desktop play fills the hero under the nav, never more than the first screen (the hero is at
+  // the viewport top and the page scroll is locked): the canvas shrinks to leave room for the
+  // controls row below it (see `.minigame-desk` in MiniGame.css).
   const gameClass =
     mode === 'touch'
       ? 'fixed inset-0 z-[200] flex items-center justify-center bg-bg'
       : mode === 'rotate'
         ? 'px-dots fixed inset-0 z-[200] flex flex-col items-center justify-center gap-8 bg-bg px-4'
-        : 'px-dots absolute inset-x-0 bottom-0 top-16 z-20 flex flex-col items-center justify-center gap-6 bg-bg px-4';
+        : '@container px-dots absolute inset-x-0 bottom-0 top-16 z-20 flex max-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-4 bg-bg px-4 pb-4 pt-3';
 
   return (
     <LazyMotion features={domAnimation}>
@@ -1154,7 +1157,7 @@ export default function Hero() {
 
               {/* Touch play has its own QUIT inside the game chrome. */}
               {mode !== 'touch' && (
-                <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
+                <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-6 gap-y-4">
                   <div className="flex items-center gap-4">
                     <Button variant="secondary" onClick={quit} leadingIcon={<PixelIcon name="close" size={12} />}>
                       Quit

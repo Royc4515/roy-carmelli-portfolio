@@ -231,7 +231,8 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     />
   );
 
-  if (!showTouchControls) return canvasEl;
+  // Desktop: a screen box that fits the canvas into the room Hero leaves it (MiniGame.css).
+  if (!showTouchControls) return <div className="minigame-desk">{canvasEl}</div>;
 
   // Quit and fullscreen act on click (a real activation: browsers only grant fullscreen
   // after the finger lifts); the game keys act on pointerdown, see useKeyPress.
