@@ -1,0 +1,72 @@
+{
+ "win150": {
+  "sections": {
+   "hero": 650,
+   "projects": 2872,
+   "about": 898,
+   "skills": 1038,
+   "resume": 464,
+   "contact": 682
+  },
+  "total": 6716,
+  "h1": "48px",
+  "h2": "32px",
+  "screens": 10.3
+ },
+ "win125": {
+  "sections": {
+   "hero": 730,
+   "projects": 2872,
+   "about": 898,
+   "skills": 1038,
+   "resume": 464,
+   "contact": 682
+  },
+  "total": 6796,
+  "h1": "48px",
+  "h2": "32px",
+  "screens": 9.3
+ },
+ "mac14": {
+  "sections": {
+   "hero": 830,
+   "projects": 2872,
+   "about": 898,
+   "skills": 1038,
+   "resume": 464,
+   "contact": 682
+  },
+  "total": 6896,
+  "h1": "48px",
+  "h2": "32px",
+  "screens": 8.3
+ },
+ "iphone": {
+  "sections": {
+   "hero": 916,
+   "projects": 4732,
+   "about": 1640,
+   "skills": 1670,
+   "resume": 638,
+   "contact": 980
+  },
+  "total": 10758,
+  "h1": "40px",
+  "h2": "24px",
+  "screens": 16.2
+ },
+ "android": {
+  "sections": {
+   "hero": 956,
+   "projects": 4831,
+   "about": 1778,
+   "skills": 1670,
+   "resume": 638,
+   "contact": 980
+  },
+  "total": 11035,
+  "h1": "40px",
+  "h2": "24px",
+  "screens": 15.8
+ }
+}

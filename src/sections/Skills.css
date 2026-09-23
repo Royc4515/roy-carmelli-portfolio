@@ -1,0 +1,337 @@
+/* ==========================================================================
+   Zone 03 · Equipment (Skills.tsx, SkillTooltip.tsx). Semantic tokens only.
+   In the components layer, so Tailwind utilities passed as classes still win.
+   ========================================================================== */
+
+@layer components {
+  /* ── Character well: Roy stands on a wooden floor, a 4px wood-hi edge over a
+     12px surface band, inside the inset panel's 2px line. */
+  .skill-well {
+    background-image:
+      linear-gradient(var(--color-wood-hi), var(--color-wood-hi)),
+      linear-gradient(var(--color-surface), var(--color-surface));
+    background-repeat: no-repeat;
+    background-size:
+      calc(100% - 4px) 4px,
+      calc(100% - 4px) 14px;
+    /* top of the edge = bottom of the sprite (the panel's 16px bottom padding) */
+    background-position:
+      2px calc(100% - 12px),
+      2px calc(100% - 2px);
+  }
+
+  .skill-stat + .skill-stat {
+    border-top: 2px dashed var(--color-border-subtle);
+  }
+
+  /* ── Slot heading icon: brass like the zone icon; the potion and book keep
+     their second ink (the icon default). */
+  .skill-slot__icon {
+    color: var(--color-accent-fg);
+  }
+
+  /* ── Item: HUD 13, 36px tall (at least 36 wide), sunken with a 2px inner
+     border-subtle line (>= 3:1 against the sunken fill and the wood panel, both
+     themes), brass when hovered, focused or open. The hit area grows 4px on
+     every side (44 x 44 or more), exactly filling the 8px gaps. */
+  .skill-item {
+    --skill-line: var(--color-border-subtle);
+    --skill-cue: var(--color-border-subtle);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    min-width: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 0;
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    white-space: nowrap;
+    cursor: help;
+    box-shadow: inset 0 0 0 2px var(--skill-line);
+    transition:
+      box-shadow var(--dur-fast) steps(2, end),
+      color var(--dur-fast) steps(2, end);
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -4px;
+    }
+
+    &:focus-visible,
+    &[data-open] {
+      --skill-line: var(--color-accent);
+      --skill-cue: var(--color-accent-fg);
+      color: var(--color-accent-fg);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        --skill-line: var(--color-accent);
+        --skill-cue: var(--color-accent-fg);
+        color: var(--color-accent-fg);
+      }
+    }
+  }
+
+  /* Inspect cue: a dotted pixel underline (2px dots, 2px gaps) under the label,
+     the usual "hover me for more" mark of a tooltip. */
+  .skill-item__label {
+    padding-bottom: 4px;
+    margin-bottom: -4px;
+    background: repeating-linear-gradient(to right, var(--skill-cue) 0 2px, transparent 2px 4px) 0 100% / 100% 2px
+      no-repeat;
+  }
+
+  /* ── Controls hint under the stats. Shown only while the grid has keyboard
+     focus; its space is always reserved, so nothing moves. */
+  .skill-keys {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 8px;
+    visibility: hidden;
+  }
+
+  .skill-panel:has(.skill-grid :focus-visible) .skill-keys {
+    visibility: visible;
+  }
+
+  .skill-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    background-color: var(--color-surface-sunken);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+    color: var(--color-fg);
+  }
+
+  .skill-key--wide {
+    padding: 0 6px;
+  }
+
+  /* ── Tooltip: paper card, 4px ink frame, hard drop. Hangs 12px under (or
+     over) its item, shifted by --tip-x so it stays inside the viewport. */
+  .skill-tip {
+    --px-frame: var(--color-ink);
+    position: absolute;
+    top: calc(100% + 12px);
+    left: var(--tip-x, 0px);
+    z-index: 30;
+    width: max-content;
+    min-width: 13rem;
+    max-width: min(20rem, calc(100vw - 2rem));
+    animation: skill-tip-in var(--dur-base) var(--ease-snap) both;
+
+    &[hidden] {
+      display: none;
+    }
+
+    /* Bridge over the gap, so the pointer can travel onto the tooltip. */
+    &::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      bottom: 100%;
+      height: 16px;
+    }
+
+    &[data-side="top"] {
+      top: auto;
+      bottom: calc(100% + 12px);
+      animation-name: skill-tip-in-top;
+
+      &::before {
+        top: 100%;
+        bottom: auto;
+      }
+    }
+  }
+
+  .skill-detail {
+    --px-frame: var(--color-ink);
+    animation: skill-tip-in var(--dur-base) var(--ease-snap) both;
+  }
+
+  /* 2px dashed ink rule (4px dash, 4px gap) above the "Used in" line. */
+  .skill-tip__rule {
+    background: repeating-linear-gradient(to right, var(--color-ink-muted) 0 4px, transparent 4px 8px)
+      0 0 / 100% 2px no-repeat;
+  }
+
+  /* ── Tall screens from xl (1280px wide and taller than the short laptop
+     screens below): Roy's frame keeps the left column, narrowed to 152px, and
+     each slot is one line of items beside its heading, in a heading column
+     the slot rows share through subgrids (Skills.tsx), the slot name over its
+     category so the column stays ~160px. Sizes:
+       items 36px tall with 8px padding, 4px apart in a line (Tomes, the
+       widest line, needs 628px of the 643px item column), 8px between Magic's
+       two lines, 16px between the columns; 28px between slots, so the last
+       one ends level with the frame column (both 464px).
+     Every width from xl lays out the same: the zone is capped at 1120px. */
+  @media (width >= 80rem) and (height > 60rem) {
+    .skill-panel {
+      --skill-h: 36px;
+      --skill-gap-x: 4px;
+      --skill-row-gap: 8px;
+      --skill-col-gap: 16px;
+      --skill-slot-gap: 28px;
+    }
+
+    .skill-slot__header {
+      display: flex;
+      align-items: center;
+      min-height: var(--skill-h);
+    }
+
+    .skill-slot__title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .skill-slot__dot {
+      display: none;
+    }
+
+    .skill-item {
+      padding: 0 8px;
+
+      /* the hit area fills the gaps exactly */
+      &::before {
+        inset: calc(var(--skill-row-gap) / -2) calc(var(--skill-gap-x) / -2);
+      }
+    }
+  }
+
+  /* ── Short laptop screens (the `short` variant, index.css): a compact
+     inventory that fits one screen under the nav. Skills.tsx lays it out: a
+     slot-heading column and an item column shared through subgrids by a
+     status line and the slots, one line of items per slot. Sizes:
+       items 28px tall, 4px apart in a line, 8px between lines; 16px between
+       the columns, under the status line and inside the panel;
+     under 600px tall (1097x516: a 14" laptop at 175% with the browser's bars)
+       items 24px (the WCAG 2.2 2.5.8 minimum), 4px between lines, a 12px
+       status gap, 8px / 12px panel padding.
+     Magic's eight items need 1031px, so they take two lines; every other slot
+     takes one from 1024px wide. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    .skill-panel {
+      --skill-h: 28px;
+      --skill-gap-x: 4px;
+      --skill-row-gap: 8px;
+      --skill-col-gap: 16px;
+      --skill-status-gap: 16px;
+      --skill-panel-pt: 16px;
+      --skill-panel-pb: 16px;
+    }
+
+    .skill-slot__header {
+      display: flex;
+      align-items: center;
+      min-height: var(--skill-h);
+    }
+
+    /* flex, not inline-flex: no line box around it, so its cell is exactly
+       as tall as the item */
+    .skill-item {
+      display: flex;
+      height: var(--skill-h);
+      padding: 0 8px;
+
+      /* the hit area still fills the gaps exactly */
+      &::before {
+        inset: calc(var(--skill-row-gap) / -2) calc(var(--skill-gap-x) / -2);
+      }
+    }
+
+    .skill-item__label {
+      padding-bottom: 2px;
+      margin-bottom: -2px;
+    }
+
+    /* The status line's rule (the character sheet's 2px dashed line), drawn
+       in the middle of the gap under it, so it takes no height. */
+    .skill-status::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      top: calc(100% + (var(--skill-status-gap) - 2px) / 2);
+      border-top: 2px dashed var(--color-border-subtle);
+    }
+
+    /* Stats on one line, split by the same 2px dashed rule, standing up. */
+    .skill-stat + .skill-stat {
+      border-top: 0;
+      border-left: 2px dashed var(--color-border-subtle);
+      margin-left: 12px;
+      padding-left: 12px;
+    }
+  }
+
+  @media (width >= 64rem) and (height < 37.5rem) {
+    .skill-panel {
+      --skill-h: 24px;
+      --skill-row-gap: 4px;
+      --skill-status-gap: 12px;
+      --skill-panel-pt: 8px;
+      --skill-panel-pb: 12px;
+    }
+
+    /* The label rides 1px high and its cue hugs the glyphs, so the dots stay
+       clear of the item's bottom line; the slot headings ride along. */
+    .skill-item,
+    .skill-slot__header {
+      padding-bottom: 2px;
+    }
+
+    .skill-item__label {
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skill-item {
+      transition: none;
+    }
+
+    .skill-tip,
+    .skill-detail {
+      animation: none;
+    }
+  }
+}
+
+/* Tall screens from xl: the slot icon sits on the heading's first line (the
+   h3's `items-center` utility would centre it on both). */
+@layer utilities {
+  @media (width >= 80rem) and (height > 60rem) {
+    .skill-slot__header > h3 {
+      align-items: flex-start;
+    }
+
+    .skill-slot__header .skill-slot__icon {
+      margin-top: 2px;
+    }
+  }
+}
+
+@keyframes skill-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes skill-tip-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}

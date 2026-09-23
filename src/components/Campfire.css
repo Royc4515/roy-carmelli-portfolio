@@ -1,0 +1,38 @@
+/*
+ * Campfire sprite (Campfire.tsx). The element is a window exactly one frame wide
+ * (16 × scale px); inside it the three frames sit side by side in one SVG strip, and
+ * steps(3) slides the strip left one whole frame at a time (translateX in whole pixels).
+ */
+.px-campfire {
+  position: relative;
+  display: block;
+  flex: none;
+  width: var(--px-campfire-size);
+  height: var(--px-campfire-size);
+  overflow: hidden;
+}
+
+.px-campfire__sheet {
+  display: block;
+  animation: px-campfire-frames var(--px-campfire-cycle) steps(var(--px-campfire-frames)) infinite;
+}
+
+.px-campfire--paused .px-campfire__sheet {
+  animation-play-state: paused;
+}
+
+@keyframes px-campfire-frames {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Reduced motion: no flicker, the strip rests on frame 0. */
+@media (prefers-reduced-motion: reduce) {
+  .px-campfire__sheet {
+    animation: none;
+  }
+}

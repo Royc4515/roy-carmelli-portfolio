@@ -71,11 +71,28 @@
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Preload hero background -->
-    <link rel="preload" as="image" href="/assets/bg/library-grand.png" />
+    <!-- Theme before first paint (stored choice, else the OS preference). It runs before the
+         stylesheet, so the first frame already has the right ground; useTheme reads the attribute. -->
+    <script>
+      (function () {
+        var t;
+        try { t = localStorage.getItem('roy-portfolio-theme'); } catch (e) {}
+        if (t !== 'day' && t !== 'night') {
+          try { t = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'; } catch (e) { t = 'day'; }
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+
+    <!-- Preload the three critical font files (same URLs as the @font-face rules in src/index.css) -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/press-start-2p-latin-400.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-latin-400.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-mono-latin-500.woff2" crossorigin />
 
     <style>
-      body { background-color: #1a2e10; }
+      /* --color-bg of the active theme until the stylesheet loads; follows the token after that */
+      body { background-color: var(--color-bg, #1a2e10); }
+      :root[data-theme="night"] body { background-color: var(--color-bg, #0a0f1e); }
     </style>
   </head>
   <body>

@@ -1,0 +1,150 @@
+/* Zone 02 · About: character-sheet parts that Tailwind utilities can't draw
+   cleanly. In the components layer so utilities passed in className win. */
+
+@layer components {
+  /* Sheet body: one column; at 768-1023 (sheet full width) portrait and
+     achievement on the left, stats on the right, both columns ending on one
+     line. */
+  .about-sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
+
+    @media (width >= 48rem) and (width < 64rem) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "id stats"
+        "feat stats";
+      column-gap: 32px;
+
+      & > .about-sheet__id {
+        grid-area: id;
+      }
+      & > .about-sheet__stats {
+        grid-area: stats;
+      }
+      & > .about-sheet__feat {
+        grid-area: feat;
+        align-self: end;
+      }
+    }
+  }
+
+  /* Portrait well: the sunken inset surface (2px inner line), 8px around the
+     ×2 face. */
+  .about-portrait {
+    padding: 8px;
+    background-color: var(--color-surface-sunken);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  /* Stat block: HUD label column + value, ruled by 2px dashed lines
+     (4px dash, 4px gap) drawn as gradients so every dash lands on the pixel
+     grid (a CSS dashed border spaces its dashes to fit the box). */
+  .about-stats {
+    padding-bottom: 2px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-border-subtle) 0 4px,
+      transparent 4px 8px
+    );
+    background-position: 0 100%;
+    background-size: 100% 2px;
+    background-repeat: no-repeat;
+  }
+
+  .about-stats__row {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: baseline;
+    padding-block: 12px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-border-subtle) 0 4px,
+      transparent 4px 8px
+    );
+    background-position: 0 0;
+    background-size: 100% 2px;
+    background-repeat: no-repeat;
+
+    /* Below 384px the value column would wrap the degree onto 3 lines:
+       stack the label over the value instead. */
+    @media (width < 24rem) {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 4px;
+    }
+  }
+
+  /* Achievement plate: a sunken slot with a brass inner line. */
+  .about-achievement {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px 12px 16px;
+    background-color: var(--color-surface-sunken);
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+
+  /* The letter's sign-off on short screens (About.tsx): floated into the end
+     of the story's last line, or onto a line of its own when that one is
+     full. 26px tall like the story's lines. */
+  .about-signoff {
+    float: right;
+    margin-left: 16px;
+    line-height: 26px;
+  }
+
+  /* Short laptop screens (the `short` variant, index.css): the zone fits one
+     screen under the nav. The sheet is a column whose stat rows share any
+     height the story gives it, so both panels end on one line: at their
+     natural height the rows sit edge to edge on their rules, and they open up
+     as the panel grows. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    /* Never taller than the screen below the header, so the whole sheet shows
+       when a nav jump lands on the zone (the story may run on below the fold):
+       72 (nav + scroll-padding) + 24 (section padding) + 96 (compact zone
+       header) + 4 (bottom frame). Never shorter than its content either. */
+    .about-sheet-panel {
+      max-height: calc(100vh - 196px);
+      max-height: calc(100svh - 196px);
+      min-height: min-content;
+    }
+
+    .about-sheet {
+      display: flex;
+      flex: 1 0 auto;
+      flex-direction: column;
+      row-gap: 8px;
+    }
+
+    /* The face at ×1 (--face-short-*, About.tsx) with 4px around it. */
+    .about-portrait {
+      padding: 4px;
+
+      & > img {
+        width: var(--face-short-w);
+        height: var(--face-short-h);
+      }
+    }
+
+    .about-stats {
+      display: flex;
+      flex: 1 0 auto;
+      flex-direction: column;
+    }
+
+    .about-stats__row {
+      flex: 1 0 auto;
+      grid-template-columns: 5.5rem minmax(0, 1fr);
+      align-content: center;
+      column-gap: 12px;
+      padding-block: 0;
+    }
+
+    .about-achievement {
+      padding: 8px 12px;
+    }
+  }
+}

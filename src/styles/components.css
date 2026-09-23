@@ -1,0 +1,733 @@
+/* ==========================================================================
+   Component layer (docs/redesign/SPEC.md §3): Button, PixelPanel, Chip,
+   ZoneHeader, Toast. Everything here sits in `@layer components`, so any
+   Tailwind utility passed through `className` still wins over it.
+
+   Colours come from the semantic tokens in src/index.css. The only extra
+   tokens are the two paper-surface mixes below, derived from existing tokens
+   with color-mix (no new hex values):
+
+     --color-paper-sunken  wells and chips on parchment: paper, 12% ink-muted
+     --color-paper-accent  top-tech chips on parchment: paper-sunken, 30% brass
+
+   They are declared on every themed element (not only :root) so a nested
+   `data-theme` wrapper, as in the dev gallery, recomputes them.
+   ========================================================================== */
+
+:root,
+[data-theme] {
+  --color-paper-sunken: color-mix(in srgb, var(--color-paper) 88%, var(--color-ink-muted));
+  --color-paper-accent: color-mix(in srgb, var(--color-paper-sunken) 70%, var(--color-accent));
+}
+
+@layer components {
+  /* ── Button ────────────────────────────────────────────────────────────
+     Face + 4px bevel + 4px notched edge + a base ("drop") under the face.
+     Hover pushes the face 2px into the base, active 4px: the bottom of the
+     base never moves, so the button reads as physically pressed.
+     States are driven by custom properties so reduced motion can cancel
+     the travel (--btn-motion: 0) without restating every state. The
+     [data-gallery-state] hooks exist for the dev gallery only. */
+  .px-btn {
+    --btn-bg: var(--color-accent);
+    --btn-fg: var(--color-on-accent);
+    --btn-hi: var(--color-bevel-hi);
+    --btn-lo: var(--color-bevel-lo);
+    --btn-edge: var(--color-edge);
+    --btn-drop: 8px;
+    --btn-press: 0px;
+    --btn-motion: 1;
+    --btn-bevel-a: var(--btn-hi);
+    --btn-bevel-b: var(--btn-lo);
+
+    @apply text-label;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 8px 20px;
+    border: 0;
+    border-radius: 0;
+    background-color: var(--btn-bg);
+    color: var(--btn-fg);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateY(calc(var(--btn-press) * var(--btn-motion)));
+    box-shadow:
+      inset 4px 4px 0 0 var(--btn-bevel-a),
+      inset -4px -4px 0 0 var(--btn-bevel-b),
+      0 -4px 0 0 var(--btn-edge),
+      0 4px 0 0 var(--btn-edge),
+      -4px 0 0 0 var(--btn-edge),
+      4px 0 0 0 var(--btn-edge),
+      0 calc(var(--btn-drop) - var(--btn-press) * var(--btn-motion)) 0 0 var(--btn-edge);
+    transition:
+      transform var(--dur-fast) steps(2, end),
+      box-shadow var(--dur-fast) steps(2, end),
+      background-color var(--dur-fast) steps(2, end),
+      color var(--dur-fast) steps(2, end);
+  }
+
+  /* Press Start 2P puts its caps in the top 7/8 of the em with no descent,
+     so a centred line box leaves them ~1px high. Nudging the label down 1px
+     centres the caps on the button and on the (flex-centred) icons. */
+  .px-btn__label {
+    position: relative;
+    top: 1px;
+    display: block;
+  }
+
+  .px-btn__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+
+    & > svg,
+    & > img {
+      display: block;
+    }
+  }
+
+  /* Phones: the md face (44px, 12px label) so full-width CTAs stay light;
+     from 640px the 16px label on a 48px face. */
+  .px-btn--lg {
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 16px;
+    text-transform: uppercase;
+
+    /* A 24px icon beside a 12px label reads as a different button: show it
+       at 12px (1:1 on its 12px grid, so it stays crisp). */
+    & .px-btn__icon > svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    @media (width >= 40rem) {
+      @apply text-display-s;
+      gap: 12px; /* step 10 (P2-19): was 10px, off the 4px grid */
+      min-height: 48px;
+      padding: 8px 20px;
+
+      & .px-btn__icon > svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .px-btn--secondary,
+  .px-btn--icon {
+    --btn-bg: var(--color-surface);
+    --btn-fg: var(--color-accent-fg);
+    --btn-hi: var(--color-wood-hi);
+    --btn-lo: var(--color-wood-lo);
+    --btn-edge: var(--color-border);
+  }
+
+  .px-btn--icon {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+
+    /* Square partner of an lg button: the same height at every width. */
+    &.px-btn--lg {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+
+      @media (width >= 40rem) {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  }
+
+  .px-btn--ghost {
+    --btn-fg: var(--color-accent-fg);
+    min-height: 44px;
+    padding: 0 4px;
+    background-color: transparent;
+    box-shadow: none;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    & .px-btn__label {
+      top: 0;
+      text-decoration: underline dashed 2px;
+      text-underline-offset: 8px;
+    }
+  }
+
+  /* hover: half press. Only where hover is real: touch browsers keep :hover
+     after a tap, which would leave the button half pressed. */
+  @media (hover: hover) {
+    .px-btn:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+      --btn-bg: var(--color-accent-hover);
+      --btn-press: 2px;
+    }
+
+    .px-btn--secondary:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]),
+    .px-btn--icon:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+      --btn-bg: var(--color-surface-raised);
+    }
+
+    /* Ghost: no face to press. Hover brightens and solidifies the underline. */
+    .px-btn--ghost:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+      --btn-fg: var(--color-fg);
+      --btn-press: 0px;
+
+      & .px-btn__label {
+        text-decoration-style: solid;
+      }
+    }
+  }
+
+  /* active: full press, bevel inverted */
+  .px-btn:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
+    --btn-bg: var(--color-accent-press);
+    --btn-press: 4px;
+    --btn-bevel-a: var(--btn-lo);
+    --btn-bevel-b: var(--btn-hi);
+    transition-duration: var(--dur-instant);
+  }
+
+  .px-btn--secondary:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]),
+  .px-btn--icon:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
+    --btn-bg: var(--color-surface);
+  }
+
+  /* Ghost: active nudges 2px. */
+  .px-btn--ghost:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
+    --btn-press: 2px;
+  }
+
+  /* focus: a 3px notched ring 8px out from the face, so it clears the 4px
+     edge by 4px. A plain outline would sit on the drop at the bottom, so the
+     ring is drawn on ::after and its bottom follows the drop (4px below it,
+     in every press state). The transparent outline is what forced-colors
+     mode shows instead (it strips box-shadows). */
+  .px-btn:is(:focus-visible, [data-gallery-state="focus"]) {
+    outline: 3px solid transparent;
+    outline-offset: 8px;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -8px -8px calc(-4px - var(--btn-drop) + var(--btn-press) * var(--btn-motion));
+      pointer-events: none;
+      box-shadow:
+        0 -3px 0 0 var(--color-focus),
+        0 3px 0 0 var(--color-focus),
+        -3px 0 0 0 var(--color-focus),
+        3px 0 0 0 var(--color-focus);
+    }
+  }
+
+  .px-btn--ghost:is(:focus-visible, [data-gallery-state="focus"]) {
+    outline-offset: 4px;
+
+    &::after {
+      inset: -4px;
+    }
+  }
+
+  /* disabled (native or aria-disabled on a link) */
+  .px-btn:is(:disabled, [aria-disabled="true"]) {
+    @apply px-dither;
+    --btn-bg: var(--color-surface-sunken);
+    --btn-fg: var(--color-fg-subtle);
+    --btn-hi: var(--color-surface-sunken);
+    --btn-lo: var(--color-surface-sunken);
+    --btn-edge: var(--color-border-subtle);
+    --btn-drop: 0px;
+    --px-dither: color-mix(in srgb, var(--color-fg-subtle) 14%, transparent);
+    cursor: not-allowed;
+  }
+
+  .px-btn--ghost:is(:disabled, [aria-disabled="true"]) {
+    background-color: transparent;
+    background-image: none;
+
+    & .px-btn__label {
+      text-decoration-style: dotted;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .px-btn {
+      --btn-motion: 0;
+    }
+  }
+
+  /* Forced colours drop box-shadows, which is where the edge lives. */
+  @media (forced-colors: active) {
+    .px-btn:not(.px-btn--ghost) {
+      border: 2px solid ButtonText;
+    }
+
+    .px-btn:is(:disabled, [aria-disabled="true"]) {
+      border-color: GrayText;
+      color: GrayText;
+    }
+  }
+
+  /* ── PixelPanel ────────────────────────────────────────────────────────
+     The frame and drop come from the px-frame / px-drop utilities
+     (pixel.css); these classes only set the surface. */
+  .px-panel {
+    position: relative;
+  }
+
+  .px-panel--wood {
+    background-color: var(--color-surface);
+    color: var(--color-fg);
+  }
+
+  .px-panel--paper {
+    --color-focus: var(--color-ink);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+
+    & a:not(.px-btn) {
+      color: var(--color-ink);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+
+    & a:not(.px-btn):hover {
+      color: var(--color-ink-muted);
+    }
+  }
+
+  .px-panel--inset {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    box-shadow:
+      inset 0 0 0 2px var(--color-border-subtle),
+      var(--px-drop, 0 0 #0000);
+  }
+
+  .px-panel--ghost {
+    background-color: transparent;
+  }
+
+  .px-panel--frameless {
+    box-shadow: var(--px-drop, 0 0 #0000);
+  }
+
+  /* Brass title plate riding on the top frame. Its 24px face is centred on
+     the 4px frame line; the panel adds top padding to clear it. The 5/3
+     vertical padding centres the pixel caps (see .px-btn__label); a direct
+     svg child is lifted back so icons stay centred on the caps. */
+  .px-panel__tab {
+    @apply text-label;
+    position: absolute;
+    top: -14px;
+    left: 16px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100% - 32px);
+    min-height: 24px;
+    padding: 5px 8px 3px;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+    white-space: nowrap;
+    box-shadow:
+      inset 2px 2px 0 0 var(--color-bevel-hi),
+      inset -2px -2px 0 0 var(--color-bevel-lo),
+      0 -4px 0 0 var(--color-edge),
+      0 4px 0 0 var(--color-edge),
+      -4px 0 0 0 var(--color-edge),
+      4px 0 0 0 var(--color-edge);
+
+    & > svg {
+      display: block;
+      flex: none;
+      margin-top: -2px;
+    }
+  }
+
+  /* Buttons placed on parchment. */
+  .px-panel--paper .px-btn--ghost:not(:disabled, [aria-disabled="true"]) {
+    --btn-fg: var(--color-ink);
+  }
+
+  .px-panel--paper :is(.px-btn--secondary, .px-btn--icon):not(:disabled, [aria-disabled="true"]) {
+    --btn-bg: var(--color-ink);
+    --btn-fg: var(--color-accent-fg);
+    --btn-hi: var(--color-ink-muted);
+    --btn-lo: var(--color-edge);
+    --btn-edge: var(--color-edge);
+
+    &:is(:hover, [data-gallery-state="hover"]) {
+      --btn-bg: color-mix(in srgb, var(--color-ink) 80%, var(--color-ink-muted));
+    }
+
+    &:is(:active, [data-gallery-state="active"]) {
+      --btn-bg: var(--color-ink);
+    }
+  }
+
+  /* ── Chip ──────────────────────────────────────────────────────────── */
+  .px-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .px-chip {
+    @apply text-hud;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 4px 8px; /* step 10 (P2-19): SPEC 4/8, was 0 10px; the height stays 28px */
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  .px-chip--accent {
+    color: var(--color-accent-fg);
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+
+  .px-chip--more {
+    background-color: transparent;
+    color: var(--color-fg-subtle);
+  }
+
+  .px-chip--paper {
+    background-color: var(--color-paper-sunken);
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 2px var(--color-ink-muted);
+
+    &.px-chip--accent {
+      background-color: var(--color-paper-accent);
+      box-shadow: inset 0 0 0 2px var(--color-ink);
+    }
+
+    &.px-chip--more {
+      background-color: transparent;
+      color: var(--color-ink-muted);
+    }
+  }
+
+  /* ── ZoneHeader ────────────────────────────────────────────────────── */
+  .zone-header {
+    margin-bottom: 24px;
+  }
+
+  /* Short laptop screens and landscape phones (the `short` and `low` variants,
+     index.css): 16px, so the zone below fits one screen. */
+  @media (width >= 64rem) and (height <= 60rem), (orientation: landscape) and (height < 31.25rem) {
+    .zone-header {
+      margin-bottom: 16px;
+    }
+  }
+
+  /* 2px down: the eyebrow's caps start 2px into its 16px line box. */
+  .zone-header__icon {
+    display: flex;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    margin-top: 2px;
+    color: var(--color-accent-fg);
+
+    & > svg,
+    & > img {
+      display: block;
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  /* ── Toast ─────────────────────────────────────────────────────────── */
+  .px-toast-region {
+    position: fixed;
+    inset-inline: 0;
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+    z-index: 300;
+    display: flex;
+    justify-content: center;
+    padding-inline: 24px;
+    pointer-events: none;
+  }
+
+  .px-toast {
+    --color-focus: var(--color-ink);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 480px;
+    min-height: 48px;
+    padding: 12px 16px;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    animation: px-toast-in var(--dur-base) var(--ease-pop) both;
+
+    &[data-leaving] {
+      animation: px-toast-out var(--dur-fast) steps(2, end) both;
+    }
+  }
+
+  .px-toast__icon {
+    display: inline-flex;
+    flex: none;
+    color: var(--color-ink);
+
+    & > svg,
+    & > img {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .px-toast,
+    .px-toast[data-leaving] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes px-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes px-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ==========================================================================
+   Step 10 additions: Button size "sm", ZoneHeader eyebrow, "zone entered"
+   banner (ZoneBanner). Kept in their own block so the step can be reviewed
+   (and reverted) on its own.
+   ========================================================================== */
+
+@layer components {
+  /* ── Button · size sm ──────────────────────────────────────────────────
+     44px face with the 12px label, for dense bars (the navbar). The focus
+     ring hugs the 4px edge instead of sitting 8px out: 3px of focus colour
+     right outside the edge and right under the drop, so it is neither
+     clipped by the viewport top nor drawn onto a neighbouring frame. */
+  .px-btn--sm {
+    min-height: 44px;
+    padding: 8px 16px;
+  }
+
+  .px-btn--icon.px-btn--sm {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+
+  .px-btn--sm:is(:focus-visible, [data-gallery-state="focus"]) {
+    outline-offset: 4px;
+
+    &::after {
+      inset: -4px -4px calc(0px - var(--btn-drop) + var(--btn-press) * var(--btn-motion));
+    }
+  }
+
+  /* ── ZoneHeader · zone-entered banner ───────────────────────────────────
+     The banner is a child of the eyebrow <p> (leading-5 with -2px margins),
+     so `bottom: 2px` puts the card's bottom edge on the eyebrow's last line.
+     It rests on the eyebrow's left edge; the wrapper reaches back to the
+     header's left edge (--zb-indent: icon + gap, 52px or 36px on phones)
+     and clips there,
+     so the card slides out from behind the header edge.
+
+     Timeline (1800ms): slide in 360ms in 4 whole-pixel steps · hold 1.2s ·
+     fade out in 3 steps (240ms) · the eyebrow is back.
+     The travel (card + indent + 12px of frame and drop) is a multiple of
+     4px by construction (ZoneBanner.tsx rounds the text widths). */
+  .zone-header--icon {
+    --zb-indent: 52px;
+  }
+
+  /* Below 640px the icon is 24px, inline with the eyebrow (ZoneHeader.tsx
+     grid), and the H2 takes the full width: 24px + 12px gap. */
+  @media (width < 40rem) {
+    .zone-header--icon {
+      --zb-indent: 36px;
+    }
+
+    .zone-header__icon {
+      width: 24px;
+      height: 24px;
+      margin-top: 0;
+
+      & > svg,
+      & > img {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .zone-banner {
+    --zb-w: max(var(--zb-label-w), var(--zb-name-w)) + 32px;
+    position: absolute;
+    bottom: 2px;
+    left: calc(-4px - var(--zb-indent, 0px));
+    z-index: 1;
+    display: block;
+    width: max-content;
+    padding-left: calc(4px + var(--zb-indent, 0px));
+    clip-path: inset(-100px -100vw -100px 0);
+    pointer-events: none;
+  }
+
+  /* Phones: ZONE 0N above the name (the one-line card is wider than the
+     text column). Up from 640px: one line. */
+  .zone-banner__card {
+    --zb-travel: calc(var(--zb-w) + var(--zb-indent, 0px) + 12px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+    box-sizing: border-box;
+    width: calc(var(--zb-w));
+    height: 68px;
+    padding: 0 16px;
+    background-color: var(--color-surface);
+    white-space: nowrap;
+    animation:
+      zone-banner-in var(--dur-slow) steps(4, end) both,
+      zone-banner-out 240ms steps(3, end) 1560ms forwards;
+  }
+
+  @media (width >= 40rem) {
+    .zone-banner {
+      --zb-w: var(--zb-label-w) + var(--zb-name-w) + 48px;
+    }
+
+    .zone-banner__card {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      height: 48px;
+    }
+  }
+
+  /* 1px down: Press Start 2P caps sit high in their line box. */
+  .zone-banner__zone,
+  .zone-banner__name {
+    position: relative;
+    top: 1px;
+    display: block;
+  }
+
+  .zone-banner__zone {
+    width: var(--zb-label-w);
+  }
+
+  /* The eyebrow hides under the card and comes back when the card is gone
+     (on phones the card is narrower than a one-line eyebrow). */
+  .zone-header__eyebrow[data-banner] {
+    animation: zone-eyebrow-swap 1800ms step-end both;
+  }
+
+  /* Divider draw-in: a left-to-right clip-path wipe in 8 steps (480ms),
+     once, when the rule is fully in view (ZoneHeader sets data-draw). */
+  @media (prefers-reduced-motion: no-preference) {
+    .zone-header__rule[data-draw="pending"] > .px-divider {
+      clip-path: inset(0 100% 0 0);
+    }
+
+    .zone-header__rule[data-draw="run"] > .px-divider {
+      animation: zone-divider-draw 480ms steps(8, end) both;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .zone-banner {
+      display: none;
+    }
+
+    .zone-header__eyebrow[data-banner] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes zone-banner-in {
+  from {
+    transform: translateX(calc(-1 * var(--zb-travel)));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes zone-divider-draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes zone-banner-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Printing / Save as PDF: reveals that never scrolled into view keep their hidden
+   inline state; show everything. */
+@media print {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* The card slides over the eyebrow; from 19% (342ms, a frame before the
+   card lands) the eyebrow is hidden, and it is back only once the card has faded out
+   (100% = 1800ms), so the two never show through each other. No 0% / 100% colour:
+   the implicit end frames keep the eyebrow's own colour (fg-subtle on phones,
+   accent-fg from 640px), and step-end holds each value until the next frame. */
+@keyframes zone-eyebrow-swap {
+  19% {
+    color: transparent;
+  }
+}

@@ -1,0 +1,55 @@
+/*
+ * Hero (title screen). Layout lives in Tailwind classes in Hero.tsx; this file
+ * only holds what utilities cannot express.
+ */
+
+/* The title screen fills the viewport up to 880px. A viewport up to 151px
+   taller than that is filled too, so Zone 01's title (144px deep at most)
+   shows whole under the ground or not at all (heroHeight() in Hero.tsx
+   mirrors this, from the same 100svh). */
+.hero--overlay {
+  min-height: min(100svh, 880px);
+}
+
+@media (880px < height < 1032px) {
+  .hero--overlay {
+    min-height: 100svh;
+  }
+}
+
+/* Night: the same forest under moonlight. Multiply washes in a night token
+   darken and cool the day art without a second bitmap. Hero.tsx stacks two:
+   one under Roy and one over everything, so the world gets both and Roy one. */
+.hero-night-wash {
+  opacity: 0;
+  background-color: var(--color-fg-subtle);
+  mix-blend-mode: multiply;
+  transition: opacity 350ms ease;
+}
+
+:root[data-theme="night"] .hero-night-wash {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-night-wash {
+    transition: none;
+  }
+}
+
+/* Tight title card (short first screens, see HERO_TIGHT_SCENE_H): the name on one line at
+   32px, still on Press Start 2P's 8px grid. */
+.hero-name--tight {
+  font-size: 32px;
+  line-height: 40px;
+
+  & > span {
+    display: inline;
+  }
+}
+
+/* A game that failed to load shows its own Retry and Quit (GameLoadFailed): the desktop
+   controls row (Quit, Esc, jump/slide hint) has nothing left to control. */
+.hero-game:has([data-game-load-failed]) .hero-game__controls {
+  display: none;
+}

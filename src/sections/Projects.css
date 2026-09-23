@@ -1,0 +1,830 @@
+/* ==========================================================================
+   Projects zone (Zone 01 · The Library): quest cards, item plates, research
+   logs. Imported by src/components/QuestCard.tsx.
+
+   Everything sits in `@layer components` so Tailwind utilities passed through
+   `className` still win; only the card padding and the hover/focus lift live
+   in `utilities`, where they have to beat the panel's padding and `px-drop`
+   utilities.
+   Colours are semantic tokens (see src/index.css and components.css).
+   ========================================================================== */
+
+@layer components {
+  /* ── Item plate ────────────────────────────────────────────────────────
+     The inset well used across the site (surface-sunken + 2px border-subtle
+     line), sized for the item at x1 / x2 / x4 / x6 with 4px of air. */
+  .item-slot {
+    --bob: -1px;
+    display: grid;
+    flex: none;
+    place-items: center;
+    background-color: var(--color-surface-sunken);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  .item-slot--sm {
+    width: 32px;
+    height: 32px;
+  }
+
+  .item-slot--md {
+    --bob: -2px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .item-slot--lg {
+    --bob: -4px;
+    width: 104px;
+    height: 104px;
+  }
+
+  .item-slot--xl {
+    --bob: -6px;
+    width: 152px;
+    height: 152px;
+  }
+
+  /* Night: the item's fixed art colours get the hero's moonlight wash (a
+     multiply layer in fg-subtle over the item's own silhouette, so the plate
+     behind it is untouched) at half strength: on the near-black night plate
+     a full wash turns the art muddy. The same object, lit by the moon. */
+  .item-sprite__wash {
+    fill: var(--color-fg-subtle);
+    mix-blend-mode: multiply;
+    opacity: 0;
+    transition: opacity 350ms ease;
+  }
+
+  :root[data-theme="night"] .item-sprite__wash {
+    opacity: 0.5;
+  }
+
+  /* ── Card ──────────────────────────────────────────────────────────────
+     Parts are direct children so a parent grid can line them up across
+     cards with subgrid (see the lists below). Spacing between parts is
+     margin/padding, which subgrid tracks include. */
+  /* --quest-pad is the card's padding (set in the utilities layer below, over
+     PixelPanel's p-4 md:p-5) and the visual's bleed to the frame, so the two
+     can never drift apart: 16, 20 from 768px, 16 on short laptop screens. */
+  .quest-card {
+    --quest-pad: 16px;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--dur-fast) steps(2, end);
+  }
+
+  .quest-card--main {
+    --quest-drop-lifted: 8px 16px 0 0 var(--color-shadow);
+  }
+
+  .quest-card--side {
+    --quest-drop-lifted: 4px 12px 0 0 var(--color-shadow);
+  }
+
+  .quest-row--meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
+  /* A side quest's head and title. Not a box (its parts are rows of the side
+     list's subgrid) except on short laptop screens: the card's left column. */
+  .quest-id {
+    display: contents;
+  }
+
+  /* Wraps the meta under the slot on narrow cards; lines stay packed at the top
+     even when the shared subgrid row is taller than this card's header. */
+  .quest-row--head {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .quest-card .quest-title {
+    margin-top: 16px;
+  }
+
+  .quest-card .quest-tagline {
+    margin-top: 12px;
+  }
+
+  .quest-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Phones: only the lead card lists its highlights; the others keep them in
+     the quest log (their descriptions restate every highlight). */
+  @media (width < 640px) {
+    .quest-highlights--secondary {
+      display: none;
+    }
+  }
+
+  /* Chip rows stay packed at the top of their (shared) row, and the list
+     always takes the full column (in a flex column `align-self: start` would
+     shrink it to its content, and the +N room below would then wrap it). */
+  .quest-card .quest-chips {
+    /* The +N chip and the gap before it: 8px gap, 8px padding a side and its
+       --chip-more-chars characters (set by QuestCard) at 13px Plex Mono, each
+       0.6em wide plus 0.06em letter-spacing (0.66 x 0.8125rem), and 1px for
+       rounding. */
+    --chip-more-room: calc(25px + var(--chip-more-chars, 3) * 0.53625rem);
+    width: 100%;
+    align-self: start;
+    align-content: flex-start;
+    margin-top: 24px;
+  }
+
+  /* The +N chip never wraps onto a row of its own: the chip before it
+     reserves its room (margin), and the +N takes that room back (the same
+     negative margin, so its own box adds nothing to the row). The two wrap
+     together and the +N still sits 8px after its neighbour. */
+  .quest-card .quest-chips > li:has(+ li > .px-chip--more) {
+    margin-inline-end: var(--chip-more-room);
+  }
+
+  .quest-card .quest-chips > li:has(> .px-chip--more) {
+    margin-inline-start: calc(var(--chip-more-room) * -1);
+  }
+
+  /* Tier tag: star + MAIN QUEST / SIDE QUEST on a small plate. */
+  .quest-tag {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+    padding: 4px 8px;
+    white-space: nowrap;
+
+    & > svg {
+      display: block;
+      flex: none;
+    }
+  }
+
+  /* Press Start 2P caps sit 1px high in the line box (see .px-btn__label). */
+  .quest-tag__label {
+    position: relative;
+    top: 1px;
+  }
+
+  .quest-tag--paper {
+    background-color: var(--color-ink);
+    color: var(--color-accent-fg);
+  }
+
+  .quest-tag--wood {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-accent-fg);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  /* ── Actions and quest log ─────────────────────────────────────────────
+     Pinned to the bottom of the card (margin-top: auto); the 32px above
+     is padding so the pin never eats it. 8px below for the buttons' drop. */
+  .quest-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+    margin-top: auto;
+    padding: 32px 0 8px;
+  }
+
+  /* Inline: Live · Code · Quest log share one row. */
+  .quest-actions__links {
+    display: contents;
+  }
+
+  /* Stacked (from 640px): Live · Code on one row, Quest log under them. */
+  @media (min-width: 640px) {
+    .quest-actions--stacked {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+
+      & > .quest-actions__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+      }
+    }
+  }
+
+  /* Phones: two equal columns of full-width buttons. Live · Code share the
+     first row and Quest log takes the row under them (--pair); a card with
+     one link puts Quest log beside it. 24px between columns clears the focus
+     ring, 16px between rows clears the 8px drop. */
+  @media (width < 640px) {
+    .quest-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 24px;
+    }
+
+    .quest-actions .px-btn {
+      width: 100%;
+    }
+
+    .quest-actions--pair > .quest-log-toggle {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .quest-log-chevron {
+    transition: transform var(--dur-fast) steps(2, end);
+  }
+
+  .quest-log-toggle[aria-expanded="true"] .quest-log-chevron {
+    transform: rotate(90deg);
+  }
+
+  .quest-log {
+    margin-top: 16px;
+    padding: 16px;
+  }
+
+  .quest-log--paper {
+    background-color: var(--color-paper-sunken);
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 2px var(--color-ink-muted);
+  }
+
+  .quest-log--wood {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  /* Unrolls in four steps. `hidden` keeps display: none while closed. */
+  .quest-log:not([hidden]) {
+    animation: quest-log-open var(--dur-slow) steps(4, end) both;
+  }
+
+  /* ── Visual: dotted backdrop, full bleed inside the card ───────────── */
+  .quest-visual {
+    margin: calc(var(--quest-pad) * -1) calc(var(--quest-pad) * -1) 24px;
+  }
+
+  .quest-visual--screen {
+    aspect-ratio: 16 / 10;
+  }
+
+  /* Item reveal: a fixed band with the x6 item on its plate from 1600px; below,
+     x4 in a 120px band (the SVG is redrawn at 96px, still an integer scale of its
+     24px grid). */
+  .quest-visual--item {
+    height: 184px;
+  }
+
+  @media (width < 1600px) {
+    .quest-visual--item {
+      height: 120px;
+    }
+
+    .quest-visual--item .item-slot--xl {
+      --bob: -4px;
+      width: 104px;
+      height: 104px;
+    }
+
+    .quest-visual--item .item-slot__sprite {
+      width: 96px;
+      height: 96px;
+    }
+  }
+
+  /* Monitor: 4px ink screen frame, 4px notched wood casing with a 12px chin
+     (power light on the right) and a hard drop. */
+  .quest-monitor {
+    position: relative;
+    width: calc(100% - 48px);
+    margin-bottom: 12px;
+    padding: 4px;
+    background-color: var(--color-ink);
+    box-shadow:
+      0 -4px 0 0 var(--color-surface),
+      -4px 0 0 0 var(--color-surface),
+      4px 0 0 0 var(--color-surface),
+      -4px 8px 0 0 var(--color-surface),
+      4px 8px 0 0 var(--color-surface),
+      0 12px 0 0 var(--color-surface),
+      8px 20px 0 0 var(--color-shadow);
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: 8px;
+      bottom: -8px;
+      width: 4px;
+      height: 4px;
+      background-color: var(--color-xp);
+    }
+  }
+
+  /* ── Lists ─────────────────────────────────────────────────────────── */
+  .quest-list {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .quest-list > li {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quest-list > li > .quest-card {
+    flex: 1;
+  }
+
+  /* Side quests: 1 → 2 (640) → 3 (1024) columns. With two columns the third
+     card takes the whole row instead of sitting alone at half width (three
+     columns at 768 made ~226px cards: titles on three lines, one chip per
+     row). */
+  @media (width >= 640px) {
+    .quest-list--side {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .quest-list--side > li:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (width >= 48rem) {
+    .quest-card {
+      --quest-pad: 20px;
+    }
+  }
+
+  /* From 768px, except on short laptop screens (1024px+ wide, 960px or less
+     tall: the `short` variant in index.css), which list every card on its
+     own row (see "Short laptop screens" below). */
+  @media (width >= 48rem) and (not ((width >= 64rem) and (height <= 60rem))) {
+    /* Main quests: the lead card spans both columns, the other two share a
+       row and line their parts up through subgrid (8 rows each). */
+    .quest-list--main {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 0;
+    }
+
+    .quest-list--main > li:first-child {
+      grid-column: 1 / -1;
+      margin-bottom: 24px;
+    }
+
+    .quest-list--main > li:not(:first-child),
+    .quest-list--main > li:not(:first-child) > .quest-card {
+      display: grid;
+      grid-row: span 8;
+      grid-template-rows: subgrid;
+    }
+
+    /* Side quests line their parts up through subgrid (6 rows each), in
+       rows of two until 1024px, then of three. */
+    .quest-list--side {
+      row-gap: 0;
+    }
+
+    .quest-list--side > li,
+    .quest-list--side > li > .quest-card {
+      display: grid;
+      grid-row: span 6;
+      grid-template-rows: subgrid;
+    }
+  }
+
+  /* Rows of two: the subgrid rows take no gap, so every card with a row
+     under it keeps 24px below (its margin grows its last track, like the
+     lead main quest's). That is every card but the last, and but the one
+     before the last when the two share the last row (an even count). */
+  @media (768px <= width < 1024px) {
+    .quest-list--side > li:not(:last-child, :nth-last-child(2):nth-child(odd)) {
+      margin-bottom: 24px;
+    }
+  }
+
+  /* Taller than the short laptop screens (which list one card per row). */
+  @media (width >= 64rem) and (height > 60rem) {
+    .quest-list--side {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .quest-list--side > li:last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+  }
+
+  /* An open quest log grows only its own card. While a log in a list is
+     open, its cards stop stretching to the tallest one (align-self: start)
+     and, from 768px, the row lets go of the subgrid, so every card keeps its
+     natural height. The parts line up again as soon as the log closes. */
+  .quest-list:has(.quest-log:not([hidden])) > li {
+    align-self: start;
+  }
+
+  @media (width >= 48rem) and (not ((width >= 64rem) and (height <= 60rem))) {
+    .quest-list--main:has(> li:not(:first-child) .quest-log:not([hidden])) > li:not(:first-child),
+    .quest-list--main:has(> li:not(:first-child) .quest-log:not([hidden])) > li:not(:first-child) > .quest-card,
+    .quest-list--side:has(.quest-log:not([hidden])) > li,
+    .quest-list--side:has(.quest-log:not([hidden])) > li > .quest-card {
+      display: flex;
+      grid-row: auto;
+    }
+  }
+
+  /* Two main quests side by side are too narrow for three buttons in a row
+     until 1024px: stack them like the side quests so both cards match. */
+  @media (768px <= width < 1024px) {
+    .quest-card--standard .quest-actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+
+      & > .quest-actions__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+      }
+    }
+  }
+
+  /* Lead card from 1024px: visual left (7/12), text right (5/12). */
+  @media (min-width: 1024px) {
+    .quest-card--feature {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      column-gap: 32px;
+    }
+
+    .quest-card--feature > .quest-visual {
+      margin: calc(var(--quest-pad) * -1) 0 calc(var(--quest-pad) * -1) calc(var(--quest-pad) * -1);
+      aspect-ratio: auto;
+      min-height: 100%;
+    }
+
+    .quest-card--feature .quest-monitor {
+      width: calc(100% - 64px);
+    }
+  }
+
+  /* Until 1280 the 5/12 text column is too narrow for Live · Code · Quest log
+     on one row (331px of buttons + 2 x 24px gaps), so give the text a bit more. */
+  @media (1024px <= width < 1280px) {
+    .quest-card--feature {
+      grid-template-columns: minmax(0, 13fr) minmax(0, 11fr);
+    }
+  }
+
+  .quest-body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  /* ── Short laptop screens ──────────────────────────────────────────────
+     1024px+ wide and 960px or less tall (the `short` variant in index.css:
+     1097x516, 1280x602, 1536x730, 1470x830, 1920x950...). Each card fits one
+     screen under the nav; at 1097x516 that is 424px (516 - 68 nav - 24 air).
+     Every card is a full-width row split 5/12 · 7/12 like the 12-column grid
+     (gap 24), so the text columns line up down the zone:
+
+       feature   screenshot     | meta · title · tagline · highlights · chips · actions
+       main      item well      | meta · title · tagline · highlights · chips · actions
+       side      head · title   | tagline · chips · actions
+
+     Cards pad 16 (--quest-pad); from the meta line down the
+     parts step 8 · 8 · 12 · 12 · 12 apart, which keeps the lead card inside
+     424px even if its tagline takes a third line (text a few % wider on
+     another OS). The DOM order (so the reading and focus order) is the same
+     as everywhere else. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    .quest-card {
+      --quest-pad: 16px;
+    }
+
+    .quest-card--feature,
+    .quest-card--standard,
+    .quest-card--side {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: 24px;
+    }
+
+    .quest-card .quest-title {
+      margin-top: 12px;
+    }
+
+    .quest-card--main .quest-title {
+      margin-top: 8px;
+    }
+
+    .quest-card .quest-tagline {
+      margin-top: 8px;
+    }
+
+    .quest-highlights {
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .quest-card .quest-chips {
+      margin-top: 12px;
+    }
+
+    .quest-actions {
+      padding-top: 12px;
+    }
+
+    .quest-card--feature .quest-monitor {
+      width: calc(100% - 48px);
+    }
+
+    /* Main quest: the item's dotted well fills the left column and bleeds to
+       the frame, like the screenshot's backdrop; the actions row takes any
+       spare height so the buttons sit on the bottom edge. */
+    .quest-card--standard {
+      grid-template-rows: repeat(5, auto) 1fr auto;
+    }
+
+    .quest-card--standard > .quest-visual {
+      grid-row: 1 / -1;
+      grid-column: 1;
+      height: auto;
+      margin: calc(var(--quest-pad) * -1) 0 calc(var(--quest-pad) * -1) calc(var(--quest-pad) * -1);
+    }
+
+    .quest-card--standard > :not(.quest-visual) {
+      grid-column: 2;
+    }
+
+    /* The well is tall enough for the x6 item at every width. */
+    .quest-card--standard .quest-visual--item .item-slot--xl {
+      --bob: -6px;
+      width: 152px;
+      height: 152px;
+    }
+
+    .quest-card--standard .quest-visual--item .item-slot__sprite {
+      width: 144px;
+      height: 144px;
+    }
+
+    /* Side quest: slot, tag, meta and title on the left; the tagline starts
+       level with the slot and Live · Code · Quest log share one row. */
+    .quest-list--side {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .quest-card--side {
+      grid-template-rows: auto auto 1fr auto;
+    }
+
+    .quest-card--side > .quest-id {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      grid-row: 1 / -1;
+      grid-column: 1;
+    }
+
+    .quest-card--side > :not(.quest-id) {
+      grid-column: 2;
+    }
+
+    .quest-card--side .quest-tagline {
+      margin-top: 0;
+    }
+
+    .quest-actions--stacked {
+      flex-direction: row;
+      align-items: center;
+      gap: 24px;
+    }
+  }
+
+  /* ── Research logs ─────────────────────────────────────────────────
+     The tab plate is the H3. Each row is a grid of its parts:
+
+       below 640px                        from 640px
+       item  meta     [code]              item  meta     [ CODE ]
+       item  title    [code]              item  title    [ CODE ]
+       item  tagline  tagline             item  tagline  [ CODE ]
+
+     The item is x1 on a 32px plate below 640px, x2 on a 56px plate above.
+
+     Below 640px the link is a 48px icon button (label hidden, the aria-label
+     names it) beside the meta line and title, so it never takes a row. */
+  .research-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    & > svg {
+      display: block;
+      flex: none;
+      margin-top: -2px; /* centre on the caps (see .px-panel__tab) */
+    }
+  }
+
+  .research-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .research-log {
+    display: grid;
+    grid-template-areas:
+      "item meta action"
+      "item title action"
+      "item tagline tagline";
+    /* The spanning button's extra height goes to the title row (fr), never
+       between the meta line and the title. */
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px 16px;
+    padding: 20px 0 24px;
+  }
+
+  .research-log:first-child {
+    padding-top: 4px;
+  }
+
+  .research-log:last-child {
+    padding-bottom: 8px;
+  }
+
+  .research-log + .research-log {
+    border-top: 2px dashed var(--color-border-subtle);
+  }
+
+  .research-log__item {
+    grid-area: item;
+  }
+
+  .research-log__meta {
+    grid-area: meta;
+  }
+
+  .research-log__title {
+    grid-area: title;
+  }
+
+  .research-log__tagline {
+    grid-area: tagline;
+  }
+
+  .research-log__action {
+    grid-area: action;
+    margin-bottom: 8px; /* the button's drop */
+  }
+
+  @media (width < 640px) {
+    /* Icon-only: the 48px square of Button's icon variant. */
+    .research-log__action {
+      width: 48px;
+      padding: 0;
+      margin-top: 4px; /* the 4px edge above the face lines up with the meta caps */
+    }
+
+    .research-log__action .px-btn__label {
+      display: none;
+    }
+  }
+
+  @media (width >= 640px) {
+    .research-log {
+      grid-template-areas:
+        "item meta action"
+        "item title action"
+        "item tagline action";
+      grid-template-rows: auto auto auto;
+      column-gap: 24px;
+    }
+
+    .research-log__item,
+    .research-log__action {
+      align-self: center;
+    }
+
+    /* Beside a 16px pixel title and two or three lines of copy the item is
+       drawn at x2 on the side quests' 56px plate (the 24px SVG at 48px, an
+       integer scale). */
+    .research-log__item {
+      width: 56px;
+      height: 56px;
+    }
+
+    .research-log__item .item-slot__sprite {
+      width: 48px;
+      height: 48px;
+    }
+
+    /* Next to the 12px label the 24px icon is drawn at x1. */
+    .research-log__icon {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  /* Hovering a card makes its item bob one sprite pixel, in two frames. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .quest-card:hover .item-slot__sprite {
+      animation: item-bob 720ms steps(1, end) infinite;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quest-card,
+    .quest-log-chevron,
+    .item-sprite__wash {
+      transition: none;
+    }
+
+    .quest-log:not([hidden]) {
+      animation: none;
+    }
+  }
+}
+
+@layer utilities {
+  /* The card's padding, from --quest-pad (see .quest-card): two classes, so it
+     beats the panel's single-class p-4 md:p-5 whatever their order. The
+     visual's negative margins then end exactly on the inner edge of the 4px
+     frame (a box-shadow outside the box) and never paint over it. */
+  .px-panel.quest-card {
+    padding: var(--quest-pad);
+  }
+
+  /* Hover (and keyboard focus inside): the frame brightens and, with motion
+     allowed, the card lifts 4px while its drop stays on the ground. The lift
+     never moves the hit area: while hovered, ::after fills the 4px strip the
+     card leaves behind, so a pointer resting on the bottom edge stays on it. */
+  @media (hover: hover) {
+    .quest-card:hover {
+      --px-frame: var(--color-accent-hover);
+    }
+  }
+
+  .quest-card:has(:focus-visible) {
+    --px-frame: var(--color-accent-hover);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @media (hover: hover) {
+      .quest-card:hover {
+        --px-drop: var(--quest-drop-lifted);
+        transform: translateY(-4px);
+      }
+
+      .quest-card:hover::after {
+        content: "";
+        position: absolute;
+        inset: 100% 0 -4px;
+      }
+    }
+
+    .quest-card:has(:focus-visible) {
+      --px-drop: var(--quest-drop-lifted);
+      transform: translateY(-4px);
+    }
+  }
+}
+
+@keyframes quest-log-open {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes item-bob {
+  0% {
+    transform: none;
+  }
+
+  50% {
+    transform: translateY(var(--bob));
+  }
+}
