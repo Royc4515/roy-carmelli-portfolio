@@ -322,6 +322,9 @@ export default function Skills() {
 
   const onGridKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
     if (e.altKey || e.shiftKey) return;
+    // Ctrl/Cmd + arrow belongs to the browser (Cmd+Left/Right is Back/Forward on macOS);
+    // only Ctrl+Home/End have a grid meaning.
+    if ((e.ctrlKey || e.metaKey) && e.key.startsWith('Arrow')) return;
     const cell = e.target instanceof Element ? e.target.closest('[data-skill-item]') : null;
     if (!cell) return;
     const [row, col] = (cell.getAttribute('data-skill-item') ?? '0-0').split('-').map(Number);

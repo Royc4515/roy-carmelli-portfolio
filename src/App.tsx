@@ -8,9 +8,11 @@ import Resume from './sections/Resume';
 import Contact from './sections/Contact';
 import { Button } from './components/ui/Button';
 import { useTheme } from './hooks/useTheme';
+import { useInitialHashScroll } from './hooks/useInitialHashScroll';
 
 export default function App() {
   const [theme, toggleTheme] = useTheme();
+  useInitialHashScroll();
   return (
     <>
       {/* First focusable element: parked above the viewport until it takes focus. */}

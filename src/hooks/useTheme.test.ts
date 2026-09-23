@@ -48,6 +48,13 @@ describe('useTheme', () => {
     expect(root.dataset.theme).toBe('night');
   });
 
+  it('does not store anything until the visitor toggles, so the OS preference keeps applying', () => {
+    mockOsDark(true);
+    const { result } = renderHook(() => useTheme());
+    expect(result.current[0]).toBe('night');
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
+  });
+
   it('falls back to the stored choice, then the OS preference', () => {
     window.localStorage.setItem(THEME_STORAGE_KEY, 'night');
     mockOsDark(false);

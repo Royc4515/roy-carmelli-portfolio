@@ -319,6 +319,10 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     expect(fireEvent.keyDown(item('React'), { key: 'Tab' })).toBe(true);
     expect(fireEvent.keyDown(item('React'), { key: 'Enter' })).toBe(true);
     expect(fireEvent.keyDown(item('React'), { key: 'ArrowLeft', altKey: true })).toBe(true);
+    // Ctrl/Cmd + arrow stays with the browser (Cmd+Left/Right is Back/Forward on macOS).
+    expect(fireEvent.keyDown(item('React'), { key: 'ArrowRight', metaKey: true })).toBe(true);
+    expect(fireEvent.keyDown(item('React'), { key: 'ArrowLeft', ctrlKey: true })).toBe(true);
+    expect(item('React')).toHaveFocus();
     expect(item('React')).toHaveFocus();
   });
 

@@ -58,6 +58,7 @@ export function Reveal({ as = 'div', index = 0, children, ...rest }: RevealProps
   return (
     <MotionTag
       {...rest}
+      data-reveal=""
       variants={materialize}
       custom={index}
       initial="hidden"

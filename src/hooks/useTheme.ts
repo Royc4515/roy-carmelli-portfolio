@@ -33,16 +33,20 @@ export function getInitialTheme(): Theme {
 }
 
 /**
- * Day/night theme, mirrored to `<html data-theme>` and localStorage.
+ * Day/night theme, mirrored to `<html data-theme>`; a toggled choice is also stored in
+ * localStorage (the page load itself never writes, so the OS preference keeps applying).
  * `toggle` also turns on the colour cross-fade for one transition; loading the page
  * never animates.
  */
 export function useTheme(): [Theme, () => void] {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const animTimer = useRef<number | undefined>(undefined);
+  /** Set by `toggle`: only an explicit choice is stored, so until then the OS preference wins. */
+  const chosen = useRef(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    if (!chosen.current) return;
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch {
@@ -59,6 +63,7 @@ export function useTheme(): [Theme, () => void] {
   );
 
   const toggle = useCallback(() => {
+    chosen.current = true;
     const root = document.documentElement;
     root.classList.add(THEME_ANIM_CLASS);
     window.clearTimeout(animTimer.current);

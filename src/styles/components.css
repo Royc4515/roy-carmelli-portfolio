@@ -659,7 +659,7 @@
   /* The eyebrow hides under the card and comes back when the card is gone
      (on phones the card is narrower than a one-line eyebrow). */
   .zone-header__eyebrow[data-banner] {
-    animation: zone-eyebrow-swap 1800ms linear both;
+    animation: zone-eyebrow-swap 1800ms step-end both;
   }
 
   /* Divider draw-in: a left-to-right clip-path wipe in 8 steps (480ms),
@@ -712,19 +712,22 @@
   }
 }
 
+/* Printing / Save as PDF: reveals that never scrolled into view keep their hidden
+   inline state; show everything. */
+@media print {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* The card slides over the eyebrow; from 19% (342ms, a frame before the
    card lands) the eyebrow is hidden, and it is back only once the card has faded out
-   (100% = 1800ms), so the two never show through each other. */
+   (100% = 1800ms), so the two never show through each other. No 0% / 100% colour:
+   the implicit end frames keep the eyebrow's own colour (fg-subtle on phones,
+   accent-fg from 640px), and step-end holds each value until the next frame. */
 @keyframes zone-eyebrow-swap {
-  0% {
-    color: var(--color-accent-fg);
-    animation-timing-function: step-end;
-  }
   19% {
     color: transparent;
-    animation-timing-function: step-end;
-  }
-  100% {
-    color: var(--color-accent-fg);
   }
 }

@@ -120,7 +120,7 @@
 
   /* Phones: only the lead card lists its highlights; the others keep them in
      the quest log (their descriptions restate every highlight). */
-  @media (max-width: 639px) {
+  @media (width < 640px) {
     .quest-highlights--secondary {
       display: none;
     }
@@ -202,7 +202,7 @@
      first row and Quest log takes the row under them (--pair); a card with
      one link puts Quest log beside it. 24px between columns clears the focus
      ring, 16px between rows clears the 8px drop. */
-  @media (max-width: 639px) {
+  @media (width < 640px) {
     .quest-actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -264,7 +264,7 @@
     height: 184px;
   }
 
-  @media (max-width: 1599px) {
+  @media (width < 1600px) {
     .quest-visual--item {
       height: 120px;
     }
@@ -405,7 +405,7 @@
 
   /* Two main quests side by side are too narrow for three buttons in a row
      until 1024px: stack them like the side quests so both cards match. */
-  @media (min-width: 768px) and (max-width: 1023px) {
+  @media (768px <= width < 1024px) {
     .quest-card--standard .quest-actions {
       flex-direction: column;
       align-items: flex-start;
@@ -440,7 +440,7 @@
 
   /* Until 1280 the 5/12 text column is too narrow for Live · Code · Quest log
      on one row (331px of buttons + 2 x 24px gaps), so give the text a bit more. */
-  @media (min-width: 1024px) and (max-width: 1279px) {
+  @media (1024px <= width < 1280px) {
     .quest-card--feature {
       grid-template-columns: minmax(0, 13fr) minmax(0, 11fr);
     }
@@ -649,7 +649,7 @@
     margin-bottom: 8px; /* the button's drop */
   }
 
-  @media (max-width: 639px) {
+  @media (width < 640px) {
     /* Icon-only: the 48px square of Button's icon variant. */
     .research-log__action {
       width: 48px;
