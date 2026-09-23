@@ -1,0 +1,172 @@
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect } from 'vitest';
+import QuestCard, { QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
+import { itemForProject } from './ItemSprite';
+import { projects } from '../data/projects';
+import type { Project } from '../types/index';
+
+const byId = (id: string): Project => {
+  const p = projects.find(project => project.id === id);
+  if (!p) throw new Error(`no project ${id}`);
+  return p;
+};
+
+describe('splitTitle', () => {
+  it('splits on the first " - "', () => {
+    expect(splitTitle('Aside - AI Sidebar')).toEqual({ name: 'Aside', subtitle: 'AI Sidebar' });
+    expect(splitTitle('Signal Processing - Synthetic Signals')).toEqual({
+      name: 'Signal Processing',
+      subtitle: 'Synthetic Signals',
+    });
+  });
+
+  it('leaves other titles whole', () => {
+    expect(splitTitle('CareerPredict AI')).toEqual({ name: 'CareerPredict AI' });
+    expect(splitTitle('Multi-step')).toEqual({ name: 'Multi-step' });
+    expect(splitTitle(' - leading')).toEqual({ name: ' - leading' });
+    expect(splitTitle('Trailing - ')).toEqual({ name: 'Trailing - ' });
+  });
+});
+
+describe('metaLine', () => {
+  it('joins kind and year with non-breaking spaces around the dot', () => {
+    expect(metaLine({ kind: 'Java game', year: 2025 })).toBe('Java game · 2025');
+  });
+});
+
+describe('every project has a visual', () => {
+  it.each(projects.map(p => [p.id, p] as const))('%s has a screenshot or an item', (_id, project) => {
+    expect(Boolean(QUEST_SCREENSHOTS[project.id] || itemForProject(project.id))).toBe(true);
+  });
+});
+
+describe('<QuestCard> main quest (feature)', () => {
+  const aside = byId('ai-sidebar');
+
+  it('names the card by its full title and shows the tier and meta', () => {
+    render(<QuestCard project={aside} layout="feature" />);
+    const heading = screen.getByRole('heading', { level: 3, name: 'Aside - AI Sidebar' });
+    const card = screen.getByRole('article', { name: 'Aside - AI Sidebar' });
+    expect(card).toContainElement(heading);
+    expect(within(card).getByText('Main quest')).toBeInTheDocument();
+    expect(within(card).getByText(/Chrome extension · 2026/)).toBeInTheDocument();
+    expect(within(card).getByText(aside.tagline)).toBeInTheDocument();
+  });
+
+  it('shows the real screenshot, responsive, lazy and not pixelated', () => {
+    render(<QuestCard project={aside} layout="feature" />);
+    const img = screen.getByRole('img', { name: /Every AI model\. One sidebar\./ });
+    expect(img).toHaveAttribute('src', '/assets/projects/aside-1280.webp');
+    expect(img.getAttribute('srcset')).toContain('aside-640.webp 640w');
+    expect(img.getAttribute('srcset')).toContain('aside-1280.webp 1280w');
+    expect(img).toHaveAttribute('sizes');
+    expect(img).toHaveAttribute('width', '1280');
+    expect(img).toHaveAttribute('height', '720');
+    expect(img).toHaveAttribute('loading', 'lazy');
+    expect(img).not.toHaveClass('pixelated');
+  });
+
+  it('lists the highlights', () => {
+    render(<QuestCard project={aside} layout="feature" />);
+    aside.highlights!.forEach(h => expect(screen.getByText(h).closest('li')).toBeInTheDocument());
+  });
+
+  it('shows at most five tech chips plus an overflow chip', () => {
+    render(<QuestCard project={aside} layout="feature" />);
+    const chips = screen.getByRole('list', { name: 'Built with' });
+    const items = within(chips).getAllByRole('listitem');
+    expect(items).toHaveLength(6);
+    expect(items[5]).toHaveTextContent(`+${aside.tech.length - 5}`);
+  });
+
+  it('links to the live demo and the code in new tabs, named after the project', () => {
+    render(<QuestCard project={aside} layout="feature" />);
+    const live = screen.getByRole('link', { name: /^Live demo: Aside - AI Sidebar/ });
+    expect(live).toHaveAttribute('href', aside.live);
+    expect(live).toHaveAttribute('target', '_blank');
+    expect(live.getAttribute('rel')).toContain('noreferrer');
+    const code = screen.getByRole('link', { name: /^Code on GitHub: Aside - AI Sidebar/ });
+    expect(code).toHaveAttribute('href', aside.github);
+    expect(code).toHaveAttribute('target', '_blank');
+  });
+
+  it('toggles the quest log with the full description', async () => {
+    const user = userEvent.setup();
+    render(<QuestCard project={aside} layout="feature" />);
+    const toggle = screen.getByRole('button', { name: 'Quest log: Aside - AI Sidebar' });
+    const log = document.getElementById(toggle.getAttribute('aria-controls')!)!;
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(log).not.toBeVisible();
+    expect(log).toHaveTextContent(aside.description);
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(log).toBeVisible();
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(log).not.toBeVisible();
+  });
+});
+
+describe('<QuestCard> main quest (standard)', () => {
+  it('shows the item at x6 instead of a screenshot', () => {
+    const { container } = render(<QuestCard project={byId('sommelier-bot')} />);
+    const item = container.querySelector('svg[data-item]')!;
+    expect(item).toHaveAttribute('data-item', 'wine-glass');
+    expect(item).toHaveAttribute('width', '144');
+    expect(item).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it('has no Live link when the project has no demo', () => {
+    render(<QuestCard project={byId('sommelier-bot')} />);
+    expect(screen.queryByRole('link', { name: /Live demo/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^Code on GitHub: Sommelier Bot/ })).toBeInTheDocument();
+  });
+});
+
+describe('<QuestCard> side quest', () => {
+  it('is a compact card with the item at x2, the tier and the status', () => {
+    const clr = byId('clr');
+    const { container } = render(<QuestCard project={clr} />);
+    const card = screen.getByRole('article', { name: clr.title });
+    expect(within(card).getByText('Side quest')).toBeInTheDocument();
+    expect(within(card).getByText('In development')).toBeInTheDocument();
+    expect(within(card).getByText(/AI pipeline · 2026/)).toBeInTheDocument();
+    expect(container.querySelector('svg[data-item="recipe-book"]')).toHaveAttribute('width', '48');
+    // highlights are for main quests only; the chip list is the only list
+    expect(within(card).getAllByRole('list')).toHaveLength(1);
+  });
+
+  it('shows no status chip when the project has none', () => {
+    render(<QuestCard project={byId('arkanoid-game')} />);
+    expect(screen.queryByText('In development')).not.toBeInTheDocument();
+  });
+
+  it('keeps Live · Code · Quest log in that order', () => {
+    render(<QuestCard project={byId('portfolio')} />);
+    const controls = screen.getAllByRole('link').concat(screen.getAllByRole('button'));
+    expect(controls.map(c => c.textContent)).toEqual(['Live', 'Code', 'Quest log']);
+  });
+});
+
+describe('<ResearchLogItem>', () => {
+  it('renders a compact row with the item at x1 and a Code link', () => {
+    const signal = byId('signal-processing');
+    const { container } = render(
+      <ul>
+        <ResearchLogItem project={signal} />
+      </ul>,
+    );
+    expect(screen.getByRole('heading', { level: 3, name: signal.title })).toBeInTheDocument();
+    expect(screen.getByText('Synthetic Signals')).toBeInTheDocument();
+    expect(screen.getByText(/Jupyter notebook · 2026/)).toBeInTheDocument();
+    expect(screen.getByText(signal.tagline)).toBeInTheDocument();
+    expect(container.querySelector('svg[data-item="oscilloscope"]')).toHaveAttribute('width', '24');
+    const code = screen.getByRole('link', { name: /^Code on GitHub: Signal Processing - Synthetic Signals/ });
+    expect(code).toHaveAttribute('href', signal.github);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+});

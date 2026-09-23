@@ -1,0 +1,499 @@
+/* ==========================================================================
+   Projects zone (Zone 01 · The Library): quest cards, item plates, research
+   logs. Imported by src/components/QuestCard.tsx.
+
+   Everything sits in `@layer components` so Tailwind utilities passed through
+   `className` still win; only the hover/focus lift lives in `utilities`, where
+   it has to beat the panel's `px-drop` utility.
+   Colours are semantic tokens (see src/index.css and components.css).
+   ========================================================================== */
+
+@layer components {
+  /* ── Item plate ────────────────────────────────────────────────────────
+     The inset well used across the site (surface-sunken + 2px border-subtle
+     line), sized for the item at x1 / x2 / x4 / x6 with 4px of air. */
+  .item-slot {
+    --bob: -1px;
+    display: grid;
+    flex: none;
+    place-items: center;
+    background-color: var(--color-surface-sunken);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  .item-slot--sm {
+    width: 32px;
+    height: 32px;
+  }
+
+  .item-slot--md {
+    --bob: -2px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .item-slot--lg {
+    --bob: -4px;
+    width: 104px;
+    height: 104px;
+  }
+
+  .item-slot--xl {
+    --bob: -6px;
+    width: 152px;
+    height: 152px;
+  }
+
+  /* ── Card ──────────────────────────────────────────────────────────────
+     Parts are direct children so a parent grid can line them up across
+     cards with subgrid (see the lists below). Spacing between parts is
+     margin/padding, which subgrid tracks include. */
+  .quest-card {
+    --quest-pad: 16px; /* mirrors PixelPanel padding "md": 16 → 24 at md */
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--dur-fast) steps(2, end);
+  }
+
+  .quest-card--main {
+    --quest-drop-lifted: 8px 16px 0 0 var(--color-shadow);
+  }
+
+  .quest-card--side {
+    --quest-drop-lifted: 4px 12px 0 0 var(--color-shadow);
+  }
+
+  .quest-row--meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
+  /* Wraps the meta under the slot on narrow cards; lines stay packed at the top
+     even when the shared subgrid row is taller than this card's header. */
+  .quest-row--head {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .quest-card .quest-title {
+    margin-top: 16px;
+  }
+
+  .quest-card .quest-tagline {
+    margin-top: 12px;
+  }
+
+  .quest-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Chip rows stay packed at the top of their (shared) row. */
+  .quest-card .quest-chips {
+    align-self: start;
+    align-content: flex-start;
+    margin-top: 24px;
+  }
+
+  /* Tier tag: star + MAIN QUEST / SIDE QUEST on a small plate. */
+  .quest-tag {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+    padding: 4px 8px;
+    white-space: nowrap;
+
+    & > svg {
+      display: block;
+      flex: none;
+    }
+  }
+
+  /* Press Start 2P caps sit 1px high in the line box (see .px-btn__label). */
+  .quest-tag__label {
+    position: relative;
+    top: 1px;
+  }
+
+  .quest-tag--paper {
+    background-color: var(--color-ink);
+    color: var(--color-accent-fg);
+  }
+
+  .quest-tag--wood {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-accent-fg);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  /* ── Actions and quest log ─────────────────────────────────────────────
+     Pinned to the bottom of the card (margin-top: auto); the 32px above
+     is padding so the pin never eats it. 8px below for the buttons' drop. */
+  .quest-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+    margin-top: auto;
+    padding: 32px 0 8px;
+  }
+
+  /* Inline: Live · Code · Quest log share one row. */
+  .quest-actions__links {
+    display: contents;
+  }
+
+  /* Stacked: Live · Code on one row, Quest log under them. */
+  .quest-actions--stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+
+    & > .quest-actions__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+  }
+
+  @media (max-width: 479px) {
+    .quest-actions,
+    .quest-actions--stacked {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .quest-actions__links {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .quest-actions .px-btn {
+      width: 100%;
+    }
+  }
+
+  .quest-log-chevron {
+    transition: transform var(--dur-fast) steps(2, end);
+  }
+
+  .quest-log-toggle[aria-expanded="true"] .quest-log-chevron {
+    transform: rotate(90deg);
+  }
+
+  .quest-log {
+    margin-top: 16px;
+    padding: 16px;
+  }
+
+  .quest-log--paper {
+    background-color: var(--color-paper-sunken);
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 2px var(--color-ink-muted);
+  }
+
+  .quest-log--wood {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  /* Unrolls in four steps. `hidden` keeps display: none while closed. */
+  .quest-log:not([hidden]) {
+    animation: quest-log-open var(--dur-slow) steps(4, end) both;
+  }
+
+  /* ── Visual: dotted backdrop, full bleed inside the card ───────────── */
+  .quest-visual {
+    margin: calc(var(--quest-pad) * -1) calc(var(--quest-pad) * -1) 24px;
+  }
+
+  .quest-visual--screen {
+    aspect-ratio: 16 / 10;
+  }
+
+  /* Item reveal: a fixed band with the x6 item on its plate. */
+  .quest-visual--item {
+    height: 184px;
+  }
+
+  /* Monitor: 4px ink screen frame, 4px notched wood casing with a 12px chin
+     (power light on the right) and a hard drop. */
+  .quest-monitor {
+    position: relative;
+    width: calc(100% - 48px);
+    margin-bottom: 12px;
+    padding: 4px;
+    background-color: var(--color-ink);
+    box-shadow:
+      0 -4px 0 0 var(--color-surface),
+      -4px 0 0 0 var(--color-surface),
+      4px 0 0 0 var(--color-surface),
+      -4px 8px 0 0 var(--color-surface),
+      4px 8px 0 0 var(--color-surface),
+      0 12px 0 0 var(--color-surface),
+      8px 20px 0 0 var(--color-shadow);
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: 8px;
+      bottom: -8px;
+      width: 4px;
+      height: 4px;
+      background-color: var(--color-xp);
+    }
+  }
+
+  /* ── Lists ─────────────────────────────────────────────────────────── */
+  .quest-list {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .quest-list > li {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quest-list > li > .quest-card {
+    flex: 1;
+  }
+
+  /* Side quests: 1 → 2 (640) → 3 (768) columns. With two columns the third
+     card takes the whole row instead of sitting alone at half width. */
+  @media (min-width: 640px) {
+    .quest-list--side {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .quest-list--side > li:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .quest-card {
+      --quest-pad: 24px;
+    }
+
+    /* Main quests: the lead card spans both columns, the other two share a
+       row and line their parts up through subgrid (8 rows each). */
+    .quest-list--main {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 0;
+    }
+
+    .quest-list--main > li:first-child {
+      grid-column: 1 / -1;
+      margin-bottom: 24px;
+    }
+
+    .quest-list--main > li:not(:first-child),
+    .quest-list--main > li:not(:first-child) > .quest-card {
+      display: grid;
+      grid-row: span 8;
+      grid-template-rows: subgrid;
+    }
+
+    .quest-list--side {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      row-gap: 0;
+    }
+
+    .quest-list--side > li:last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+
+    .quest-list--side > li,
+    .quest-list--side > li > .quest-card {
+      display: grid;
+      grid-row: span 6;
+      grid-template-rows: subgrid;
+    }
+  }
+
+  /* Two main quests side by side are too narrow for three buttons in a row
+     until 1024px: stack them like the side quests so both cards match. */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .quest-card--standard .quest-actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+
+      & > .quest-actions__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+      }
+    }
+  }
+
+  /* Lead card from 1024px: visual left (7/12), text right (5/12). */
+  @media (min-width: 1024px) {
+    .quest-card--feature {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      column-gap: 32px;
+    }
+
+    .quest-card--feature > .quest-visual {
+      margin: calc(var(--quest-pad) * -1) 0 calc(var(--quest-pad) * -1) calc(var(--quest-pad) * -1);
+      aspect-ratio: auto;
+      min-height: 100%;
+    }
+
+    .quest-card--feature .quest-monitor {
+      width: calc(100% - 64px);
+    }
+  }
+
+  /* Until 1280 the 5/12 text column is too narrow for Live · Code · Quest log
+     on one row (331px of buttons + 2 x 24px gaps), so give the text a bit more. */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .quest-card--feature {
+      grid-template-columns: minmax(0, 13fr) minmax(0, 11fr);
+    }
+  }
+
+  .quest-body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  /* ── Research logs ─────────────────────────────────────────────────── */
+  .research-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .research-log {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 16px 20px;
+    padding: 20px 0 24px;
+  }
+
+  .research-log:first-child {
+    padding-top: 4px;
+  }
+
+  .research-log:last-child {
+    padding-bottom: 8px;
+  }
+
+  .research-log + .research-log {
+    border-top: 2px dashed var(--color-border-subtle);
+  }
+
+  .research-log__action {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  @media (max-width: 479px) {
+    .research-log__action {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .research-log {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 24px;
+    }
+
+    .research-log__action {
+      grid-column: 3;
+      margin-bottom: 8px; /* balance the button's 8px drop */
+    }
+  }
+
+  /* Hovering a card makes its item bob one sprite pixel, in two frames. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .quest-card:hover .item-slot__sprite {
+      animation: item-bob 720ms steps(1, end) infinite;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quest-card,
+    .quest-log-chevron {
+      transition: none;
+    }
+
+    .quest-log:not([hidden]) {
+      animation: none;
+    }
+  }
+}
+
+/* Hover (and keyboard focus inside): the frame brightens and, with motion
+   allowed, the card lifts 4px while its drop stays on the ground. */
+@layer utilities {
+  @media (hover: hover) {
+    .quest-card:hover {
+      --px-frame: var(--color-accent-hover);
+    }
+  }
+
+  .quest-card:has(:focus-visible) {
+    --px-frame: var(--color-accent-hover);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @media (hover: hover) {
+      .quest-card:hover {
+        --px-drop: var(--quest-drop-lifted);
+        transform: translateY(-4px);
+      }
+    }
+
+    .quest-card:has(:focus-visible) {
+      --px-drop: var(--quest-drop-lifted);
+      transform: translateY(-4px);
+    }
+  }
+}
+
+@keyframes quest-log-open {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes item-bob {
+  0% {
+    transform: none;
+  }
+
+  50% {
+    transform: translateY(var(--bob));
+  }
+}

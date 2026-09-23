@@ -16,8 +16,6 @@ export interface Project {
   tech: string[];
   github?: string;
   live?: string;
-  /** @deprecated superseded by `tier`; kept until the Projects zone is rebuilt. */
-  featured: boolean;
   tier: ProjectTier;
   status?: 'in-development';
   year: number;

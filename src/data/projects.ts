@@ -13,7 +13,6 @@ export const projects: Project[] = [
     tech: ["JavaScript", "Chrome MV3", "Service Worker", "OOP", "Factory Pattern", "Strategy Pattern", "Template Method", "Streaming / SSE", "Claude API", "Gemini API", "OpenAI API", "Ollama", "i18n / RTL", "GitHub Pages"],
     github: "https://github.com/Royc4515/Aside",
     live: "https://royc4515.github.io/Aside/",
-    featured: true,
     year: 2026,
   },
   {
@@ -27,7 +26,6 @@ export const projects: Project[] = [
     tech: ["React 19", "Vite", "Tailwind CSS", "Node.js", "Express", "Passport.js", "SQLite", "Google OAuth", "Pollinations.ai", "Render"],
     github: "https://github.com/Royc4515/career-predictor",
     live: "https://career-predictor-cnvg.onrender.com",
-    featured: true,
     year: 2026,
   },
   {
@@ -40,7 +38,6 @@ export const projects: Project[] = [
     description: "Serverless Telegram bot - a personal AI sommelier that pairs meals with a live Google Sheets cellar inventory, advises on purchases, and holds open-ended sommelier conversations. Built a 4-model fallback chain with exponential backoff after I hit reliability gaps in production. Two-layer memory: rolling session history (30 messages, 1-hour TTL) + AI-compressed long-term summary. Zero-framework Python on Vercel webhooks for low cold-start latency.",
     tech: ["Python", "Gemini API", "Telegram Bot API", "Vercel", "Google Sheets", "unittest", "Serverless Functions"],
     github: "https://github.com/Royc4515/gemini-sommelier-bot",
-    featured: true,
     year: 2026,
   },
   {
@@ -53,7 +50,6 @@ export const projects: Project[] = [
     description: "(In active development.) AI ingestion pipeline for the recipes I actually cook: URL into Telegram → Groq LLM extracts and structures the content → normalized JSON consumed by a React web app. Architected end-to-end with agentic workflows - schema decisions, the UI scaffold, and the ingestion logic are all paired with AI as a first-class collaborator. The pipeline itself is the proof point that the methodology works.",
     tech: ["TypeScript", "Python", "Groq API", "Telegram API", "Vercel", "Agentic Workflows"],
     github: "https://github.com/Royc4515/Culinary-Logic-Repository",
-    featured: true,
     year: 2026,
   },
   {
@@ -65,7 +61,6 @@ export const projects: Project[] = [
     description: "Arkanoid clone in Java 17, built around the OOP patterns that hold up in production: inheritance hierarchy (GameObject → Ball / Paddle / Brick), polymorphism throughout, Factory for level construction, Strategy for collision response, Template Method for the game loop. No public fields, fully documented, refactored.",
     tech: ["Java 17", "OOP", "Factory Pattern", "Strategy Pattern", "Template Method"],
     github: "https://github.com/Royc4515/ArkanoidGame",
-    featured: true,
     year: 2025,
   },
   {
@@ -78,7 +73,6 @@ export const projects: Project[] = [
     tech: ["React", "TypeScript", "Vite", "Tailwind CSS", "Framer Motion", "Vercel"],
     github: "https://github.com/Royc4515/roy-carmelli-portfolio",
     live: "https://roy-carmelli-portfolio.vercel.app/",
-    featured: true,
     year: 2026,
   },
 
@@ -92,7 +86,6 @@ export const projects: Project[] = [
     description: "Signal processing exercise for the Neuroscience Data Analysis track. Jupyter notebook applying filtering, spectral analysis, and feature extraction across multiple synthetic signal types. The point isn't a discovery - it's building intuition for how the same DSP toolkit behaves on different signal morphologies.",
     tech: ["Python", "NumPy", "SciPy", "Matplotlib", "Jupyter"],
     github: "https://github.com/Royc4515/Project1_SignalProcessing",
-    featured: false,
     year: 2026,
   },
   {
@@ -104,7 +97,6 @@ export const projects: Project[] = [
     description: "Statistical investigation into socio-educational predictors of children's cognitive outcomes - Pandas, NumPy, SciPy, OLS regression. Built for a data-analysis-for-neuroscience course; demonstrates the full pipeline from raw survey data through hypothesis testing.",
     tech: ["Python", "Pandas", "NumPy", "SciPy", "OLS Regression"],
     github: "https://github.com/Royc4515/background-cognitive-correlation",
-    featured: false,
     year: 2026,
   },
   {
@@ -116,7 +108,6 @@ export const projects: Project[] = [
     description: "Self-test mini-game for the Neuroanatomy course (white matter unit). HTML / JS. Built it because making the tool to learn the material is faster than memorizing it cold.",
     tech: ["HTML", "JavaScript"],
     github: "https://github.com/Royc4515/white-matter-tracts-game",
-    featured: false,
     year: 2026,
   },
 ];
