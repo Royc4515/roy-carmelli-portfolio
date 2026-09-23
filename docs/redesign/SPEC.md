@@ -66,7 +66,7 @@ components; pixel-art bitmaps are the one exception).
 | `border-subtle` | `#6a8f48` | `#6472b0` | component boundaries (non-text only) |
 | `focus` | `#fff1b8` | `#fff1b8` | focus ring (set to `ink` inside paper surfaces) |
 | `shadow` | `#0a1406` | `#02040a` | hard drop shadows |
-| `edge` | `#1a120a` | `#05080f` | dark outline around buttons |
+| `edge` | `#1a120a` | `#3a2f12` | dark outline and drop under buttons (night: bronze, so the key depth stays visible on navy) |
 | `bevel-hi` / `bevel-lo` | `#e8c974` / `#9c7a2c` | `#f9e3a0` / `#b8902f` | brass bevel |
 | `wood-hi` / `wood-lo` | `#5a4028` / `#24180c` | `#2a3558` / `#0b1022` | wood bevel |
 | `hp` / `xp` | `#ef7d70` / `#8fd07a` | `#f07a6e` / `#8fd07a` | HUD bars, status dots |

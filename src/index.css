@@ -12,6 +12,7 @@
 @import "@fontsource/ibm-plex-mono/latin-600.css";
 
 @import "./styles/pixel.css";
+@import "./styles/components.css";
 
 /* The spec quotes class names in prose; don't generate CSS for them. */
 @source not "../docs";
@@ -127,7 +128,7 @@
   --color-border-subtle: #6472b0;
   --color-focus: #fff1b8;
   --color-shadow: #02040a;
-  --color-edge: #05080f;
+  --color-edge: #3a2f12; /* dark bronze: keeps the key depth of buttons visible on navy */
   --color-bevel-hi: #f9e3a0;
   --color-bevel-lo: #b8902f;
   --color-wood-hi: #2a3558;

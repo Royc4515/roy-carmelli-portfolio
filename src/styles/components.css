@@ -1,0 +1,499 @@
+/* ==========================================================================
+   Component layer (docs/redesign/SPEC.md §3): Button, PixelPanel, Chip,
+   ZoneHeader, Toast. Everything here sits in `@layer components`, so any
+   Tailwind utility passed through `className` still wins over it.
+
+   Colours come from the semantic tokens in src/index.css. The only extra
+   tokens are the two paper-surface mixes below, derived from existing tokens
+   with color-mix (no new hex values):
+
+     --color-paper-sunken  wells and chips on parchment: paper, 12% ink-muted
+     --color-paper-accent  top-tech chips on parchment: paper-sunken, 30% brass
+
+   They are declared on every themed element (not only :root) so a nested
+   `data-theme` wrapper, as in the dev gallery, recomputes them.
+   ========================================================================== */
+
+:root,
+[data-theme] {
+  --color-paper-sunken: color-mix(in srgb, var(--color-paper) 88%, var(--color-ink-muted));
+  --color-paper-accent: color-mix(in srgb, var(--color-paper-sunken) 70%, var(--color-accent));
+}
+
+@layer components {
+  /* ── Button ────────────────────────────────────────────────────────────
+     Face + 4px bevel + 4px notched edge + a base ("drop") under the face.
+     Hover pushes the face 2px into the base, active 4px: the bottom of the
+     base never moves, so the button reads as physically pressed.
+     States are driven by custom properties so reduced motion can cancel
+     the travel (--btn-motion: 0) without restating every state. The
+     [data-gallery-state] hooks exist for the dev gallery only. */
+  .px-btn {
+    --btn-bg: var(--color-accent);
+    --btn-fg: var(--color-on-accent);
+    --btn-hi: var(--color-bevel-hi);
+    --btn-lo: var(--color-bevel-lo);
+    --btn-edge: var(--color-edge);
+    --btn-drop: 8px;
+    --btn-press: 0px;
+    --btn-motion: 1;
+    --btn-bevel-a: var(--btn-hi);
+    --btn-bevel-b: var(--btn-lo);
+
+    @apply text-label;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 8px 20px;
+    border: 0;
+    border-radius: 0;
+    background-color: var(--btn-bg);
+    color: var(--btn-fg);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateY(calc(var(--btn-press) * var(--btn-motion)));
+    box-shadow:
+      inset 4px 4px 0 0 var(--btn-bevel-a),
+      inset -4px -4px 0 0 var(--btn-bevel-b),
+      0 -4px 0 0 var(--btn-edge),
+      0 4px 0 0 var(--btn-edge),
+      -4px 0 0 0 var(--btn-edge),
+      4px 0 0 0 var(--btn-edge),
+      0 calc(var(--btn-drop) - var(--btn-press) * var(--btn-motion)) 0 0 var(--btn-edge);
+    transition:
+      transform var(--dur-fast) steps(2, end),
+      box-shadow var(--dur-fast) steps(2, end),
+      background-color var(--dur-fast) steps(2, end),
+      color var(--dur-fast) steps(2, end);
+  }
+
+  /* Press Start 2P puts its caps in the top 7/8 of the em with no descent,
+     so a centred line box leaves them ~1px high. Nudging the label down 1px
+     centres the caps on the button and on the (flex-centred) icons. */
+  .px-btn__label {
+    position: relative;
+    top: 1px;
+    display: block;
+  }
+
+  .px-btn__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+
+    & > svg,
+    & > img {
+      display: block;
+    }
+  }
+
+  .px-btn--lg {
+    @apply text-display-s;
+    gap: 10px;
+    min-height: 56px;
+    padding: 8px 24px;
+    text-transform: uppercase;
+  }
+
+  .px-btn--secondary,
+  .px-btn--icon {
+    --btn-bg: var(--color-surface);
+    --btn-fg: var(--color-accent-fg);
+    --btn-hi: var(--color-wood-hi);
+    --btn-lo: var(--color-wood-lo);
+    --btn-edge: var(--color-border);
+  }
+
+  .px-btn--icon {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+
+    &.px-btn--lg {
+      width: 56px;
+      height: 56px;
+      padding: 0;
+    }
+  }
+
+  .px-btn--ghost {
+    --btn-fg: var(--color-accent-fg);
+    min-height: 44px;
+    padding: 0 4px;
+    background-color: transparent;
+    box-shadow: none;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    & .px-btn__label {
+      top: 0;
+      text-decoration: underline dashed 2px;
+      text-underline-offset: 8px;
+    }
+  }
+
+  /* hover: half press */
+  .px-btn:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+    --btn-bg: var(--color-accent-hover);
+    --btn-press: 2px;
+  }
+
+  /* active: full press, bevel inverted */
+  .px-btn:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
+    --btn-bg: var(--color-accent-press);
+    --btn-press: 4px;
+    --btn-bevel-a: var(--btn-lo);
+    --btn-bevel-b: var(--btn-hi);
+    transition-duration: var(--dur-instant);
+  }
+
+  .px-btn--secondary:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]),
+  .px-btn--icon:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+    --btn-bg: var(--color-surface-raised);
+  }
+
+  .px-btn--secondary:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]),
+  .px-btn--icon:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
+    --btn-bg: var(--color-surface);
+  }
+
+  /* Ghost: no face to press. Hover brightens and solidifies the underline;
+     active nudges 2px. */
+  .px-btn--ghost:where(:not(:disabled, [aria-disabled="true"])):is(:hover, [data-gallery-state="hover"]) {
+    --btn-fg: var(--color-fg);
+    --btn-press: 0px;
+
+    & .px-btn__label {
+      text-decoration-style: solid;
+    }
+  }
+
+  .px-btn--ghost:where(:not(:disabled, [aria-disabled="true"])):is(:active, [data-gallery-state="active"]) {
+    --btn-press: 2px;
+  }
+
+  /* focus: a 3px notched ring 8px out from the face, so it clears the 4px
+     edge by 4px. A plain outline would sit on the drop at the bottom, so the
+     ring is drawn on ::after and its bottom follows the drop (4px below it,
+     in every press state). The transparent outline is what forced-colors
+     mode shows instead (it strips box-shadows). */
+  .px-btn:is(:focus-visible, [data-gallery-state="focus"]) {
+    outline: 3px solid transparent;
+    outline-offset: 8px;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -8px -8px calc(-4px - var(--btn-drop) + var(--btn-press) * var(--btn-motion));
+      pointer-events: none;
+      box-shadow:
+        0 -3px 0 0 var(--color-focus),
+        0 3px 0 0 var(--color-focus),
+        -3px 0 0 0 var(--color-focus),
+        3px 0 0 0 var(--color-focus);
+    }
+  }
+
+  .px-btn--ghost:is(:focus-visible, [data-gallery-state="focus"]) {
+    outline-offset: 4px;
+
+    &::after {
+      inset: -4px;
+    }
+  }
+
+  /* disabled (native or aria-disabled on a link) */
+  .px-btn:is(:disabled, [aria-disabled="true"]) {
+    @apply px-dither;
+    --btn-bg: var(--color-surface-sunken);
+    --btn-fg: var(--color-fg-subtle);
+    --btn-hi: var(--color-surface-sunken);
+    --btn-lo: var(--color-surface-sunken);
+    --btn-edge: var(--color-border-subtle);
+    --btn-drop: 0px;
+    --px-dither: color-mix(in srgb, var(--color-fg-subtle) 14%, transparent);
+    cursor: not-allowed;
+  }
+
+  .px-btn--ghost:is(:disabled, [aria-disabled="true"]) {
+    background-color: transparent;
+    background-image: none;
+
+    & .px-btn__label {
+      text-decoration-style: dotted;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .px-btn {
+      --btn-motion: 0;
+    }
+  }
+
+  /* Forced colours drop box-shadows, which is where the edge lives. */
+  @media (forced-colors: active) {
+    .px-btn:not(.px-btn--ghost) {
+      border: 2px solid ButtonText;
+    }
+
+    .px-btn:is(:disabled, [aria-disabled="true"]) {
+      border-color: GrayText;
+      color: GrayText;
+    }
+  }
+
+  /* ── PixelPanel ────────────────────────────────────────────────────────
+     The frame and drop come from the px-frame / px-drop utilities
+     (pixel.css); these classes only set the surface. */
+  .px-panel {
+    position: relative;
+  }
+
+  .px-panel--wood {
+    background-color: var(--color-surface);
+    color: var(--color-fg);
+  }
+
+  .px-panel--paper {
+    --color-focus: var(--color-ink);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+
+    & a:not(.px-btn) {
+      color: var(--color-ink);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+
+    & a:not(.px-btn):hover {
+      color: var(--color-ink-muted);
+    }
+  }
+
+  .px-panel--inset {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    box-shadow:
+      inset 0 0 0 2px var(--color-border-subtle),
+      var(--px-drop, 0 0 #0000);
+  }
+
+  .px-panel--ghost {
+    background-color: transparent;
+  }
+
+  .px-panel--dark {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  .px-panel--frameless {
+    box-shadow: var(--px-drop, 0 0 #0000);
+  }
+
+  /* Brass title plate riding on the top frame. Its 24px face is centred on
+     the 4px frame line; the panel adds top padding to clear it. The 5/3
+     vertical padding centres the pixel caps (see .px-btn__label); a direct
+     svg child is lifted back so icons stay centred on the caps. */
+  .px-panel__tab {
+    @apply text-label;
+    position: absolute;
+    top: -14px;
+    left: 16px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100% - 32px);
+    min-height: 24px;
+    padding: 5px 8px 3px;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+    white-space: nowrap;
+    box-shadow:
+      inset 2px 2px 0 0 var(--color-bevel-hi),
+      inset -2px -2px 0 0 var(--color-bevel-lo),
+      0 -4px 0 0 var(--color-edge),
+      0 4px 0 0 var(--color-edge),
+      -4px 0 0 0 var(--color-edge),
+      4px 0 0 0 var(--color-edge);
+
+    & > svg {
+      display: block;
+      flex: none;
+      margin-top: -2px;
+    }
+  }
+
+  /* Buttons placed on parchment. */
+  .px-panel--paper .px-btn--ghost:not(:disabled, [aria-disabled="true"]) {
+    --btn-fg: var(--color-ink);
+  }
+
+  .px-panel--paper :is(.px-btn--secondary, .px-btn--icon):not(:disabled, [aria-disabled="true"]) {
+    --btn-bg: var(--color-ink);
+    --btn-fg: var(--color-accent-fg);
+    --btn-hi: var(--color-ink-muted);
+    --btn-lo: var(--color-edge);
+    --btn-edge: var(--color-edge);
+
+    &:is(:hover, [data-gallery-state="hover"]) {
+      --btn-bg: color-mix(in srgb, var(--color-ink) 80%, var(--color-ink-muted));
+    }
+
+    &:is(:active, [data-gallery-state="active"]) {
+      --btn-bg: var(--color-ink);
+    }
+  }
+
+  /* ── Chip ──────────────────────────────────────────────────────────── */
+  .px-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .px-chip {
+    @apply text-hud;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 10px;
+    background-color: var(--color-surface-sunken);
+    color: var(--color-fg);
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+  }
+
+  .px-chip--accent {
+    color: var(--color-accent-fg);
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+
+  .px-chip--more {
+    background-color: transparent;
+    color: var(--color-fg-subtle);
+  }
+
+  .px-chip--paper {
+    background-color: var(--color-paper-sunken);
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 2px var(--color-ink-muted);
+
+    &.px-chip--accent {
+      background-color: var(--color-paper-accent);
+      box-shadow: inset 0 0 0 2px var(--color-ink);
+    }
+
+    &.px-chip--more {
+      background-color: transparent;
+      color: var(--color-ink-muted);
+    }
+  }
+
+  /* ── ZoneHeader ────────────────────────────────────────────────────── */
+  .zone-header {
+    margin-bottom: 32px;
+  }
+
+  /* 2px down: the eyebrow's caps start 2px into its 16px line box. */
+  .zone-header__icon {
+    display: flex;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    margin-top: 2px;
+    color: var(--color-accent-fg);
+
+    & > svg,
+    & > img {
+      display: block;
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  /* ── Toast ─────────────────────────────────────────────────────────── */
+  .px-toast-region {
+    position: fixed;
+    inset-inline: 0;
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+    z-index: 300;
+    display: flex;
+    justify-content: center;
+    padding-inline: 24px;
+    pointer-events: none;
+  }
+
+  .px-toast {
+    --color-focus: var(--color-ink);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 480px;
+    min-height: 48px;
+    padding: 12px 16px;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    animation: px-toast-in var(--dur-base) var(--ease-pop) both;
+
+    &[data-leaving] {
+      animation: px-toast-out var(--dur-fast) steps(2, end) both;
+    }
+  }
+
+  .px-toast__icon {
+    display: inline-flex;
+    flex: none;
+    color: var(--color-ink);
+
+    & > svg,
+    & > img {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .px-toast,
+    .px-toast[data-leaving] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes px-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes px-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
