@@ -9,10 +9,14 @@ import {
 import { cx } from './cx';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'icon';
-export type ButtonSize = 'md' | 'lg';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface CommonProps {
-  /** `md` is 48px tall with a 12px pixel label; `lg` is 56px with a 16px label. Ghost ignores it. */
+  /**
+   * `sm` is a 44px face with a 12px pixel label and a focus ring that hugs the edge (dense
+   * bars such as the navbar; icon buttons become 44×44); `md` is 48px tall with a 12px label;
+   * `lg` is 56px with a 16px label. Ghost ignores it.
+   */
   size?: ButtonSize;
   /** Extra classes (Tailwind utilities win over the component styles). */
   className?: string;
@@ -123,7 +127,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
     const classes = cx(
       'px-btn',
       `px-btn--${variant}`,
-      size === 'lg' && variant !== 'ghost' && 'px-btn--lg',
+      size !== 'md' && variant !== 'ghost' && `px-btn--${size}`,
       className,
     );
 

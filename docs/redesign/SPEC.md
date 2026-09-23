@@ -194,6 +194,12 @@ The same values are exported for Framer Motion from `src/theme/motion.ts`.
   instant, banners appear without movement, twinkle off. The game stays available (user-initiated).
   Use `<MotionConfig reducedMotion="user">` plus CSS media queries plus `usePrefersReducedMotion`.
 - Sprites pause when off-screen (IntersectionObserver) and when the tab is hidden.
+- Zone entered (`useZoneEntered`, once per load, scrolling down past 35% of the viewport, never
+  on initial load or scroll restoration): `ZoneBanner` slides in from the header's left edge in
+  `steps(4)` over 360ms, holds 1.2s, fades out in 3 steps; the divider below draws left to
+  right with `clip-path` in `steps(8)` over 480ms on first full view. Reduced motion: neither.
+- Mini-map head walks between nav nodes in 4 whole-pixel hops (`--dur-slow`); jumps under
+  reduced motion.
 
 ## 3. Components
 
@@ -213,7 +219,8 @@ typed props, JSDoc on exported components.
 - Polymorphic: renders `<a>` when `href` is set, otherwise `<button type="button">`.
 - Variants: `primary` (brass), `secondary` (wood with brass frame, `accent-fg` text), `ghost`
   (HUD text, dashed underline), `icon` (48×48 square, requires `aria-label`).
-- Sizes: `md` 48px tall with `label` text, `lg` 56px tall with `display-s` text.
+- Sizes: `sm` 44px face with 12px label and a focus ring hugging the edge (navbar), `md` 48px
+  tall with `label` text, `lg` 56px tall with `display-s` text.
   Touch targets are ≥ 44px in every size.
 - Optional leading/trailing `PixelIcon`.
 - States (CSS only):
@@ -257,7 +264,11 @@ Reference CSS (from the approved prototype):
 - Anatomy: `PixelIcon` (36px) · eyebrow `ZONE 0N · NAME` (`label`, `accent-fg`) · H2 (`display-l`,
   `fg`) · optional subline (`body`, `fg-muted`, ≤ 90 chars) · `px-divider` below.
 - Props: `zone` (number), `name`, `title`, `subtitle?`, `icon`, `id` for the H2 (used by
-  `aria-labelledby` on the section).
+  `aria-labelledby` on the section). The H2 has `tabIndex={-1}` so menu jumps can focus it.
+- Eyebrow breaks only after the dot (`ZONE 02 ·` / `THE ADVENTURER`), 4px row gap. Below 640px
+  the icon is 24px, inline with the eyebrow, and the H2 takes the full width.
+- Hosts the zone-entered `ZoneBanner` (absolute over the eyebrow, `aria-hidden`) and the divider
+  draw-in, so every zone gets them with no section changes.
 
 ### PixelIcon
 - `name`, `size` (12 | 24 | 36 | 48), `title?` (when meaningful; otherwise `aria-hidden`).
@@ -291,10 +302,14 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
 - **Navbar.** 64px, `surface` with 4px bottom frame; gains `px-drop-sm` after scrolling.
   Left: face ×1 (native) + `ROY CARMELLI` (`label`) linking to `#hero`. Middle: Projects · About ·
   Skills · Contact (HUD 13 + 24px icon), active item gets a `play` cursor + 4px accent underline +
-  `aria-current="true"`. Right: `Resume` (primary md, download icon, links to the PDF),
+  `aria-current="true"`. From 1024px the links form a mini-map: a 12×12 node before each label
+  joined by a 4px path (dashed `border-subtle` ahead, solid `accent` once visited; current node
+  `accent` with an `edge` ring) and a 12×12 two-colour head standing on the current node. The
+  map is `aria-hidden` decoration. Right: `Resume` (primary md, download icon, links to the PDF),
   `Play` (secondary md, joystick) and theme toggle (icon button, sun/moon). Mobile (< 768px):
-  brand left; right: Resume icon button + Menu button. Menu = full-screen "PAUSED" panel, list
-  with `play` cursor on hover/focus, "Resume game" closes it; `inert` when closed, focus moves to
+  brand left (replaced inside a zone by a two-line HUD plate `ZONE n/5` / zone name that opens
+  the menu; brand name hidden below 360px); right: Resume icon button + Menu button. Menu = full-screen "PAUSED" panel, list
+  with `play` cursor on hover/focus, "Continue" closes it; `inert` when closed, focus moves to
   the first item on open, Esc closes, focus returns to the Menu button.
 - **Hero (title screen).** Forest (`pixelSprites.forest`, 240×112, true grid 11.47px,
   `groundRow` 101) and character share ONE integer scale `k`, so their pixels are identical.

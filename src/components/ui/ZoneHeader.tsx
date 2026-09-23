@@ -1,5 +1,9 @@
-import type { ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
+import { useInView } from 'framer-motion';
 import { cx } from './cx';
+import { ZoneBanner, formatZoneNumber } from './ZoneBanner';
+import { useZoneEntered } from '../../hooks/useZoneEntered';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
 export interface ZoneHeaderProps {
   /** Zone number, shown zero-padded: `1` → `ZONE 01`. */
@@ -18,38 +22,100 @@ export interface ZoneHeaderProps {
   className?: string;
 }
 
-/** `1` → `"01"`. */
-function formatZoneNumber(zone: number): string {
-  return String(Math.max(0, Math.floor(zone))).padStart(2, '0');
+const NBSP = ' ';
+/** Names up to this length never break inside (they fit a 320px screen on one line). */
+const UNBREAKABLE_NAME_MAX = 16;
+
+/**
+ * `ZONE 02 · THE ADVENTURER`, with a single break opportunity after the dot on narrow
+ * screens: "ZONE 02 ·" / "THE ADVENTURER", never "ZONE 02 · THE" / "ADVENTURER".
+ */
+function eyebrowText(zone: number, name: string): string {
+  const joinedName = name.length <= UNBREAKABLE_NAME_MAX ? name.replace(/ /g, NBSP) : name;
+  return `Zone${NBSP}${formatZoneNumber(zone)}${NBSP}· ${joinedName}`;
 }
+
 
 /**
  * Zone header (SPEC §3): icon, `ZONE 0N · NAME` eyebrow, H2 title, optional
  * subline, then a full-width pixel divider. Place it first inside
  * `<section aria-labelledby={id}>`.
+ *
+ * Signature moment ③ lives here, so every zone gets it: the divider draws in (8 steps) the
+ * first time it comes into view, and the first time the header crosses 35% of the viewport
+ * while scrolling down a "zone entered" card (`ZoneBanner`) slides over the eyebrow, holds and
+ * fades back into it. Both are off under reduced motion.
  */
 export function ZoneHeader({ zone, name, title, subtitle, icon, id, className }: ZoneHeaderProps) {
+  const reduced = usePrefersReducedMotion();
+  const entered = useZoneEntered(id);
+  const [bannerDone, setBannerDone] = useState(false);
+  const showBanner = entered && !bannerDone;
+  // Divider "draw in" (CSS, components.css): pending until the rule is fully in view, then an
+  // 8-step clip-path wipe. Watched on the unclipped wrapper: IntersectionObserver counts the
+  // target's own clip-path, so a fully clipped divider would never be "in view".
+  const ruleRef = useRef<HTMLDivElement>(null);
+  const ruleInView = useInView(ruleRef, { once: true, amount: 'all' });
+
+  const hasIcon = icon != null;
+
+  // Grid: ≥ 640px the 36px icon is a column beside the text; below it the icon drops to 24px
+  // inline with the eyebrow and the H2 and subline take the full width.
   return (
-    <header className={cx('zone-header', className)}>
-      <div className="flex items-start gap-4">
-        {icon != null && (
-          <span className="zone-header__icon" aria-hidden="true">
+    <header className={cx('zone-header', hasIcon && 'zone-header--icon', className)}>
+      <div
+        className={cx(
+          'grid items-center gap-x-3 sm:gap-x-4',
+          hasIcon
+            ? 'grid-cols-[24px_minmax(0,1fr)] sm:grid-cols-[36px_minmax(0,1fr)]'
+            : 'grid-cols-[minmax(0,1fr)]',
+        )}
+      >
+        {hasIcon && (
+          <span className="zone-header__icon col-start-1 row-start-1 sm:row-span-3 sm:self-start" aria-hidden="true">
             {icon}
           </span>
         )}
-        <div className="min-w-0 flex-1">
-          <p className="text-label text-accent-fg">
-            Zone {formatZoneNumber(zone)} · {name}
-          </p>
-          <h2 id={id} className="mt-2 text-display-l text-fg [overflow-wrap:break-word]">
-            {title}
-          </h2>
-          {subtitle != null && (
-            <p className="mt-2 max-w-[68ch] text-body text-fg-muted">{subtitle}</p>
+        {/* leading-5 + -my-0.5: 16px lines with a 4px gap when the eyebrow wraps. */}
+        <p
+          className={cx(
+            'zone-header__eyebrow relative -my-0.5 text-balance text-label leading-5 text-accent-fg',
+            hasIcon && 'col-start-2 row-start-1',
           )}
-        </div>
+          data-banner={showBanner || undefined}
+        >
+          {eyebrowText(zone, name)}
+          {showBanner && <ZoneBanner zone={zone} name={name} onDone={() => setBannerDone(true)} />}
+        </p>
+        {/* tabIndex -1: the pause menu moves focus here after a jump (no extra tab stop). */}
+        <h2
+          id={id}
+          tabIndex={-1}
+          className={cx(
+            'zone-header__title mt-1 text-balance text-display-l text-fg [overflow-wrap:break-word] sm:mt-2',
+            hasIcon && 'col-span-2 sm:col-span-1 sm:col-start-2',
+          )}
+        >
+          {title}
+        </h2>
+        {subtitle != null && (
+          <p
+            className={cx(
+              'mt-2 max-w-[68ch] text-balance text-body text-fg-muted',
+              hasIcon && 'col-span-2 sm:col-span-1 sm:col-start-2',
+            )}
+          >
+            {subtitle}
+          </p>
+        )}
       </div>
-      <div className="px-divider mt-6" aria-hidden="true" />
+      <div
+        ref={ruleRef}
+        className="zone-header__rule mt-6"
+        data-draw={reduced ? undefined : ruleInView ? 'run' : 'pending'}
+      >
+        <div className="px-divider" aria-hidden="true" />
+      </div>
     </header>
   );
 }

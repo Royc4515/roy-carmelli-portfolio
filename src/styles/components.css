@@ -96,7 +96,7 @@
 
   .px-btn--lg {
     @apply text-display-s;
-    gap: 10px;
+    gap: 12px; /* step 10 (P2-19): was 10px, off the 4px grid */
     min-height: 56px;
     padding: 8px 24px;
     text-transform: uppercase;
@@ -373,7 +373,7 @@
     display: inline-flex;
     align-items: center;
     height: 28px;
-    padding: 0 10px;
+    padding: 4px 8px; /* step 10 (P2-19): SPEC 4/8, was 0 10px; the height stays 28px */
     background-color: var(--color-surface-sunken);
     color: var(--color-fg);
     white-space: nowrap;
@@ -495,5 +495,204 @@
   to {
     opacity: 0;
     transform: translateY(8px);
+  }
+}
+
+/* ==========================================================================
+   Step 10 additions: Button size "sm", ZoneHeader eyebrow, "zone entered"
+   banner (ZoneBanner). Kept in their own block so the step can be reviewed
+   (and reverted) on its own.
+   ========================================================================== */
+
+@layer components {
+  /* ── Button · size sm ──────────────────────────────────────────────────
+     44px face with the 12px label, for dense bars (the navbar). The focus
+     ring hugs the 4px edge instead of sitting 8px out: 3px of focus colour
+     right outside the edge and right under the drop, so it is neither
+     clipped by the viewport top nor drawn onto a neighbouring frame. */
+  .px-btn--sm {
+    min-height: 44px;
+    padding: 8px 16px;
+  }
+
+  .px-btn--icon.px-btn--sm {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+
+  .px-btn--sm:is(:focus-visible, [data-gallery-state="focus"]) {
+    outline-offset: 4px;
+
+    &::after {
+      inset: -4px -4px calc(0px - var(--btn-drop) + var(--btn-press) * var(--btn-motion));
+    }
+  }
+
+  /* ── ZoneHeader · zone-entered banner ───────────────────────────────────
+     The banner is a child of the eyebrow <p> (leading-5 with -2px margins),
+     so `bottom: 2px` puts the card's bottom edge on the eyebrow's last line.
+     It rests on the eyebrow's left edge; the wrapper reaches back to the
+     header's left edge (--zb-indent: icon + gap, 52px or 36px on phones)
+     and clips there,
+     so the card slides out from behind the header edge.
+
+     Timeline (1800ms): slide in 360ms in 4 whole-pixel steps · hold 1.2s ·
+     fade out in 3 steps (240ms) · the eyebrow is back.
+     The travel (card + indent + 12px of frame and drop) is a multiple of
+     4px by construction (ZoneBanner.tsx rounds the text widths). */
+  .zone-header--icon {
+    --zb-indent: 52px;
+  }
+
+  /* Below 640px the icon is 24px, inline with the eyebrow (ZoneHeader.tsx
+     grid), and the H2 takes the full width: 24px + 12px gap. */
+  @media (width < 40rem) {
+    .zone-header--icon {
+      --zb-indent: 36px;
+    }
+
+    .zone-header__icon {
+      width: 24px;
+      height: 24px;
+      margin-top: 0;
+
+      & > svg,
+      & > img {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .zone-banner {
+    --zb-w: max(var(--zb-label-w), var(--zb-name-w)) + 32px;
+    position: absolute;
+    bottom: 2px;
+    left: calc(-4px - var(--zb-indent, 0px));
+    z-index: 1;
+    display: block;
+    width: max-content;
+    padding-left: calc(4px + var(--zb-indent, 0px));
+    clip-path: inset(-100px -100vw -100px 0);
+    pointer-events: none;
+  }
+
+  /* Phones: ZONE 0N above the name (the one-line card is wider than the
+     text column). Up from 640px: one line. */
+  .zone-banner__card {
+    --zb-travel: calc(var(--zb-w) + var(--zb-indent, 0px) + 12px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+    box-sizing: border-box;
+    width: calc(var(--zb-w));
+    height: 68px;
+    padding: 0 16px;
+    background-color: var(--color-surface);
+    white-space: nowrap;
+    animation:
+      zone-banner-in var(--dur-slow) steps(4, end) both,
+      zone-banner-out 240ms steps(3, end) 1560ms forwards;
+  }
+
+  @media (width >= 40rem) {
+    .zone-banner {
+      --zb-w: var(--zb-label-w) + var(--zb-name-w) + 48px;
+    }
+
+    .zone-banner__card {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      height: 48px;
+    }
+  }
+
+  /* 1px down: Press Start 2P caps sit high in their line box. */
+  .zone-banner__zone,
+  .zone-banner__name {
+    position: relative;
+    top: 1px;
+    display: block;
+  }
+
+  .zone-banner__zone {
+    width: var(--zb-label-w);
+  }
+
+  /* The eyebrow hides under the card and comes back when the card is gone
+     (on phones the card is narrower than a one-line eyebrow). */
+  .zone-header__eyebrow[data-banner] {
+    animation: zone-eyebrow-swap 1800ms linear both;
+  }
+
+  /* Divider draw-in: a left-to-right clip-path wipe in 8 steps (480ms),
+     once, when the rule is fully in view (ZoneHeader sets data-draw). */
+  @media (prefers-reduced-motion: no-preference) {
+    .zone-header__rule[data-draw="pending"] > .px-divider {
+      clip-path: inset(0 100% 0 0);
+    }
+
+    .zone-header__rule[data-draw="run"] > .px-divider {
+      animation: zone-divider-draw 480ms steps(8, end) both;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .zone-banner {
+      display: none;
+    }
+
+    .zone-header__eyebrow[data-banner] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes zone-banner-in {
+  from {
+    transform: translateX(calc(-1 * var(--zb-travel)));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes zone-divider-draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes zone-banner-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* The card slides over the eyebrow; from 19% (342ms, a frame before the
+   card lands) the eyebrow is hidden, and it is back only once the card has faded out
+   (100% = 1800ms), so the two never show through each other. */
+@keyframes zone-eyebrow-swap {
+  0% {
+    color: var(--color-accent-fg);
+    animation-timing-function: step-end;
+  }
+  19% {
+    color: transparent;
+    animation-timing-function: step-end;
+  }
+  100% {
+    color: var(--color-accent-fg);
   }
 }

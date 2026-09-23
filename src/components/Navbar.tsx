@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import type { Theme } from '../hooks/useTheme';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useActiveSection } from '../hooks/useActiveSection';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { Button } from './ui/Button';
 import { cx } from './ui/cx';
 import PixelIcon, { type PixelIconName } from './PixelIcon';
 import PixelPanel from './PixelPanel';
+import { useToast } from './ui/Toast';
 import { pixelSprites } from '../theme/pixelSprites';
 import { bio } from '../data/bio';
 import './Navbar.css';
@@ -24,8 +26,17 @@ const LINKS: readonly SectionLink[] = [
   { id: 'contact', label: 'Contact', icon: 'mail' },
 ];
 
+/** The five zones in page order (ZoneHeader numbers). `resume` has no nav link. */
+const ZONES = [
+  { id: 'projects', label: 'Projects' },
+  { id: 'about', label: 'About' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'resume', label: 'Resume' },
+  { id: 'contact', label: 'Contact' },
+] as const;
+
 /** Sections the scroll-spy watches, in page order. `resume` has no link: nothing is lit there. */
-const SPY_IDS = ['projects', 'about', 'skills', 'resume', 'contact'];
+const SPY_IDS = ZONES.map(zone => zone.id);
 /** Contact is short and last: its top may never reach the spy line, so the page bottom lights it. */
 const LAST_LINK_ID = 'contact';
 
@@ -36,28 +47,191 @@ const WIDE_QUERY = '(min-width: 1280px)';
 
 const PLAY_LABEL = 'Play the mini-game';
 
+/* ── Mini-map (≥ 1024px) ────────────────────────────────────────────────── */
+
+type NodeState = 'visited' | 'current' | 'ahead';
+type PathState = 'visited' | 'half' | 'ahead';
+
+/**
+ * How far along the map the reader is, in link indices: -1 on the hero, 0-3 on a linked zone,
+ * 2.5 on the resume band (it has no node: it sits on the path between Skills and Contact).
+ */
+export function mapProgress(current: string | null): number {
+  if (current === 'resume') return LINKS.findIndex(link => link.id === 'skills') + 0.5;
+  return LINKS.findIndex(link => link.id === current);
+}
+
+/** Node `i`: passed, the current zone, or still ahead. */
+export function nodeState(i: number, progress: number): NodeState {
+  if (i < progress) return 'visited';
+  return i === progress ? 'current' : 'ahead';
+}
+
+/** The path segment leading into node `i` (i ≥ 1): walked, walked halfway, or still ahead. */
+export function pathState(i: number, progress: number): PathState {
+  if (i <= progress) return 'visited';
+  return i - 1 < progress ? 'half' : 'ahead';
+}
+
+/** Duration and step count of the walk (SPEC: --dur-slow, steps(4)). */
+const WALK_MS = 360;
+const WALK_STEPS = 4;
+/** The walker hops this many px on every other step. */
+const WALK_HOP = 2;
+const WALKER_SIZE = 12;
+
+/**
+ * Keyframes for the walk from `from` to `to` (px): four whole-pixel stops, each held until the
+ * next (`step-end`), hopping on odd steps. CSS `steps(4)` on a transform would land on
+ * fractional pixels whenever the distance is not a multiple of 4.
+ */
+export function walkKeyframes(from: number, to: number): Keyframe[] {
+  const frames: Keyframe[] = [];
+  for (let step = 0; step < WALK_STEPS; step += 1) {
+    const x = Math.round(from + ((to - from) * step) / WALK_STEPS);
+    const y = step % 2 === 1 ? -WALK_HOP : 0;
+    frames.push({ offset: step / WALK_STEPS, transform: `translate(${x}px, ${y}px)`, easing: 'step-end' });
+  }
+  frames.push({ offset: 1, transform: `translate(${to}px, 0px)` });
+  return frames;
+}
+
+/**
+ * Roy's head, 12x12, two inks: hair (`h`) and skin (`s`); eyes and mouth are holes that show
+ * the bar through them. Same format as PixelIcon bitmaps.
+ */
+const WALKER_BITMAP = [
+  '...hhhhhh...',
+  '..hhhhhhhh..',
+  '.hhhhhhhhhh.',
+  '.hhhhhhhhhhh',
+  '.hhssshhhhh.',
+  '.hssssssshh.',
+  '.ss.ssss.ss.',
+  '.ss.ssss.ss.',
+  '.ssssssssss.',
+  '..ss....ss..',
+  '...ssssss...',
+  '....ssss....',
+];
+
+/** Horizontal runs of one ink per row, as SVG rects. */
+function bitmapRuns(rows: readonly string[], ink: string) {
+  const runs: { x: number; y: number; w: number }[] = [];
+  rows.forEach((row, y) => {
+    let x = 0;
+    while (x < row.length) {
+      if (row[x] !== ink) {
+        x += 1;
+        continue;
+      }
+      let end = x + 1;
+      while (end < row.length && row[end] === ink) end += 1;
+      runs.push({ x, y, w: end - x });
+      x = end;
+    }
+  });
+  return runs;
+}
+
+const WALKER_HAIR = bitmapRuns(WALKER_BITMAP, 'h');
+const WALKER_SKIN = bitmapRuns(WALKER_BITMAP, 's');
+
+function WalkerHead() {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      width={WALKER_SIZE}
+      height={WALKER_SIZE}
+      shapeRendering="crispEdges"
+      focusable="false"
+      aria-hidden="true"
+      className="block"
+    >
+      <g className="mm-walker__hair">
+        {WALKER_HAIR.map(r => (
+          <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w} height={1} />
+        ))}
+      </g>
+      <g className="mm-walker__skin">
+        {WALKER_SKIN.map(r => (
+          <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w} height={1} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * Keeps the walker over `anchor` (the current node, or the path it stands on), measured
+ * relative to the map. A change of anchor walks it there in 4 stepped hops (a jump under
+ * reduced motion); resizes and font swaps re-place it without walking.
+ */
+function useMapWalker(
+  mapRef: RefObject<HTMLElement>,
+  walkerRef: RefObject<HTMLElement>,
+  anchor: string | null,
+  reducedMotion: boolean,
+) {
+  const placedAt = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const map = mapRef.current;
+    const walker = walkerRef.current;
+    if (!map || !walker) return;
+
+    const place = (walk: boolean) => {
+      const target = anchor ? map.querySelector<HTMLElement>(`[data-anchor="${anchor}"]`) : null;
+      // Below 1024px the map is hidden (display: none): nothing to measure.
+      if (!target || target.getClientRects().length === 0) {
+        walker.dataset.hidden = '';
+        placedAt.current = null;
+        return;
+      }
+      const box = target.getBoundingClientRect();
+      const origin = map.getBoundingClientRect();
+      const x = Math.round(box.left + box.width / 2 - origin.left - WALKER_SIZE / 2);
+      const from = placedAt.current;
+      placedAt.current = x;
+      delete walker.dataset.hidden;
+      walker.style.transform = `translate(${x}px, 0px)`;
+      if (!walk || from === null || from === x || reducedMotion || typeof walker.animate !== 'function') {
+        return;
+      }
+      // Start from where it is now, even if it is still walking to the previous node.
+      const running = walker.getAnimations();
+      const now = running.length > 0 ? new DOMMatrixReadOnly(getComputedStyle(walker).transform).m41 : from;
+      running.forEach(animation => animation.cancel());
+      walker.animate(walkKeyframes(Math.round(now), x), { duration: WALK_MS, easing: 'linear' });
+    };
+
+    place(true);
+    if (typeof ResizeObserver !== 'function') return;
+    const resize = new ResizeObserver(() => place(false));
+    resize.observe(map);
+    return () => resize.disconnect();
+  }, [mapRef, walkerRef, anchor, reducedMotion]);
+}
+
+/**
+ * After a pause-menu jump the clicked item disappears (the menu goes inert), so focus would
+ * fall to <body>. Move it to the zone's H2 instead (ZoneHeader gives it tabIndex -1), on the
+ * next frame: the menu has closed and the anchor's scroll has started, which preventScroll
+ * leaves alone.
+ */
+function focusZoneHeading(sectionId: string) {
+  window.requestAnimationFrame(() => {
+    const section = document.getElementById(sectionId);
+    const labelId = section?.getAttribute('aria-labelledby');
+    const heading = (labelId && document.getElementById(labelId)) || section?.querySelector('h2');
+    heading?.focus({ preventScroll: true });
+  });
+}
+
 /** Scroll to the hero, then ask it to start the game (Hero listens for `arcade:play`). */
 function triggerArcade(reducedMotion: boolean) {
   document.getElementById('hero')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
   window.setTimeout(() => window.dispatchEvent(new CustomEvent('arcade:play')), ARCADE_DELAY_MS);
-}
-
-function matchesQuery(query: string): boolean {
-  return typeof window.matchMedia === 'function' && window.matchMedia(query).matches;
-}
-
-/** Live `matchMedia` result (the nav only needs one breakpoint beyond `useIsMobile`). */
-function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => matchesQuery(query));
-  useEffect(() => {
-    if (typeof window.matchMedia !== 'function') return;
-    const mql = window.matchMedia(query);
-    const onChange = () => setMatches(mql.matches);
-    onChange();
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
-  }, [query]);
-  return matches;
 }
 
 /** `scrolled`: past the first 8px (the bar gains its drop). `atBottom`: a scrollable page is at its end. */
@@ -104,10 +278,26 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
   const { scrolled, atBottom } = useScrollState();
   const spied = useActiveSection(SPY_IDS);
   const current = atBottom ? LAST_LINK_ID : spied;
+  const progress = mapProgress(current);
+  const zoneIndex = ZONES.findIndex(zone => zone.id === current);
+  const walkerAnchor =
+    progress < 0 ? null : Number.isInteger(progress) ? `node-${progress}` : `path-${Math.ceil(progress)}`;
 
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
+  const zoneChipRef = useRef<HTMLButtonElement>(null);
+  /** The control that opened the menu (Menu button or zone chip): focus returns to it. */
+  const openerRef = useRef<HTMLElement | null>(null);
   const firstItemRef = useRef<HTMLAnchorElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const walkerRef = useRef<HTMLSpanElement>(null);
+  const toast = useToast();
+
+  /** Every resume download in the bar and the menu pops the same toast as the Resume zone. */
+  const lootResume = () =>
+    toast.show(`Loot acquired: ${bio.resume.fileName}`, { icon: <PixelIcon name="trophy" size={24} /> });
+
+  useMapWalker(mapRef, walkerRef, isMobile ? null : walkerAnchor, reducedMotion);
 
   const themeLabel = theme === 'night' ? 'Switch to day mode' : 'Switch to night mode';
   const themeIcon: PixelIconName = theme === 'night' ? 'sun' : 'moon';
@@ -115,8 +305,18 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
   /** Close the pause menu; `returnFocus` puts focus back on the Menu button. */
   const closeMenu = useCallback((returnFocus: boolean) => {
     setMenuOpen(false);
-    if (returnFocus) menuButtonRef.current?.focus();
+    if (returnFocus) (openerRef.current ?? menuButtonRef.current)?.focus();
   }, []);
+
+  /** Menu button and zone chip: open (remembering which one did it) or close. */
+  const toggleMenu = (opener: HTMLElement | null) => {
+    if (menuOpen) {
+      closeMenu(false);
+      return;
+    }
+    openerRef.current = opener;
+    setMenuOpen(true);
+  };
 
   // The menu only exists below 768px.
   useEffect(() => {
@@ -183,7 +383,14 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
         height={pixelSprites.face.h}
         className="pixelated block self-start"
       />
-      <span className="site-nav__name relative top-px text-label md:max-lg:hidden">{bio.name}</span>
+      <span
+        className={cx(
+          'site-nav__name relative top-px text-label max-[359px]:hidden md:max-lg:hidden',
+          isMobile && zoneIndex >= 0 && 'hidden',
+        )}
+      >
+        {bio.name}
+      </span>
     </a>
   );
 
@@ -203,29 +410,52 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
 
             {!isMobile && (
               <>
-                <ul className="mx-auto flex items-center gap-1 xl:gap-2" role="list">
-                  {LINKS.map(link => {
-                    const active = current === link.id;
-                    return (
-                      <li key={link.id} className="flex">
-                        <a
-                          href={`#${link.id}`}
-                          aria-current={active ? 'true' : undefined}
-                          className="nav-link relative flex h-12 items-center gap-2 pl-4 pr-2 text-hud"
-                        >
-                          <PixelIcon
-                            name="play"
-                            size={12}
-                            className="nav-link__cursor absolute inset-y-0 left-0 my-auto"
-                          />
-                          <PixelIcon name={link.icon} size={24} className="hidden shrink-0 lg:block" />
-                          <span className="relative top-px">{link.label}</span>
-                          <span aria-hidden="true" className="nav-link__underline absolute bottom-0 left-4 right-2 h-1" />
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
+                {/* ≥ 1024px the links sit on a mini-map path (decorative, aria-hidden), with Roy's
+                    head walking to the current node. 768-1023px: cursor + underline only. */}
+                <div ref={mapRef} className="site-nav__map relative mx-auto">
+                  <ul className="flex items-center gap-1 lg:gap-0" role="list">
+                    {LINKS.map((link, index) => {
+                      const active = current === link.id;
+                      return (
+                        <li key={link.id} className="flex items-center">
+                          {index > 0 && (
+                            <span
+                              aria-hidden="true"
+                              data-anchor={`path-${index}`}
+                              data-state={pathState(index, progress)}
+                              className="mm-path hidden lg:block"
+                            />
+                          )}
+                          <a
+                            href={`#${link.id}`}
+                            aria-current={active ? 'true' : undefined}
+                            className="nav-link relative flex h-12 items-center gap-2 pl-4 pr-2 text-hud lg:gap-3 lg:px-1"
+                          >
+                            <PixelIcon
+                              name="play"
+                              size={12}
+                              className="nav-link__cursor absolute inset-y-0 left-0 my-auto lg:hidden"
+                            />
+                            <span
+                              aria-hidden="true"
+                              data-anchor={`node-${index}`}
+                              data-state={nodeState(index, progress)}
+                              className="mm-node hidden shrink-0 lg:block"
+                            />
+                            <span className="relative top-px">{link.label}</span>
+                            <span
+                              aria-hidden="true"
+                              className="nav-link__underline absolute bottom-0 left-4 right-2 h-1 lg:hidden"
+                            />
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <span ref={walkerRef} aria-hidden="true" data-hidden="" className="mm-walker hidden lg:block">
+                    <WalkerHead />
+                  </span>
+                </div>
 
                 <div className="flex shrink-0 items-center gap-4">
                   <Button
@@ -233,7 +463,8 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                     download={bio.resume.fileName}
                     title="Download resume (PDF)"
                     leadingIcon={<PixelIcon name="download" size={12} />}
-                    className="min-h-11"
+                    size="sm"
+                    onClick={lootResume}
                   >
                     Resume
                   </Button>
@@ -242,7 +473,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                       variant="secondary"
                       title={PLAY_LABEL}
                       leadingIcon={<PixelIcon name="joystick" size={12} />}
-                      className="min-h-11"
+                      size="sm"
                       onClick={play}
                     >
                       Play
@@ -252,7 +483,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                       variant="icon"
                       aria-label={PLAY_LABEL}
                       title={PLAY_LABEL}
-                      className="size-11 min-h-11"
+                      size="sm"
                       onClick={play}
                     >
                       <PixelIcon name="joystick" size={24} />
@@ -262,13 +493,32 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                     variant="icon"
                     aria-label={themeLabel}
                     title={themeLabel}
-                    className="size-11 min-h-11"
+                    size="sm"
                     onClick={onToggleTheme}
                   >
                     <PixelIcon name={themeIcon} size={24} />
                   </Button>
                 </div>
               </>
+            )}
+
+            {isMobile && zoneIndex >= 0 && (
+              <button
+                ref={zoneChipRef}
+                type="button"
+                className="zone-chip max-[359px]:hidden"
+                aria-label={`Zone ${zoneIndex + 1} of ${ZONES.length}: ${ZONES[zoneIndex].label}. Open the menu`}
+                aria-expanded={menuOpen}
+                aria-controls={PAUSE_MENU_ID}
+                onClick={() => toggleMenu(zoneChipRef.current)}
+              >
+                <span className="zone-chip__plate">
+                  <span className="text-label text-accent-fg">
+                    Zone {zoneIndex + 1}/{ZONES.length}
+                  </span>
+                  <span className="text-hud uppercase text-fg">{ZONES[zoneIndex].label}</span>
+                </span>
+              </button>
             )}
 
             {isMobile && (
@@ -278,7 +528,8 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                   href={bio.resume.href}
                   download={bio.resume.fileName}
                   aria-label="Download resume"
-                  className="size-11 min-h-11"
+                  size="sm"
+                  onClick={lootResume}
                 >
                   <PixelIcon name="download" size={24} />
                 </Button>
@@ -288,8 +539,8 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                   aria-label="Toggle menu"
                   aria-expanded={menuOpen}
                   aria-controls={PAUSE_MENU_ID}
-                  className="size-11 min-h-11"
-                  onClick={() => (menuOpen ? closeMenu(false) : setMenuOpen(true))}
+                  size="sm"
+                  onClick={() => toggleMenu(menuButtonRef.current)}
                 >
                   <PixelIcon name={menuOpen ? 'close' : 'menu'} size={24} />
                 </Button>
@@ -324,7 +575,10 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                           href={`#${link.id}`}
                           aria-current={active ? 'true' : undefined}
                           className="pause-item"
-                          onClick={() => closeMenu(false)}
+                          onClick={() => {
+                            closeMenu(false);
+                            focusZoneHeading(link.id);
+                          }}
                         >
                           <PixelIcon name="play" size={12} className="pause-item__cursor shrink-0" />
                           <PixelIcon name={link.icon} size={24} className="shrink-0" />
@@ -348,7 +602,10 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                       href={bio.resume.href}
                       download={bio.resume.fileName}
                       className="pause-item"
-                      onClick={() => closeMenu(true)}
+                      onClick={() => {
+                        lootResume();
+                        closeMenu(true);
+                      }}
                     >
                       <PixelIcon name="play" size={12} className="pause-item__cursor shrink-0" />
                       <PixelIcon name="download" size={24} className="shrink-0" />
@@ -387,7 +644,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                 leadingIcon={<PixelIcon name="play" size={12} />}
                 onClick={() => closeMenu(true)}
               >
-                Resume game
+                Continue
               </Button>
             </PixelPanel>
           </div>

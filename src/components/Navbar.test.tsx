@@ -1,7 +1,8 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import Navbar from './Navbar';
+import Navbar, { mapProgress, nodeState, pathState, walkKeyframes } from './Navbar';
+import { ToastProvider } from './ui/Toast';
 import { bio } from '../data/bio';
 
 // Default: desktop viewport (isMobile = false)
@@ -193,6 +194,65 @@ describe('Navbar — active section', () => {
     scrollSectionsTo({ projects: -3200, about: -2400, skills: -1600, resume: -800, contact: 50 });
     expect(link('Contact')).toHaveAttribute('aria-current', 'true');
   });
+
+  it('draws the mini-map path as decoration only: aria-hidden, links keep their names', () => {
+    const { container } = render(<Navbar {...defaultProps} />);
+    const decorations = container.querySelectorAll('.mm-node, .mm-path, .mm-walker');
+    // 4 nodes, 3 path segments, 1 walker.
+    expect(decorations).toHaveLength(8);
+    decorations.forEach(el => expect(el).toHaveAttribute('aria-hidden', 'true'));
+    ['Projects', 'About', 'Skills', 'Contact'].forEach(name => expect(link(name)).toBeInTheDocument());
+  });
+
+  it('marks nodes and path segments visited up to the current zone', () => {
+    const { container } = render(<Navbar {...defaultProps} />);
+    const states = (selector: string) =>
+      Array.from(container.querySelectorAll(selector)).map(el => el.getAttribute('data-state'));
+
+    expect(states('.mm-node')).toEqual(['ahead', 'ahead', 'ahead', 'ahead']);
+    scrollSectionsTo({ projects: -1500, about: -700, skills: 200, resume: 1000, contact: 1800 });
+    expect(states('.mm-node')).toEqual(['visited', 'visited', 'current', 'ahead']);
+    expect(states('.mm-path')).toEqual(['visited', 'visited', 'ahead']);
+
+    // Resume band: no node is current; the path into Contact is walked halfway.
+    scrollSectionsTo({ projects: -2400, about: -1600, skills: -800, resume: 100, contact: 900 });
+    expect(states('.mm-node')).toEqual(['visited', 'visited', 'visited', 'ahead']);
+    expect(states('.mm-path')).toEqual(['visited', 'visited', 'half']);
+  });
+
+  it('shows a mobile zone chip that reflects the zone and opens the pause menu', async () => {
+    setupMatchMedia(true);
+    render(<Navbar {...defaultProps} />);
+    expect(document.querySelector('.zone-chip')).toBeNull();
+
+    scrollSectionsTo({ projects: -2400, about: -1600, skills: -800, resume: 100, contact: 900 });
+    const chip = screen.getByRole('button', { name: 'Zone 4 of 5: Resume. Open the menu' });
+    expect(chip).toHaveTextContent('Zone 4/5Resume');
+    expect(chip).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(chip);
+    expect(screen.getByTestId('mobile-menu-overlay')).toHaveAttribute('aria-hidden', 'false');
+    expect(chip).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.keyboard('{Escape}');
+    expect(chip).toHaveFocus();
+    document.body.style.overflow = '';
+  });
+
+  it('moves focus to the zone heading after a pause-menu jump', async () => {
+    setupMatchMedia(true);
+    const heading = document.createElement('h2');
+    heading.id = 'about-title';
+    heading.tabIndex = -1;
+    const about = document.getElementById('about')!;
+    about.setAttribute('aria-labelledby', 'about-title');
+    about.append(heading);
+
+    render(<Navbar {...defaultProps} />);
+    await userEvent.click(screen.getByRole('button', { name: /toggle menu/i }));
+    await userEvent.click(screen.getByTestId('mobile-menu-overlay').querySelector('a[href="#about"]')!);
+    await waitFor(() => expect(heading).toHaveFocus());
+    document.body.style.overflow = '';
+  });
 });
 
 describe('Navbar — mobile', () => {
@@ -276,11 +336,11 @@ describe('Navbar — mobile', () => {
     expect(document.body.style.overflow).toBe('');
   });
 
-  it('"Resume game" closes the menu and returns focus to the Menu button', async () => {
+  it('"Continue" closes the menu and returns focus to the Menu button', async () => {
     render(<Navbar {...defaultProps} />);
     const hamburger = screen.getByRole('button', { name: /toggle menu/i });
     await userEvent.click(hamburger);
-    await userEvent.click(screen.getByRole('button', { name: /resume game/i }));
+    await userEvent.click(screen.getByRole('button', { name: /continue/i }));
     expect(screen.getByTestId('mobile-menu-overlay')).toHaveAttribute('aria-hidden', 'true');
     expect(hamburger).toHaveFocus();
   });
@@ -288,7 +348,7 @@ describe('Navbar — mobile', () => {
   it('keeps Tab inside the header while the menu is open', async () => {
     render(<Navbar {...defaultProps} />);
     await userEvent.click(screen.getByRole('button', { name: /toggle menu/i }));
-    const resumeGame = screen.getByRole('button', { name: /resume game/i });
+    const resumeGame = screen.getByRole('button', { name: /continue/i });
     resumeGame.focus();
     await userEvent.tab();
     expect(screen.getByRole('link', { name: /back to top/i })).toHaveFocus();
@@ -310,5 +370,74 @@ describe('Navbar — mobile', () => {
     expect(overlay.querySelector(`a[href="${bio.resume.href}"]`)).toHaveAttribute('download', bio.resume.fileName);
     expect(screen.getByRole('button', { name: /play/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /switch to day/i })).toBeInTheDocument();
+  });
+});
+
+describe('Navbar — resume loot toast', () => {
+  const blockNavigation = (event: Event) => event.preventDefault();
+  beforeEach(() => document.addEventListener('click', blockNavigation));
+  afterEach(() => {
+    document.removeEventListener('click', blockNavigation);
+    document.body.style.overflow = '';
+  });
+
+  const lootText = `Loot acquired: ${bio.resume.fileName}`;
+
+  it('pops the loot toast from the desktop Resume button', async () => {
+    setupMatchMedia(false);
+    render(
+      <ToastProvider>
+        <Navbar {...defaultProps} />
+      </ToastProvider>,
+    );
+    await userEvent.click(screen.getByRole('link', { name: 'Resume' }));
+    expect(await screen.findByText(lootText)).toBeInTheDocument();
+  });
+
+  it('pops it from the mobile download button and the pause-menu row', async () => {
+    setupMatchMedia(true);
+    render(
+      <ToastProvider>
+        <Navbar {...defaultProps} />
+      </ToastProvider>,
+    );
+    await userEvent.click(screen.getByRole('link', { name: 'Download resume' }));
+    expect(await screen.findByText(lootText)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /toggle menu/i }));
+    const row = screen.getByTestId('mobile-menu-overlay').querySelector(`a[href="${bio.resume.href}"]`)!;
+    await userEvent.click(row);
+    expect(await screen.findByText(lootText)).toBeInTheDocument();
+    expect(screen.getByTestId('mobile-menu-overlay')).toHaveAttribute('aria-hidden', 'true');
+  });
+});
+
+describe('Navbar — mini-map helpers', () => {
+  it('maps the active zone to a position on the path', () => {
+    expect(mapProgress(null)).toBe(-1);
+    expect(mapProgress('projects')).toBe(0);
+    expect(mapProgress('skills')).toBe(2);
+    expect(mapProgress('resume')).toBe(2.5);
+    expect(mapProgress('contact')).toBe(3);
+  });
+
+  it('derives node and path states from the position', () => {
+    expect([0, 1, 2, 3].map(i => nodeState(i, 1))).toEqual(['visited', 'current', 'ahead', 'ahead']);
+    expect([1, 2, 3].map(i => pathState(i, 1))).toEqual(['visited', 'ahead', 'ahead']);
+    expect([1, 2, 3].map(i => pathState(i, 2.5))).toEqual(['visited', 'visited', 'half']);
+    expect([0, 1, 2, 3].map(i => nodeState(i, -1))).toEqual(['ahead', 'ahead', 'ahead', 'ahead']);
+  });
+
+  it('walks in four whole-pixel, held steps, hopping on odd steps', () => {
+    const frames = walkKeyframes(10, 107);
+    expect(frames.map(f => f.offset)).toEqual([0, 0.25, 0.5, 0.75, 1]);
+    expect(frames.map(f => f.transform)).toEqual([
+      'translate(10px, 0px)',
+      'translate(34px, -2px)',
+      'translate(59px, 0px)',
+      'translate(83px, -2px)',
+      'translate(107px, 0px)',
+    ]);
+    frames.slice(0, 4).forEach(f => expect(f.easing).toBe('step-end'));
   });
 });

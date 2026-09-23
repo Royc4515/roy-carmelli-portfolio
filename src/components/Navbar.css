@@ -2,7 +2,8 @@
    Navbar + pause menu (docs/redesign/SPEC.md §4 Navbar).
    Layout lives in Tailwind classes in Navbar.tsx. This file holds the state
    styling: the frame and scroll drop, link cursor/underline states, the
-   pause-menu rows and open/close transition, and a nav-sized focus ring.
+   pause-menu rows and open/close transition, and (step 10) the desktop
+   mini-map and the mobile zone chip.
    It sits in the components layer, so Tailwind utilities still win.
    ========================================================================== */
 
@@ -26,13 +27,8 @@
       box-shadow var(--dur-fast) steps(2, end);
   }
 
-  /* Nav buttons are 44px faces in a 64px bar: the stock ring (8px out, 4px
-     under the drop) would be clipped by the viewport top and sit on the
-     frame. Here it hugs the 4px edge instead: 3px of focus colour right
-     outside the edge and right under the drop. */
-  .site-nav__bar .px-btn:focus-visible::after {
-    inset: -4px -4px calc(0px - var(--btn-drop) + var(--btn-press) * var(--btn-motion));
-  }
+  /* Nav buttons use Button size="sm" (44px faces, a focus ring that hugs
+     the edge), so nothing is clipped by the viewport top. */
 
   /* ── Brand ─────────────────────────────────────────────────────────── */
   .site-nav__brand {
@@ -77,7 +73,7 @@
     visibility: visible;
   }
 
-  /* Absolutely positioned, so a later mini-map path can sit between items. */
+  /* Absolutely positioned, so the mini-map path can sit between items. */
   .nav-link__underline {
     background-color: transparent;
     transition: background-color var(--dur-fast) steps(2, end);
@@ -174,7 +170,146 @@
     visibility: hidden;
   }
 
+  /* ── Step 10: mini-map (≥ 1024px) ──────────────────────────────────────
+     Each link starts with a 12px node on a 4px path. Nodes and path are
+     aria-hidden spans (Navbar.tsx sets data-state from the scroll-spy):
+       ahead    sunken node, 4px border-subtle ring; dashed border-subtle path
+       visited  accent node and ring; solid accent path (the trail walked)
+       current  accent node, 4px edge ring; Roy's head stands on it
+     The resume band has no node: the path into Contact turns to accent dashes
+     and the head stands halfway along it. Rings are notched, like every frame. */
+  .mm-node {
+    --mm-fill: var(--color-surface-sunken);
+    --mm-ring: var(--color-border-subtle);
+    width: 12px;
+    height: 12px;
+    background-color: var(--mm-fill);
+    box-shadow:
+      0 -4px 0 0 var(--mm-ring),
+      0 4px 0 0 var(--mm-ring),
+      -4px 0 0 0 var(--mm-ring),
+      4px 0 0 0 var(--mm-ring);
+    transition:
+      background-color var(--dur-fast) steps(2, end),
+      box-shadow var(--dur-fast) steps(2, end);
+  }
+
+  .mm-node[data-state="visited"] {
+    --mm-fill: var(--color-accent);
+    --mm-ring: var(--color-accent);
+  }
+
+  .mm-node[data-state="current"] {
+    --mm-fill: var(--color-accent);
+    --mm-ring: var(--color-edge);
+  }
+
+  /* Hover previews the step: an accent ring on a node you have not reached. */
+  .nav-link:hover .mm-node[data-state="ahead"] {
+    --mm-ring: var(--color-accent);
+  }
+
+  /* 8px dash, 8px gap, starting and ending on a dash: 24px (2 dashes), and
+     40px (3 dashes) from 1280px. 8px of air after the previous label; the
+     next node's ring sits in the link's 4px padding, so the path meets it. */
+  .mm-path {
+    --mm-path: var(--color-border-subtle);
+    flex: none;
+    width: 24px;
+    height: 4px;
+    margin-left: 8px;
+    background-image: repeating-linear-gradient(to right, var(--mm-path) 0 8px, transparent 8px 16px);
+  }
+
+  @media (width >= 80rem) {
+    .mm-path {
+      width: 40px;
+    }
+  }
+
+  .mm-path[data-state="visited"] {
+    background-image: none;
+    background-color: var(--color-accent);
+  }
+
+  /* On the resume band: accent dashes, the head standing halfway along. */
+  .mm-path[data-state="half"] {
+    --mm-path: var(--color-accent);
+  }
+
+  /* Hover brightens any label to the current link's accent colour. */
+  @media (width >= 64rem) {
+    .nav-link:hover {
+      color: var(--color-accent-fg);
+    }
+  }
+
+  /* Roy's head: 12px, standing on the current node's ring (its top is level
+     with the buttons' faces). JS sets the x; the walk is a stepped WAAPI
+     animation (Navbar.tsx walkKeyframes). */
+  .mm-walker {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    pointer-events: none;
+  }
+
+  .mm-walker[data-hidden] {
+    visibility: hidden;
+  }
+
+  .mm-walker__hair {
+    fill: var(--color-accent-press);
+  }
+
+  .mm-walker__skin {
+    fill: var(--color-paper);
+  }
+
+  /* ── Step 10: zone chip (< 768px) ───────────────────────────────────────
+     A two-line HUD plate after the brand, like the hero's player plate:
+     ZONE n/5 over the zone name. The button is 44px tall; the plate inside
+     is a sunken well with a 2px line, accent on hover/press. Tapping it
+     opens the pause menu. */
+  .zone-chip {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .zone-chip__plate {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 4px 8px;
+    background-color: var(--color-surface-sunken);
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+    transition: box-shadow var(--dur-fast) steps(2, end);
+
+    & > span {
+      position: relative;
+      top: 1px;
+      white-space: nowrap;
+    }
+  }
+
+  .zone-chip:is(:hover, :active, [aria-expanded="true"]) .zone-chip__plate {
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+
+  .zone-chip:focus-visible {
+    outline-offset: 0;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .mm-node,
+    .zone-chip__plate,
     .site-nav__bar,
     .site-nav__brand,
     .nav-link,

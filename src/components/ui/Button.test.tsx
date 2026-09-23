@@ -116,6 +116,31 @@ describe('Button', () => {
     expect(trail).toHaveAttribute('aria-hidden', 'true');
   });
 
+  it('has a compact sm size for labelled and icon buttons', () => {
+    render(
+      <>
+        <Button size="sm" href="/cv.pdf" download>
+          Resume
+        </Button>
+        <Button size="sm" variant="icon" aria-label="Toggle menu">
+          <svg />
+        </Button>
+      </>,
+    );
+    expect(screen.getByRole('link', { name: 'Resume' })).toHaveClass('px-btn', 'px-btn--primary', 'px-btn--sm');
+    const icon = screen.getByRole('button', { name: 'Toggle menu' });
+    expect(icon).toHaveClass('px-btn--icon', 'px-btn--sm');
+    expect(icon).not.toHaveClass('px-btn--lg');
+  });
+
+  it('adds no size class for md', () => {
+    render(<Button size="md">Play</Button>);
+    const button = screen.getByRole('button', { name: 'Play' });
+    expect(button).not.toHaveClass('px-btn--sm');
+    expect(button).not.toHaveClass('px-btn--md');
+    expect(button).not.toHaveClass('px-btn--lg');
+  });
+
   it('ignores size on the ghost variant', () => {
     render(
       <Button variant="ghost" size="lg">
@@ -125,6 +150,15 @@ describe('Button', () => {
     const button = screen.getByRole('button', { name: 'Quest log' });
     expect(button).toHaveClass('px-btn--ghost');
     expect(button).not.toHaveClass('px-btn--lg');
+  });
+
+  it('ignores the sm size on the ghost variant too', () => {
+    render(
+      <Button variant="ghost" size="sm">
+        Quest log
+      </Button>,
+    );
+    expect(screen.getByRole('button', { name: 'Quest log' })).not.toHaveClass('px-btn--sm');
   });
 
   it('forwards refs and extra props', () => {
