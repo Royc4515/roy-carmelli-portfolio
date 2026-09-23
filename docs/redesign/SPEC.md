@@ -367,6 +367,14 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   wash. Below 640px: Live/Code side by side, highlights on the lead card only, 120px item band,
   research `Code` as a 44px icon button. Card actions (Live / Code) use Button `sm`. The item band is
   120px with the item at ×4 below 1600px, 184px at ×6 above.
+  Short laptops (`short:`): the list scrolls, but every quest card fits one screen under the nav
+  (viewport height − 92; 424px at 1097×516). Cards run one per row, split 5/12 · 7/12 (gap 24) so
+  the text columns line up: the lead card has the screenshot left and the text right; main quests
+  have the item at ×6 in a dotted well bleeding to the frame, text right; side quests have slot,
+  tag, meta and title left, tagline, chips and actions right. Cards pad 16; parts step
+  8 · 8 · 12 · 12 · 12 from the meta line; the subtitle follows the name on its line; Live · Code ·
+  Quest log share one row. DOM and reading order are unchanged; the 2-up and 3-up grids don't apply.
+  The research log panel scrolls as a whole (each row fits).
 - **About (Zone 02 · The Adventurer).** 7/12 story on a paper panel (≤ 65ch) + 5/12 "Character
   sheet" (inset panel): face ×2, the existing at-a-glance rows (HUD labels, Plex values), one
   achievement row derived from the bio ("Field medic · scaled a unit from 12 to 30+").
