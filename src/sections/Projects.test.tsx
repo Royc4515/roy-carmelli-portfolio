@@ -86,7 +86,7 @@ describe('<Projects>', () => {
   });
 });
 
-describe('Projects.css card padding', () => {
+describe('Projects.css', () => {
   // Read from disk: the Vitest config stubs CSS imports (css: false).
   const css = readFileSync(resolve(import.meta.dirname, './Projects.css'), 'utf8');
 
@@ -105,5 +105,10 @@ describe('Projects.css card padding', () => {
     // 16 · 20 from 768px · 16 on short laptop screens, on the 4px grid.
     const pads = [...css.matchAll(/--quest-pad: (\d+)px;/g)].map(m => Number(m[1]));
     expect(pads).toEqual([16, 20, 16]);
+  });
+
+  it('keeps the +N chip off a row of its own: the chip before it reserves the room the +N gives back', () => {
+    expect(css).toMatch(/\.quest-chips > li:has\(\+ li > \.px-chip--more\) \{\s*margin-inline-end: var\(--chip-more-room\);/);
+    expect(css).toMatch(/\.quest-chips > li:has\(> \.px-chip--more\) \{\s*margin-inline-start: calc\(var\(--chip-more-room\) \* -1\);/);
   });
 });

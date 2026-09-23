@@ -88,12 +88,23 @@ describe('<QuestCard> main quest (feature)', () => {
     expect(list).not.toHaveClass('quest-highlights--secondary');
   });
 
-  it('shows at most five tech chips plus an overflow chip', () => {
+  it('shows at most four tech chips plus an overflow chip, like the side quests', () => {
     render(<QuestCard project={aside} layout="feature" />);
     const chips = screen.getByRole('list', { name: 'Built with' });
     const items = within(chips).getAllByRole('listitem');
-    expect(items).toHaveLength(6);
-    expect(items[5]).toHaveTextContent(`+${aside.tech.length - 5}`);
+    expect(items).toHaveLength(5);
+    expect(items.slice(0, 4).map(i => i.textContent)).toEqual(aside.tech.slice(0, 4));
+    expect(items[4]).toHaveTextContent(`+${aside.tech.length - 4}`);
+    // Projects.css reserves the +N chip's room from its character count ("+10").
+    expect(chips.style.getPropertyValue('--chip-more-chars')).toBe(String(`+${aside.tech.length - 4}`.length));
+  });
+
+  it('sets no +N room when every chip shows', () => {
+    const few = { ...aside, tech: aside.tech.slice(0, 4) };
+    render(<QuestCard project={few} layout="feature" />);
+    const chips = screen.getByRole('list', { name: 'Built with' });
+    expect(within(chips).getAllByRole('listitem')).toHaveLength(4);
+    expect(chips.style.getPropertyValue('--chip-more-chars')).toBe('');
   });
 
   it('links to the live demo and the code in new tabs, named after the project', () => {
@@ -225,6 +236,7 @@ describe('<QuestCard> side quest', () => {
     expect(items.slice(0, 4).map(i => i.textContent)).toEqual(clr.tech.slice(0, 4));
     expect(items[4]).toHaveTextContent(`+${clr.tech.length - 4}`);
     expect(items[4]).toHaveTextContent(`and ${clr.tech.length - 4} more: ${clr.tech.slice(4).join(', ')}`);
+    expect(screen.getByRole('list', { name: 'Built with' }).style.getPropertyValue('--chip-more-chars')).toBe('2');
   });
 });
 

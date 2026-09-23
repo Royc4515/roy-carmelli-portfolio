@@ -130,11 +130,31 @@
     }
   }
 
-  /* Chip rows stay packed at the top of their (shared) row. */
+  /* Chip rows stay packed at the top of their (shared) row, and the list
+     always takes the full column (in a flex column `align-self: start` would
+     shrink it to its content, and the +N room below would then wrap it). */
   .quest-card .quest-chips {
+    /* The +N chip and the gap before it: 8px gap, 8px padding a side and its
+       --chip-more-chars characters (set by QuestCard) at 13px Plex Mono, each
+       0.6em wide plus 0.06em letter-spacing (0.66 x 0.8125rem), and 1px for
+       rounding. */
+    --chip-more-room: calc(25px + var(--chip-more-chars, 3) * 0.53625rem);
+    width: 100%;
     align-self: start;
     align-content: flex-start;
     margin-top: 24px;
+  }
+
+  /* The +N chip never wraps onto a row of its own: the chip before it
+     reserves its room (margin), and the +N takes that room back (the same
+     negative margin, so its own box adds nothing to the row). The two wrap
+     together and the +N still sits 8px after its neighbour. */
+  .quest-card .quest-chips > li:has(+ li > .px-chip--more) {
+    margin-inline-end: var(--chip-more-room);
+  }
+
+  .quest-card .quest-chips > li:has(> .px-chip--more) {
+    margin-inline-start: calc(var(--chip-more-room) * -1);
   }
 
   /* Tier tag: star + MAIN QUEST / SIDE QUEST on a small plate. */

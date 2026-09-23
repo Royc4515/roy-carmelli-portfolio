@@ -366,12 +366,13 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   spans full width (visual 7/12, text 5/12), the other two side by side; side quests in a 3-col
   grid (compact wood cards); research logs as a compact list. QuestCard anatomy: visual (16:10,
   pixel bezel) · tier tag (`star` icon + `MAIN QUEST` / `SIDE QUEST` / `RESEARCH LOG`) · kind ·
-  year · title · `tagline` · `highlights` (main only) · ≤ 5 chips + `+N` · actions: `Live` (primary,
+  year · title · `tagline` · `highlights` (main only) · ≤ 4 chips + `+N` · actions: `Live` (primary,
   external icon), `Code` (secondary, code icon), `Quest log` (ghost, `<details>` holding the full
   `description`). Links ≥ 44px. Mobile: one column, visual on top.
   Headings: one H3 per tier (the Research logs tab plate is the visible H3; main/side are
-  screen-reader only because every card shows its tier tag), card titles H4. Side quests cap chips
-  at 4 + `+N`. An open quest log never stretches its neighbour (`:has()` releases the subgrid).
+  screen-reader only because every card shows its tier tag), card titles H4. Every card caps chips
+  at 4 + `+N`, and the `+N` never takes a row alone: the chip before it reserves its room, so the
+  two wrap together. An open quest log never stretches its neighbour (`:has()` releases the subgrid).
   Hover lift keeps its hit area. The visual's backdrop bleeds to the inner edge of the 4px frame,
   never over it: the card padding and the bleed are one value (`--quest-pad`: 16, 20 from `md`,
   16 on short laptops). Item art uses fixed bitmap colours with a half-strength night

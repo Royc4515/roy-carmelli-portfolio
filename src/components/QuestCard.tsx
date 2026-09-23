@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import type { Project } from '../types/index';
 import PixelPanel from './PixelPanel';
 import PixelIcon from './PixelIcon';
@@ -76,6 +76,18 @@ export function metaLine(project: Pick<Project, 'kind' | 'year'>): string {
 }
 
 type Surface = 'paper' | 'wood';
+
+/** Tech chips shown before the `+N` chip, on every quest card. */
+const CHIP_MAX = 4;
+
+/**
+ * The `+N` chip's character count ("+10" is 3) for Projects.css, which reserves exactly that
+ * room on the chip before it so the two wrap together and the `+N` never takes a row alone.
+ */
+function chipListStyle(tech: readonly string[]): CSSProperties | undefined {
+  const more = tech.length - CHIP_MAX;
+  return more > 0 ? ({ '--chip-more-chars': String(more).length + 1 } as CSSProperties) : undefined;
+}
 
 const SLOT_SIZE: Record<ItemScale, 'sm' | 'md' | 'lg' | 'xl'> = { 1: 'sm', 2: 'md', 4: 'lg', 6: 'xl' };
 
@@ -334,10 +346,11 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
         <ChipList
           items={project.tech}
           accentCount={3}
-          max={5}
+          max={CHIP_MAX}
           surface="paper"
           aria-label="Built with"
           className="quest-chips"
+          style={chipListStyle(project.tech)}
         />
         <QuestActions project={project} open={open} onToggle={toggle} stacked={false} />
         <QuestLog project={project} open={open} surface="paper" />
@@ -389,7 +402,14 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
         {project.status === 'in-development' && <StatusChip surface="wood" />}
         <p className="text-body text-fg">{project.tagline}</p>
       </div>
-      <ChipList items={project.tech} accentCount={3} max={4} aria-label="Built with" className="quest-chips" />
+      <ChipList
+        items={project.tech}
+        accentCount={3}
+        max={CHIP_MAX}
+        aria-label="Built with"
+        className="quest-chips"
+        style={chipListStyle(project.tech)}
+      />
       <QuestActions project={project} open={open} onToggle={toggle} stacked />
       <QuestLog project={project} open={open} surface="wood" />
     </PixelPanel>
