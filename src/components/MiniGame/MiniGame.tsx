@@ -142,7 +142,12 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     const engine = new GameEngine(ctx);
     engineRef.current = engine;
 
-    engine.init().then(() => engine.start());
+    // Loading can outlast the game (a quick Quit or Esc): only start a game still on screen,
+    // or its rAF loop would run on with nothing to stop it.
+    let alive = true;
+    engine.init().then(() => {
+      if (alive) engine.start();
+    });
 
     const onKey = (e: KeyboardEvent) => {
       if (JUMP_KEYS.has(e.code)) {
@@ -172,6 +177,7 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     canvas.addEventListener('touchstart', onTouchStart, { passive: false });
 
     return () => {
+      alive = false;
       engine.stop();
       window.removeEventListener('keydown', onKey);
       canvas.removeEventListener('click', onClick);

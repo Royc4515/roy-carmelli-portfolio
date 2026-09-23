@@ -1,25 +1,35 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import MiniGame from './MiniGame';
 
-// The engine is replaced by a spy so input routing can be asserted. It only gets built
-// when the canvas yields a 2D context, which jsdom doesn't (the "engine" tests stub it).
+// The engine is replaced by spies so its lifecycle and input routing can be asserted. It only
+// gets built when the canvas yields a 2D context, which jsdom doesn't (the "engine" tests stub it).
 const engine = vi.hoisted(() => ({
+  init: vi.fn(() => Promise.resolve()),
+  start: vi.fn(),
+  stop: vi.fn(),
   handleInput: vi.fn(),
   handleSlide: vi.fn(),
   isAwaitingStart: vi.fn(() => false),
 }));
 vi.mock('./GameEngine', () => ({
   GameEngine: class {
-    init = () => Promise.resolve();
-    start = () => {};
-    stop = () => {};
+    init = engine.init;
+    start = engine.start;
+    stop = engine.stop;
     handleInput = engine.handleInput;
     handleSlide = engine.handleSlide;
     isAwaitingStart = engine.isAwaitingStart;
   },
 }));
+
+/** A promise resolved from outside: an engine whose sprites are still loading. */
+function deferred() {
+  let resolve!: () => void;
+  const promise = new Promise<void>(r => (resolve = r));
+  return { promise, resolve };
+}
 
 describe('MiniGame', () => {
   it('always mounts a canvas element', () => {
@@ -114,12 +124,28 @@ describe('MiniGame input routing (engine running)', () => {
 
   beforeEach(() => {
     HTMLCanvasElement.prototype.getContext = (() => ({})) as unknown as typeof getContext;
-    engine.handleInput.mockClear();
-    engine.handleSlide.mockClear();
+    Object.values(engine).forEach(spy => spy.mockClear());
   });
 
   afterEach(() => {
     HTMLCanvasElement.prototype.getContext = getContext;
+  });
+
+  it('starts the engine once its sprites have loaded', async () => {
+    render(<MiniGame />);
+    await waitFor(() => expect(engine.start).toHaveBeenCalledOnce());
+  });
+
+  it('never starts an engine whose game was closed while it was still loading', async () => {
+    const loading = deferred();
+    engine.init.mockImplementationOnce(() => loading.promise);
+    const { unmount } = render(<MiniGame />);
+    expect(engine.init).toHaveBeenCalledOnce();
+    unmount();
+    expect(engine.stop).toHaveBeenCalledOnce();
+    await act(async () => loading.resolve());
+    // Starting now would leave a rAF loop running with nothing left to stop it.
+    expect(engine.start).not.toHaveBeenCalled();
   });
 
   it('a tap on JUMP jumps once: on pointerdown, not again on the click that follows', () => {
