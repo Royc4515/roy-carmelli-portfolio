@@ -1,0 +1,24 @@
+/*
+ * Hero (title screen). Layout lives in Tailwind classes in Hero.tsx; this file
+ * only holds what utilities cannot express.
+ */
+
+/* Night: the same forest under moonlight. Multiply washes in a night token
+   darken and cool the day art without a second bitmap. Hero.tsx stacks two:
+   one under Roy and one over everything, so the world gets both and Roy one. */
+.hero-night-wash {
+  opacity: 0;
+  background-color: var(--color-fg-subtle);
+  mix-blend-mode: multiply;
+  transition: opacity 350ms ease;
+}
+
+:root[data-theme="night"] .hero-night-wash {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-night-wash {
+    transition: none;
+  }
+}

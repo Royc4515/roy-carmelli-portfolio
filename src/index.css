@@ -336,13 +336,4 @@
   }
 }
 
-/* LEGACY: only ArcadeFallback still blinks. SPEC §2.5 bans blinking text, so
-   remove this with the ArcadeFallback step. Defined only when motion is
-   allowed, so reduced-motion users get static text. */
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes hero-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-}
 

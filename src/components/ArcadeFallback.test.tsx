@@ -29,6 +29,13 @@ describe('ArcadeFallback', () => {
     expect(container.querySelector('canvas')).toBeNull();
   });
 
+  it('uses an ARCADE ZONE heading and the rotate-phone pixel icon, with no emoji', () => {
+    const { container } = render(<ArcadeFallback />);
+    expect(screen.getByRole('heading', { name: /arcade zone/i })).toBeInTheDocument();
+    expect(container.querySelector('svg[data-icon="rotate-phone"]')).not.toBeNull();
+    expect(container.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
+  });
+
   it('contains a pixel-art styled container (PixelPanel)', () => {
     const { container } = render(<ArcadeFallback />);
     // PixelPanel renders a div with a specific box-shadow — verify something

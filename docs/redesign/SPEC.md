@@ -290,20 +290,24 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   brand left; right: Resume icon button + Menu button. Menu = full-screen "PAUSED" panel, list
   with `play` cursor on hover/focus, "Resume game" closes it; `inert` when closed, focus moves to
   the first item on open, Esc closes, focus returns to the Menu button.
-- **Hero (title screen).** Full-bleed forest (`pixelSprites.forest`: 240×112 native, true grid
-  11.47px, `groundRow` 101) at integer scale `k` (cover: `max(ceil(W / 240), ceil(H / 112))`),
-  anchored bottom-center, cropped. Character (wave) on the ground line (bottom offset
-  `(112 - groundRow) × k` px), feet near forest column ~96 or ~182 so the head clears the three
-  birds baked into the art; same scale `k` as the forest (forest and character share one grid). Title card (wood panel, `px-drop`) top-left on desktop:
-  eyebrow `PLAYER ONE` with `play` icon, H1 name, role line (`bio.role`, Plex 600, `accent-fg`),
-  tagline (`bio.tagline`, `body-l`), availability chip (`bio.availability`, `xp` square dot),
-  CTAs: primary `View projects` → `#projects`, secondary `Resume` (PDF, download), then
-  `Press start to play` (ghost with joystick icon, the button tests look for `/press start/i`).
-  HUD nameplate (face, `PLAYER 1`, HP/XP bars from 4px segments, `LVL 3`) top-right of the scene.
-  No blinking; no floating offset hacks. Pressing start fades the title card out and mounts the
-  game in the same frame (existing MiniGame/ArcadeFallback logic and `arcade:play` event stay).
-  Mobile: scene at `k = 3`, cropped to keep the character, title card flows below the scene,
-  name on two lines, CTAs full width.
+- **Hero (title screen).** Forest (`pixelSprites.forest`, 240×112, true grid 11.47px,
+  `groundRow` 101) and character share ONE integer scale `k`, so their pixels are identical.
+  `k = max(ceil(W / 240), floor(H / 112))`, lowered to `floor(H / 112)` when covering the width
+  would make the character exceed 60% of the scene height (`HERO_MAX_SHARE`); mirrored copies
+  of the forest then fill the sides seamlessly. A forest shorter than the scene is anchored to
+  the top and the ground is extended downward by repeating its bottom dirt rows (shifted per
+  strip); a taller one is anchored to the bottom. Scene height is `min(100svh, 880px) - 64px`.
+  The character's feet sit on forest column 182 on the grass line; its x is chosen per viewport
+  so the title card never covers it, no baked-in bird sits on its head and the HUD stays clear.
+  Title card: wood panel, elevation 2, 544px, left-aligned to the page container: `PLAYER ONE`
+  eyebrow, H1 name on two lines, role (`bio.role`), tagline, availability chip, `View projects`
+  (primary lg) + `Resume` (secondary lg, PDF), ghost `Press start to play`. HUD nameplate
+  top-right (omitted when it would collide). Static `SCROLL` cue on the dirt. Night: moonlight
+  washes over the forest (stronger) and the character (lighter). Pressing start fades the card
+  and HUD out (`--dur-scene`, stepped slide) and fades the lazily loaded game in over the dimmed
+  scene; Esc/Quit return focus to Press start. Phones and portrait tablets (< 1024 portrait):
+  a scene band (×3 phones, ×4 tablets) with the character at ~60% of the width, then the title
+  card as a full-bleed wood slab with stacked full-width CTAs; HUD and scroll cue hidden.
 - **Projects (Zone 01 · The Library).** ZoneHeader "Things I've Built". Main quests: the first
   spans full width (visual 7/12, text 5/12), the other two side by side; side quests in a 3-col
   grid (compact wood cards); research logs as a compact list. QuestCard anatomy: visual (16:10,
