@@ -151,7 +151,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-title" className="relative bg-bg px-dots py-12 md:py-16 min-[100rem]:py-20 short:py-6">
+    <section id="contact" aria-labelledby="contact-title" className="relative bg-bg px-dots py-12 md:py-16 min-[100rem]:py-20 short:py-6 low:py-6">
       <div className="relative mx-auto max-w-[1120px] px-4 md:px-6 lg:px-8">
         <Reveal>
           <ZoneHeader

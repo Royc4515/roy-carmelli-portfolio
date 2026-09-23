@@ -435,9 +435,9 @@
     margin-bottom: 24px;
   }
 
-  /* Short laptop screens (the `short` variant, index.css): 16px, so the
-     zone below fits one screen. */
-  @media (width >= 64rem) and (height <= 60rem) {
+  /* Short laptop screens and landscape phones (the `short` and `low` variants,
+     index.css): 16px, so the zone below fits one screen. */
+  @media (width >= 64rem) and (height <= 60rem), (orientation: landscape) and (height < 31.25rem) {
     .zone-header {
       margin-bottom: 16px;
     }

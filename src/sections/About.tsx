@@ -47,7 +47,7 @@ const paragraphs = bio.about
  */
 export default function About() {
   return (
-    <section id="about" aria-labelledby="about-title" className="relative bg-bg-alt px-dots py-12 md:py-16 min-[100rem]:py-20 short:py-6">
+    <section id="about" aria-labelledby="about-title" className="relative bg-bg-alt px-dots py-12 md:py-16 min-[100rem]:py-20 short:py-6 low:py-6">
       <div className="relative mx-auto max-w-[1120px] px-4 md:px-6 lg:px-8">
         <Reveal>
           <ZoneHeader
@@ -103,7 +103,13 @@ export default function About() {
               variant="wood"
               elevation={2}
               className="about-sheet-panel h-full short:flex short:flex-col short:px-4 short:pb-4 short:pt-6"
-              tab={<h3 className="text-label">Character sheet</h3>}
+              tab={
+                <h3 className="inline-flex items-center gap-2 text-label">
+                  {/* Same plate as Research logs: icon centred on the caps. */}
+                  <PixelIcon name="person" size={12} className="-mt-0.5 block flex-none" />
+                  Character sheet
+                </h3>
+              }
             >
               {/* 768-1023 the full-width sheet splits: portrait + achievement | stats. */}
               <div className="about-sheet">

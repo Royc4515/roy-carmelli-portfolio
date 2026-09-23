@@ -24,7 +24,7 @@ export default function Footer() {
           Continue?
         </Button>
         <p className="text-hud text-fg-muted">Roy Carmelli © {year}</p>
-        <p className="text-body-s text-fg-subtle lg:justify-self-end lg:text-right">
+        <p className="text-hud text-fg-subtle lg:justify-self-end lg:text-right">
           Built from scratch: React · TypeScript · Canvas
         </p>
       </div>

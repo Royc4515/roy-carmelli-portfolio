@@ -19,6 +19,10 @@
    Every zone except Projects fits one screen under the nav there. */
 @custom-variant short (@media (width >= 64rem) and (height <= 60rem));
 
+/* Landscape phones (e.g. 844x390): the short-screen spacing only (section padding,
+   compact zone header), none of the short layouts. */
+@custom-variant low (@media (orientation: landscape) and (height < 31.25rem));
+
 /* The spec quotes class names in prose; don't generate CSS for them. */
 @source not "../docs";
 @source not "../.claude";
