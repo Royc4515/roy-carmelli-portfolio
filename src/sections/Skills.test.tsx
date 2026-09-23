@@ -279,10 +279,10 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     expect(item('Java 17')).toHaveFocus();
 
     await user.keyboard('{Control>}{End}{/Control}');
-    expect(item('AI Fluency: Framework & Foundations')).toHaveFocus();
+    expect(item('AI Fluency')).toHaveFocus();
     expect(tip()).toHaveTextContent('Certificate earned');
     await user.keyboard('{ArrowDown}'); // last slot: stays
-    expect(item('AI Fluency: Framework & Foundations')).toHaveFocus();
+    expect(item('AI Fluency')).toHaveFocus();
     await user.keyboard('{Control>}{Home}{/Control}');
     expect(item('Java 17')).toHaveFocus();
     expect(tip()).toHaveTextContent('Arkanoid');

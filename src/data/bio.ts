@@ -5,7 +5,7 @@ export const bio = {
   nameHe: "רועי כרמלי",
   title: "CS & Neuroscience · Bar-Ilan University",
   role: "Full-Stack & AI Developer",
-  availability: "Open to student & intern roles · Israel",
+  availability: "Student & intern roles · Israel",
   contactBlurb: "I'm looking for a student or intern role in full-stack, frontend or AI development in Israel. Email works best.",
   resume: {
     href: "/Roy_Carmelli_CV.pdf",
@@ -14,7 +14,8 @@ export const bio = {
   },
   institution: "Bar-Ilan University",
   location: "Israel",
-  tagline: "Third-year CS & Neuroscience student at Bar-Ilan. I build web apps, Chrome extensions and AI tools, and I ship them.",
+  /** "Bar-\u2060Ilan": a word joiner after the hyphen, so the name never breaks across lines. */
+  tagline: "Third-year CS & Neuroscience student at Bar-\u2060Ilan. I build web apps, Chrome extensions and AI tools, and I ship them.",
   about: `I'm a third-year student at Bar-Ilan University, doing a dual major in Computer Science and Neuroscience. Most of my building happens on the CS side. The neuroscience side is where I learned to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children.
 
 I build things I end up using. Aside puts six AI providers in a sidebar next to whatever I'm reading, and a Telegram bot keeps track of my wine cellar. I work with AI coding tools every day: I make the architecture calls, review what they write, and debug it myself.
@@ -35,5 +36,5 @@ export const skills = [
   { slot: "Potions", category: "Data & Analysis",    items: ["NumPy", "Pandas", "SciPy", "Matplotlib", "Jupyter"] },
   { slot: "Tomes", category: "CS Foundations",       items: ["OOP", "Data Structures", "Design Patterns", "Systems Programming", "Computer Architecture"] },
   { slot: "Trinkets", category: "Tools & Platforms", items: ["Git", "GitHub Actions", "Docker", "Vercel", "Render", "GitHub Pages", "VS Code", "IntelliJ"] },
-  { slot: "Achievements", category: "Certifications", items: ["Claude Code in Action", "Claude Code 101", "Claude 101", "AI Fluency: Framework & Foundations"] },
+  { slot: "Achievements", category: "Certifications", items: ["Claude Code in Action", "Claude Code 101", "Claude 101", "AI Fluency"] },
 ];

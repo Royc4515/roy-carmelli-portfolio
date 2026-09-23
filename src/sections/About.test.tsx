@@ -83,7 +83,7 @@ describe('About', () => {
     render(<About />);
     expect(screen.getByText('Achievement')).toBeInTheDocument();
     expect(
-      screen.getByText((_, el) => el?.textContent === 'Combat medic · led a unit that grew from 12 to 30+'),
+      screen.getByText((_, el) => el?.textContent === 'Combat medic · led a unit from 12 to 30+'),
     ).toBeInTheDocument();
     // The claim must stay backed by the bio text.
     expect(bio.about).toMatch(/combat medic/);
