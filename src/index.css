@@ -341,12 +341,3 @@
   }
 }
 
-/* LEGACY mobile spacing for the current sections. The !important beats any
-   padding utility, so delete this once sections use the SPEC §2.3 rhythm
-   (py-16 / md:py-24). */
-@media (max-width: 767px) {
-  section[id]:not(#hero) {
-    padding-top: 40px !important;
-    padding-bottom: 2rem !important;
-  }
-}
