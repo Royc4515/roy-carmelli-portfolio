@@ -625,6 +625,8 @@
        item  title    [code]              item  title    [ CODE ]
        item  tagline  tagline             item  tagline  [ CODE ]
 
+     The item is x1 on a 32px plate below 640px, x2 on a 56px plate above.
+
      Below 640px the link is a 48px icon button (label hidden, the aria-label
      names it) beside the meta line and title, so it never takes a row. */
   .research-heading {
@@ -706,7 +708,7 @@
     }
   }
 
-  @media (min-width: 640px) {
+  @media (width >= 640px) {
     .research-log {
       grid-template-areas:
         "item meta action"
@@ -719,6 +721,19 @@
     .research-log__item,
     .research-log__action {
       align-self: center;
+    }
+
+    /* Beside a 16px pixel title and two or three lines of copy the item is
+       drawn at x2 on the side quests' 56px plate (the 24px SVG at 48px, an
+       integer scale). */
+    .research-log__item {
+      width: 56px;
+      height: 56px;
+    }
+
+    .research-log__item .item-slot__sprite {
+      width: 48px;
+      height: 48px;
     }
 
     /* Next to the 12px label the 24px icon is drawn at x1. */

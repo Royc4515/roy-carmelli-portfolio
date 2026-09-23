@@ -417,10 +417,10 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
 }
 
 /**
- * One research log: a compact list row with the item at x1, kind · year, the title, tagline
- * and a Code link. Render inside a `<ul>`. The parts are direct children of the row so
- * Projects.css can place them: below 640px the link is a 48px icon button beside the meta
- * line and title; from 640px it is a labelled button on the right.
+ * One research log: a compact list row with the item (x1, x2 from 640px), kind · year, the
+ * title, tagline and a Code link. Render inside a `<ul>`. The parts are direct children of the
+ * row so Projects.css can place them: below 640px the link is a 48px icon button beside the
+ * meta line and title; from 640px it is a labelled button on the right.
  */
 export function ResearchLogItem({ project }: { project: Project }) {
   return (

@@ -111,4 +111,10 @@ describe('Projects.css', () => {
     expect(css).toMatch(/\.quest-chips > li:has\(\+ li > \.px-chip--more\) \{\s*margin-inline-end: var\(--chip-more-room\);/);
     expect(css).toMatch(/\.quest-chips > li:has\(> \.px-chip--more\) \{\s*margin-inline-start: calc\(var\(--chip-more-room\) \* -1\);/);
   });
+
+  it('draws the research-log items at x2 on a 56px plate from 640px (an integer scale)', () => {
+    const block = css.slice(css.indexOf('@media (width >= 640px) {\n    .research-log {'));
+    expect(block).toMatch(/\.research-log__item \{\s*width: 56px;\s*height: 56px;/);
+    expect(block).toMatch(/\.research-log__item \.item-slot__sprite \{\s*width: 48px;\s*height: 48px;/);
+  });
 });

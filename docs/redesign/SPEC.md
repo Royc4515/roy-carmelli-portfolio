@@ -378,7 +378,8 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   never over it: the card padding and the bleed are one value (`--quest-pad`: 16, 20 from `md`,
   16 on short laptops). Item art uses fixed bitmap colours with a half-strength night
   wash. Below 640px: Live/Code side by side, highlights on the lead card only, 120px item band,
-  research `Code` as a 44px icon button. Card actions (Live / Code) use Button `sm`. The item band is
+  research `Code` as a 44px icon button. Research items sit at ×1 on a 32px plate, ×2 on the 56px
+  plate from 640px. Card actions (Live / Code) use Button `sm`. The item band is
   120px with the item at ×4 below 1600px, 184px at ×6 above.
   Short laptops (`short:`): the list scrolls, but every quest card fits one screen under the nav
   (viewport height − 92; 424px at 1097×516). Cards run one per row, split 5/12 · 7/12 (gap 24) so
