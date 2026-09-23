@@ -378,6 +378,12 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
 - **About (Zone 02 · The Adventurer).** 7/12 story on a paper panel (≤ 65ch) + 5/12 "Character
   sheet" (inset panel): face ×2, the existing at-a-glance rows (HUD labels, Plex values), one
   achievement row derived from the bio ("Field medic · scaled a unit from 12 to 30+").
+  Short laptops (`short:`): the story column keeps 632px (600px of text, 12 lines of 16/26, 12px
+  paragraph gaps, 16px padding) with the "- Roy" sign-off on its last line; the sheet takes the
+  remaining 360-400px: ×1 portrait beside the name, 14px values in an 88px label column, stat rows
+  sharing any extra height so both panels end on one line. The sheet is capped at the screen height
+  under the zone header (100svh − 196px), so a nav jump always shows it whole; on screens under
+  ~590px tall (1097×516) the end of the story runs past the fold.
 - **Skills (Zone 03 · Equipment).** Equipment screen: character (idle, ×3) in a wood frame on the
   left; slots on the right, one per `skills[i].slot` (Weapons, Armor, Magic, Potions, Tomes,
   Trinkets, Achievements). Each item is a focusable chip; hover/focus shows a Stardew-style
@@ -406,6 +412,8 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   `Copy email` (toast "Email copied · progress saved"; visible `Copy` label from 640px). Email shown
   in lowercase (`mailto:` keeps `bio.email`). Secondary buttons with icon + readable label: GitHub,
   LinkedIn, Phone (number shown under it from 640px).
+  Short laptops (`short:`): panel padding 16 and a 12/16/16/16 rhythm (text → buttons → address →
+  socials → phone number); the save-point caption sits above the scene instead of below the ground.
 - **Footer.** `surface-sunken`. `Continue?` back-to-top button with `arrow-up`, name ©, and
   "Built from scratch: React · TypeScript · Canvas" in readable size and contrast.
 - **ArcadeFallback.** `rotate-phone` icon (stepped rotation, static under reduced motion), text at
