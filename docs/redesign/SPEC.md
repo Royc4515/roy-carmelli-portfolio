@@ -336,6 +336,12 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   year · title · `tagline` · `highlights` (main only) · ≤ 5 chips + `+N` · actions: `Live` (primary,
   external icon), `Code` (secondary, code icon), `Quest log` (ghost, `<details>` holding the full
   `description`). Links ≥ 44px. Mobile: one column, visual on top.
+  Headings: one H3 per tier (the Research logs tab plate is the visible H3; main/side are
+  screen-reader only because every card shows its tier tag), card titles H4. Side quests cap chips
+  at 4 + `+N`. An open quest log never stretches its neighbour (`:has()` releases the subgrid).
+  Hover lift keeps its hit area. Item art uses fixed bitmap colours with a half-strength night
+  wash. Below 640px: Live/Code side by side, highlights on the lead card only, 120px item band,
+  research `Code` as a 48px icon button.
 - **About (Zone 02 · The Adventurer).** 7/12 story on a paper panel (≤ 65ch) + 5/12 "Character
   sheet" (inset panel): face ×2, the existing at-a-glance rows (HUD labels, Plex values), one
   achievement row derived from the bio ("Field medic · scaled a unit from 12 to 30+").
@@ -343,15 +349,23 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   left; slots on the right, one per `skills[i].slot` (Weapons, Armor, Magic, Potions, Tomes,
   Trinkets, Achievements). Each item is a focusable chip; hover/focus shows a Stardew-style
   tooltip with "Used in: …" computed from `projects` (normalize e.g. `React 19` → `React`).
-  Items not used in any project show no "Used in" line (never invent data). Mobile: stacked,
-  tooltip becomes an inline detail row on tap.
-- **Resume (Zone 04 · Resume Scroll).** Wide paper band: `scroll` icon ×4, existing sentence,
+  Items not used in any project show no "Used in" line (never invent data); CS Foundations say
+  "Studied in coursework", certifications "Certificate earned". Mobile: stacked, tooltip becomes
+  an inline detail row on tap; character well and stats hidden below 768px.
+  Keyboard: the equipment is one ARIA layout grid (`grid` / `row` with the slot h3 as `rowheader` /
+  `gridcell`) with a roving tabindex: one Tab stop, Left/Right within a slot, Up/Down across slots
+  keeping the column, Home/End, Ctrl+Home/End; the tooltip follows focus, Esc closes. Items carry a
+  2px `border-subtle` line and a dotted inspect cue (brass on hover/focus/open); a keycap hint
+  shows while the grid has keyboard focus. Fixed two-column split from xl (no CSS columns).
+- **Resume (Zone 04 · Resume Scroll, title "Resume").** Wide paper band: `scroll` icon ×4, existing sentence,
   `bio.resume.meta`, `Download` (primary, `download` attr) + `View` (secondary, new tab).
   Download shows toast "Loot acquired: Roy_Carmelli_CV.pdf".
-- **Contact (Zone 05 · Save Point).** Pixel campfire (3-frame sheet or SVG, stepped) next to the
-  idle character. Title "Let's Talk". `bio.contactBlurb`. Primary `Email me` (mailto) + icon button
-  `Copy email` (toast "Email copied · progress saved"). Secondary buttons with icon + readable
-  label: GitHub, LinkedIn, Phone.
+- **Contact (Zone 05 · Save Point).** Pixel campfire (21×21 native, 3 frames, one `<path>` per
+  colour) rendered at exactly the character's scale (×4 desktop, ×2 below 1024) so both share one
+  pixel grid; the ground line is level with the panel's bottom frame. Caption `aria-hidden`. Title "Let's Talk". `bio.contactBlurb`. Primary `Email me` (mailto) + icon button
+  `Copy email` (toast "Email copied · progress saved"; visible `Copy` label from 640px). Email shown
+  in lowercase (`mailto:` keeps `bio.email`). Secondary buttons with icon + readable label: GitHub,
+  LinkedIn, Phone (number shown under it from 640px).
 - **Footer.** `surface-sunken`. `Continue?` back-to-top button with `arrow-up`, name ©, and
   "Built from scratch: React · TypeScript · Canvas" in readable size and contrast.
 - **ArcadeFallback.** `rotate-phone` icon (stepped rotation, static under reduced motion), text at

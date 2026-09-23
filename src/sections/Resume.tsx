@@ -47,7 +47,7 @@ export default function Resume() {
 
             <div className="min-w-0">
               <p className="max-w-[60ch] text-body text-pretty text-ink">
-                Full breakdown - coursework with grades, project{' '}
+                Full breakdown: coursework with grades, project{' '}
                 <span className="whitespace-nowrap">deep-dives</span>, IDF reserve service, certifications.
               </p>
               <p className="mt-2 text-hud text-ink-muted">{meta}</p>
