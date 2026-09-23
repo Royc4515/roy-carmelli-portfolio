@@ -67,7 +67,7 @@ describe('Contact', () => {
 
   it('shows the contact blurb and the address as selectable text', () => {
     renderContact();
-    expect(screen.getByText(/Available now for software engineering/)).toBeInTheDocument();
+    expect(screen.getByText(/looking for a student or intern role in full-stack, frontend or AI development/)).toBeInTheDocument();
     expect(screen.getByText(EMAIL_SHOWN)).toHaveClass('select-all');
   });
 

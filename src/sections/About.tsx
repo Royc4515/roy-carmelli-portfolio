@@ -11,17 +11,17 @@ import './About.css';
 const AT_A_GLANCE = [
   { label: 'Degree', value: 'B.Sc. Computer Science & Neuroscience (dual major)' },
   { label: 'University', value: 'Bar-Ilan University' },
-  { label: 'Year', value: '3rd Year · Expected graduation 2027' },
+  { label: 'Year', value: '3rd year · expected graduation 2027' },
   { label: 'GPA', value: '85.09 / 100' },
-  { label: 'Open to', value: 'Internships · Student roles · R&D' },
+  { label: 'Open to', value: 'Student & intern roles: full-stack, frontend, AI' },
 ] as const;
 
 /**
- * Condensed from the reserve-service paragraph of `bio.about` (combat medic,
- * unit of 12 → 30+). Two parts so a narrow sheet breaks after the "·", never
- * inside the phrase.
+ * Condensed from the service paragraph of `bio.about` (combat medic, led a
+ * unit that grew from 12 to 30+). Two parts so a narrow sheet breaks after
+ * the "·", never inside the phrase.
  */
-const ACHIEVEMENT = ['Field medic ·', 'scaled a unit from 12 to 30+'] as const;
+const ACHIEVEMENT = ['Combat medic ·', 'led a unit that grew from 12 to 30+'] as const;
 
 /** The portrait is the native face sprite at ×2 (×1 on short laptop screens, About.css). */
 const FACE_SCALE = 2;
