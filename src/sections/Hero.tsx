@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { AnimatePresence, motion, steps, type Transition } from 'framer-motion';
+import { AnimatePresence, LazyMotion, domAnimation, m, steps, type Transition } from 'framer-motion';
 import { bio } from '../data/bio';
 import Character from '../components/Character';
 import ArcadeFallback from '../components/ArcadeFallback';
@@ -18,6 +18,7 @@ import PixelPanel from '../components/PixelPanel';
 import PixelIcon from '../components/PixelIcon';
 import { Button } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
+import { useToast } from '../components/ui/Toast';
 import { cx } from '../components/ui/cx';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useGameDisplayMode } from '../hooks/useGameDisplayMode';
@@ -36,15 +37,24 @@ const MiniGame = lazy(() => import('../components/MiniGame/MiniGame'));
    into the art). The forest's left offset is derived from where the
    composition puts Roy, so that column lands exactly under his feet.
 
-   Scale: k = max(ceil(W / 240), floor(H / 112)), one step under "cover", so
-   Roy stays about 55% of the scene and the canopy, birds and fences stay in
-   view. A forest shorter than the scene is anchored to the top and the ground
-   gets deeper: its bottom dirt rows repeat, mirrored row-wise, down to the
-   scene bottom. A forest taller than the scene is anchored to the bottom (the
-   canopy crops). When covering the width would push Roy past 60% of the scene
-   (1920x1080 under the 880px cap, ultrawide, short windows) k stays at
-   floor(H / 112) and mirrored copies of the forest, seamless at the shared
-   edge, fill the sides. */
+   Title screen (desktop): k = max(ceil(W / 240), floor(H / 112)), one step
+   under "cover", so Roy stays about 55% of the scene and the canopy, birds and
+   fences stay in view. A forest shorter than the scene is anchored to the top
+   and the ground gets deeper: its bottom dirt rows repeat, shifted per strip,
+   down to the scene bottom. A forest taller than the scene is anchored to the
+   bottom (the canopy crops). When covering the width would push Roy past 60%
+   of the scene (1920x1080 under the 880px cap, ultrawide, short windows) k
+   stays at floor(H / 112) and mirrored copies of the forest, seamless at the
+   shared edge, fill the sides.
+
+   Compact title screen (short or narrow landscape viewports: phones held
+   sideways, 200% zoom, small windows): the same composition, but k is chosen
+   so the forest fills the first screen and Roy stands in it whole, and the
+   card may narrow; the card's content puts the CTAs right under the role.
+
+   Band (phones and portrait tablets): the forest as a strip above the title
+   card, x3 on phones, x4 on tablets, x2 when the viewport is under 700px tall,
+   at most 38% of the viewport tall (the canopy crops, Roy and the grass stay). */
 
 const FOREST = pixelSprites.forest;
 const WAVE = pixelSprites.wave;
@@ -53,14 +63,27 @@ const WAVE = pixelSprites.wave;
 export const HERO_FEET_COLUMN = 182;
 /** Fixed navbar height; the scene starts below it. */
 export const HERO_NAV_H = 64;
-/** The hero is at most this tall (nav included). */
+/** The hero is at most this tall (nav included)... */
 export const HERO_MAX_H = 880;
+/** ...unless the viewport is less than this much taller: then it fills it (no sliver of Zone 01). */
+export const HERO_FILL_SLACK = 96;
 /** Title-card width on the scene (fits two lg CTAs side by side at p-6). */
 export const HERO_CARD_W = 544;
 /** Scale of the band on phones. */
 export const HERO_MOBILE_K = 3;
 /** Roy's sprite may take at most this share of the desktop scene height. */
 export const HERO_MAX_SHARE = 0.6;
+/** The band takes at most this share of the viewport height (the canopy crops first). */
+export const HERO_BAND_SHARE = 0.38;
+/** Viewports shorter than this get the band at x2. */
+export const HERO_SHORT_VH = 700;
+/**
+ * Viewports at least this tall show the full-width title card in its reading order: its CTAs end
+ * 524px down (nav, 16px, the card down to the CTA's drop). Shorter ones move the CTAs up.
+ */
+export const HERO_FULL_CARD_VH = 560;
+/** Native rows the band always keeps: Roy (67), the ground under his feet (11) and 4 rows of air. */
+export const HERO_BAND_MIN_ROWS = FOREST.h - FOREST.groundRow + WAVE.frameH + 4;
 /**
  * Native columns [from, to) of the three birds baked into the forest. The title card's right
  * edge must never slice one: each is either fully behind the card or clear of it.
@@ -90,26 +113,40 @@ const CARD_BOTTOM_AIR = 24;
 const CARD_DROP = 12;
 /** Card height used before it has been measured. */
 const CARD_H_ESTIMATE = 520;
-/** The HUD nameplate: 16px below the scene top, its box 238x89 plus a 4px frame and 8px drop. */
+/**
+ * Narrowest compact card: the H1's longest line ("Carmelli", 8 glyphs) plus the card's padding,
+ * below 768px (40px type, p-4) and from 768px (48px type, p-6).
+ */
+const CARD_MIN_W = 368;
+const CARD_MIN_W_MD = 432;
+/** The HUD nameplate: 16px below the scene top, its box 266x89 plus a 4px frame and 8px drop. */
 const HUD_TOP = 16;
-const HUD_W = 238;
+const HUD_W = 266;
 const HUD_H = 89;
 /** Placement costs (px of distance from the ideal spot are worth 1). */
 const COST_COLLISION = 1000;
 const COST_OPTIONAL_MIRROR = 300;
 
 export type HeroLayout =
-  /** Scene fills the hero; card and HUD float over it (desktop). */
+  /** Scene fills the hero; card and HUD float over it (desktop, landscape). */
   | 'overlay'
-  /** Scene is a band; the card flows below it (phones, narrow portrait tablets). */
+  /** Scene is a band; the card flows below it (phones, portrait tablets). */
   | 'stack';
+
+export interface HeroPlan {
+  layout: HeroLayout;
+  /** Overlay on a short or narrow landscape viewport (see `compactOverlayFit`). */
+  compact: boolean;
+}
 
 export interface HeroScene {
   layout: HeroLayout;
   /** Integer scale shared by the forest and Roy. */
   k: number;
-  /** Scene height in px (stack: the whole forest, 112k). */
+  /** Scene height in px (stack: the band). */
   sceneH: number;
+  /** Title-card width in px (overlay). */
+  cardW: number;
   /** Forest left edge in px from the scene's left (< 0: cropped). */
   forestX: number;
   /** Forest top edge in px from the scene's top (< 0: canopy cropped). */
@@ -126,7 +163,7 @@ export interface HeroScene {
   groundH: number;
   /** Height of the dirt (under the grass) above the scene bottom. */
   dirtH: number;
-  /** Desktop: the HUD nameplate has room above Roy's head. */
+  /** Overlay: the HUD nameplate has room above Roy's head and beside the card. */
   hudClear: boolean;
 }
 
@@ -139,6 +176,15 @@ function gutterFor(width: number): number {
 /** Left edge of the page container's content (`max-w-[1120px]` + gutters) in a `width` px wide box. */
 export function containerContentLeft(width: number): number {
   return Math.max(0, Math.floor((width - CONTAINER_W) / 2)) + gutterFor(width);
+}
+
+/**
+ * Height of the hero (nav included) in a viewport `vh` px tall: the viewport, capped at 880px,
+ * except that a viewport 1-95px taller than the cap is filled, so no sliver of Zone 01 shows
+ * under the title screen. Mirrors `.hero--overlay` in Hero.css.
+ */
+export function heroHeight(vh: number): number {
+  return vh > HERO_MAX_H && vh < HERO_MAX_H + HERO_FILL_SLACK ? vh : Math.min(vh, HERO_MAX_H);
 }
 
 /**
@@ -157,11 +203,6 @@ function forestYFor(k: number, sceneH: number): number {
   return Math.min(0, sceneH - FOREST.h * k);
 }
 
-/** Grass line height above the scene bottom. */
-function groundHFor(k: number, sceneH: number): number {
-  return sceneH - forestYFor(k, sceneH) - FOREST.groundRow * k;
-}
-
 /** Sprite left edge → forest left edge, so the feet land on HERO_FEET_COLUMN. */
 function forestXFor(spriteX: number, k: number): number {
   return spriteX - (HERO_FEET_COLUMN - WAVE.anchorX) * k;
@@ -177,21 +218,20 @@ function birdsClear(forestX: number, k: number, edge: number): boolean {
   });
 }
 
-/** True when Roy's sprite at `spriteX` would touch the HUD nameplate (with 8px of air). */
-function hitsHud(spriteX: number, k: number, width: number, sceneH: number): boolean {
+/** True when Roy's sprite (left `spriteX`, top `spriteTop`) would touch the HUD nameplate (8px air). */
+function hitsHud(spriteX: number, spriteTop: number, k: number, width: number): boolean {
   const air = 8;
   const hudRight = width - containerContentLeft(width);
   const hudL = hudRight - HUD_W - 4 - air; // frame, air
   const hudR = hudRight + 4 + 4 + air; // frame, drop, air
   const hudBottom = HUD_TOP + HUD_H + 4 + 8 + air; // frame, drop, air
-  const spriteTop = sceneH - groundHFor(k, sceneH) - WAVE.frameH * k;
   return spriteTop < hudBottom && spriteX < hudR && spriteX + WAVE.frameW * k > hudL;
 }
 
 /** True when the HUD nameplate clears the title card's right edge by 16px. */
-function hudBesideCard(width: number): boolean {
+function hudBesideCard(width: number, cardW: number): boolean {
   const left = containerContentLeft(width);
-  return width - left - HUD_W - 4 >= left + HERO_CARD_W + CARD_OUTSET + 16;
+  return width - left - HUD_W - 4 >= left + cardW + CARD_OUTSET + 16;
 }
 
 export interface OverlayPlacement {
@@ -199,22 +239,32 @@ export interface OverlayPlacement {
   spriteX: number;
   /** False when no position keeps Roy clear of the HUD: the HUD is then left out. */
   hudClear: boolean;
+  /** No bird sliced by the card and Roy clear of the HUD. */
+  clean: boolean;
+}
+
+/** Scale, card width and Roy's top edge for one overlay composition. */
+interface Stage {
+  k: number;
+  cardW: number;
+  spriteTop: number;
+  /** Keep Roy clear of the HUD nameplate (default true). */
+  hud?: boolean;
 }
 
 /**
- * Desktop placement of Roy's sprite in a `width` x `sceneH` scene, or null when he does not
- * fit beside the title card. Ideal: centred between the card and the container's right edge
- * (under the HUD), or hugging the right gutter when that stage is too narrow. Every whole
- * pixel of the allowed range is then scored: distance from the ideal, plus a heavy cost if the
- * card's edge would slice a bird or Roy's head would touch the HUD, plus a cost for showing a
- * mirrored forest copy that a plain crop would not need.
+ * Places Roy's sprite beside a card `stage.cardW` wide, or returns null when he does not fit.
+ * Ideal: centred between the card and the container's right edge (under the HUD), or hugging
+ * the right gutter when that stage is too narrow. Every whole pixel of the allowed range is then
+ * scored: distance from the ideal, plus a heavy cost if the card's edge would slice a bird or
+ * Roy's head would touch the HUD, plus a cost for showing a mirrored forest copy that a plain
+ * crop would not need.
  */
-export function placeOverlaySprite(width: number, sceneH: number): OverlayPlacement | null {
-  const k = sceneScale(width, sceneH);
+function placeSprite(width: number, { k, cardW, spriteTop, hud: withHud = true }: Stage): OverlayPlacement | null {
   const spriteW = WAVE.frameW * k;
   const forestW = FOREST.w * k;
   const left = containerContentLeft(width);
-  const cardEdge = left + HERO_CARD_W + CARD_OUTSET;
+  const cardEdge = left + cardW + CARD_OUTSET;
   const lo = cardEdge + STAGE_AIR;
   const hi = width - EDGE_AIR - spriteW;
   if (hi < lo) return null;
@@ -223,63 +273,173 @@ export function placeOverlaySprite(width: number, sceneH: number): OverlayPlacem
   const ideal = stageR - lo >= spriteW ? lo + (stageR - lo - spriteW) / 2 : hi;
   const cropOnly = forestW >= width;
 
-  let best = { spriteX: Math.round(ideal), hudClear: true };
+  let best = { spriteX: Math.round(ideal), hudClear: true, clean: false };
   let bestCost = Infinity;
   for (let x = lo; x <= hi; x += 1) {
     const forestX = forestXFor(x, k);
     // Mirrored copies can fill at most one forest width per side.
     if (forestX > forestW || forestX + 2 * forestW < width) continue;
     const mirrored = forestX > 0 || forestX + forestW < width;
-    const hud = hitsHud(x, k, width, sceneH);
+    const hud = withHud && hitsHud(x, spriteTop, k, width);
+    const birds = birdsClear(forestX, k, cardEdge);
     const cost =
       Math.abs(x - ideal) +
-      (birdsClear(forestX, k, cardEdge) ? 0 : COST_COLLISION) +
+      (birds ? 0 : COST_COLLISION) +
       (hud ? COST_COLLISION : 0) +
       (mirrored && cropOnly ? COST_OPTIONAL_MIRROR : 0);
     if (cost < bestCost) {
       bestCost = cost;
-      best = { spriteX: x, hudClear: !hud };
+      best = { spriteX: x, hudClear: !hud, clean: birds && !hud };
     }
   }
   return best;
 }
 
+/** Roy's top edge in a scene whose forest top is at `forestY`. */
+function spriteTopFor(k: number, forestY: number): number {
+  return forestY + (FOREST.groundRow - WAVE.frameH) * k;
+}
+
 /**
- * Card-driven minimum scene height: a scene shorter than the card plus its margins grows to
- * fit it, which also raises k.
+ * Desktop placement of Roy's sprite in a `width` x `sceneH` title screen (544px card, scale
+ * `sceneScale`), or null when he does not fit beside the title card.
+ */
+export function placeOverlaySprite(width: number, sceneH: number): OverlayPlacement | null {
+  const k = sceneScale(width, sceneH);
+  return placeSprite(width, { k, cardW: HERO_CARD_W, spriteTop: spriteTopFor(k, forestYFor(k, sceneH)) });
+}
+
+/** Width left for the title card when Roy stands beside it at scale k. */
+function cardRoom(width: number, k: number): number {
+  return width - containerContentLeft(width) - CARD_OUTSET - STAGE_AIR - WAVE.frameW * k - EDGE_AIR;
+}
+
+export interface CompactFit {
+  k: number;
+  cardW: number;
+}
+
+/**
+ * Roy's placement in a compact title screen whose first screen is `viewH` px tall. The HUD is a
+ * bonus there: it shows only where Roy's head leaves it room, it never moves him.
+ */
+function placeCompact(width: number, viewH: number, { k, cardW }: CompactFit): OverlayPlacement | null {
+  return placeSprite(width, { k, cardW, spriteTop: spriteTopFor(k, forestYFor(k, viewH)), hud: false });
+}
+
+/**
+ * Compact title screen for a viewport whose scene area is `viewH` px tall: the scale whose forest
+ * best fills the first screen (Roy whole, with 4 rows of air over his head), stepping down one
+ * scale to keep the full 544px card, else narrowing the card (widest first, never under its
+ * minimum). The first candidate where the card slices no bird wins. Null when nothing fits: the
+ * band layout takes over.
+ */
+export function compactOverlayFit(width: number, viewH: number): CompactFit | null {
+  const kFit = Math.min(Math.round(viewH / FOREST.h), Math.floor(viewH / HERO_BAND_MIN_ROWS));
+  const kTop = Math.max(2, kFit);
+  const minCard = width >= 768 ? CARD_MIN_W_MD : CARD_MIN_W;
+  const candidates: CompactFit[] = [];
+  for (let k = kTop; k >= Math.max(2, kTop - 1); k -= 1) {
+    if (cardRoom(width, k) >= HERO_CARD_W) candidates.push({ k, cardW: HERO_CARD_W });
+  }
+  for (let k = kTop; k >= 2; k -= 1) {
+    for (let cardW = Math.min(HERO_CARD_W, Math.floor(cardRoom(width, k) / 4) * 4); cardW >= minCard; cardW -= 4) {
+      candidates.push({ k, cardW });
+    }
+  }
+  let fallback: CompactFit | null = null;
+  for (const fit of candidates) {
+    const placed = placeCompact(width, viewH, fit);
+    if (!placed) continue;
+    if (placed.clean) return fit;
+    fallback ??= fit;
+  }
+  return fallback;
+}
+
+/**
+ * Card-driven minimum scene height: a scene shorter than the card plus its margins would push
+ * the CTAs below the fold, so it gets the compact title screen instead.
  */
 const MIN_OVERLAY_SCENE_H = CARD_TOP_MIN + CARD_H_ESTIMATE + CARD_DROP + CARD_BOTTOM_AIR;
 
 /**
- * Overlay (desktop) when the viewport is ≥ 768px and Roy fits beside the title card at the
- * scene scale; otherwise the stacked band layout. Decided from the viewport only (never from
- * the measured scene) so the choice cannot oscillate.
+ * Layout for a viewport `width` x `viewportH`, decided from the viewport only (never from the
+ * measured scene) so the choice cannot oscillate:
+ * - the title screen when the viewport is ≥ 768px wide, tall enough for the card and Roy fits
+ *   beside it at the scene scale;
+ * - otherwise, in landscape, the compact title screen when it fits;
+ * - otherwise the band layout.
  */
-export function chooseHeroLayout(width: number, idealSceneH: number, mobile: boolean): HeroLayout {
-  if (mobile) return 'stack';
-  const sceneH = Math.max(idealSceneH, MIN_OVERLAY_SCENE_H);
-  return placeOverlaySprite(width, sceneH) === null ? 'stack' : 'overlay';
+export function planHero(width: number, viewportH: number, mobile: boolean): HeroPlan {
+  const viewH = heroHeight(viewportH) - HERO_NAV_H;
+  const short = viewH < MIN_OVERLAY_SCENE_H;
+  if (!mobile && !short && placeOverlaySprite(width, viewH) !== null) {
+    return { layout: 'overlay', compact: false };
+  }
+  if (width > viewportH && compactOverlayFit(width, viewH) !== null) {
+    return { layout: 'overlay', compact: true };
+  }
+  return { layout: 'stack', compact: false };
+}
+
+/** `planHero`'s layout for a scene area `idealH` px tall (the viewport minus the nav). */
+export function chooseHeroLayout(width: number, idealH: number, mobile: boolean): HeroLayout {
+  return planHero(width, idealH + HERO_NAV_H, mobile).layout;
+}
+
+export interface SceneOptions {
+  /** Viewport height: sizes the band (stack) and the first screen (compact). */
+  viewportH?: number;
+  /** Compact title screen (see `planHero`). */
+  compact?: boolean;
 }
 
 /** Integer placement of the forest and Roy for a scene `width` x `height` px. */
-export function computeHeroScene(layout: HeroLayout, width: number, height: number): HeroScene {
+export function computeHeroScene(
+  layout: HeroLayout,
+  width: number,
+  height: number,
+  { viewportH, compact = false }: SceneOptions = {},
+): HeroScene {
   const w = Math.max(1, Math.round(width));
   let k: number;
   let sceneH: number;
+  let forestY: number;
   let spriteX: number;
-  let hudClear = true;
+  let cardW = HERO_CARD_W;
+  let hudClear = false;
 
   if (layout === 'overlay') {
     sceneH = Math.max(1, Math.round(height));
-    k = sceneScale(w, sceneH);
+    if (compact) {
+      // Fit the first screen: the scene may be taller (the card grows it), the forest is
+      // anchored to the first screen and the dirt deepens below.
+      const viewH = viewportH === undefined ? sceneH : Math.min(sceneH, heroHeight(viewportH) - HERO_NAV_H);
+      const fit = compactOverlayFit(w, viewH) ?? { k: 2, cardW: CARD_MIN_W };
+      ({ k, cardW } = fit);
+      forestY = forestYFor(k, viewH);
+    } else {
+      k = sceneScale(w, sceneH);
+      forestY = forestYFor(k, sceneH);
+    }
+    const spriteTop = spriteTopFor(k, forestY);
     // A scene taller than planned (a very tall card) may leave no stage: hug the right edge.
-    const placed = placeOverlaySprite(w, sceneH);
+    const placed = placeSprite(w, { k, cardW, spriteTop, hud: !compact });
     spriteX = placed?.spriteX ?? w - EDGE_AIR - WAVE.frameW * k;
-    hudClear = (placed ? placed.hudClear : !hitsHud(spriteX, k, w, sceneH)) && hudBesideCard(w);
+    hudClear = !hitsHud(spriteX, spriteTop, k, w) && hudBesideCard(w, cardW);
   } else {
-    // x3 on phones; portrait tablets get x4. Roy's frame is centred at 60% of the width.
-    k = w < 768 ? HERO_MOBILE_K : HERO_MOBILE_K + 1;
-    sceneH = FOREST.h * k;
+    // x3 on phones, x4 on portrait tablets, x2 on short viewports. Roy's frame is centred at
+    // 60% of the width. The band keeps the forest's bottom rows (Roy, grass, dirt) and crops
+    // the canopy down to HERO_BAND_SHARE of the viewport.
+    const short = viewportH !== undefined && viewportH < HERO_SHORT_VH;
+    k = short ? 2 : w < 768 ? HERO_MOBILE_K : HERO_MOBILE_K + 1;
+    const rows =
+      viewportH === undefined
+        ? FOREST.h
+        : Math.min(FOREST.h, Math.max(HERO_BAND_MIN_ROWS, Math.floor((HERO_BAND_SHARE * viewportH) / k)));
+    sceneH = rows * k;
+    forestY = sceneH - FOREST.h * k;
     spriteX = Math.round(0.6 * w - (WAVE.frameW * k) / 2);
   }
 
@@ -289,30 +449,32 @@ export function computeHeroScene(layout: HeroLayout, width: number, height: numb
   const cropOnly = layout === 'stack' && forestW >= w;
   const [minX, maxX] = cropOnly ? [w - forestW, 0] : [w - 2 * forestW, forestW];
   const forestX = Math.min(maxX, Math.max(minX, forestXFor(spriteX, k)));
-  const forestY = forestYFor(k, sceneH);
 
   return {
     layout,
     k,
     sceneH,
+    cardW,
     forestX,
     forestY,
     groundExtraH: Math.max(0, sceneH - forestY - FOREST.h * k),
     mirrorLeft: forestX > 0,
     mirrorRight: forestX + forestW < w,
     spriteX: forestX + (HERO_FEET_COLUMN - WAVE.anchorX) * k,
-    groundH: groundHFor(k, sceneH),
+    groundH: sceneH - forestY - FOREST.groundRow * k,
     dirtH: sceneH - forestY - DIRT_ROW * k,
     hudClear,
   };
 }
 
 /**
- * Whole-pixel top offset of the title card inside the scene: centred in the air above the
- * grass, never closer than 16px to the top, and allowed to overlap the ground (never the
- * scene bottom) when the scene is short. Integer so the pixel type stays on the pixel grid.
+ * Whole-pixel top offset of the title card inside the scene. With the HUD on screen the card's
+ * top lines up with the HUD's (16px under the scene top); otherwise it is centred in the air
+ * above the grass, never closer than 16px to the top, and allowed to overlap the ground (never
+ * the scene bottom) when the scene is short. Integer so the pixel type stays on the pixel grid.
  */
-export function titleCardTop(sceneH: number, groundH: number, cardH: number): number {
+export function titleCardTop(sceneH: number, groundH: number, cardH: number, pinned = false): number {
+  if (pinned) return CARD_TOP_MIN;
   const centred = Math.round((sceneH - groundH - cardH) / 2);
   const lowest = sceneH - CARD_BOTTOM_AIR - CARD_DROP - cardH;
   return Math.max(CARD_TOP_MIN, Math.min(centred, lowest));
@@ -373,6 +535,22 @@ function useSpriteRunning(ref: RefObject<HTMLElement>, enabled: boolean): boolea
   }, [enabled]);
 
   return inView && pageVisible;
+}
+
+/**
+ * While the game is open, the rest of the page (main's other sections and the footer) leaves
+ * the tab order and the accessibility tree; quitting restores exactly what it changed.
+ */
+function useInertPageWhile(active: boolean) {
+  useEffect(() => {
+    if (!active) return;
+    const others = [
+      ...document.querySelectorAll<HTMLElement>('main > :not(#hero)'),
+      ...document.querySelectorAll<HTMLElement>('main ~ footer'),
+    ].filter(el => !el.hasAttribute('inert'));
+    others.forEach(el => el.setAttribute('inert', ''));
+    return () => others.forEach(el => el.removeAttribute('inert'));
+  }, [active]);
 }
 
 /* ── Pieces ────────────────────────────────────────────────────────────── */
@@ -451,6 +629,7 @@ function GroundStrips({
   );
 }
 
+/** Eight 8x12 segments 4px apart: the meter sits on the 4px grid. */
 function Meter({
   label,
   filled,
@@ -465,9 +644,13 @@ function Meter({
   return (
     <span className="flex items-center gap-2 text-hud">
       <span className="w-5 text-fg-muted">{label}</span>
-      <span className="flex gap-[2px]">
+      <span className="flex gap-1">
         {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className={cx('block h-[10px] w-[6px]', i < filled ? fillClass : 'bg-surface-sunken')} />
+          <span
+            key={i}
+            data-meter-segment=""
+            className={cx('block h-3 w-2', i < filled ? fillClass : 'bg-surface-sunken')}
+          />
         ))}
       </span>
       {end}
@@ -479,8 +662,8 @@ function Meter({
 function HudNameplate() {
   return (
     <PixelPanel variant="wood" padding="sm" elevation={1} className="pointer-events-auto">
-      {/* Fixed tracks (57px = the face well) keep every label on whole pixels. */}
-      <div aria-hidden="true" className="grid grid-cols-[46px_148px] grid-rows-[17px_20px_20px] items-end gap-x-3">
+      {/* Fixed tracks (46px = the face well) keep every label on whole pixels. */}
+      <div aria-hidden="true" className="grid grid-cols-[46px_176px] grid-rows-[17px_20px_20px] items-end gap-x-3">
         <span className="row-span-3 block self-stretch bg-surface-sunken p-1">
           <img
             src={pixelSprites.face.src}
@@ -508,6 +691,26 @@ function HudNameplate() {
   );
 }
 
+/** Desktop game controls, next to Esc: HTML so they stay crisp at any zoom. */
+function ControlsHint() {
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-hud text-fg-muted">
+      <Chip>
+        <kbd className="font-[inherit]">Space</kbd>
+      </Chip>
+      <span>/ click to jump</span>
+      <span aria-hidden="true">·</span>
+      <Chip>
+        <kbd className="flex items-center font-[inherit]">
+          <PixelIcon name="arrow-down" size={12} />
+          <span className="sr-only">Down arrow</span>
+        </kbd>
+      </Chip>
+      <span>to slide</span>
+    </p>
+  );
+}
+
 /* ── Hero ──────────────────────────────────────────────────────────────── */
 
 /**
@@ -522,6 +725,7 @@ export default function Hero() {
   const isMobile = useIsMobile();
   const mode = useGameDisplayMode();
   const reduced = usePrefersReducedMotion();
+  const toast = useToast();
 
   const sceneRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -534,10 +738,13 @@ export default function Hero() {
   const measured = useElementSize(sceneRef);
   const vh = useViewportHeight();
   const width = measured?.w || document.documentElement.clientWidth || window.innerWidth;
-  const idealH = Math.min(vh, HERO_MAX_H) - HERO_NAV_H;
-  const layout = chooseHeroLayout(width, idealH, isMobile);
+  const idealH = heroHeight(vh) - HERO_NAV_H;
+  const { layout, compact } = planHero(width, vh, isMobile);
   const overlay = layout === 'overlay';
-  const scene = computeHeroScene(layout, width, Math.max(idealH, measured?.h ?? 0));
+  const scene = computeHeroScene(layout, width, Math.max(idealH, measured?.h ?? 0), {
+    viewportH: vh,
+    compact,
+  });
   const { k } = scene;
   const forestTiles = [
     scene.mirrorLeft && { x: scene.forestX - FOREST.w * k, mirrored: true },
@@ -545,7 +752,7 @@ export default function Hero() {
     scene.mirrorRight && { x: scene.forestX + FOREST.w * k, mirrored: true },
   ].filter((tile): tile is { x: number; mirrored: boolean } => Boolean(tile));
   const cardH = useElementSize(cardRef)?.h || CARD_H_ESTIMATE;
-  const cardTop = titleCardTop(scene.sceneH, scene.groundH, cardH);
+  const cardTop = titleCardTop(scene.sceneH, scene.groundH, cardH, scene.hudClear);
   // The scroll cue sits in the dirt at the bottom centre; skip it when the card reaches down there.
   const showScrollCue = overlay && cardTop + cardH + CARD_DROP <= scene.sceneH - scene.dirtH;
 
@@ -565,7 +772,24 @@ export default function Hero() {
     };
   }, [isPlaying]);
 
+  useInertPageWhile(isPlaying);
+
   const quit = useCallback(() => setIsPlaying(false), []);
+
+  // An in-page link outside the hero (the nav stays usable during play) leaves the game
+  // first, so the page it jumps to is no longer inert; focus stays on that link.
+  const leftViaLink = useRef(false);
+  useEffect(() => {
+    if (!isPlaying) return;
+    const onClick = (e: MouseEvent) => {
+      const link = (e.target as Element | null)?.closest?.('a[href^="#"]');
+      if (!link || link.closest('#hero')) return;
+      leftViaLink.current = true;
+      quit();
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, [isPlaying, quit]);
 
   // Esc quits in every mode (the rotate prompt has no game to catch it).
   useEffect(() => {
@@ -580,13 +804,14 @@ export default function Hero() {
   // The faded-out title card and HUD leave the tab order; focus follows the scene swap.
   useLayoutEffect(() => {
     for (const el of [titleRef.current, hudRef.current]) {
-      if (el) el.inert = isPlaying;
+      el?.toggleAttribute('inert', isPlaying);
     }
     if (isPlaying) {
       gameRef.current?.focus({ preventScroll: true });
-    } else if (wasPlaying.current) {
+    } else if (wasPlaying.current && !leftViaLink.current) {
       pressStartRef.current?.focus({ preventScroll: true });
     }
+    leftViaLink.current = false;
     wasPlaying.current = isPlaying;
   }, [isPlaying]);
 
@@ -602,58 +827,147 @@ export default function Hero() {
 
   const spriteLabel = 'Roy waving hello';
 
+  /* ── Title card ─────────────────────────────────────────────────────────
+     One set of pieces, three arrangements:
+     - title screen (and a compact one with the full card at least 560px tall): eyebrow, name,
+       role, tagline, availability, CTAs, Press start;
+     - shorter compact title screens: the CTAs move up under the role so they make the fold;
+     - band (phones): eyebrow, name, role, availability, CTAs, tagline, Press start;
+       from 768px the CTAs and Press start take a second column beside the text. */
+  const fullCard = overlay && scene.cardW >= HERO_CARD_W;
+  const titleOrder = overlay && fullCard && (!compact || vh >= HERO_FULL_CARD_VH);
+  const wideBand = !overlay && width >= 768;
+
+  const eyebrow = (
+    <p className="flex items-center gap-2 text-label text-accent-fg">
+      <PixelIcon name="play" size={12} />
+      Player one
+    </p>
+  );
+  const name = (
+    <h1 id="hero-title" className="mt-3 text-display-xl text-fg">
+      {splitName(bio.name)}
+    </h1>
+  );
+  const role = <p className="mt-2 text-body-l font-semibold text-accent-fg">{bio.role}</p>;
+  const tagline = (className: string) => (
+    <p className={cx(className, 'text-pretty text-body-l text-fg')}>{bio.tagline}</p>
+  );
+  const availability = (className: string) => (
+    <div className={cx(className, 'flex')}>
+      <Chip className="gap-2">
+        <span aria-hidden="true" className="block size-2 bg-xp" />
+        {bio.availability}
+      </Chip>
+    </div>
+  );
+  const onResume = () => {
+    toast.show(`Loot acquired: ${bio.resume.fileName}`, { icon: <PixelIcon name="trophy" size={24} /> });
+  };
+  const ctas = (className: string, buttonClass: string) => (
+    <div className={cx(className, 'flex gap-6')}>
+      <Button
+        href="#projects"
+        size="lg"
+        className={buttonClass}
+        leadingIcon={<PixelIcon name="play" size={24} />}
+      >
+        View projects
+      </Button>
+      <Button
+        href={bio.resume.href}
+        download={bio.resume.fileName}
+        variant="secondary"
+        size="lg"
+        className={buttonClass}
+        leadingIcon={<PixelIcon name="download" size={24} />}
+        onClick={onResume}
+      >
+        Resume
+      </Button>
+    </div>
+  );
+  const pressStart = (className: string) => (
+    <Button
+      ref={pressStartRef}
+      variant="ghost"
+      className={className}
+      onClick={() => setIsPlaying(true)}
+      leadingIcon={<PixelIcon name="joystick" size={24} />}
+    >
+      Press start to play
+    </Button>
+  );
+
+  let cardBody: ReactNode;
+  if (titleOrder) {
+    cardBody = (
+      <>
+        {eyebrow}
+        {name}
+        {role}
+        {tagline('mt-3')}
+        {availability('mt-4')}
+        {ctas('mt-6 flex-col md:flex-row', 'w-full md:w-auto')}
+        {pressStart('mt-4')}
+      </>
+    );
+  } else if (overlay) {
+    cardBody = (
+      <>
+        {eyebrow}
+        {name}
+        {role}
+        {ctas(cx('mt-6', fullCard ? 'flex-row' : 'flex-col'), fullCard ? 'w-auto' : 'w-full')}
+        {availability('mt-6')}
+        {tagline('mt-4')}
+        {pressStart('mt-4')}
+      </>
+    );
+  } else if (wideBand) {
+    cardBody = (
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-8">
+        <div className="min-w-0">
+          {eyebrow}
+          {name}
+          {role}
+          {tagline('mt-3 max-w-[60ch]')}
+          {availability('mt-4')}
+        </div>
+        {/* The primary CTA's top lines up with the name's. */}
+        <div className="flex flex-col items-start pt-7">
+          {ctas('flex-col self-stretch', 'w-full')}
+          {pressStart('mt-4')}
+        </div>
+      </div>
+    );
+  } else {
+    cardBody = (
+      <>
+        {eyebrow}
+        {name}
+        {role}
+        {availability('mt-4')}
+        {ctas('mt-6 flex-col sm:flex-row', 'w-full sm:w-auto')}
+        {tagline('mt-6')}
+        {pressStart('mt-4')}
+      </>
+    );
+  }
+
   const titleCard = (
-    <div ref={cardRef} className={overlay ? 'w-[544px] max-w-full' : undefined}>
+    <div
+      ref={cardRef}
+      className={overlay ? 'max-w-full' : undefined}
+      style={overlay ? { width: `${scene.cardW}px` } : undefined}
+    >
       <PixelPanel
         variant="wood"
         elevation={overlay ? 2 : 0}
         className={overlay ? undefined : 'w-full px-4 pb-10 pt-6 md:px-6 md:pt-8'}
       >
-        <div className={overlay ? undefined : 'mx-auto max-w-[544px] md:mx-0'}>
-          <p className="flex items-center gap-2 text-label text-accent-fg">
-            <PixelIcon name="play" size={12} />
-            Player one
-          </p>
-          <h1 id="hero-title" className="mt-3 text-display-xl text-fg">
-            {splitName(bio.name)}
-          </h1>
-          <p className="mt-2 text-body-l font-semibold text-accent-fg">{bio.role}</p>
-          <p className="mt-3 text-pretty text-body-l text-fg">{bio.tagline}</p>
-          <div className="mt-4 flex">
-            <Chip className="gap-2">
-              <span aria-hidden="true" className="block size-2 bg-xp" />
-              {bio.availability}
-            </Chip>
-          </div>
-          <div className="mt-6 flex flex-col gap-6 md:flex-row">
-            <Button
-              href="#projects"
-              size="lg"
-              className="w-full md:w-auto"
-              leadingIcon={<PixelIcon name="play" size={24} />}
-            >
-              View projects
-            </Button>
-            <Button
-              href={bio.resume.href}
-              download={bio.resume.fileName}
-              variant="secondary"
-              size="lg"
-              className="w-full md:w-auto"
-              leadingIcon={<PixelIcon name="download" size={24} />}
-            >
-              Resume
-            </Button>
-          </div>
-          <Button
-            ref={pressStartRef}
-            variant="ghost"
-            className="mt-4"
-            onClick={() => setIsPlaying(true)}
-            leadingIcon={<PixelIcon name="joystick" size={24} />}
-          >
-            Press start to play
-          </Button>
+        <div className={overlay ? undefined : wideBand ? 'mx-auto max-w-[1120px]' : 'mx-auto max-w-[544px]'}>
+          {cardBody}
         </div>
       </PixelPanel>
     </div>
@@ -664,154 +978,160 @@ export default function Hero() {
       ? 'fixed inset-0 z-[200] flex items-center justify-center bg-bg'
       : mode === 'rotate'
         ? 'px-dots fixed inset-0 z-[200] flex flex-col items-center justify-center gap-8 bg-bg px-4'
-        : 'absolute inset-x-0 bottom-0 top-16 z-20 flex flex-col items-center justify-center gap-6 bg-shadow/70 px-4';
+        : 'px-dots absolute inset-x-0 bottom-0 top-16 z-20 flex flex-col items-center justify-center gap-6 bg-bg px-4';
 
   return (
-    <section
-      id="hero"
-      aria-labelledby="hero-title"
-      data-layout={layout}
-      className={cx(
-        'relative bg-bg pt-16',
-        overlay ? 'flex min-h-[min(100svh,880px)] flex-col overflow-hidden' : 'overflow-x-clip pb-1',
-      )}
-    >
-      {/* ── The world: forest + Roy at one integer scale ─────────────────── */}
-      <div
-        ref={sceneRef}
-        className={cx('hero-scene overflow-hidden', overlay ? 'absolute inset-x-0 bottom-0 top-16' : 'relative')}
-        style={overlay ? undefined : { height: `${scene.sceneH}px` }}
-      >
-        {forestTiles.map(tile => (
-          <img
-            key={tile.x}
-            src={FOREST.src}
-            alt=""
-            width={FOREST.w * k}
-            height={FOREST.h * k}
-            decoding="async"
-            draggable={false}
-            className={cx('pixelated absolute max-w-none select-none', tile.mirrored && '-scale-x-100')}
-            style={{
-              left: `${tile.x}px`,
-              top: `${scene.forestY}px`,
-              width: `${FOREST.w * k}px`,
-              height: `${FOREST.h * k}px`,
-            }}
-          />
-        ))}
-        {scene.groundExtraH > 0 && (
-          <GroundStrips
-            k={k}
-            forestX={scene.forestX}
-            top={scene.forestY + FOREST.h * k}
-            depth={scene.groundExtraH}
-          />
-        )}
-        {/* Night: the world gets two moonlight washes, Roy (between them) one, so he stays lit. */}
-        <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
-        <motion.div
-          className="absolute"
-          style={{ left: `${scene.spriteX}px`, bottom: `${scene.groundH}px` }}
-          initial={false}
-          animate={{ opacity: isPlaying ? 0 : 1 }}
-          transition={sceneTransition}
-        >
-          {k <= 4 ? (
-            <Character pose="wave" scale={k} label={spriteLabel} />
-          ) : (
-            <HeroSprite scale={k} label={spriteLabel} paused={isPlaying} />
-          )}
-        </motion.div>
-        <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
-      </div>
-
-      {/* ── HUD nameplate (desktop) ─────────────────────────────────────── */}
-      {overlay && scene.hudClear && (
-        <div className="pointer-events-none absolute inset-x-0 top-16 z-10">
-          <div className="mx-auto flex max-w-[1120px] justify-end px-6 pt-4 lg:px-8">
-            <motion.div
-              ref={hudRef}
-              initial={false}
-              animate={isPlaying ? { opacity: 0, y: -16 } : { opacity: 1, y: 0 }}
-              transition={slide(16)}
-            >
-              <HudNameplate />
-            </motion.div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Title card ──────────────────────────────────────────────────── */}
-      <motion.div
-        ref={titleRef}
+    <LazyMotion features={domAnimation}>
+      <section
+        id="hero"
+        aria-labelledby="hero-title"
+        data-layout={layout}
+        data-compact={compact || undefined}
         className={cx(
-          'relative z-10',
-          overlay && 'mx-auto w-full max-w-[1120px] flex-1 px-6 pb-9 lg:px-8',
+          'relative bg-bg pt-16',
+          overlay ? 'hero--overlay flex flex-col overflow-hidden' : 'overflow-x-clip pb-1',
         )}
-        style={overlay ? { paddingTop: `${cardTop}px` } : undefined}
-        initial={false}
-        animate={isPlaying ? { opacity: 0, x: -24 } : { opacity: 1, x: 0 }}
-        transition={slide(24)}
       >
-        {titleCard}
-      </motion.div>
-
-      {/* ── Scroll cue (desktop), on the dirt under the grass ───────────── */}
-      {showScrollCue && (
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 z-10 flex items-center justify-center gap-2 text-hud text-fg"
-          style={{ bottom: `${Math.round((scene.dirtH - 16) / 2)}px` }}
-          initial={false}
-          animate={{ opacity: isPlaying ? 0 : 1 }}
-          transition={sceneTransition}
+        {/* ── The world: forest + Roy at one integer scale ─────────────────── */}
+        <div
+          ref={sceneRef}
+          className={cx('hero-scene overflow-hidden', overlay ? 'absolute inset-x-0 bottom-0 top-16' : 'relative')}
+          style={overlay ? undefined : { height: `${scene.sceneH}px` }}
         >
-          SCROLL
-          <PixelIcon name="arrow-down" size={12} />
-        </motion.div>
-      )}
-
-      {/* ── Game / rotate prompt ────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isPlaying && (
-          <motion.div
-            key="game"
-            ref={gameRef}
-            tabIndex={-1}
-            role="region"
-            aria-label="Roy Runner"
-            className={cx(gameClass, 'outline-none')}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          {forestTiles.map(tile => (
+            <img
+              key={tile.x}
+              src={FOREST.src}
+              alt=""
+              width={FOREST.w * k}
+              height={FOREST.h * k}
+              decoding="async"
+              draggable={false}
+              className={cx('pixelated absolute max-w-none select-none', tile.mirrored && '-scale-x-100')}
+              style={{
+                left: `${tile.x}px`,
+                top: `${scene.forestY}px`,
+                width: `${FOREST.w * k}px`,
+                height: `${FOREST.h * k}px`,
+              }}
+            />
+          ))}
+          {scene.groundExtraH > 0 && (
+            <GroundStrips
+              k={k}
+              forestX={scene.forestX}
+              top={scene.forestY + FOREST.h * k}
+              depth={scene.groundExtraH}
+            />
+          )}
+          {/* Night: the world gets two moonlight washes, Roy (between them) one, so he stays lit. */}
+          <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
+          <m.div
+            className="absolute"
+            style={{ left: `${scene.spriteX}px`, bottom: `${scene.groundH}px` }}
+            initial={false}
+            animate={{ opacity: isPlaying ? 0 : 1 }}
             transition={sceneTransition}
           >
-            {mode === 'rotate' ? (
-              <ArcadeFallback />
+            {k <= 4 ? (
+              <Character pose="wave" scale={k} label={spriteLabel} />
             ) : (
-              <Suspense fallback={<p className="text-label text-fg">Loading...</p>}>
-                <MiniGame onQuit={quit} showTouchControls={mode === 'touch'} />
-              </Suspense>
+              <HeroSprite scale={k} label={spriteLabel} paused={isPlaying} />
             )}
+          </m.div>
+          <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
+        </div>
 
-            {/* Touch play has its own QUIT inside the game chrome. */}
-            {mode !== 'touch' && (
-              <div className="flex items-center gap-4">
-                <Button variant="secondary" onClick={quit} leadingIcon={<PixelIcon name="close" size={12} />}>
-                  Quit
-                </Button>
-                {mode === 'desktop' && (
-                  <Chip>
-                    <kbd className="font-[inherit]">Esc</kbd>
-                  </Chip>
-                )}
-              </div>
-            )}
-          </motion.div>
+        {/* ── HUD nameplate (desktop) ─────────────────────────────────────── */}
+        {overlay && scene.hudClear && (
+          <div className="pointer-events-none absolute inset-x-0 top-16 z-10">
+            <div className="mx-auto flex max-w-[1120px] justify-end px-6 pt-4 lg:px-8">
+              <m.div
+                ref={hudRef}
+                initial={false}
+                animate={isPlaying ? { opacity: 0, y: -16 } : { opacity: 1, y: 0 }}
+                transition={slide(16)}
+              >
+                <HudNameplate />
+              </m.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
-    </section>
+
+        {/* ── Title card ──────────────────────────────────────────────────── */}
+        <m.div
+          ref={titleRef}
+          className={cx(
+            'relative z-10',
+            overlay && 'mx-auto w-full max-w-[1120px] flex-1 px-4 pb-9 md:px-6 lg:px-8',
+          )}
+          style={overlay ? { paddingTop: `${cardTop}px` } : undefined}
+          initial={false}
+          animate={isPlaying ? { opacity: 0, x: -24 } : { opacity: 1, x: 0 }}
+          transition={slide(24)}
+        >
+          {titleCard}
+        </m.div>
+
+        {/* ── Scroll cue (desktop), on the dirt under the grass ───────────── */}
+        {showScrollCue && (
+          <m.div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 z-10 flex items-center justify-center gap-2 text-hud text-fg"
+            style={{ bottom: `${Math.round((scene.dirtH - 16) / 2)}px` }}
+            initial={false}
+            animate={{ opacity: isPlaying ? 0 : 1 }}
+            transition={sceneTransition}
+          >
+            SCROLL
+            <PixelIcon name="arrow-down" size={12} />
+          </m.div>
+        )}
+
+        {/* ── Game / rotate prompt ────────────────────────────────────────── */}
+        <AnimatePresence>
+          {isPlaying && (
+            <m.div
+              key="game"
+              ref={gameRef}
+              tabIndex={-1}
+              role="region"
+              aria-label="Roy Runner"
+              className={cx(gameClass, 'outline-none')}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={sceneTransition}
+            >
+              {mode === 'rotate' ? (
+                <ArcadeFallback />
+              ) : (
+                <Suspense fallback={<p className="text-label text-fg">Loading...</p>}>
+                  <MiniGame onQuit={quit} showTouchControls={mode === 'touch'} />
+                </Suspense>
+              )}
+
+              {/* Touch play has its own QUIT inside the game chrome. */}
+              {mode !== 'touch' && (
+                <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
+                  <div className="flex items-center gap-4">
+                    <Button variant="secondary" onClick={quit} leadingIcon={<PixelIcon name="close" size={12} />}>
+                      Quit
+                    </Button>
+                    {mode === 'desktop' && (
+                      <Chip>
+                        <kbd className="font-[inherit]">Esc</kbd>
+                      </Chip>
+                    )}
+                  </div>
+                  {mode === 'desktop' && <ControlsHint />}
+                </div>
+              )}
+            </m.div>
+          )}
+        </AnimatePresence>
+      </section>
+    </LazyMotion>
   );
 }
 

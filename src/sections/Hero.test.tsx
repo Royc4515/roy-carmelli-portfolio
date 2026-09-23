@@ -1,17 +1,23 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Hero, {
   FOREST_BIRD_COLUMNS,
+  HERO_BAND_SHARE,
   HERO_CARD_W,
   HERO_FEET_COLUMN,
+  HERO_NAV_H,
   chooseHeroLayout,
+  compactOverlayFit,
   computeHeroScene,
   containerContentLeft,
+  heroHeight,
   placeOverlaySprite,
+  planHero,
   sceneScale,
   titleCardTop,
 } from './Hero';
+import { ToastProvider } from '../components/ui/Toast';
 import { bio } from '../data/bio';
 import { pixelSprites } from '../theme/pixelSprites';
 
@@ -44,6 +50,12 @@ function setupMatchMedia(opts: { mobileWidth: boolean; coarse: boolean; portrait
       dispatchEvent: vi.fn(),
     } as MediaQueryList;
   };
+}
+
+/** jsdom's window is 1024x768; phone tests resize it (the hero reads innerWidth/innerHeight). */
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: width });
+  Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: height });
 }
 
 /** The game is lazy-loaded: wait for its canvas. */
@@ -127,6 +139,91 @@ describe('Hero — desktop', () => {
     await userEvent.click(screen.getByRole('button', { name: /^quit$/i }));
     await waitFor(() => expect(document.querySelector('canvas')).toBeNull());
   });
+
+  it('pops the same "Loot acquired" toast as the Resume zone when the Resume CTA is clicked', async () => {
+    render(
+      <ToastProvider>
+        <Hero />
+      </ToastProvider>,
+    );
+    const resume = screen.getByRole('link', { name: /resume/i });
+    // Keep jsdom from trying to navigate to the PDF.
+    resume.addEventListener('click', e => e.preventDefault());
+    await userEvent.click(resume);
+    expect(screen.getByRole('status')).toHaveTextContent(`Loot acquired: ${bio.resume.fileName}`);
+  });
+
+  it('makes the rest of the page inert while the game plays, and restores it on quit', async () => {
+    render(
+      <>
+        <main>
+          <Hero />
+          <section id="projects">
+            <a href="#x">Quest</a>
+          </section>
+          {/* React 18 has no typed inert prop: pass the attribute as a string. */}
+          <section id="contact" {...{ inert: '' }}>
+            <a href="#y">Already inert</a>
+          </section>
+        </main>
+        <footer>Footer</footer>
+      </>,
+    );
+    const projects = document.getElementById('projects')!;
+    const footer = document.querySelector('footer')!;
+    await userEvent.click(screen.getByRole('button', { name: /press start/i }));
+    await findCanvas();
+    expect(projects).toHaveAttribute('inert');
+    expect(footer).toHaveAttribute('inert');
+    expect(document.getElementById('hero')).not.toHaveAttribute('inert');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(document.querySelector('canvas')).toBeNull());
+    expect(projects).not.toHaveAttribute('inert');
+    expect(footer).not.toHaveAttribute('inert');
+    // Only what the game changed is restored.
+    expect(document.getElementById('contact')).toHaveAttribute('inert');
+  });
+
+  it('leaves the game when an in-page link outside the hero is followed, keeping focus on it', async () => {
+    render(
+      <>
+        <header>
+          <a href="#projects">Projects</a>
+        </header>
+        <main>
+          <Hero />
+          <section id="projects">Quests</section>
+        </main>
+      </>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /press start/i }));
+    await findCanvas();
+    const link = screen.getByRole('link', { name: 'Projects' });
+    await userEvent.click(link);
+    await waitFor(() => expect(document.querySelector('canvas')).toBeNull());
+    expect(document.getElementById('projects')).not.toHaveAttribute('inert');
+    expect(screen.getByRole('button', { name: /press start/i })).not.toHaveFocus();
+  });
+
+  it('shows the controls next to Esc while playing, with pixel icons instead of arrow glyphs', async () => {
+    render(<Hero />);
+    await userEvent.click(screen.getByRole('button', { name: /press start/i }));
+    await findCanvas();
+    const game = screen.getByRole('region', { name: 'Roy Runner' });
+    expect(game).toHaveTextContent('Esc');
+    expect(game).toHaveTextContent(/Space\s*\/ click to jump/);
+    expect(game).toHaveTextContent(/Down arrow\s*to slide/);
+    expect(game.querySelector('svg[data-icon="arrow-down"]')).not.toBeNull();
+    expect(game.textContent).not.toMatch(/[\u2190-\u21ff]/u);
+  });
+
+  it('draws the HUD meters on the 4px grid (8x12 segments, 4px apart)', () => {
+    const { container } = render(<Hero />);
+    const segments = container.querySelectorAll('[data-meter-segment]');
+    expect(segments).toHaveLength(16);
+    segments.forEach(seg => expect(seg).toHaveClass('h-3', 'w-2'));
+    expect(segments[0].parentElement).toHaveClass('gap-1');
+  });
 });
 
 describe('Hero — phone portrait', () => {
@@ -134,6 +231,20 @@ describe('Hero — phone portrait', () => {
     setupMatchMedia({ mobileWidth: true, coarse: true, portrait: true });
     vi.restoreAllMocks();
     Element.prototype.scrollIntoView = vi.fn();
+    setViewport(390, 844);
+  });
+  afterEach(() => setViewport(1024, 768));
+
+  it('stacks the band over the card and orders the card for the fold: name, role, chip, CTAs, tagline', () => {
+    const { container } = render(<Hero />);
+    expect(container.querySelector('#hero')).toHaveAttribute('data-layout', 'stack');
+    const text = container.querySelector('#hero')!.textContent!;
+    const at = (needle: string) => text.indexOf(needle);
+    expect(at(bio.role)).toBeGreaterThan(at('Carmelli'));
+    expect(at(bio.availability)).toBeGreaterThan(at(bio.role));
+    expect(at('View projects')).toBeGreaterThan(at(bio.availability));
+    expect(at(bio.tagline)).toBeGreaterThan(at('Resume'));
+    expect(at('Press start to play')).toBeGreaterThan(at(bio.tagline));
   });
 
   it('renders the PRESS START button on a phone', () => {
@@ -281,7 +392,7 @@ describe('hero scene geometry', () => {
   it('stacks on phones and narrow portrait tablets, overlays wherever Roy fits beside the card', () => {
     expect(chooseHeroLayout(390, 780, true)).toBe('stack');
     expect(chooseHeroLayout(768, 816, false)).toBe('stack');
-    // A landscape phone keeps the name above the fold: the scene grows to fit the card.
+    // A landscape phone gets the compact title screen (CTAs above the fold).
     expect(chooseHeroLayout(844, 326, false)).toBe('overlay');
     expect(chooseHeroLayout(1024, 704, false)).toBe('overlay');
     expect(chooseHeroLayout(1280, 736, false)).toBe('overlay');
@@ -292,5 +403,122 @@ describe('hero scene geometry', () => {
     expect(titleCardTop(736, 130, 520)).toBe(43);
     expect(titleCardTop(593, 88, 520)).toBe(16);
     expect(Number.isInteger(titleCardTop(701, 99, 511))).toBe(true);
+  });
+
+  it('pins the title card top to the HUD top (16px) when the HUD is on screen', () => {
+    expect(titleCardTop(736, 130, 520, true)).toBe(16);
+    expect(titleCardTop(836, 129, 520, true)).toBe(16);
+  });
+});
+
+describe('hero height', () => {
+  it('fills the viewport up to 880px, and a viewport less than 96px taller than that', () => {
+    expect(heroHeight(657)).toBe(657);
+    expect(heroHeight(800)).toBe(800);
+    expect(heroHeight(880)).toBe(880);
+    expect(heroHeight(900)).toBe(900);
+    expect(heroHeight(975)).toBe(975);
+    expect(heroHeight(976)).toBe(880);
+    expect(heroHeight(1080)).toBe(880);
+  });
+
+  it('keeps the desktop scale when a 900px-tall viewport is filled (1440x900 stays x7)', () => {
+    const s = computeHeroScene('overlay', 1440, heroHeight(900) - HERO_NAV_H);
+    expect(s.k).toBe(7);
+    expect(s.forestY).toBe(0);
+    expect(s.hudClear).toBe(true);
+  });
+});
+
+/* ── Small and short viewports (P1-04) ─────────────────────────────────── */
+
+describe('hero layout per viewport', () => {
+  it.each([
+    [1280, 800, false, 'overlay', false],
+    [1440, 900, false, 'overlay', false],
+    [1920, 1080, false, 'overlay', false],
+    [1024, 768, false, 'overlay', false],
+    [1366, 657, false, 'overlay', false],
+    [390, 844, true, 'stack', false],
+    [360, 740, true, 'stack', false],
+    [768, 1024, false, 'stack', false],
+    [800, 600, false, 'overlay', true],
+    [844, 390, false, 'overlay', true],
+    [640, 400, true, 'overlay', true],
+    [667, 375, true, 'overlay', true],
+  ] as const)('%ix%i (mobile %s) → %s, compact %s', (w, h, mobile, layout, compact) => {
+    expect(planHero(w, h, mobile)).toEqual({ layout, compact });
+  });
+});
+
+describe('band (stacked) geometry', () => {
+  const band = (w: number, vh: number) => computeHeroScene('stack', w, 0, { viewportH: vh });
+
+  it.each([
+    [360, 740, 3],
+    [390, 844, 3],
+    [375, 600, 2],
+    [768, 1024, 4],
+    [820, 1180, 4],
+  ])('%ix%i: x%i, at most 38%% of the viewport, Roy and the grass whole', (w, vh, k) => {
+    const s = band(w, vh);
+    expect(s.k).toBe(k);
+    expect(s.sceneH).toBeLessThanOrEqual(Math.round(HERO_BAND_SHARE * vh));
+    expect(s.sceneH % k).toBe(0);
+    // Anchored to the bottom: the canopy crops, the ground (11 native rows) stays.
+    expect(s.forestY + forest.h * k).toBe(s.sceneH);
+    expect(s.groundH).toBe((forest.h - forest.groundRow) * k);
+    // Roy's head is inside the band with air above it.
+    const spriteTop = s.sceneH - s.groundH - wave.frameH * k;
+    expect(spriteTop).toBeGreaterThanOrEqual(4 * k);
+    expect(s.forestX).toBeLessThanOrEqual(0);
+    expect(s.forestX + forest.w * k).toBeGreaterThanOrEqual(w);
+  });
+
+  it('crops the canopy on phones (360x740 keeps 93 of 112 rows)', () => {
+    expect(band(360, 740).sceneH).toBe(93 * 3);
+  });
+});
+
+describe('compact title screen geometry', () => {
+  it.each([
+    [844, 390],
+    [640, 400],
+    [800, 600],
+    [667, 375],
+    [740, 360],
+    [932, 430],
+  ])('%ix%i: Roy stands whole in the first screen, beside the card, no bird sliced', (w, vh) => {
+    const viewH = heroHeight(vh) - HERO_NAV_H;
+    const fit = compactOverlayFit(w, viewH);
+    expect(fit).not.toBeNull();
+    // The card grows the scene below the first screen; the forest is anchored to the first screen.
+    const s = computeHeroScene('overlay', w, viewH + 300, { viewportH: vh, compact: true });
+    const { k } = s;
+    expect(k).toBe(fit!.k);
+    expect(s.cardW).toBe(fit!.cardW);
+    expect(s.cardW % 4).toBe(0);
+    expect(s.cardW).toBeGreaterThanOrEqual(w >= 768 ? 432 : 368);
+    const spriteTop = viewH + 300 - s.groundH - wave.frameH * k;
+    expect(spriteTop).toBeGreaterThanOrEqual(0);
+    expect(spriteTop + wave.frameH * k).toBeLessThanOrEqual(viewH);
+    expect(s.forestY + forest.h * k).toBeGreaterThanOrEqual(viewH - forest.h);
+    const cardEdge = containerContentLeft(w) + s.cardW + 12;
+    expect(s.spriteX).toBeGreaterThanOrEqual(cardEdge + 32);
+    expect(s.spriteX + wave.frameW * k).toBeLessThanOrEqual(w - 16);
+    for (const [from, to] of FOREST_BIRD_COLUMNS) {
+      const b0 = s.forestX + from * k;
+      const b1 = s.forestX + to * k;
+      const hidden = Math.min(Math.max(cardEdge - b0, 0), b1 - b0);
+      expect(hidden === b1 - b0 || hidden <= k).toBe(true);
+    }
+    // The dirt fills the scene below the forest.
+    expect(s.forestY + forest.h * k + s.groundExtraH).toBe(viewH + 300);
+  });
+
+  it('keeps the full 544px card on landscape phones and narrows it at 200% zoom', () => {
+    expect(compactOverlayFit(844, 326)).toEqual({ k: 3, cardW: HERO_CARD_W });
+    expect(compactOverlayFit(640, 336)?.k).toBe(3);
+    expect(compactOverlayFit(640, 336)!.cardW).toBeLessThan(HERO_CARD_W);
   });
 });

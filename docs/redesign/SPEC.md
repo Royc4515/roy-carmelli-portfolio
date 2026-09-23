@@ -124,7 +124,8 @@ Floors everywhere: body 16px (14px only for captions/meta), HUD 12px (13 preferr
 - Breakpoints: Tailwind defaults `sm 640 · md 768 · lg 1024 · xl 1280`.
 - Section rhythm: `py-16` (64) base, `md:py-24` (96). Zone header → content 32. Card gap 24.
   Panel padding 16 (base) / 24 (`md`).
-- No `min-height: 100vh` except the hero (`min-h-[100svh]`, capped at 880px on desktop).
+- No `min-height: 100vh` except the hero (`min-h-[100svh]`, capped at 880px on desktop, or the
+  full `100svh` when the viewport is 881-975px tall so no sliver of Zone 01 shows).
 - Zone grounds alternate: hero scene · Projects `bg` · About `bg-alt` · Skills `bg` ·
   Resume paper band on `bg-alt` · Contact `bg` · Footer `surface-sunken`. Every zone carries `px-dots`.
 
@@ -317,18 +318,28 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   would make the character exceed 60% of the scene height (`HERO_MAX_SHARE`); mirrored copies
   of the forest then fill the sides seamlessly. A forest shorter than the scene is anchored to
   the top and the ground is extended downward by repeating its bottom dirt rows (shifted per
-  strip); a taller one is anchored to the bottom. Scene height is `min(100svh, 880px) - 64px`.
+  strip); a taller one is anchored to the bottom. Scene height is the hero height (see §2.3) minus 64px.
   The character's feet sit on forest column 182 on the grass line; its x is chosen per viewport
   so the title card never covers it, no baked-in bird sits on its head and the HUD stays clear.
-  Title card: wood panel, elevation 2, 544px, left-aligned to the page container: `PLAYER ONE`
+  Title card: wood panel, elevation 2, 544px, left-aligned to the page container, its top
+  aligned with the HUD top: `PLAYER ONE`
   eyebrow, H1 name on two lines, role (`bio.role`), tagline, availability chip, `View projects`
   (primary lg) + `Resume` (secondary lg, PDF), ghost `Press start to play`. HUD nameplate
   top-right (omitted when it would collide). Static `SCROLL` cue on the dirt. Night: moonlight
   washes over the forest (stronger) and the character (lighter). Pressing start fades the card
   and HUD out (`--dur-scene`, stepped slide) and fades the lazily loaded game in over the dimmed
-  scene; Esc/Quit return focus to Press start. Phones and portrait tablets (< 1024 portrait):
-  a scene band (×3 phones, ×4 tablets) with the character at ~60% of the width, then the title
-  card as a full-bleed wood slab with stacked full-width CTAs; HUD and scroll cue hidden.
+  scene; Esc/Quit return focus to Press start. During desktop play the game sits on an opaque
+  `bg` backdrop, the rest of `main` and the footer are `inert`, an HTML controls hint sits next
+  to Esc, and following an in-page nav link quits the game first (focus stays on the link).
+  Phones and portrait tablets (< 1024 portrait): a scene band (×3 phones, ×4 tablets, ×2 below
+  700px tall) at most 38% of the viewport height, canopy cropped and anchored at the bottom so
+  the character and grass stay, then the title card as a full-bleed wood slab. Phone card order:
+  eyebrow, H1, role, availability chip, CTAs, tagline, Press start. Tablets use two columns (text
+  left; CTAs and Press start right, CTA top level with the H1). HUD and scroll cue hidden.
+  Short or narrow landscape viewports (e.g. 844×390, 800×600, 640×400) get a compact title
+  screen: the same overlay composition with k chosen so the forest fills the first screen and
+  the character stands whole, a narrower card when needed (never slicing a bird), and CTAs
+  directly under the role below 560px tall. Name, role and primary CTA are always above the fold.
 - **Projects (Zone 01 · The Library).** ZoneHeader "Things I've Built". Main quests: the first
   spans full width (visual 7/12, text 5/12), the other two side by side; side quests in a 3-col
   grid (compact wood cards); research logs as a compact list. QuestCard anatomy: visual (16:10,

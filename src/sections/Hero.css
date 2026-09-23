@@ -3,6 +3,19 @@
  * only holds what utilities cannot express.
  */
 
+/* The title screen fills the viewport up to 880px. A viewport up to 95px
+   taller than that is filled too, so no sliver of Zone 01 peeks under the
+   ground (heroHeight() in Hero.tsx mirrors this). */
+.hero--overlay {
+  min-height: min(100svh, 880px);
+}
+
+@media (880px < height < 976px) {
+  .hero--overlay {
+    min-height: 100svh;
+  }
+}
+
 /* Night: the same forest under moonlight. Multiply washes in a night token
    darken and cool the day art without a second bitmap. Hero.tsx stacks two:
    one under Roy and one over everything, so the world gets both and Roy one. */
