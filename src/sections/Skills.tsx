@@ -23,7 +23,7 @@ import { cx } from '../components/ui/cx';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { equipmentStats, skillDetail, type SkillDetail, type SkillGroup } from '../lib/skillUsage';
-import { moveInGrid, splitColumns, type GridPos } from '../lib/equipmentGrid';
+import { moveInGrid, type GridPos } from '../lib/equipmentGrid';
 import './Skills.css';
 
 /** Slot heading icons (12px, existing set). Armor is the body slot, hence `person`. */
@@ -38,13 +38,6 @@ const SLOT_ICONS: Readonly<Record<string, PixelIconName>> = {
 };
 
 const ROW_LENGTHS = skills.map(group => group.items.length);
-/** First slot of the right-hand column (≥ 1280px). A fixed split, so opening a tooltip can
-    never rebalance the columns (CSS columns did, and the page jumped under the pointer). */
-const SPLIT = splitColumns(ROW_LENGTHS);
-const COLUMNS = [
-  { first: 0, groups: skills.slice(0, SPLIT) },
-  { first: SPLIT, groups: skills.slice(SPLIT) },
-].filter(column => column.groups.length > 0);
 
 const cellKey = ({ row, col }: GridPos) => `${row}-${col}`;
 
@@ -169,25 +162,26 @@ function SkillSlot({ group, row, baseId, active, setActive, open, setOpen, inlin
       index={row}
       role="row"
       className={cx(
-        'relative short:col-span-2 short:grid short:grid-cols-subgrid short:items-start',
+        'relative xl:col-span-2 xl:grid xl:grid-cols-subgrid xl:items-start short:col-span-2 short:grid short:grid-cols-subgrid short:items-start',
         openIndex >= 0 && 'z-10',
       )}
     >
       <div role="rowheader" className="skill-slot__header">
         <h3 className="flex items-center gap-2 text-hud uppercase">
           {icon && <PixelIcon name={icon} size={12} className="skill-slot__icon shrink-0" />}
-          <span>
+          {/* Tall screens from xl stack the slot over its category (Skills.css). */}
+          <span className="skill-slot__title">
             {/* Reads "Weapons: Languages"; the dot is visual only. */}
             <span className="text-fg-subtle">
               {group.slot}
-              <span aria-hidden="true"> ·</span>
+              <span className="skill-slot__dot" aria-hidden="true"> ·</span>
               <span className="sr-only">:</span>
             </span>{' '}
             <span className="text-accent-fg">{group.category}</span>
           </span>
         </h3>
       </div>
-      <div className="mt-3 flex flex-wrap gap-2 short:mt-0 short:gap-x-(--skill-gap-x) short:gap-y-(--skill-row-gap)">
+      <div className="mt-3 flex flex-wrap gap-2 xl:mt-0 xl:gap-x-(--skill-gap-x) xl:gap-y-(--skill-row-gap) short:mt-0 short:gap-x-(--skill-gap-x) short:gap-y-(--skill-row-gap)">
         {details.map((detail, col) => (
           <SkillItem
             key={detail.name}
@@ -225,7 +219,8 @@ function Keycap({ children, wide = false }: { children: ReactNode; wide?: boolea
 /**
  * Left column (≥ 768px; phones skip it, Roy already stands in Hero, About and Contact):
  * Roy in an inset well, his level, a few stats counted from the data, and the grid's
- * controls, shown while the grid has keyboard focus.
+ * controls, shown while the grid has keyboard focus. From xl the column narrows to 152px so
+ * the slots beside it keep one line each.
  *
  * Short laptop screens (`short:`): a status line over the slots instead. The well goes (Roy
  * stands in Hero and Contact too); the level sits in the slot-heading column, the stats and
@@ -291,9 +286,10 @@ function CharacterFrame() {
 
 /**
  * Zone 03 · Equipment (SPEC §4 Skills): the skills as an RPG equipment screen. Roy stands
- * in a frame on the left; each skill category is a slot of items. On short laptop screens
- * (`short:`, CSS only) it becomes a compact inventory that fits one screen: a status line,
- * then one line of items per slot beside its heading. Hovering, focusing or
+ * in a frame on the left; each skill category is a slot of items. From xl (1280px) each slot
+ * is one line of items beside its heading, the headings in a column of their own (CSS only).
+ * On short laptop screens (`short:`, CSS only) it becomes a compact inventory that fits one
+ * screen: the frame gives way to a status line over those slot lines. Hovering, focusing or
  * tapping an item opens a tooltip whose "Used in" line is computed from the projects' tech
  * lists (src/lib/skillUsage.ts), never written by hand.
  *
@@ -386,43 +382,38 @@ export default function Skills() {
           />
         </Reveal>
 
-        {/* Short laptop screens: a compact inventory, one line per slot. One grid of two
-            columns (slot headings, items) shared through subgrids by the status line and every
-            slot row; the column wrappers dissolve (`contents`), so the slots stack in data order,
-            the order the arrow keys already follow. */}
+        {/* From xl, one line per slot: the grid has two columns (slot headings, items) that
+            every slot row shares through a subgrid, and the slots stack in data order, the order
+            the arrow keys already follow. Short laptop screens make it a compact inventory: the
+            grid joins the panel's columns so the status line shares them too. */}
         <PixelPanel
           variant="wood"
           elevation={2}
           padding="lg"
           className="skill-panel short:px-4 short:pt-(--skill-panel-pt) short:pb-(--skill-panel-pb)"
         >
-          <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 short:grid-cols-[max-content_minmax(0,1fr)] short:gap-x-(--skill-col-gap) short:gap-y-(--skill-status-gap)">
+          <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[152px_minmax(0,1fr)] xl:gap-x-8 short:grid-cols-[max-content_minmax(0,1fr)] short:gap-x-(--skill-col-gap) short:gap-y-(--skill-status-gap)">
             <CharacterFrame />
-            {/* Two fixed columns at xl; reading, Tab and arrow order stay in data order. */}
             <div
               ref={gridRef}
               role="grid"
               aria-label="Equipment"
-              className="skill-grid grid items-start gap-8 xl:grid-cols-2 xl:gap-x-10 short:col-span-2 short:grid-cols-subgrid short:gap-x-(--skill-col-gap) short:gap-y-(--skill-row-gap)"
+              className="skill-grid grid items-start gap-8 xl:grid-cols-[max-content_minmax(0,1fr)] xl:gap-x-(--skill-col-gap) xl:gap-y-(--skill-slot-gap) short:col-span-2 short:grid-cols-subgrid short:gap-x-(--skill-col-gap) short:gap-y-(--skill-row-gap)"
               onKeyDown={onGridKeyDown}
             >
-              {COLUMNS.map(column => (
-                <div key={column.first} className="space-y-8 short:contents short:space-y-0">
-                  {column.groups.map((group, i) => (
-                    <SkillSlot
-                      key={group.slot}
-                      group={group}
-                      row={column.first + i}
-                      baseId={baseId}
-                      active={active}
-                      setActive={setActive}
-                      open={open}
-                      setOpen={setOpen}
-                      inline={inline}
-                      pointer={pointer}
-                    />
-                  ))}
-                </div>
+              {skills.map((group, row) => (
+                <SkillSlot
+                  key={group.slot}
+                  group={group}
+                  row={row}
+                  baseId={baseId}
+                  active={active}
+                  setActive={setActive}
+                  open={open}
+                  setOpen={setOpen}
+                  inline={inline}
+                  pointer={pointer}
+                />
               ))}
             </div>
           </div>

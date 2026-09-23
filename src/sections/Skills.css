@@ -165,6 +165,50 @@
       0 0 / 100% 2px no-repeat;
   }
 
+  /* ── Tall screens from xl (1280px wide and taller than the short laptop
+     screens below): Roy's frame keeps the left column, narrowed to 152px, and
+     each slot is one line of items beside its heading, in a heading column
+     the slot rows share through subgrids (Skills.tsx), the slot name over its
+     category so the column stays ~160px. Sizes:
+       items 36px tall with 8px padding, 4px apart in a line (Tomes, the
+       widest line, needs 628px of the 643px item column), 8px between Magic's
+       two lines, 16px between the columns; 28px between slots, so the last
+       one ends level with the frame column (both 464px).
+     Every width from xl lays out the same: the zone is capped at 1120px. */
+  @media (width >= 80rem) and (height > 60rem) {
+    .skill-panel {
+      --skill-h: 36px;
+      --skill-gap-x: 4px;
+      --skill-row-gap: 8px;
+      --skill-col-gap: 16px;
+      --skill-slot-gap: 28px;
+    }
+
+    .skill-slot__header {
+      display: flex;
+      align-items: center;
+      min-height: var(--skill-h);
+    }
+
+    .skill-slot__title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .skill-slot__dot {
+      display: none;
+    }
+
+    .skill-item {
+      padding: 0 8px;
+
+      /* the hit area fills the gaps exactly */
+      &::before {
+        inset: calc(var(--skill-row-gap) / -2) calc(var(--skill-gap-x) / -2);
+      }
+    }
+  }
+
   /* ── Short laptop screens (the `short` variant, index.css): a compact
      inventory that fits one screen under the nav. Skills.tsx lays it out: a
      slot-heading column and an item column shared through subgrids by a
@@ -260,6 +304,20 @@
     .skill-tip,
     .skill-detail {
       animation: none;
+    }
+  }
+}
+
+/* Tall screens from xl: the slot icon sits on the heading's first line (the
+   h3's `items-center` utility would centre it on both). */
+@layer utilities {
+  @media (width >= 80rem) and (height > 60rem) {
+    .skill-slot__header > h3 {
+      align-items: flex-start;
+    }
+
+    .skill-slot__header .skill-slot__icon {
+      margin-top: 2px;
     }
   }
 }

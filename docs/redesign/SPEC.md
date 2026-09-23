@@ -409,7 +409,13 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   `gridcell`) with a roving tabindex: one Tab stop, Left/Right within a slot, Up/Down across slots
   keeping the column, Home/End, Ctrl+Home/End; the tooltip follows focus, Esc closes. Items carry a
   2px `border-subtle` line and a dotted inspect cue (brass on hover/focus/open); a keycap hint
-  shows while the grid has keyboard focus. Fixed two-column split from xl (no CSS columns).
+  shows while the grid has keyboard focus. Tall screens from xl (1280px, taller than the short
+  laptops; CSS only, same DOM): the frame column narrows to 152px (well, "ROY · LVL 3", stats) and
+  each slot is one line of items beside its heading, the slot name over its category in a heading
+  column the rows share through subgrids, slots in data order. Items stay 36px tall with 8px
+  padding, 4px apart in a line and 8px between lines (only Magic takes two); 28px between slots
+  ends the last one level with the frame column. Every width from xl lays out the same (the zone is
+  capped at 1120px); below xl the headings sit over their items in one column.
   Short laptops (`short:`, CSS only, same DOM): a compact inventory. The character well is hidden
   (Roy stands in Hero and Contact); a status line ("ROY · LVL 3", the three stats split by 2px
   dashed rules, the keycap hint at the right) sits over the slots. Each slot is one row: its h3 in a

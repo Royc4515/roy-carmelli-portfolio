@@ -12,6 +12,8 @@ const originalMatchMedia = window.matchMedia;
 
 /** The `short` variant's query (src/index.css), which Skills.css repeats as a plain @media. */
 const SHORT_QUERY = '(width >= 64rem) and (height <= 60rem)';
+/** Tall screens from xl: the rest of the xl range, where Skills.css sizes the slot lines. */
+const XL_TALL_QUERY = '(width >= 80rem) and (height > 60rem)';
 
 /**
  * `mobile` answers the < 768px query (and the opposite for ≥ 1024px); `short` answers the
@@ -401,20 +403,21 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     expect(within(status).getByText(/Roy · LVL 3/)).toBeInTheDocument();
     expect(status.querySelector('dl')?.textContent).toContain(`Projects${projects.length}`);
     expect(within(status).getByTestId('skill-keys')).toBeInTheDocument();
-    // The column wrappers dissolve, so the rows stack in data order.
+    // The slots are the grid's own rows, in data order.
     expect(within(grid).getAllByRole('row').map(r => within(r).getByRole('heading').textContent)).toEqual(
       skills.map(g => `${g.slot} ·: ${g.category}`),
     );
   });
 
-  it('has the hooks the one-line-per-slot layout needs (subgrids, dissolving columns, no well)', () => {
+  it('has the hooks the one-line-per-slot layout needs (subgrids, slots as direct rows, no well)', () => {
     mockMedia({ mobile: false, short: true });
     render(<Skills />);
     const grid = screen.getByRole('grid', { name: 'Equipment' });
     const layout = grid.parentElement!;
     expect(layout).toHaveClass('short:grid-cols-[max-content_minmax(0,1fr)]');
     expect(grid).toHaveClass('short:col-span-2', 'short:grid-cols-subgrid');
-    for (const column of grid.children) expect(column).toHaveClass('short:contents', 'short:space-y-0');
+    // No column wrappers: every child of the grid is a slot row.
+    expect([...grid.children].map(c => c.getAttribute('role'))).toEqual(skills.map(() => 'row'));
     for (const row of within(grid).getAllByRole('row')) {
       expect(row).toHaveClass('short:col-span-2', 'short:grid-cols-subgrid');
     }
@@ -423,13 +426,13 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     expect(status.querySelector('.skill-well')).toHaveClass('short:hidden');
   });
 
-  it('Up / Down cross the column split: the next slot is the line right below', async () => {
+  it('Up / Down go to the slot on the line right above or below', async () => {
     mockMedia({ mobile: false, short: true });
     const user = userEvent.setup();
     render(<Skills />);
-    act(() => item('Claude API').focus()); // Magic, the last slot of the first column
+    act(() => item('Claude API').focus()); // Magic
     await user.keyboard('{ArrowDown}');
-    expect(item('NumPy')).toHaveFocus(); // Potions, the first slot of the second column
+    expect(item('NumPy')).toHaveFocus(); // Potions, the next line down
     await user.keyboard('{ArrowUp}');
     expect(item('Claude API')).toHaveFocus();
     // Magic wraps onto a second line there: Right runs on through the wrap, in reading order.
@@ -438,6 +441,52 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     expect(item('Serverless Functions')).toHaveFocus();
     await user.keyboard('{ArrowUp}');
     expect(item('Google OAuth')).toHaveFocus(); // Armor, same column (clamped to its last item)
+  });
+});
+
+/*
+ * Tall screens from xl (1280px wide, taller than the short laptop screens): Roy's frame keeps
+ * the left column and every slot is one line of items beside its heading, the headings in a
+ * column shared through subgrids (CSS only, like the short layout).
+ */
+describe('Skills on tall screens from xl', () => {
+  beforeEach(() => mockMedia({ mobile: false }));
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+  });
+
+  it('lays the slots out one per line with a shared heading column, beside the frame', () => {
+    render(<Skills />);
+    const grid = screen.getByRole('grid', { name: 'Equipment' });
+    const layout = grid.parentElement!;
+    expect(layout).toHaveClass('lg:grid-cols-[220px_minmax(0,1fr)]', 'xl:grid-cols-[152px_minmax(0,1fr)]');
+    expect(grid).toHaveClass('xl:grid-cols-[max-content_minmax(0,1fr)]');
+    expect(grid).not.toHaveClass('xl:grid-cols-2');
+    for (const row of within(grid).getAllByRole('row')) {
+      expect(row).toHaveClass('xl:col-span-2', 'xl:grid', 'xl:grid-cols-subgrid');
+    }
+    // The frame stays: only the short layout hides the well.
+    const well = layout.querySelector('.skill-well')!;
+    expect(well.className).not.toMatch(/(^|\s)xl:hidden/);
+    expect(well).toHaveClass('short:hidden');
+  });
+
+  it('stacks the slot over its category visually, without changing the heading name', () => {
+    render(<Skills />);
+    const heading = screen.getAllByRole('heading', { level: 3 })[0];
+    expect(heading).toHaveAccessibleName(`${skills[0].slot}: ${skills[0].category}`);
+    expect(heading.querySelector('.skill-slot__title')).not.toBeNull();
+    expect(heading.querySelector('.skill-slot__dot')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('Up / Down go to the slot above or below, in data order', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    act(() => item('Claude API').focus()); // Magic
+    await user.keyboard('{ArrowDown}');
+    expect(item('NumPy')).toHaveFocus(); // Potions
+    await user.keyboard('{ArrowUp}{ArrowUp}');
+    expect(item('React')).toHaveFocus(); // Armor
   });
 });
 
@@ -454,9 +503,14 @@ describe('Skills.css short-mode sizes', () => {
     expect(skillsCss).toContain(`@media ${SHORT_QUERY} {`);
   });
 
+  it('sizes the tall xl slot lines in their own block, which never meets the short one', () => {
+    expect(skillsCss).toContain(`@media ${XL_TALL_QUERY} {`);
+  });
+
   it('keeps every item at least 24px tall (WCAG 2.2 2.5.8) and every gap on the 4px grid', () => {
-    expect(values('skill-h')).toEqual([28, 24]);
-    const spacing = ['gap-x', 'row-gap', 'col-gap', 'status-gap', 'panel-pt', 'panel-pb'];
+    // Tall xl · short · short under 600px.
+    expect(values('skill-h')).toEqual([36, 28, 24]);
+    const spacing = ['gap-x', 'row-gap', 'col-gap', 'slot-gap', 'status-gap', 'panel-pt', 'panel-pb'];
     for (const name of spacing.map(s => `skill-${s}`)) {
       const found = values(name);
       expect(found.length).toBeGreaterThan(0);
