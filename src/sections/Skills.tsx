@@ -98,6 +98,9 @@ function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inlin
         className="skill-item text-hud"
         tabIndex={active ? 0 : -1}
         aria-describedby={tipId}
+        // < 768px the item toggles the inline detail row under its slot, so it says whether
+        // the row is open; the floating tooltip elsewhere is a description, not an expansion.
+        aria-expanded={inline ? isOpen : undefined}
         data-open={isOpen || undefined}
         onPointerDown={e => {
           pointer.current = { type: e.pointerType, at: Date.now() };

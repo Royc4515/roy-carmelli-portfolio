@@ -404,7 +404,8 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   tooltip with "Used in: …" computed from `projects` (normalize e.g. `React 19` → `React`).
   Items not used in any project show no "Used in" line (never invent data); CS Foundations say
   "Studied in coursework", certifications "Certificate earned". Mobile: stacked, tooltip becomes
-  an inline detail row on tap; character well and stats hidden below 768px.
+  an inline detail row on tap (the item carries `aria-expanded` there, and only there); character
+  well and stats hidden below 768px.
   Keyboard: the equipment is one ARIA layout grid (`grid` / `row` with the slot h3 as `rowheader` /
   `gridcell`) with a roving tabindex: one Tab stop, Left/Right within a slot, Up/Down across slots
   keeping the column, Home/End, Ctrl+Home/End; the tooltip follows focus, Esc closes. Items carry a

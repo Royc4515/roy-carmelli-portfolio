@@ -171,6 +171,13 @@ describe('Skills (equipment screen)', () => {
     expect(icons).toEqual(['sword', 'person', 'star', 'potion', 'book', 'gear', 'trophy']);
   });
 
+  it('items with a floating tooltip claim no expanded state', () => {
+    render(<Skills />);
+    act(() => item('TypeScript').focus());
+    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    for (const name of ['TypeScript', 'Python']) expect(item(name)).not.toHaveAttribute('aria-expanded');
+  });
+
   it('certifications say "Certificate earned" instead of an empty "Used in"', () => {
     render(<Skills />);
     act(() => item('Claude 101').focus());
@@ -356,6 +363,17 @@ describe('Skills on mobile (< 768px)', () => {
 
     await user.click(item('Vercel'));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();
+  });
+
+  it('the item says whether its inline row is open (aria-expanded)', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    expect(item('Vercel')).toHaveAttribute('aria-expanded', 'false');
+    await user.click(item('Vercel'));
+    expect(item('Vercel')).toHaveAttribute('aria-expanded', 'true');
+    expect(item('React')).toHaveAttribute('aria-expanded', 'false');
+    await user.click(item('Vercel'));
+    expect(item('Vercel')).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('tapping elsewhere closes the row', async () => {
