@@ -382,6 +382,13 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   keeping the column, Home/End, Ctrl+Home/End; the tooltip follows focus, Esc closes. Items carry a
   2px `border-subtle` line and a dotted inspect cue (brass on hover/focus/open); a keycap hint
   shows while the grid has keyboard focus. Fixed two-column split from xl (no CSS columns).
+  Short laptops (`short:`, CSS only, same DOM): a compact inventory. The character well is hidden
+  (Roy stands in Hero and Contact); a status line ("ROY · LVL 3", the three stats split by 2px
+  dashed rules, the keycap hint at the right) sits over the slots. Each slot is one row: its h3 in a
+  heading column as wide as the longest heading, its items beside it, all on one grid through
+  subgrids. Items are 28px, 4px apart in a line, 8px between lines, panel padding 16; under 600px
+  tall they drop to 24px (the WCAG 2.5.8 floor) with 4px between lines. Magic takes two lines,
+  every other slot one from 1024px wide. Up/Down move to the slot directly above or below.
 - **Resume (Zone 04 · Resume Scroll, title "Resume").** Wide paper band: `scroll` icon ×4, existing sentence,
   `bio.resume.meta`, `Download` (primary, `download` attr) + `View` (secondary, new tab).
   Download shows toast "Loot acquired: Roy_Carmelli_CV.pdf".
