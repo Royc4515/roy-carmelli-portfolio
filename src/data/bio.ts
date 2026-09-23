@@ -6,7 +6,7 @@ export const bio = {
   title: "CS × Neuroscience · Bar-Ilan University",
   institution: "Bar-Ilan University",
   location: "Israel",
-  tagline: "I ship full-stack apps, Chrome extensions, and agentic AI tools. Second-year B.Sc. student exploring where software meets the brain.",
+  tagline: "I ship full-stack apps, Chrome extensions, and agentic AI tools. Third-year B.Sc. student exploring where software meets the brain.",
   about: `I'm a Computer Science and Neuroscience student at Bar-Ilan University - one of the few programs that puts software engineering depth and hands-on neuroscience research in the same degree.
 
 I ship full-stack apps, data pipelines, and Chrome extensions. I use AI deliberately as part of how I work - not as a shortcut, but as a tool I understand and architect with. I'm drawn to problems that sit at the edge of CS and neuroscience: how software models cognition, how data reveals something real about the brain.
