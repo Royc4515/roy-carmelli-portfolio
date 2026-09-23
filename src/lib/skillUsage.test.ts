@@ -82,24 +82,24 @@ describe('projectsUsing (real data)', () => {
     expect(ids('Python')).toEqual([
       'sommelier-bot',
       'clr',
-      'signal-processing',
       'cognitive-correlation',
+      'signal-processing',
     ]);
-    expect(ids('TypeScript')).toEqual(['clr', 'portfolio']);
+    expect(ids('TypeScript')).toEqual(['portfolio', 'clr']);
     expect(ids('JavaScript')).toEqual(['ai-sidebar', 'white-matter-game']);
   });
 
   it('normalizes versions: React 19 and Java 17', () => {
-    expect(ids('React')).toEqual(['career-predictor', 'portfolio']);
+    expect(ids('React')).toEqual(['wolt-clone', 'portfolio', 'career-predictor', 'clr']);
     expect(ids('Java 17')).toEqual(['arkanoid-game']);
   });
 
   it('uses the alias map', () => {
-    expect(ids('Tailwind CSS')).toEqual(['career-predictor', 'portfolio']);
+    expect(ids('Tailwind CSS')).toEqual(['portfolio', 'career-predictor']);
     expect(ids('Telegram Bot API')).toEqual(['sommelier-bot', 'clr']);
     expect(ids('Google OAuth')).toEqual(['career-predictor']);
     expect(ids('Claude API')).toEqual(['ai-sidebar']);
-    expect(ids('Node.js')).toEqual(['career-predictor']);
+    expect(ids('Node.js')).toEqual(['wolt-clone', 'career-predictor']);
   });
 
   it('returns nothing for skills no project lists', () => {
@@ -136,17 +136,17 @@ describe('shortProjectTitle', () => {
 
 describe('skillDetail', () => {
   it('lists short project titles for used items', () => {
-    const d = skillDetail('TypeScript', group('Languages'), projects);
+    const d = skillDetail('JavaScript', group('Languages'), projects);
     expect(d).toEqual({
-      name: 'TypeScript',
+      name: 'JavaScript',
       slot: 'Weapons',
       category: 'Languages',
-      usedIn: ['Culinary Logic Repository', 'This Portfolio'],
+      usedIn: ['Aside', 'White Matter Tracts Game'],
       note: null,
     });
     expect(skillDetail('Design Patterns', group('CS Foundations'), projects).usedIn).toEqual([
       'Aside',
-      'Arkanoid Game',
+      'Arkanoid',
     ]);
   });
 

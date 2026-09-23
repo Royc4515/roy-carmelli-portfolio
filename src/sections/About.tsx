@@ -105,7 +105,7 @@ export default function About() {
               className="about-sheet-panel h-full short:flex short:flex-col short:px-4 short:pb-4 short:pt-6"
               tab={
                 <h3 className="inline-flex items-center gap-2 text-label">
-                  {/* Same plate as Research logs: icon centred on the caps. */}
+                  {/* Same plate as Training logs: icon centred on the caps. */}
                   <PixelIcon name="person" size={12} className="-mt-0.5 block flex-none" />
                   Character sheet
                 </h3>

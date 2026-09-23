@@ -90,8 +90,8 @@ describe('Skills (equipment screen)', () => {
     expect(within(tip).getByText('Languages')).toBeInTheDocument();
     expect(tip).toHaveTextContent(/Used in/i);
     const used = within(tip).getAllByRole('listitem').map(li => li.textContent);
-    expect(used).toEqual(['Aside,', 'White Matter Tracts Quiz']);
-    expect(js).toHaveAccessibleDescription(/Used in: Aside, White Matter Tracts Quiz/);
+    expect(used).toEqual(['Aside,', 'White Matter Tracts Game']);
+    expect(js).toHaveAccessibleDescription(/Used in: Aside, White Matter Tracts Game/);
 
     act(() => js.blur());
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
@@ -101,8 +101,8 @@ describe('Skills (equipment screen)', () => {
     render(<Skills />);
     act(() => item('React').focus());
     const tip = screen.getByRole('tooltip');
-    expect(tip).toHaveTextContent('CareerPredict AI');
-    expect(tip).toHaveTextContent('This Portfolio');
+    expect(tip).toHaveTextContent('Wolt Clone');
+    expect(tip).toHaveTextContent('Personal Portfolio');
   });
 
   it('never invents usage', () => {
@@ -129,7 +129,7 @@ describe('Skills (equipment screen)', () => {
     render(<Skills />);
 
     await user.hover(item('Python'));
-    expect(screen.getByRole('tooltip')).toHaveTextContent('Sommelier Bot');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Wine Sommelier Bot');
     await user.unhover(item('Python'));
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
@@ -145,7 +145,7 @@ describe('Skills (equipment screen)', () => {
 
     await user.tab();
     expect(item('Java 17')).toHaveFocus();
-    expect(screen.getByRole('tooltip')).toHaveTextContent('Arkanoid Game');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Arkanoid');
 
     await user.keyboard('{Enter}');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
@@ -260,7 +260,7 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     await user.keyboard('{ArrowRight}');
     expect(item('Python')).toHaveFocus();
     expect(screen.getAllByRole('tooltip')).toHaveLength(1);
-    expect(tip()).toHaveTextContent('Sommelier Bot');
+    expect(tip()).toHaveTextContent('Wine Sommelier Bot');
     expect(item('Python')).toHaveAttribute('aria-describedby', tip().id);
 
     await user.keyboard('{ArrowDown}'); // Armor, same column
@@ -285,7 +285,7 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     expect(item('AI Fluency: Framework & Foundations')).toHaveFocus();
     await user.keyboard('{Control>}{Home}{/Control}');
     expect(item('Java 17')).toHaveFocus();
-    expect(tip()).toHaveTextContent('Arkanoid Game');
+    expect(tip()).toHaveTextContent('Arkanoid');
   });
 
   it('Up / Down keep a sticky column through shorter slots', async () => {
@@ -355,11 +355,11 @@ describe('Skills on mobile (< 768px)', () => {
 
     await user.click(item('Vercel'));
     const row = screen.getByTestId('skill-detail');
-    expect(row).toHaveTextContent('Sommelier Bot');
-    expect(row).toHaveTextContent('Culinary Logic Repository');
+    expect(row).toHaveTextContent('Wine Sommelier Bot');
+    expect(row).toHaveTextContent('CLR');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     // The hidden tooltip still describes the item for assistive tech.
-    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Sommelier Bot, Culinary Logic Repository/);
+    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Wine Sommelier Bot, Personal Portfolio, CLR/);
 
     await user.click(item('Vercel'));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();

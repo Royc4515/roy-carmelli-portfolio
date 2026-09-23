@@ -7,12 +7,13 @@ import { projects } from '../data/projects';
 
 describe('byTier', () => {
   it('keeps data order within a tier', () => {
-    expect(byTier(projects, 'main').map(p => p.id)).toEqual(['ai-sidebar', 'career-predictor', 'sommelier-bot']);
-    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['clr', 'arkanoid-game', 'portfolio']);
+    expect(byTier(projects, 'main').map(p => p.id)).toEqual(['ai-sidebar', 'sommelier-bot', 'wolt-clone']);
+    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['portfolio', 'career-predictor', 'clr']);
     expect(byTier(projects, 'research').map(p => p.id)).toEqual([
-      'signal-processing',
       'cognitive-correlation',
+      'signal-processing',
       'white-matter-game',
+      'arkanoid-game',
     ]);
   });
 });
@@ -25,14 +26,14 @@ describe('<Projects>', () => {
     expect(section).toHaveAttribute('aria-labelledby', title.id);
     expect(screen.getByText('Zone 01 · The Library')).toBeInTheDocument();
     expect(
-      screen.getByText("What I've shipped, from a Chrome extension to AI pipelines. Start with the main quests."),
+      screen.getByText("Start with the main quests: the three I'd demo first. Side quests and coursework are below."),
     ).toBeInTheDocument();
   });
 
   it('has an H3 per tier that names its list', () => {
     render(<Projects />);
     const tiers = screen.getAllByRole('heading', { level: 3 });
-    expect(tiers.map(h => h.textContent)).toEqual(['Main quests', 'Side quests', 'Research logs']);
+    expect(tiers.map(h => h.textContent)).toEqual(['Main quests', 'Side quests', 'Training logs']);
     tiers.forEach(h => expect(screen.getByRole('list', { name: h.textContent! })).toHaveAttribute('aria-labelledby', h.id));
     // Main and side are visually hidden (each card wears its tier tag); research is the tab plate.
     expect(tiers[0]).toHaveClass('sr-only');
@@ -47,12 +48,21 @@ describe('<Projects>', () => {
       within(screen.getByRole('list', { name }))
         .getAllByRole('heading', { level: 4 })
         .map(h => h.textContent);
-    expect(titlesIn('Main quests')).toEqual(['Aside - AI Sidebar', 'CareerPredict AI', 'Sommelier Bot']);
-    expect(titlesIn('Side quests')).toEqual(['Culinary Logic Repository', 'Arkanoid Game', 'This Portfolio']);
-    expect(titlesIn('Research logs')).toEqual([
-      'Signal Processing - Synthetic Signals',
-      'Cognitive Outcomes Regression',
-      'White Matter Tracts Quiz',
+    expect(titlesIn('Main quests')).toEqual([
+      'Aside - AI Sidebar',
+      'Wine Sommelier Bot',
+      'Wolt Clone - Food-Delivery App',
+    ]);
+    expect(titlesIn('Side quests')).toEqual([
+      'Personal Portfolio',
+      'CareerPredict AI',
+      'CLR - Culinary Logic Repository',
+    ]);
+    expect(titlesIn('Training logs')).toEqual([
+      'Cognitive Background - Neuro-Data Analysis',
+      'Signal Processing - Neural Data',
+      'White Matter Tracts Game',
+      'Arkanoid',
     ]);
   });
 
@@ -82,7 +92,7 @@ describe('<Projects>', () => {
     render(<Projects projects={only} />);
     expect(screen.queryByRole('list', { name: 'Main quests' })).not.toBeInTheDocument();
     expect(screen.getByRole('list', { name: 'Side quests' })).toBeInTheDocument();
-    expect(screen.queryByRole('list', { name: 'Research logs' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Training logs' })).not.toBeInTheDocument();
   });
 });
 
