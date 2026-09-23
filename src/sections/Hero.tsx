@@ -864,8 +864,11 @@ export default function Hero() {
   const onResume = () => {
     toast.show(`Loot acquired: ${bio.resume.fileName}`, { icon: <PixelIcon name="trophy" size={24} /> });
   };
+  // Side by side the two lg CTAs need 492px + a fraction of text width, and the desktop card
+  // gives them 496: a 20px column gap (the focus ring reaches 11px) keeps "View projects" on one
+  // line. Stacked, 24px clears the 8px drop and the 15px ring below.
   const ctas = (className: string, buttonClass: string) => (
-    <div className={cx(className, 'flex gap-6')}>
+    <div className={cx(className, 'flex gap-x-5 gap-y-6')}>
       <Button
         href="#projects"
         size="lg"
