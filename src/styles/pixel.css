@@ -46,45 +46,50 @@
   image-rendering: pixelated;
 }
 
-/* Dot grid: square 2px dots centred in 32px cells, in --color-dot.
-   Night adds a sparse, twinkling star layer on ::before, so the host must be
-   positioned (relative/absolute). The twinkle is off under reduced motion. */
+/* Dot grid: square 2px dots centred in 32px cells, in --color-dot (a quiet
+   texture in both themes). Night adds a sparse star layer on ::before: bright
+   2px squares on nodes of the same grid, seven per 14x13-cell tile at
+   scattered nodes (no two share a row or column), so the stars never read as
+   a second lattice. The layer sits behind the host's content (the host
+   becomes an isolated stacking context), so a star never lands on a glyph;
+   the host must be positioned (relative/absolute/fixed). It twinkles in three
+   hard steps and is static under reduced motion. */
 @utility px-dots {
+  isolation: isolate;
   background-image: conic-gradient(at 2px 2px, transparent 75%, var(--color-dot) 0);
   background-size: 32px 32px;
   background-position: 15px 15px;
 
   &::before {
+    --px-star: conic-gradient(at 2px 2px, transparent 75%, var(--color-star) 0);
     content: "";
     position: absolute;
     inset: 0;
+    z-index: -1;
     pointer-events: none;
-    background-image: radial-gradient(circle, var(--color-dot) 1.5px, transparent 1.5px);
-    background-size: 96px 96px;
-    background-position: 18px 42px;
+    background-image: var(--px-star), var(--px-star), var(--px-star), var(--px-star),
+      var(--px-star), var(--px-star), var(--px-star);
+    background-size: 448px 416px;
+    /* grid nodes (15 + 32i, 15 + 32j) */
+    background-position: 79px 47px, 239px 111px, 367px 15px, 143px 207px, 399px 239px,
+      47px 335px, 271px 367px;
     opacity: 0;
-    transition: opacity 600ms ease;
   }
 
   :root[data-theme="night"] &::before {
-    opacity: 0.55;
+    opacity: 0.8;
   }
 
   @media (prefers-reduced-motion: no-preference) {
     :root[data-theme="night"] &::before {
-      animation: twinkle 4.5s ease-in-out infinite;
+      animation: twinkle 4.8s steps(3, jump-none) infinite alternate;
     }
   }
 }
 
-/* Legacy name used by the current sections. */
-@utility dot-grid {
-  @apply px-dots;
-}
-
 @keyframes twinkle {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 0.18; }
+  from { opacity: 0.8; }
+  to   { opacity: 0.3; }
 }
 
 /* Divider: 4px dashed accent line (8px dash, 8px gap) with a 12px pixel

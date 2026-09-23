@@ -8,7 +8,6 @@
 
 /* Non-critical faces, latin subset only (fetched on first use). */
 @import "@fontsource/ibm-plex-sans/latin-600.css";
-@import "@fontsource/ibm-plex-mono/latin-500.css";
 @import "@fontsource/ibm-plex-mono/latin-600.css";
 
 @import "./styles/pixel.css";
@@ -37,6 +36,18 @@
   font-weight: 400;
   font-display: swap;
   src: url("/fonts/ibm-plex-sans-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+/* HUD face: nav labels, chips and the hero nameplate are above the fold. */
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-latin-500.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
     U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
     U+FEFF, U+FFFD;
@@ -81,6 +92,7 @@
   --color-hp: #ef7d70;
   --color-xp: #8fd07a;
   --color-dot: #34521f;
+  --color-star: #f5e9b8; /* night sky only: the sparse twinkle layer of px-dots */
 
   /* ── Color: legacy (remove in QA once no component uses them) ──────
      Aliased where the semantic token has the same value in both themes;
@@ -135,7 +147,7 @@
   --color-wood-lo: #0b1022;
   --color-hp: #f07a6e;
   --color-xp: #8fd07a;
-  --color-dot: #f5e9b8;
+  --color-dot: #27305a; /* dim slate: same quiet weight as the day grid (1.5:1 on bg) */
 
   /* legacy */
   --color-forest: #141b33;
@@ -249,9 +261,12 @@
    ========================================================================== */
 
 @layer base {
-  /* Anchor jumps land below the fixed 64px nav + its 4px frame line. */
+  /* Anchor jumps land below the fixed 64px nav + its 4px frame line.
+     The gutter stays reserved when a menu or the game locks scrolling, so
+     nothing shifts sideways. */
   html {
     scroll-padding-top: 72px;
+    scrollbar-gutter: stable;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -268,14 +283,19 @@
     color: var(--color-fg);
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background-color 350ms ease, color 350ms ease;
   }
 
-  section,
-  nav,
-  footer {
-    transition: background-color 350ms ease, border-color 350ms ease, color 350ms ease,
-      box-shadow 350ms ease;
+  /* Theme cross-fade. useTheme puts `theme-anim` on <html> for 400ms when
+     the player toggles the theme, so the first paint never animates. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root.theme-anim body {
+      transition: background-color 350ms ease, color 350ms ease;
+    }
+
+    :root.theme-anim :is(section, nav, footer) {
+      transition: background-color 350ms ease, border-color 350ms ease, color 350ms ease,
+        box-shadow 350ms ease;
+    }
   }
 
   h1,
@@ -328,12 +348,4 @@
       scrollbar-color: var(--color-border-subtle) var(--color-bg);
     }
   }
-
-  @media (prefers-reduced-motion: reduce) {
-    body {
-      transition: none;
-    }
-  }
 }
-
-
