@@ -43,7 +43,7 @@ export default function Projects({ projects = allProjects }: ProjectsProps) {
             zone={1}
             name="The Library"
             title="Things I've Built"
-            subtitle="What I've shipped, from a Chrome extension to AI pipelines. Start with the main quests."
+            subtitle="Start with the main quests: the three I'd walk you through first. Side quests and coursework are below."
             icon={<PixelIcon name="book" size={36} />}
             id={TITLE_ID}
           />
@@ -87,7 +87,7 @@ export default function Projects({ projects = allProjects }: ProjectsProps) {
               tab={
                 <h3 id={RESEARCH_ID} className="research-heading">
                   <PixelIcon name="scroll" size={12} />
-                  Research logs
+                  Training logs
                 </h3>
               }
             >

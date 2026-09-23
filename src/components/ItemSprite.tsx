@@ -252,6 +252,32 @@ export const ITEMS = {
     '........................',
     '........................',
   ],
+  'delivery-bag': [
+    '........................',
+    '........................',
+    '........########........',
+    '.......#nnnnnnnn#.......',
+    '.......#n######n#.......',
+    '.......#n#....#n#.......',
+    '.######################.',
+    '#wwwwwwwwwwwwwwwwwwwwww#',
+    '#aaaaaaaaaaaaaaaaaaaaaa#',
+    '#llllllllllllllllllllll#',
+    '.######################.',
+    '..#aaaaaaaaaaaaaaaaaa#..',
+    '..#aaaaaaaa##aaaaaaaa#..',
+    '..#aaaaaa######aaaaaa#..',
+    '..#aaaaa#wwwwww#aaaaa#..',
+    '..#aaaa#wwwwwwww#aaaa#..',
+    '..#aa##############aa#..',
+    '..#aaaaaaaaaaaaaaaaaa#..',
+    '..#aaaaaaaaaaaaaaaaaa#..',
+    '..#llllllllllllllllll#..',
+    '..#llllllllllllllllll#..',
+    '..####################..',
+    '........................',
+    '........................',
+  ],
 } as const satisfies Record<string, readonly string[]>;
 
 export type ItemName = keyof typeof ITEMS;
@@ -275,6 +301,7 @@ export const PROJECT_ITEMS: Readonly<Record<string, ItemName>> = {
   'signal-processing': 'oscilloscope',
   'cognitive-correlation': 'scatter-plot',
   'white-matter-game': 'brain',
+  'wolt-clone': 'delivery-bag',
 };
 
 /** The item for a project, or `undefined` when it has none. */

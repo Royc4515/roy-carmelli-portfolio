@@ -891,7 +891,7 @@ export default function Hero() {
   const eyebrow = (
     <p className="flex items-center gap-2 text-label text-accent-fg">
       <PixelIcon name="play" size={12} />
-      Player one
+      Player 1
     </p>
   );
   const name = (

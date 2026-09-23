@@ -8,9 +8,9 @@ import { pixelSprites } from '../theme/pixelSprites';
 const AT_A_GLANCE: Array<[string, string]> = [
   ['Degree', 'B.Sc. Computer Science & Neuroscience (dual major)'],
   ['University', 'Bar-Ilan University'],
-  ['Year', '3rd Year · Expected graduation 2027'],
+  ['Year', '3rd year · expected graduation 2027'],
   ['GPA', '85.09 / 100'],
-  ['Open to', 'Internships · Student roles · R&D'],
+  ['Open to', 'Student & intern roles: full-stack, frontend, AI'],
 ];
 
 describe('About', () => {
@@ -83,7 +83,7 @@ describe('About', () => {
     render(<About />);
     expect(screen.getByText('Achievement')).toBeInTheDocument();
     expect(
-      screen.getByText((_, el) => el?.textContent === 'Field medic · scaled a unit from 12 to 30+'),
+      screen.getByText((_, el) => el?.textContent === 'Combat medic · led a unit from 12 to 30+'),
     ).toBeInTheDocument();
     // The claim must stay backed by the bio text.
     expect(bio.about).toMatch(/combat medic/);

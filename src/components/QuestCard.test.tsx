@@ -161,21 +161,21 @@ describe('<QuestCard> main quest (standard)', () => {
   it('has no Live link when the project has no demo', () => {
     const { container } = render(<QuestCard project={byId('sommelier-bot')} />);
     expect(screen.queryByRole('link', { name: /Live demo/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^Code on GitHub: Sommelier Bot/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^Code on GitHub: Wine Sommelier Bot/ })).toBeInTheDocument();
     // One link: on phones Code and Quest log share a row.
     expect(container.querySelector('.quest-actions')).not.toHaveClass('quest-actions--pair');
   });
 
   it('reads tier, title, tagline, highlights, tech, then actions (every layout keeps this order)', () => {
-    const career = byId('career-predictor');
-    render(<QuestCard project={career} />);
-    const card = screen.getByRole('article', { name: career.title });
+    const aside = byId('ai-sidebar');
+    render(<QuestCard project={aside} />);
+    const card = screen.getByRole('article', { name: aside.title });
     expect(
       inDocumentOrder([
         within(card).getByText('Main quest'),
-        within(card).getByRole('heading', { level: 4, name: career.title }),
-        within(card).getByText(career.tagline),
-        within(card).getByText(career.highlights![0]),
+        within(card).getByRole('heading', { level: 4, name: aside.title }),
+        within(card).getByText(aside.tagline),
+        within(card).getByText(aside.highlights![0]),
         within(card).getByRole('list', { name: 'Built with' }),
         within(card).getByRole('link', { name: /^Live demo/ }),
         within(card).getByRole('link', { name: /^Code on GitHub/ }),
@@ -185,10 +185,18 @@ describe('<QuestCard> main quest (standard)', () => {
   });
 
   it('marks its highlights as secondary (hidden below 640px, restated in the quest log)', () => {
-    const career = byId('career-predictor');
-    render(<QuestCard project={career} />);
-    const list = screen.getByText(career.highlights![0]).closest('ul')!;
+    const wolt = byId('wolt-clone');
+    render(<QuestCard project={wolt} />);
+    const list = screen.getByText(wolt.highlights![0]).closest('ul')!;
     expect(list).toHaveClass('quest-highlights', 'quest-highlights--secondary');
+  });
+
+  it('shows only the quest log for a private project (no Live, no Code)', () => {
+    const wolt = byId('wolt-clone');
+    const { container } = render(<QuestCard project={wolt} />);
+    expect(container.querySelector('svg[data-item]')).toHaveAttribute('data-item', 'delivery-bag');
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: `Quest log: ${wolt.title}` })).toBeInTheDocument();
   });
 });
 
@@ -260,11 +268,11 @@ describe('<ResearchLogItem>', () => {
       </ul>,
     );
     expect(screen.getByRole('heading', { level: 4, name: signal.title })).toBeInTheDocument();
-    expect(screen.getByText('Synthetic Signals')).toBeInTheDocument();
+    expect(screen.getByText('Neural Data')).toBeInTheDocument();
     expect(screen.getByText(/Jupyter notebook · 2026/)).toBeInTheDocument();
     expect(screen.getByText(signal.tagline)).toBeInTheDocument();
     expect(container.querySelector('svg[data-item="oscilloscope"]')).toHaveAttribute('width', '24');
-    const code = screen.getByRole('link', { name: /^Code on GitHub: Signal Processing - Synthetic Signals/ });
+    const code = screen.getByRole('link', { name: /^Code on GitHub: Signal Processing - Neural Data/ });
     expect(code).toHaveAttribute('href', signal.github);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });

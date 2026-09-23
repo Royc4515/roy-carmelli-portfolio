@@ -11,17 +11,17 @@ import './About.css';
 const AT_A_GLANCE = [
   { label: 'Degree', value: 'B.Sc. Computer Science & Neuroscience (dual major)' },
   { label: 'University', value: 'Bar-Ilan University' },
-  { label: 'Year', value: '3rd Year · Expected graduation 2027' },
+  { label: 'Year', value: '3rd year · expected graduation 2027' },
   { label: 'GPA', value: '85.09 / 100' },
-  { label: 'Open to', value: 'Internships · Student roles · R&D' },
+  { label: 'Open to', value: 'Student & intern roles: full-stack, frontend, AI' },
 ] as const;
 
 /**
- * Condensed from the reserve-service paragraph of `bio.about` (combat medic,
- * unit of 12 → 30+). Two parts so a narrow sheet breaks after the "·", never
- * inside the phrase.
+ * Condensed from the service paragraph of `bio.about` (combat medic, led a
+ * unit as it grew from 12 to 30+). Two parts so a narrow sheet breaks after
+ * the "·", never inside the phrase.
  */
-const ACHIEVEMENT = ['Field medic ·', 'scaled a unit from 12 to 30+'] as const;
+const ACHIEVEMENT = ['Combat medic ·', 'led a unit from 12 to 30+'] as const;
 
 /** The portrait is the native face sprite at ×2 (×1 on short laptop screens, About.css). */
 const FACE_SCALE = 2;
@@ -105,7 +105,7 @@ export default function About() {
               className="about-sheet-panel h-full short:flex short:flex-col short:px-4 short:pb-4 short:pt-6"
               tab={
                 <h3 className="inline-flex items-center gap-2 text-label">
-                  {/* Same plate as Research logs: icon centred on the caps. */}
+                  {/* Same plate as Training logs: icon centred on the caps. */}
                   <PixelIcon name="person" size={12} className="-mt-0.5 block flex-none" />
                   Character sheet
                 </h3>
