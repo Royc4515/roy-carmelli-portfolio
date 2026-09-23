@@ -66,7 +66,7 @@ export function splitTitle(title: string): { name: string; subtitle?: string } {
   return subtitle ? { name: title.slice(0, at), subtitle } : { name: title };
 }
 
-/** "Website + game engine · 2026", with the last word held to the year so it never wraps alone. */
+/** "Website + engine · 2026", with the last word held to the year so it never wraps alone. */
 export function metaLine(project: Pick<Project, 'kind' | 'year'>): string {
   return `${project.kind}\u00a0·\u00a0${project.year}`;
 }
@@ -113,8 +113,9 @@ function QuestMeta({ project, surface }: { project: Project; surface: Surface })
 }
 
 /**
- * The pixel title, with anything after " - " as a Plex subtitle line. The accessible name
- * stays the full title (a visually hidden " - " joins the two).
+ * The pixel title (an H4: Projects puts the tier headings at H3), with anything after " - "
+ * as a Plex subtitle line. The accessible name stays the full title (a visually hidden " - "
+ * joins the two).
  */
 function QuestTitle({
   id,
@@ -131,7 +132,7 @@ function QuestTitle({
 }) {
   const { name, subtitle } = splitTitle(title);
   return (
-    <h3 id={id} className={cx('[overflow-wrap:break-word]', className)}>
+    <h4 id={id} className={cx('[overflow-wrap:break-word]', className)}>
       <span className={cx('block', nameClass)}>{name}</span>
       {subtitle && (
         <>
@@ -142,7 +143,7 @@ function QuestTitle({
           </span>
         </>
       )}
-    </h3>
+    </h4>
   );
 }
 
@@ -165,7 +166,10 @@ function Monitor({ shot }: { shot: QuestScreenshot }) {
   );
 }
 
-/** Dotted backdrop holding the screenshot (feature) or the item at x6 (standard). */
+/**
+ * Dotted backdrop holding the screenshot (feature) or the item at x6 (standard). Below 640px
+ * Projects.css draws the item at x4 in a shorter band (still an integer scale of the SVG).
+ */
 function QuestVisual({ project, layout }: { project: Project; layout: QuestCardLayout }) {
   const shot = QUEST_SCREENSHOTS[project.id];
   return (
@@ -185,7 +189,8 @@ function QuestVisual({ project, layout }: { project: Project; layout: QuestCardL
  * Live · Code · Quest log. Main quests keep them on one row; side quests (too narrow for
  * three arcade buttons) put the links on one row and the quest log on the next, the same in
  * every card so the rows line up (`stacked`). Projects.css also stacks the two side-by-side
- * main quests between 768 and 1023px.
+ * main quests between 768 and 1023px. Below 640px every card uses two equal columns: Live ·
+ * Code with Quest log on the row under them (`quest-actions--pair`), or Code · Quest log.
  */
 function QuestActions({
   project,
@@ -238,7 +243,13 @@ function QuestActions({
   );
   // The links wrapper is `display: contents` when everything shares one row.
   return (
-    <div className={cx('quest-actions', stacked && 'quest-actions--stacked')}>
+    <div
+      className={cx(
+        'quest-actions',
+        stacked && 'quest-actions--stacked',
+        project.live && project.github && 'quest-actions--pair',
+      )}
+    >
       <div className="quest-actions__links">{links}</div>
       {log}
     </div>
@@ -291,7 +302,11 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
           )}
         />
         <p className="quest-tagline text-body text-ink">{project.tagline}</p>
-        <ul role="list" className="quest-highlights">
+        {/* Below 640px only the lead card keeps its highlights (the quest log restates them). */}
+        <ul
+          role="list"
+          className={cx('quest-highlights', layout !== 'feature' && 'quest-highlights--secondary')}
+        >
           {(project.highlights ?? []).map(h => (
             <li key={h} className="flex gap-3 text-body text-ink">
               {/* One body line tall, so the bullet centres on the first line. */}
@@ -356,7 +371,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
         {project.status === 'in-development' && <StatusChip surface="wood" />}
         <p className="text-body text-fg">{project.tagline}</p>
       </div>
-      <ChipList items={project.tech} accentCount={3} max={5} aria-label="Built with" className="quest-chips" />
+      <ChipList items={project.tech} accentCount={3} max={4} aria-label="Built with" className="quest-chips" />
       <QuestActions project={project} open={open} onToggle={toggle} stacked />
       <QuestLog project={project} open={open} surface="wood" />
     </PixelPanel>
@@ -365,29 +380,30 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
 
 /**
  * One research log: a compact list row with the item at x1, kind · year, the title, tagline
- * and a Code link. Render inside a `<ul>`.
+ * and a Code link. Render inside a `<ul>`. The parts are direct children of the row so
+ * Projects.css can place them: below 640px the link is a 48px icon button beside the meta
+ * line and title; from 640px it is a labelled button on the right.
  */
 export function ResearchLogItem({ project }: { project: Project }) {
   return (
     <li className="research-log">
-      <ItemSlot project={project} scale={1} />
-      <div className="min-w-0">
-        <p className="text-hud uppercase text-fg-subtle">{metaLine(project)}</p>
-        <QuestTitle
-          id={questTitleId(project)}
-          title={project.title}
-          className="mt-2 text-fg"
-          nameClass="text-display-s"
-          subtitleClass="text-body text-accent-fg"
-        />
-        <p className="mt-2 max-w-[68ch] text-body text-fg-muted">{project.tagline}</p>
-      </div>
+      <ItemSlot project={project} scale={1} className="research-log__item" />
+      <p className="research-log__meta text-hud uppercase text-fg-subtle">{metaLine(project)}</p>
+      <QuestTitle
+        id={questTitleId(project)}
+        title={project.title}
+        className="research-log__title text-fg"
+        nameClass="text-display-s"
+        subtitleClass="text-body text-accent-fg"
+      />
+      <p className="research-log__tagline max-w-[68ch] text-body text-fg-muted">{project.tagline}</p>
       {project.github && (
         <Button
           href={project.github}
           external
           variant="secondary"
-          leadingIcon={<PixelIcon name="code" size={12} />}
+          // 24px for the icon-only button, drawn at 12px next to the label (both integer scales).
+          leadingIcon={<PixelIcon name="code" size={24} className="research-log__icon" />}
           aria-label={codeLabel(project.title)}
           className="research-log__action"
         >

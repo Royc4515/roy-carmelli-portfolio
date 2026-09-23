@@ -44,6 +44,21 @@
     height: 152px;
   }
 
+  /* Night: the item's fixed art colours get the hero's moonlight wash (a
+     multiply layer in fg-subtle over the item's own silhouette, so the plate
+     behind it is untouched) at half strength: on the near-black night plate
+     a full wash turns the art muddy. The same object, lit by the moon. */
+  .item-sprite__wash {
+    fill: var(--color-fg-subtle);
+    mix-blend-mode: multiply;
+    opacity: 0;
+    transition: opacity 350ms ease;
+  }
+
+  :root[data-theme="night"] .item-sprite__wash {
+    opacity: 0.5;
+  }
+
   /* ── Card ──────────────────────────────────────────────────────────────
      Parts are direct children so a parent grid can line them up across
      cards with subgrid (see the lists below). Spacing between parts is
@@ -95,6 +110,14 @@
     margin: 16px 0 0;
     padding: 0;
     list-style: none;
+  }
+
+  /* Phones: only the lead card lists its highlights; the others keep them in
+     the quest log (their descriptions restate every highlight). */
+  @media (max-width: 639px) {
+    .quest-highlights--secondary {
+      display: none;
+    }
   }
 
   /* Chip rows stay packed at the top of their (shared) row. */
@@ -154,34 +177,38 @@
     display: contents;
   }
 
-  /* Stacked: Live · Code on one row, Quest log under them. */
-  .quest-actions--stacked {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
+  /* Stacked (from 640px): Live · Code on one row, Quest log under them. */
+  @media (min-width: 640px) {
+    .quest-actions--stacked {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
 
-    & > .quest-actions__links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
+      & > .quest-actions__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+      }
     }
   }
 
-  @media (max-width: 479px) {
-    .quest-actions,
-    .quest-actions--stacked {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .quest-actions__links {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
+  /* Phones: two equal columns of full-width buttons. Live · Code share the
+     first row and Quest log takes the row under them (--pair); a card with
+     one link puts Quest log beside it. 24px between columns clears the focus
+     ring, 16px between rows clears the 8px drop. */
+  @media (max-width: 639px) {
+    .quest-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 24px;
     }
 
     .quest-actions .px-btn {
       width: 100%;
+    }
+
+    .quest-actions--pair > .quest-log-toggle {
+      grid-column: 1 / -1;
     }
   }
 
@@ -224,9 +251,27 @@
     aspect-ratio: 16 / 10;
   }
 
-  /* Item reveal: a fixed band with the x6 item on its plate. */
+  /* Item reveal: a fixed band with the x6 item on its plate (x4 on phones:
+     the SVG is redrawn at 96px, still an integer scale of its 24px grid). */
   .quest-visual--item {
     height: 184px;
+  }
+
+  @media (max-width: 639px) {
+    .quest-visual--item {
+      height: 120px;
+    }
+
+    .quest-visual--item .item-slot--xl {
+      --bob: -4px;
+      width: 104px;
+      height: 104px;
+    }
+
+    .quest-visual--item .item-slot__sprite {
+      width: 96px;
+      height: 96px;
+    }
   }
 
   /* Monitor: 4px ink screen frame, 4px notched wood casing with a 12px chin
@@ -328,6 +373,24 @@
     }
   }
 
+  /* An open quest log grows only its own card. While a log in a list is
+     open, its cards stop stretching to the tallest one (align-self: start)
+     and, from 768px, the row lets go of the subgrid, so every card keeps its
+     natural height. The parts line up again as soon as the log closes. */
+  .quest-list:has(.quest-log:not([hidden])) > li {
+    align-self: start;
+  }
+
+  @media (min-width: 768px) {
+    .quest-list--main:has(> li:not(:first-child) .quest-log:not([hidden])) > li:not(:first-child),
+    .quest-list--main:has(> li:not(:first-child) .quest-log:not([hidden])) > li:not(:first-child) > .quest-card,
+    .quest-list--side:has(.quest-log:not([hidden])) > li,
+    .quest-list--side:has(.quest-log:not([hidden])) > li > .quest-card {
+      display: flex;
+      grid-row: auto;
+    }
+  }
+
   /* Two main quests side by side are too narrow for three buttons in a row
      until 1024px: stack them like the side quests so both cards match. */
   @media (min-width: 768px) and (max-width: 1023px) {
@@ -377,7 +440,28 @@
     flex-direction: column;
   }
 
-  /* ── Research logs ─────────────────────────────────────────────────── */
+  /* ── Research logs ─────────────────────────────────────────────────
+     The tab plate is the H3. Each row is a grid of its parts:
+
+       below 640px                        from 640px
+       item  meta     [code]              item  meta     [ CODE ]
+       item  title    [code]              item  title    [ CODE ]
+       item  tagline  tagline             item  tagline  [ CODE ]
+
+     Below 640px the link is a 48px icon button (label hidden, the aria-label
+     names it) beside the meta line and title, so it never takes a row. */
+  .research-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    & > svg {
+      display: block;
+      flex: none;
+      margin-top: -2px; /* centre on the caps (see .px-panel__tab) */
+    }
+  }
+
   .research-list {
     margin: 0;
     padding: 0;
@@ -386,9 +470,16 @@
 
   .research-log {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "item meta action"
+      "item title action"
+      "item tagline tagline";
+    /* The spanning button's extra height goes to the title row (fr), never
+       between the meta line and the title. */
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: start;
-    gap: 16px 20px;
+    gap: 8px 16px;
     padding: 20px 0 24px;
   }
 
@@ -404,28 +495,59 @@
     border-top: 2px dashed var(--color-border-subtle);
   }
 
-  .research-log__action {
-    grid-column: 2;
-    justify-self: start;
+  .research-log__item {
+    grid-area: item;
   }
 
-  @media (max-width: 479px) {
+  .research-log__meta {
+    grid-area: meta;
+  }
+
+  .research-log__title {
+    grid-area: title;
+  }
+
+  .research-log__tagline {
+    grid-area: tagline;
+  }
+
+  .research-log__action {
+    grid-area: action;
+    margin-bottom: 8px; /* the button's drop */
+  }
+
+  @media (max-width: 639px) {
+    /* Icon-only: the 48px square of Button's icon variant. */
     .research-log__action {
-      grid-column: 1 / -1;
-      width: 100%;
+      width: 48px;
+      padding: 0;
+      margin-top: 4px; /* the 4px edge above the face lines up with the meta caps */
+    }
+
+    .research-log__action .px-btn__label {
+      display: none;
     }
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 640px) {
     .research-log {
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      align-items: center;
+      grid-template-areas:
+        "item meta action"
+        "item title action"
+        "item tagline action";
+      grid-template-rows: auto auto auto;
       column-gap: 24px;
     }
 
+    .research-log__item,
     .research-log__action {
-      grid-column: 3;
-      margin-bottom: 8px; /* balance the button's 8px drop */
+      align-self: center;
+    }
+
+    /* Next to the 12px label the 24px icon is drawn at x1. */
+    .research-log__icon {
+      width: 12px;
+      height: 12px;
     }
   }
 
@@ -438,7 +560,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .quest-card,
-    .quest-log-chevron {
+    .quest-log-chevron,
+    .item-sprite__wash {
       transition: none;
     }
 
@@ -449,7 +572,9 @@
 }
 
 /* Hover (and keyboard focus inside): the frame brightens and, with motion
-   allowed, the card lifts 4px while its drop stays on the ground. */
+   allowed, the card lifts 4px while its drop stays on the ground. The lift
+   never moves the hit area: while hovered, ::after fills the 4px strip the
+   card leaves behind, so a pointer resting on the bottom edge stays on it. */
 @layer utilities {
   @media (hover: hover) {
     .quest-card:hover {
@@ -466,6 +591,12 @@
       .quest-card:hover {
         --px-drop: var(--quest-drop-lifted);
         transform: translateY(-4px);
+      }
+
+      .quest-card:hover::after {
+        content: "";
+        position: absolute;
+        inset: 100% 0 -4px;
       }
     }
 

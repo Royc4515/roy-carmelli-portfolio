@@ -46,7 +46,7 @@ describe('<QuestCard> main quest (feature)', () => {
 
   it('names the card by its full title and shows the tier and meta', () => {
     render(<QuestCard project={aside} layout="feature" />);
-    const heading = screen.getByRole('heading', { level: 3, name: 'Aside - AI Sidebar' });
+    const heading = screen.getByRole('heading', { level: 4, name: 'Aside - AI Sidebar' });
     const card = screen.getByRole('article', { name: 'Aside - AI Sidebar' });
     expect(card).toContainElement(heading);
     expect(within(card).getByText('Main quest')).toBeInTheDocument();
@@ -67,9 +67,12 @@ describe('<QuestCard> main quest (feature)', () => {
     expect(img).not.toHaveClass('pixelated');
   });
 
-  it('lists the highlights', () => {
+  it('lists the highlights, on phones too (the lead card keeps them)', () => {
     render(<QuestCard project={aside} layout="feature" />);
     aside.highlights!.forEach(h => expect(screen.getByText(h).closest('li')).toBeInTheDocument());
+    const list = screen.getByText(aside.highlights![0]).closest('ul')!;
+    expect(list).toHaveClass('quest-highlights');
+    expect(list).not.toHaveClass('quest-highlights--secondary');
   });
 
   it('shows at most five tech chips plus an overflow chip', () => {
@@ -121,9 +124,18 @@ describe('<QuestCard> main quest (standard)', () => {
   });
 
   it('has no Live link when the project has no demo', () => {
-    render(<QuestCard project={byId('sommelier-bot')} />);
+    const { container } = render(<QuestCard project={byId('sommelier-bot')} />);
     expect(screen.queryByRole('link', { name: /Live demo/ })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^Code on GitHub: Sommelier Bot/ })).toBeInTheDocument();
+    // One link: on phones Code and Quest log share a row.
+    expect(container.querySelector('.quest-actions')).not.toHaveClass('quest-actions--pair');
+  });
+
+  it('marks its highlights as secondary (hidden below 640px, restated in the quest log)', () => {
+    const career = byId('career-predictor');
+    render(<QuestCard project={career} />);
+    const list = screen.getByText(career.highlights![0]).closest('ul')!;
+    expect(list).toHaveClass('quest-highlights', 'quest-highlights--secondary');
   });
 });
 
@@ -146,9 +158,21 @@ describe('<QuestCard> side quest', () => {
   });
 
   it('keeps Live · Code · Quest log in that order', () => {
-    render(<QuestCard project={byId('portfolio')} />);
+    const { container } = render(<QuestCard project={byId('portfolio')} />);
     const controls = screen.getAllByRole('link').concat(screen.getAllByRole('button'));
     expect(controls.map(c => c.textContent)).toEqual(['Live', 'Code', 'Quest log']);
+    // Two links: on phones Live · Code share a row and Quest log goes under them.
+    expect(container.querySelector('.quest-actions')).toHaveClass('quest-actions--pair');
+  });
+
+  it('shows at most four tech chips plus an overflow chip', () => {
+    const clr = byId('clr');
+    render(<QuestCard project={clr} />);
+    const items = within(screen.getByRole('list', { name: 'Built with' })).getAllByRole('listitem');
+    expect(items).toHaveLength(5);
+    expect(items.slice(0, 4).map(i => i.textContent)).toEqual(clr.tech.slice(0, 4));
+    expect(items[4]).toHaveTextContent(`+${clr.tech.length - 4}`);
+    expect(items[4]).toHaveTextContent(`and ${clr.tech.length - 4} more: ${clr.tech.slice(4).join(', ')}`);
   });
 });
 
@@ -160,7 +184,7 @@ describe('<ResearchLogItem>', () => {
         <ResearchLogItem project={signal} />
       </ul>,
     );
-    expect(screen.getByRole('heading', { level: 3, name: signal.title })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 4, name: signal.title })).toBeInTheDocument();
     expect(screen.getByText('Synthetic Signals')).toBeInTheDocument();
     expect(screen.getByText(/Jupyter notebook · 2026/)).toBeInTheDocument();
     expect(screen.getByText(signal.tagline)).toBeInTheDocument();

@@ -2,39 +2,43 @@
  * Inventory item emblems for the quest cards: 24x24 pixel bitmaps rendered as crisp SVG.
  *
  * Bitmap legend (rows top to bottom, 24 characters each): `.` is transparent, every other
- * character is an ink from `INKS`: a semantic colour token (or a mix of two tokens), so the
- * items follow the day/night theme. Each item uses at most five inks. They are drawn for the
- * dark inset plate (`surface-sunken`): silhouettes read from their fills, the `ink` outline
- * only separates parts, and anything that must stay visible (glass, a shaft) uses a light ink.
+ * character is an ink from `INKS`. The inks are fixed art colours (the SPEC's bitmap
+ * exception to "semantic tokens only"), sampled from the day palette, so an item is the same
+ * object in both themes: at night it gets the hero's moonlight wash instead of new colours
+ * (see `.item-sprite__wash` in src/sections/Projects.css). Each item uses at most five inks.
+ * They are drawn for the dark inset plate (`surface-sunken`): silhouettes read from their
+ * fills, the dark outline only separates parts, and anything that must stay visible (glass,
+ * a shaft) uses a light ink.
  *
  * Shown only at integer scales: x1 (24px), x2 (48px), x4 (96px), x6 (144px).
  * Review sheet: render every item at each scale on both themes before changing a bitmap.
  */
 import { cx } from './ui/cx';
+import '../sections/Projects.css';
 
 export const INKS = {
-  /** outline and deepest shade (same in both themes) */
-  '#': 'var(--color-ink)',
+  /** outline and deepest shade */
+  '#': '#2e1f12',
   /** wood, text lines */
-  n: 'var(--color-ink-muted)',
+  n: '#5e4128',
   /** highlight, paper, glass */
-  w: 'var(--color-fg)',
+  w: '#ede0b8',
   /** paper shade */
-  m: 'var(--color-fg-muted)',
+  m: '#c9b87a',
   /** brass */
-  a: 'var(--color-accent)',
+  a: '#c9a24a',
   /** dark brass */
-  l: 'var(--color-bevel-lo)',
+  l: '#9c7a2c',
   /** red: wine, bricks, the joystick ball */
-  r: 'var(--color-hp)',
+  r: '#ef7d70',
   /** deep red: wine shade, brain folds */
-  R: 'color-mix(in srgb, var(--color-hp) 60%, var(--color-ink))',
+  R: '#a2574a',
   /** green: bricks, the scope trace */
-  g: 'var(--color-xp)',
-  /** crystal (sage by day, lavender at night) */
-  s: 'var(--color-fg-subtle)',
-  /** crystal shade, data points (moss by day, blue at night) */
-  b: 'var(--color-border-subtle)',
+  g: '#8fd07a',
+  /** crystal (sage) */
+  s: '#9dbb7c',
+  /** crystal shade, data points (moss) */
+  b: '#6a8f48',
 } as const;
 
 export type ItemInk = keyof typeof INKS;
@@ -330,15 +334,33 @@ export function toLayers(rows: readonly string[]): Layer[] {
   return [...layers].map(([ink, rects]) => ({ ink, rects }));
 }
 
-const layerCache = new Map<ItemName, Layer[]>();
+/** One SVG path for a set of rects, one closed subpath per rect (`M x y h w v h h -w z`). */
+export function toPath(rects: readonly Rect[]): string {
+  return rects.map(r => `M${r.x} ${r.y}h${r.w}v${r.h}h${-r.w}z`).join('');
+}
 
-function layersFor(name: ItemName): Layer[] {
-  let layers = layerCache.get(name);
-  if (!layers) {
-    layers = toLayers(ITEMS[name]);
-    layerCache.set(name, layers);
+interface ItemPaths {
+  /** One path per ink, in first-use order. */
+  inks: { ink: ItemInk; d: string }[];
+  /** Every filled pixel, for the night wash. */
+  silhouette: string;
+}
+
+const pathCache = new Map<ItemName, ItemPaths>();
+
+/** The item as one `d` per ink plus its silhouette, computed once per item. */
+export function itemPaths(name: ItemName): ItemPaths {
+  let paths = pathCache.get(name);
+  if (!paths) {
+    const rows = ITEMS[name];
+    const solid = toLayers(rows.map(row => row.replace(/[^.]/g, '#')));
+    paths = {
+      inks: toLayers(rows).map(({ ink, rects }) => ({ ink, d: toPath(rects) })),
+      silhouette: toPath(solid[0]?.rects ?? []),
+    };
+    pathCache.set(name, paths);
   }
-  return layers;
+  return paths;
 }
 
 export interface ItemSpriteProps {
@@ -352,8 +374,10 @@ export interface ItemSpriteProps {
 }
 
 /**
- * A 24x24 pixel-art inventory item (SPEC §2.4 sprites), drawn as crisp SVG rects in theme
- * colours at an integer scale. Decorative by default.
+ * A 24x24 pixel-art inventory item (SPEC §2.4 sprites), drawn as crisp SVG at an integer
+ * scale: one `<path>` per art colour, then the silhouette again as the night moonlight wash
+ * (a multiply layer in `--color-fg-subtle`, like the hero's; invisible by day). Decorative by
+ * default.
  *
  * @example
  *   <ItemSprite name="crystal-ball" scale={4} />
@@ -366,6 +390,7 @@ export default function ItemSprite({ name, scale = 1, title, className }: ItemSp
     return null;
   }
   const size = ITEM_SIZE * scale;
+  const paths = itemPaths(name);
   const a11y = title
     ? { role: 'img' as const, 'aria-label': title }
     : { 'aria-hidden': true as const };
@@ -382,13 +407,10 @@ export default function ItemSprite({ name, scale = 1, title, className }: ItemSp
       {...a11y}
     >
       {title && <title>{title}</title>}
-      {layersFor(name).map(({ ink, rects }) => (
-        <g key={ink} fill={INKS[ink]}>
-          {rects.map(r => (
-            <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w} height={r.h} />
-          ))}
-        </g>
+      {paths.inks.map(({ ink, d }) => (
+        <path key={ink} fill={INKS[ink]} d={d} />
       ))}
+      <path className="item-sprite__wash" d={paths.silhouette} />
     </svg>
   );
 }

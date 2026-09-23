@@ -7,6 +7,9 @@ import { Reveal } from '../components/ui/Reveal';
 import { ZoneHeader } from '../components/ui/ZoneHeader';
 
 const TITLE_ID = 'projects-title';
+const MAIN_ID = 'projects-main-title';
+const SIDE_ID = 'projects-side-title';
+const RESEARCH_ID = 'projects-research-title';
 
 /** Projects of one tier, in data order. */
 export function byTier(list: readonly Project[], tier: ProjectTier): Project[] {
@@ -21,6 +24,11 @@ export interface ProjectsProps {
 /**
  * Zone 01 · The Library (SPEC §4 Projects). Main quests first (the lead one full width),
  * then side quests in a grid, then research logs as a compact list.
+ *
+ * Headings: H2 zone title · H3 per tier · H4 per project. The main and side H3s are visually
+ * hidden because every card already wears its tier tag (star + MAIN QUEST / SIDE QUEST), so a
+ * visible label would repeat it right above the cards; research logs have no per-row tag, so
+ * their brass tab plate is the visible H3.
  */
 export default function Projects({ projects = allProjects }: ProjectsProps) {
   const main = byTier(projects, 'main');
@@ -35,30 +43,40 @@ export default function Projects({ projects = allProjects }: ProjectsProps) {
             zone={1}
             name="The Library"
             title="Things I've Built"
-            subtitle="Three main quests, three side quests and three research logs."
+            subtitle="What I've shipped, from a Chrome extension to AI pipelines. Start with the main quests."
             icon={<PixelIcon name="book" size={36} />}
             id={TITLE_ID}
           />
         </Reveal>
 
         {main.length > 0 && (
-          <ul role="list" aria-label="Main quests" className="quest-list quest-list--main">
-            {main.map((project, i) => (
-              <Reveal as="li" key={project.id} index={i}>
-                <QuestCard project={project} layout={i === 0 ? 'feature' : 'standard'} />
-              </Reveal>
-            ))}
-          </ul>
+          <>
+            <h3 id={MAIN_ID} className="sr-only">
+              Main quests
+            </h3>
+            <ul role="list" aria-labelledby={MAIN_ID} className="quest-list quest-list--main">
+              {main.map((project, i) => (
+                <Reveal as="li" key={project.id} index={i}>
+                  <QuestCard project={project} layout={i === 0 ? 'feature' : 'standard'} />
+                </Reveal>
+              ))}
+            </ul>
+          </>
         )}
 
         {side.length > 0 && (
-          <ul role="list" aria-label="Side quests" className="quest-list quest-list--side mt-12">
-            {side.map((project, i) => (
-              <Reveal as="li" key={project.id} index={i}>
-                <QuestCard project={project} />
-              </Reveal>
-            ))}
-          </ul>
+          <>
+            <h3 id={SIDE_ID} className="sr-only">
+              Side quests
+            </h3>
+            <ul role="list" aria-labelledby={SIDE_ID} className="quest-list quest-list--side mt-12">
+              {side.map((project, i) => (
+                <Reveal as="li" key={project.id} index={i}>
+                  <QuestCard project={project} />
+                </Reveal>
+              ))}
+            </ul>
+          </>
         )}
 
         {research.length > 0 && (
@@ -67,13 +85,13 @@ export default function Projects({ projects = allProjects }: ProjectsProps) {
               variant="wood"
               elevation={1}
               tab={
-                <>
+                <h3 id={RESEARCH_ID} className="research-heading">
                   <PixelIcon name="scroll" size={12} />
                   Research logs
-                </>
+                </h3>
               }
             >
-              <ul role="list" aria-label="Research logs" className="research-list">
+              <ul role="list" aria-labelledby={RESEARCH_ID} className="research-list">
                 {research.map(project => (
                   <ResearchLogItem key={project.id} project={project} />
                 ))}

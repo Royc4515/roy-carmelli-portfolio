@@ -22,13 +22,28 @@ describe('<Projects>', () => {
     const title = screen.getByRole('heading', { level: 2, name: "Things I've Built" });
     expect(section).toHaveAttribute('aria-labelledby', title.id);
     expect(screen.getByText('Zone 01 · The Library')).toBeInTheDocument();
+    expect(
+      screen.getByText("What I've shipped, from a Chrome extension to AI pipelines. Start with the main quests."),
+    ).toBeInTheDocument();
+  });
+
+  it('has an H3 per tier that names its list', () => {
+    render(<Projects />);
+    const tiers = screen.getAllByRole('heading', { level: 3 });
+    expect(tiers.map(h => h.textContent)).toEqual(['Main quests', 'Side quests', 'Research logs']);
+    tiers.forEach(h => expect(screen.getByRole('list', { name: h.textContent! })).toHaveAttribute('aria-labelledby', h.id));
+    // Main and side are visually hidden (each card wears its tier tag); research is the tab plate.
+    expect(tiers[0]).toHaveClass('sr-only');
+    expect(tiers[1]).toHaveClass('sr-only');
+    expect(tiers[2]).not.toHaveClass('sr-only');
+    expect(tiers[2].closest('.px-panel__tab')).not.toBeNull();
   });
 
   it('groups the quests by tier, in data order', () => {
     render(<Projects />);
     const titlesIn = (name: string) =>
       within(screen.getByRole('list', { name }))
-        .getAllByRole('heading', { level: 3 })
+        .getAllByRole('heading', { level: 4 })
         .map(h => h.textContent);
     expect(titlesIn('Main quests')).toEqual(['Aside - AI Sidebar', 'CareerPredict AI', 'Sommelier Bot']);
     expect(titlesIn('Side quests')).toEqual(['Culinary Logic Repository', 'Arkanoid Game', 'This Portfolio']);
@@ -39,10 +54,10 @@ describe('<Projects>', () => {
     ]);
   });
 
-  it('gives every project an H3 and a Code link', () => {
+  it('gives every project an H4 and a Code link', () => {
     render(<Projects />);
     projects.forEach(p => {
-      expect(screen.getByRole('heading', { level: 3, name: p.title })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 4, name: p.title })).toBeInTheDocument();
       if (p.github) {
         expect(screen.getByRole('link', { name: new RegExp(`^Code on GitHub: ${p.title}`) })).toHaveAttribute(
           'href',

@@ -6,13 +6,15 @@ import ItemSprite, {
   ITEM_SIZE,
   PROJECT_ITEMS,
   itemForProject,
+  itemPaths,
   toLayers,
+  toPath,
   type ItemName,
 } from './ItemSprite';
 
 const names = Object.keys(ITEMS) as ItemName[];
-const TOKEN_INK =
-  /^(var\(--color-[a-z-]+\)|color-mix\(in srgb, var\(--color-[a-z-]+\) \d{1,2}%, var\(--color-[a-z-]+\)\))$/;
+/** Fixed art colours (the SPEC's bitmap exception): the same object in both themes. */
+const ART_INK = /^#[0-9a-f]{6}$/;
 
 describe('ItemSprite bitmaps', () => {
   it.each(names)('%s is 24 x 24', name => {
@@ -27,8 +29,8 @@ describe('ItemSprite bitmaps', () => {
     used.forEach(ink => expect(INKS).toHaveProperty(ink));
   });
 
-  it('draws every ink from semantic colour tokens (no hex)', () => {
-    Object.values(INKS).forEach(value => expect(value).toMatch(TOKEN_INK));
+  it('draws every ink in a fixed art colour, never a theme token', () => {
+    Object.values(INKS).forEach(value => expect(value).toMatch(ART_INK));
   });
 
   it.each(names)('%s has no stray single pixels', name => {
@@ -88,6 +90,27 @@ describe('toLayers', () => {
   });
 });
 
+describe('toPath / itemPaths', () => {
+  it('draws each rect as one closed subpath', () => {
+    expect(toPath([])).toBe('');
+    expect(
+      toPath([
+        { x: 0, y: 0, w: 2, h: 2 },
+        { x: 5, y: 3, w: 1, h: 4 },
+      ]),
+    ).toBe('M0 0h2v2h-2zM5 3h1v4h-1z');
+  });
+
+  it.each(names)('%s has one path per ink and a silhouette of every filled pixel', name => {
+    const rows = ITEMS[name];
+    const inks = new Set(rows.join('').replace(/\./g, ''));
+    const paths = itemPaths(name);
+    expect(paths.inks.map(p => p.ink).sort()).toEqual([...inks].sort());
+    const solid = rows.map(row => row.replace(/[^.]/g, '#'));
+    expect(paths.silhouette).toBe(toPath(toLayers(solid)[0].rects));
+  });
+});
+
 describe('<ItemSprite>', () => {
   it.each([
     [1, 24],
@@ -117,11 +140,18 @@ describe('<ItemSprite>', () => {
     expect(getByRole('img', { name: 'Wine glass' })).toBeInTheDocument();
   });
 
-  it('fills each ink group from its token', () => {
+  it('draws one path per ink in its art colour, then the night wash', () => {
     const { container } = render(<ItemSprite name="crystal-ball" />);
-    const fills = [...container.querySelectorAll('g')].map(g => g.getAttribute('fill'));
-    expect(fills).toContain('var(--color-fg-subtle)');
-    fills.forEach(fill => expect(fill).toMatch(TOKEN_INK));
+    expect(container.querySelector('rect')).toBeNull();
+    const paths = [...container.querySelectorAll('path')];
+    const art = paths.slice(0, -1);
+    expect(art.map(p => p.getAttribute('fill'))).toEqual(itemPaths('crystal-ball').inks.map(i => INKS[i.ink]));
+    art.forEach(p => expect(p.getAttribute('fill')).toMatch(ART_INK));
+    // The wash is the silhouette on top; its colour comes from CSS (fg-subtle, night only).
+    const wash = paths[paths.length - 1];
+    expect(wash).toHaveClass('item-sprite__wash');
+    expect(wash).not.toHaveAttribute('fill');
+    expect(wash).toHaveAttribute('d', itemPaths('crystal-ball').silhouette);
   });
 
   it('renders nothing for an unknown item', () => {

@@ -65,7 +65,7 @@ export const projects: Project[] = [
   },
   {
     id: "portfolio",
-    kind: "Website + game engine",
+    kind: "Website + engine",
     tier: "side",
     tagline: "You're playing it. React + TypeScript with a hand-written canvas game engine: FSM, AABB collision, event bus.",
     title: "This Portfolio",
