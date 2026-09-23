@@ -1,6 +1,33 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, afterEach } from 'vitest';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import ArcadeFallback from './ArcadeFallback';
+
+const originalMatchMedia = window.matchMedia;
+
+function mockReducedMotion(reduced: boolean) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: query === '(prefers-reduced-motion: reduce)' ? reduced : false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
+}
+
+/** Under the app's root provider (main.tsx), which loads the DOM animation features. */
+function renderWithMotion() {
+  const result = render(
+    <LazyMotion features={domAnimation} strict>
+      <ArcadeFallback />
+    </LazyMotion>,
+  );
+  return result.container.querySelector<HTMLElement>('span[aria-hidden="true"]')!;
+}
 
 describe('ArcadeFallback', () => {
   it('renders the fallback heading', () => {
@@ -34,6 +61,26 @@ describe('ArcadeFallback', () => {
     expect(screen.getByRole('heading', { name: /arcade zone/i })).toBeInTheDocument();
     expect(container.querySelector('svg[data-icon="rotate-phone"]')).not.toBeNull();
     expect(container.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
+  });
+
+  describe('the rotate-phone icon', () => {
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia;
+    });
+
+    it('turns: it starts upright and steps to sideways (the loop runs, not parked on its last keyframe)', async () => {
+      mockReducedMotion(false);
+      const icon = renderWithMotion();
+      expect(icon.style.transform).not.toMatch(/90deg/);
+      await waitFor(() => expect(icon.style.transform).toMatch(/rotate\(90deg\)/), { timeout: 2000 });
+    });
+
+    it('rests upright under reduced motion', async () => {
+      mockReducedMotion(true);
+      const icon = renderWithMotion();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      expect(icon.style.transform).not.toMatch(/90deg/);
+    });
   });
 
   it('contains a pixel-art styled container (PixelPanel)', () => {

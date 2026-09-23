@@ -27,10 +27,11 @@ export default function ArcadeFallback() {
   return (
     <PixelPanel variant="wood" elevation={2} padding="lg" className="w-full max-w-[400px]">
       <div className="flex flex-col items-center gap-6 text-center">
+        {/* No `initial={false}`: it would skip the mount animation, and with it the whole loop,
+            leaving the phone parked sideways on the last keyframe. */}
         <m.span
           className="flex text-accent-fg"
           aria-hidden="true"
-          initial={false}
           animate={reduced ? { rotate: 0 } : ROTATE_LOOP}
         >
           <PixelIcon name="rotate-phone" size={48} />
