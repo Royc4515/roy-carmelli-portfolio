@@ -81,19 +81,19 @@ describe('Skills (equipment screen)', () => {
     render(<Skills />);
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
-    const ts = item('TypeScript');
-    act(() => ts.focus());
+    const js = item('JavaScript');
+    act(() => js.focus());
 
     const tip = screen.getByRole('tooltip');
-    expect(ts).toHaveAttribute('aria-describedby', tip.id);
-    expect(within(tip).getByText('TypeScript')).toBeInTheDocument();
+    expect(js).toHaveAttribute('aria-describedby', tip.id);
+    expect(within(tip).getByText('JavaScript')).toBeInTheDocument();
     expect(within(tip).getByText('Languages')).toBeInTheDocument();
     expect(tip).toHaveTextContent(/Used in/i);
     const used = within(tip).getAllByRole('listitem').map(li => li.textContent);
-    expect(used).toEqual(['Culinary Logic Repository,', 'This Portfolio']);
-    expect(ts).toHaveAccessibleDescription(/Used in: Culinary Logic Repository, This Portfolio/);
+    expect(used).toEqual(['Aside,', 'White Matter Tracts Quiz']);
+    expect(js).toHaveAccessibleDescription(/Used in: Aside, White Matter Tracts Quiz/);
 
-    act(() => ts.blur());
+    act(() => js.blur());
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
@@ -108,7 +108,7 @@ describe('Skills (equipment screen)', () => {
   it('never invents usage', () => {
     render(<Skills />);
 
-    act(() => item('Algorithms').focus());
+    act(() => item('Data Structures').focus());
     let tip = screen.getByRole('tooltip');
     expect(tip).toHaveTextContent('Studied in coursework');
     expect(tip).not.toHaveTextContent(/Used in/i);
@@ -173,9 +173,9 @@ describe('Skills (equipment screen)', () => {
 
   it('items with a floating tooltip claim no expanded state', () => {
     render(<Skills />);
-    act(() => item('TypeScript').focus());
+    act(() => item('JavaScript').focus());
     expect(screen.getByRole('tooltip')).toBeInTheDocument();
-    for (const name of ['TypeScript', 'Python']) expect(item(name)).not.toHaveAttribute('aria-expanded');
+    for (const name of ['JavaScript', 'Python']) expect(item(name)).not.toHaveAttribute('aria-expanded');
   });
 
   it('certifications say "Certificate earned" instead of an empty "Used in"', () => {
@@ -264,8 +264,8 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     expect(item('Python')).toHaveAttribute('aria-describedby', tip().id);
 
     await user.keyboard('{ArrowDown}'); // Armor, same column
-    expect(item('Vite')).toHaveFocus();
-    expect(tip()).toHaveTextContent('Web & Full Stack');
+    expect(item('Node.js')).toHaveFocus();
+    expect(tip()).toHaveTextContent('Web & Full-Stack');
     await user.keyboard('{ArrowUp}');
     expect(item('Python')).toHaveFocus();
 
@@ -279,10 +279,10 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     expect(item('Java 17')).toHaveFocus();
 
     await user.keyboard('{Control>}{End}{/Control}');
-    expect(item('Claude 101')).toHaveFocus();
+    expect(item('AI Fluency: Framework & Foundations')).toHaveFocus();
     expect(tip()).toHaveTextContent('Certificate earned');
     await user.keyboard('{ArrowDown}'); // last slot: stays
-    expect(item('Claude 101')).toHaveFocus();
+    expect(item('AI Fluency: Framework & Foundations')).toHaveFocus();
     await user.keyboard('{Control>}{Home}{/Control}');
     expect(item('Java 17')).toHaveFocus();
     expect(tip()).toHaveTextContent('Arkanoid Game');
@@ -291,17 +291,17 @@ describe('Skills keyboard grid (roving tabindex)', () => {
   it('Up / Down keep a sticky column through shorter slots', async () => {
     const user = userEvent.setup();
     render(<Skills />);
-    act(() => item('Telegram Bot API').focus()); // Magic, column 8 of 8
+    act(() => item('Telegram Bot API').focus()); // Magic, column 7 of 7
     expect(tabStops()).toEqual([item('Telegram Bot API')]);
 
     await user.keyboard('{ArrowDown}'); // Potions has 5 items
     expect(item('Jupyter')).toHaveFocus();
     await user.keyboard('{ArrowDown}'); // Tomes has 5
-    expect(item('Systems Programming')).toHaveFocus();
-    await user.keyboard('{ArrowDown}'); // Trinkets has 8: back to column 8
-    expect(item('GitHub Pages')).toHaveFocus();
+    expect(item('Computer Architecture')).toHaveFocus();
+    await user.keyboard('{ArrowDown}'); // Trinkets has 8: back to column 7
+    expect(item('VS Code')).toHaveFocus();
     await user.keyboard('{ArrowLeft}{ArrowUp}'); // a sideways move resets the column
-    expect(item('Systems Programming')).toHaveFocus();
+    expect(item('Computer Architecture')).toHaveFocus();
   });
 
   it('Esc closes the tooltip and keeps focus; the next arrow opens the next item', async () => {
@@ -454,11 +454,11 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     await user.keyboard('{ArrowUp}');
     expect(item('Claude API')).toHaveFocus();
     // Magic wraps onto a second line there: Right runs on through the wrap, in reading order.
-    act(() => item('Prompt Engineering').focus());
+    act(() => item('Claude Code').focus());
     await user.keyboard('{ArrowRight}');
-    expect(item('Serverless Functions')).toHaveFocus();
+    expect(item('Telegram Bot API')).toHaveFocus();
     await user.keyboard('{ArrowUp}');
-    expect(item('Google OAuth')).toHaveFocus(); // Armor, same column (clamped to its last item)
+    expect(item('Vite')).toHaveFocus(); // Armor, same column
   });
 });
 

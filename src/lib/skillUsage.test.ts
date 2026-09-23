@@ -151,14 +151,14 @@ describe('skillDetail', () => {
   });
 
   it('says "Studied in coursework" only for unused CS Foundations items', () => {
-    expect(skillDetail('Algorithms', group('CS Foundations'), projects).note).toBe(
+    expect(skillDetail('Data Structures', group('CS Foundations'), projects).note).toBe(
       'Studied in coursework',
     );
     expect(skillDetail('OOP', group('CS Foundations'), projects).note).toBeNull();
     const mcp = skillDetail('MCP', group('AI & Agents'), projects);
     expect(mcp.usedIn).toEqual([]);
     expect(mcp.note).toBeNull();
-    expect(skillDetail('Git', group('Tools'), projects).note).toBeNull();
+    expect(skillDetail('Git', group('Tools & Platforms'), projects).note).toBeNull();
   });
 
   it('says "Certificate earned" for certifications no project lists', () => {

@@ -29,11 +29,11 @@ Alongside the degree, I'm an IDF combat medic and medical coordinator in the Gaz
 
 /** `slot` is the equipment-screen slot each category maps to. */
 export const skills = [
-  { slot: "Weapons", category: "Languages",        items: ["Java 17", "Python", "C", "JavaScript", "TypeScript", "x86 Assembly"] },
-  { slot: "Armor", category: "Web & Full Stack", items: ["React", "Vite", "Node.js", "Express", "Tailwind CSS", "SQLite", "Google OAuth"] },
-  { slot: "Magic", category: "AI & Agents",      items: ["Claude API", "Gemini API", "Groq API", "MCP", "Agentic Workflows", "Prompt Engineering", "Serverless Functions", "Telegram Bot API"] },
-  { slot: "Potions", category: "Data & Neuro",     items: ["NumPy", "Pandas", "SciPy", "Matplotlib", "Jupyter"] },
-  { slot: "Tomes", category: "CS Foundations",   items: ["OOP", "Data Structures", "Algorithms", "Design Patterns", "Systems Programming"] },
-  { slot: "Trinkets", category: "Tools",            items: ["Git", "VS Code", "IntelliJ", "PyCharm", "CLion", "Vercel", "Render", "GitHub Pages"] },
-  { slot: "Achievements", category: "Certifications",   items: ["Claude Code in Action", "Claude Code 101", "Claude 101"] },
+  { slot: "Weapons", category: "Languages",          items: ["Java 17", "Python", "C", "C++", "JavaScript", "x86 Assembly"] },
+  { slot: "Armor", category: "Web & Full-Stack",     items: ["React", "Node.js", "Express", "MongoDB", "React Native", "Tailwind CSS", "Vite"] },
+  { slot: "Magic", category: "AI & Agents",          items: ["Claude API", "Gemini API", "OpenAI API", "Groq API", "MCP", "Claude Code", "Telegram Bot API"] },
+  { slot: "Potions", category: "Data & Analysis",    items: ["NumPy", "Pandas", "SciPy", "Matplotlib", "Jupyter"] },
+  { slot: "Tomes", category: "CS Foundations",       items: ["OOP", "Data Structures", "Design Patterns", "Systems Programming", "Computer Architecture"] },
+  { slot: "Trinkets", category: "Tools & Platforms", items: ["Git", "GitHub Actions", "Docker", "Vercel", "Render", "GitHub Pages", "VS Code", "IntelliJ"] },
+  { slot: "Achievements", category: "Certifications", items: ["Claude Code in Action", "Claude Code 101", "Claude 101", "AI Fluency: Framework & Foundations"] },
 ];
