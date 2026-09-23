@@ -37,7 +37,11 @@ describe('splitTitle', () => {
 
 describe('metaLine', () => {
   it('joins kind and year with non-breaking spaces around the dot', () => {
-    expect(metaLine({ kind: 'Java game', year: 2025 })).toBe('Java game · 2025');
+    expect(metaLine({ kind: 'Java game', year: 2025 })).toBe('Java game\u00a0·\u00a02025');
+  });
+
+  it('holds a " + " kind together and lets it break before the dot instead', () => {
+    expect(metaLine({ kind: 'Website + engine', year: 2026 })).toBe('Website\u00a0+\u00a0engine ·\u00a02026');
   });
 });
 

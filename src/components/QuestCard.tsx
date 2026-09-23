@@ -70,9 +70,14 @@ export function splitTitle(title: string): { name: string; subtitle?: string } {
   return subtitle ? { name: title.slice(0, at), subtitle } : { name: title };
 }
 
-/** "Website + engine · 2026", with the last word held to the year so it never wraps alone. */
-export function metaLine(project: Pick<Project, 'kind' | 'year'>): string {
-  return `${project.kind}\u00a0·\u00a0${project.year}`;
+/**
+ * "Java game · 2025", with the last word held to the year so it never wraps alone. A kind
+ * joined by " + " ("Website + engine") is one unit instead: its words hold together, so no
+ * line ends on a dangling "+", and a narrow card breaks before the dot.
+ */
+export function metaLine({ kind, year }: Pick<Project, 'kind' | 'year'>): string {
+  if (kind.includes(' + ')) return `${kind.replace(/ \+ /g, '\u00a0+\u00a0')} ·\u00a0${year}`;
+  return `${kind}\u00a0·\u00a0${year}`;
 }
 
 type Surface = 'paper' | 'wood';
