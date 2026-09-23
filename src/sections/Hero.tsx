@@ -524,10 +524,35 @@ function useElementSize(ref: RefObject<HTMLElement>): { w: number; h: number } |
   return size;
 }
 
-function useViewportHeight(): number {
-  const [vh, setVh] = useState(() => window.innerHeight || 800);
+/** Hidden fixed element, `100svh` tall, that `smallViewportHeight` measures. */
+export const SVH_PROBE_ID = 'hero-svh-probe';
+
+/**
+ * The small-viewport height (CSS `100svh`: the viewport with the browser's collapsible bars
+ * shown). Unlike `innerHeight` it stays put while a phone's URL bar collapses and expands on
+ * scroll, so the band does not rescale and shift every section below it mid-scroll; window
+ * resizes and rotations still change it. It is what `.hero--overlay` in Hero.css sizes with, so
+ * `heroHeight` / `planHero` fed with it agree with the CSS. Falls back to `100vh` without svh
+ * support (also stable) and to `innerHeight` where nothing is laid out (tests).
+ */
+function smallViewportHeight(): number {
+  let probe = document.getElementById(SVH_PROBE_ID);
+  if (!probe) {
+    probe = document.createElement('div');
+    probe.id = SVH_PROBE_ID;
+    probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText =
+      'position:fixed;top:0;left:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
+    document.body.append(probe);
+  }
+  return probe.getBoundingClientRect().height || window.innerHeight || 800;
+}
+
+/** `smallViewportHeight`, re-measured on resize (a URL bar moving leaves it unchanged). */
+function useSmallViewportHeight(): number {
+  const [vh, setVh] = useState(smallViewportHeight);
   useEffect(() => {
-    const onResize = () => setVh(window.innerHeight || 800);
+    const onResize = () => setVh(smallViewportHeight());
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
@@ -758,7 +783,7 @@ export default function Hero() {
   const wasPlaying = useRef(false);
 
   const measured = useElementSize(sceneRef);
-  const vh = useViewportHeight();
+  const vh = useSmallViewportHeight();
   const width = measured?.w || document.documentElement.clientWidth || window.innerWidth;
   const idealH = heroHeight(vh) - HERO_NAV_H;
   const { layout, compact } = planHero(width, vh, isMobile);

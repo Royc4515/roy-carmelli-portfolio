@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Hero, {
@@ -7,6 +7,7 @@ import Hero, {
   HERO_CARD_W,
   HERO_FEET_COLUMN,
   HERO_NAV_H,
+  SVH_PROBE_ID,
   chooseHeroLayout,
   compactOverlayFit,
   computeHeroScene,
@@ -53,7 +54,8 @@ function setupMatchMedia(opts: { mobileWidth: boolean; coarse: boolean; portrait
   };
 }
 
-/** jsdom's window is 1024x768; phone tests resize it (the hero reads innerWidth/innerHeight). */
+/** jsdom's window is 1024x768; phone tests resize it (the hero reads innerWidth, and innerHeight
+ *  wherever its 100svh probe measures nothing, as in jsdom). */
 function setViewport(width: number, height: number) {
   Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: width });
   Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: height });
@@ -563,6 +565,62 @@ describe('hero layout per viewport', () => {
     [667, 375, true, 'overlay', true],
   ] as const)('%ix%i (mobile %s) → %s, compact %s', (w, h, mobile, layout, compact) => {
     expect(planHero(w, h, mobile)).toEqual({ layout, compact });
+  });
+});
+
+describe('viewport height: 100svh, not innerHeight', () => {
+  /** Makes the hidden 100svh probe report `height` (jsdom lays nothing out). */
+  function setSmallViewportHeight(height: number) {
+    const probe = document.getElementById(SVH_PROBE_ID)!;
+    probe.getBoundingClientRect = () => ({ height }) as DOMRect;
+  }
+  const sceneHeight = () => document.querySelector<HTMLElement>('#hero .hero-scene')!.style.height;
+  const resize = (width: number, innerHeight: number, svh: number) =>
+    act(() => {
+      setViewport(width, innerHeight);
+      setSmallViewportHeight(svh);
+      window.dispatchEvent(new Event('resize'));
+    });
+
+  beforeEach(() => setupMatchMedia({ mobileWidth: true, coarse: true, portrait: true }));
+  afterEach(() => {
+    setViewport(1024, 768);
+    // The probe outlives a render: drop the stubbed one so later renders measure afresh.
+    document.getElementById(SVH_PROBE_ID)?.remove();
+  });
+
+  it('keeps the phone band when the URL bar collapses (innerHeight grows, 100svh does not)', () => {
+    setViewport(390, 664);
+    render(<Hero />);
+    expect(document.getElementById(SVH_PROBE_ID)).toHaveAttribute('aria-hidden', 'true');
+    resize(390, 664, 664);
+    const band = computeHeroScene('stack', 390, 0, { viewportH: 664 }).sceneH;
+    expect(sceneHeight()).toBe(`${band}px`);
+    // 390x664 -> 390x750 as the bar hides: innerHeight alone would re-plan the band at x3.
+    expect(computeHeroScene('stack', 390, 0, { viewportH: 750 }).sceneH).not.toBe(band);
+    resize(390, 750, 664);
+    expect(sceneHeight()).toBe(`${band}px`);
+    resize(390, 664, 664);
+    expect(sceneHeight()).toBe(`${band}px`);
+  });
+
+  it('re-plans the band when the viewport really changes (a resize or rotation moves 100svh too)', () => {
+    setViewport(390, 664);
+    render(<Hero />);
+    resize(390, 664, 664);
+    resize(390, 844, 844);
+    expect(sceneHeight()).toBe(`${computeHeroScene('stack', 390, 0, { viewportH: 844 }).sceneH}px`);
+  });
+
+  it('plans the desktop title screen from 100svh as well', () => {
+    setupMatchMedia({ mobileWidth: false, coarse: false, portrait: false });
+    setViewport(1097, 516);
+    render(<Hero />);
+    resize(1097, 516, 516);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveClass('hero-name--tight');
+    // A window made taller changes 100svh: the tight card gives way to the full one.
+    resize(1097, 800, 800);
+    expect(screen.getByRole('heading', { level: 1 })).not.toHaveClass('hero-name--tight');
   });
 });
 
