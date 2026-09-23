@@ -3,14 +3,15 @@
  * only holds what utilities cannot express.
  */
 
-/* The title screen fills the viewport up to 880px. A viewport up to 95px
-   taller than that is filled too, so no sliver of Zone 01 peeks under the
-   ground (heroHeight() in Hero.tsx mirrors this). */
+/* The title screen fills the viewport up to 880px. A viewport up to 151px
+   taller than that is filled too, so Zone 01's title (144px deep at most)
+   shows whole under the ground or not at all (heroHeight() in Hero.tsx
+   mirrors this, from the same 100svh). */
 .hero--overlay {
   min-height: min(100svh, 880px);
 }
 
-@media (880px < height < 976px) {
+@media (880px < height < 1032px) {
   .hero--overlay {
     min-height: 100svh;
   }

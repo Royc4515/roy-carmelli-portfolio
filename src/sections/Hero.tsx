@@ -73,8 +73,12 @@ export const HERO_FEET_COLUMN = 182;
 export const HERO_NAV_H = 64;
 /** The hero is at most this tall (nav included)... */
 export const HERO_MAX_H = 880;
-/** ...unless the viewport is less than this much taller: then it fills it (no sliver of Zone 01). */
-export const HERO_FILL_SLACK = 96;
+/**
+ * ...unless the viewport is less than this much taller: then it fills it. Zone 01's title (its
+ * eyebrow and H2) ends at most 144px below the zone's top on desktop, so a hero capped at 880px
+ * shows that title whole (viewport ≥ 1032px) or the hero fills the screen and shows none of it.
+ */
+export const HERO_FILL_SLACK = 152;
 /** Title-card width on the scene (fits the two lg CTAs, 476px, side by side at p-5). */
 export const HERO_CARD_W = 520;
 /** Scale of the band on phones. */
@@ -202,7 +206,7 @@ export function containerContentLeft(width: number): number {
 
 /**
  * Height of the hero (nav included) in a viewport `vh` px tall: the viewport, capped at 880px,
- * except that a viewport 1-95px taller than the cap is filled, so no sliver of Zone 01 shows
+ * except that a viewport 1-151px taller than the cap is filled, so no sliver of Zone 01 shows
  * under the title screen. Mirrors `.hero--overlay` in Hero.css.
  */
 export function heroHeight(vh: number): number {

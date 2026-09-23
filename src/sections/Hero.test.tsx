@@ -376,6 +376,10 @@ const DESKTOP_SCENES: Array<[number, number]> = [
   [1536, 800],
   [1920, 816],
   [2560, 816],
+  // First screens 976-1031px tall, filled rather than capped (1280x1000, 1728x1000, 1728x1030).
+  [1280, 936],
+  [1728, 936],
+  [1728, 966],
 ];
 
 describe('hero scene geometry', () => {
@@ -473,14 +477,33 @@ describe('hero scene geometry', () => {
 });
 
 describe('hero height', () => {
-  it('fills the viewport up to 880px, and a viewport less than 96px taller than that', () => {
+  it('fills the viewport up to 880px, and a viewport less than 152px taller than that', () => {
     expect(heroHeight(657)).toBe(657);
     expect(heroHeight(800)).toBe(800);
     expect(heroHeight(880)).toBe(880);
     expect(heroHeight(900)).toBe(900);
     expect(heroHeight(975)).toBe(975);
-    expect(heroHeight(976)).toBe(880);
+    // 976-1031: capped at 880, Zone 01's title (144px deep) would be cut by the fold.
+    expect(heroHeight(976)).toBe(976);
+    expect(heroHeight(1000)).toBe(1000);
+    expect(heroHeight(1031)).toBe(1031);
+    expect(heroHeight(1032)).toBe(880);
     expect(heroHeight(1080)).toBe(880);
+  });
+
+  it.each([
+    [1728, 1000],
+    [1280, 1000],
+    [1728, 1030],
+  ])('fills a %ix%i first screen with one clean title screen', (w, vh) => {
+    expect(planHero(w, vh, false)).toEqual({ layout: 'overlay', compact: false });
+    const h = heroHeight(vh) - HERO_NAV_H;
+    const s = computeHeroScene('overlay', w, h, { viewportH: vh });
+    const share = (wave.frameH * s.k) / h;
+    expect(share).toBeGreaterThanOrEqual(0.5);
+    expect(share).toBeLessThanOrEqual(0.6);
+    expect(s.forestY + forest.h * s.k + s.groundExtraH).toBe(h);
+    expect(s.hudClear).toBe(true);
   });
 
   it('keeps the desktop scale when a 900px-tall viewport is filled (1440x900 stays x7)', () => {

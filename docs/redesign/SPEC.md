@@ -132,7 +132,8 @@ Floors everywhere: body 16px (14px only for captions/meta), HUD 12px (13 preferr
   card fits one screen on its own (see the zone sections below). Phones, tablets and taller
   desktops are unaffected.
 - No `min-height: 100vh` except the hero (`min-h-[100svh]`, capped at 880px on desktop, or the
-  full `100svh` when the viewport is 881-975px tall so no sliver of Zone 01 shows).
+  full `100svh` when the viewport is 881-1031px tall, so Zone 01's title (at most 144px deep) shows
+  whole under the hero or not at all).
 - Zone grounds alternate: hero scene · Projects `bg` · About `bg-alt` · Skills `bg` ·
   Resume paper band on `bg-alt` · Contact `bg` · Footer `surface-sunken`. Every zone carries `px-dots`.
 
