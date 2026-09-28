@@ -83,10 +83,19 @@ describe('About', () => {
     render(<About />);
     expect(screen.getByText('Achievement')).toBeInTheDocument();
     expect(
-      screen.getByText((_, el) => el?.textContent === 'Combat medic · led a unit from 12 to 30+'),
+      screen.getByText((_, el) => el?.textContent === 'Battalion medic · led a unit from 12 to 30+'),
     ).toBeInTheDocument();
     // The claim must stay backed by the bio text.
-    expect(bio.about).toMatch(/combat medic/);
+    expect(bio.about).toMatch(/battalion medic/);
     expect(bio.about).toMatch(/from 12 to 30\+/);
+  });
+
+  it('never describes the service role as combat', () => {
+    // don't touch / Roy's role was battalion medic in an operational-support
+    // (תומך לחימה) capacity, not a combat role. "combat medic" shipped once
+    // and was corrected; this guard keeps it from coming back in an edit.
+    render(<About />);
+    expect(bio.about).not.toMatch(/combat/i);
+    expect(document.body.textContent).not.toMatch(/combat/i);
   });
 });
