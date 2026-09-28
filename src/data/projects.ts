@@ -10,7 +10,7 @@ export const projects: Project[] = [
     highlights: [
       "Six AI providers behind one Factory + Strategy layer",
       "Streaming answers (SSE / NDJSON) and a two-model compare mode",
-      "Plain JavaScript on MV3: no build step, 8 languages, RTL",
+      "Plain JavaScript on MV3: no build step, English/Hebrew UI with RTL",
     ],
     title: "Aside - AI Sidebar",
     description: "A Chrome extension (Manifest V3, plain JavaScript, no build step) that opens an AI assistant in a sidebar next to any web page. Press Alt+A and the page's main text is already extracted as context; it goes out only with a message you send, and one toggle turns it off. Six providers sit behind one interface: Claude, Gemini, OpenAI, Grok, Groq and local Ollama, each with its own model list and a Custom option for new model IDs. Answers stream in (SSE, or NDJSON for Ollama), and compare mode sends one prompt to two models so you can keep the better answer. One-tap actions summarize the page, pull its data into a table, and explain, translate or rewrite a selection. API keys and chat history stay in chrome.storage.local and are never synced. Under the hood, a ProviderFactory picks the provider at runtime, each provider is a swappable strategy on a shared BaseProvider, and OpenAI, Grok and Groq share one OpenAI-compatible parent class. The sidebar talks to the page through a nonce-checked postMessage bridge and renders Markdown with its own parser. There's also a GitHub Pages landing site.",
@@ -27,10 +27,10 @@ export const projects: Project[] = [
     highlights: [
       "Label photos become sheet rows; edit or remove in chat",
       "Retries with backoff, then falls back across 4 models",
-      "Plain Python on a Vercel webhook, 173 tests in CI",
+      "Plain Python on a Vercel webhook, 198 tests in CI",
     ],
     title: "Wine Sommelier Bot",
-    description: "A personal sommelier on Telegram, built for my own cellar. The cellar lives in a Google Sheet: the bot reads it live and writes back through a Google Apps Script endpoint. Send photos of the front and back label and it pulls out the wine's details and adds the bottle; ask in Hebrew or English and it edits a bottle, marks it open or finished, or removes it. A router model sorts each message (add, edit, status, delete or chat) before anything touches the sheet, and every write re-checks the row first so it can't hit the wrong bottle. Pairing and buying advice come from what's actually in the cellar. When Gemini started returning 503s and 429s, I added retries with exponential backoff and a fallback chain across 4 models. Memory has two layers: the last 30 messages, and after an hour of quiet, an AI-written summary that carries over. Plain Python with no web framework, running as a Vercel webhook, with 173 unittest tests in GitHub Actions. It also takes voice notes.",
+    description: "A personal sommelier on Telegram, built for my own cellar. The cellar lives in a Google Sheet: the bot reads it live and writes back through a Google Apps Script endpoint. Send photos of the front and back label and it pulls out the wine's details and adds the bottle; ask in Hebrew or English and it edits a bottle, marks it open or finished, or removes it. A router model sorts each message (add, edit, status, delete or chat) before anything touches the sheet, and every write re-checks the row first so it can't hit the wrong bottle. Pairing and buying advice come from what's actually in the cellar. When Gemini started returning 503s and 429s, I added retries with exponential backoff and a fallback chain across 4 models. Memory has two layers: the last 30 messages, and after an hour of quiet, an AI-written summary that carries over. Plain Python with no web framework, running as a Vercel webhook, with 198 unittest tests in GitHub Actions. It also takes voice notes.",
     tech: ["Python", "Gemini API", "Telegram Bot API", "Google Sheets", "Vercel", "Google Apps Script", "Serverless Functions", "unittest", "GitHub Actions"],
     github: "https://github.com/Royc4515/gemini-sommelier-bot",
     year: 2026,

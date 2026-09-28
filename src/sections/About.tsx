@@ -17,11 +17,11 @@ const AT_A_GLANCE = [
 ] as const;
 
 /**
- * Condensed from the service paragraph of `bio.about` (combat medic, led a
+ * Condensed from the service paragraph of `bio.about` (battalion medic, led a
  * unit as it grew from 12 to 30+). Two parts so a narrow sheet breaks after
  * the "·", never inside the phrase.
  */
-const ACHIEVEMENT = ['Combat medic ·', 'led a unit from 12 to 30+'] as const;
+const ACHIEVEMENT = ['Battalion medic ·', 'led a unit from 12 to 30+'] as const;
 
 /** The portrait is the native face sprite at ×2 (×1 on short laptop screens, About.css). */
 const FACE_SCALE = 2;

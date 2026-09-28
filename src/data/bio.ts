@@ -20,7 +20,7 @@ export const bio = {
 
 I build things I end up using. Aside puts six AI providers in a sidebar next to whatever I'm reading, and a Telegram bot keeps track of my wine cellar. I work with AI coding tools every day: I make the architecture calls, review what they write, and debug it myself.
 
-Alongside the degree, I'm an IDF combat medic and medical coordinator in the Gaza Division: regular service from 2021, and an active reservist since August 2024. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people, ran coordination and logistics in the division's war room, and handled triage and evacuation in mass-casualty events. What I took from it: stay calm and make the call.`,
+Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division: regular service from 2021, and an active reservist since August 2024. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people, ran coordination and logistics in the division's war room, and handled triage and evacuation in mass-casualty events. What I took from it: stay calm and make the call.`,
   email: "Roy.y.carmelli@gmail.com",
   github: "https://github.com/Royc4515",
   linkedin: "https://linkedin.com/in/roy-carmelli",
