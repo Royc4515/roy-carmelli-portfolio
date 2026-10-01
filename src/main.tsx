@@ -11,6 +11,12 @@ const Gallery = import.meta.env.DEV ? lazy(() => import('./dev/Gallery')) : null
 const showGallery =
   import.meta.env.DEV && new URLSearchParams(window.location.search).has('gallery');
 
+// Back from Google sign-in for Roy Runner: finish it and reopen the game. Loaded only on
+// that visit, so the auth code never weighs on a normal page load.
+if (new URLSearchParams(window.location.search).has('runner')) {
+  import('./lib/runnerAuthReturn').then(m => m.completeRunnerSignIn()).catch(() => {});
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {/* `m.*` components get their animation features here, once. `strict` throws if a

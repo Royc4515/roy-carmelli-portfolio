@@ -10,7 +10,8 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - `src/data/bio.ts`, `src/data/projects.ts` - ALL recruiter-facing copy (bio, skills, project cards). Most content edits happen here.
 - `src/sections/` - page zones: Hero, Projects, About, Skills, Resume, Contact.
 - `src/components/ui/` - design-system primitives (Button, PixelPanel, Chip, ZoneHeader, ZoneBanner, Toast, Reveal).
-- `src/components/MiniGame/` - "Roy Runner" canvas engine (GameEngine, Player, Obstacle, SpriteRenderer, config). Lazy-loaded from `Hero.tsx`.
+- `src/components/MiniGame/` - "Roy Runner" canvas engine (GameEngine, Player, Obstacle, SpriteRenderer, config) and the `Scoreboard` dialog. Lazy-loaded from `Hero.tsx`.
+- `src/lib/supabase.ts`, `src/lib/runnerScores.ts`, `src/hooks/useRunnerScores.ts` - Google sign-in, personal best and leaderboard (Supabase). `supabase/migrations/` holds the schema; setup in `docs/leaderboard/SETUP.md`.
 - `src/hooks/` - theme, media queries, game display mode, active section, hash scroll.
 - `src/theme/` - tokens, motion, and the GENERATED `pixelSprites.ts`.
 - `src/dev/Gallery.tsx` - dev-only component gallery at `/?gallery`.
@@ -22,7 +23,7 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 ## Commands
 - `npm install` (or `npm ci`) - verified.
 - `npm run dev` - Vite dev server on port 5173 (unverified here).
-- `npm test` - `vitest run`; verified: 36 files / 486 tests pass. jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
+- `npm test` - `vitest run`; verified: 43 files / 542 tests pass. jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
 - `npm run build` - `tsc -b && vite build`; verified.
 - `npm run test:coverage` - v8 coverage (unverified).
 - `python3 scripts/pixelate/pixelate.py` - needs Pillow + numpy (unverified).
@@ -33,7 +34,7 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - Flag counterintuitive, load-bearing or past-bug-hiding lines with a `// don't touch / <reason>` comment (in CSS: `/* don't touch / <reason> */`).
 - Edge cases and input validation are priorities; prefer clean OOP, good naming, reuse.
 - No em dashes in any user-facing text or docs; use a plain hyphen.
-- Secrets only via environment variables, never committed (`.env*` is gitignored; the site currently needs none).
+- Secrets only via environment variables, never committed (`.env*` is gitignored). The only env vars are the optional `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (see `.env.example`); never put a service-role key in a `VITE_` var, it would ship in the bundle.
 - Components use semantic tokens from `src/index.css`, never raw hex (per `docs/redesign/SPEC.md`).
 
 ## Repo-specific rules
@@ -52,5 +53,8 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - `main.tsx` wraps the app in `LazyMotion strict`: using a full `motion.*` component throws. Use `m.*`.
 - `MiniGame` is lazy-imported with a `.catch` to `GameLoadFailed`; keep that fallback when touching the import.
 - `vite.config.ts` excludes `.claude/**` from tests so agent worktrees are not collected.
+- Scoreboard: with no Supabase env vars it is `offline` (no trophy, no Leaderboard button, local best only); tests run that way. Writes go only through the SQL functions; the tables have RLS on and no policies on purpose.
+- `submit_runner_score` hardcodes 8 points/s; keep it equal to `SCORE_CONFIG.pointsPerSecond` or real scores get rejected.
+- The OAuth return lands on `/?runner=1&code=...`; `main.tsx` lazy-loads `runnerAuthReturn.ts` to finish sign-in, strip the params and reopen the game. Supabase's Redirect URLs allowlist must include the site origin.
 - `MOBILE_SDD.md` is partly stale (mentions `Arcade.tsx` and an inline-styles-only codebase); trust the code over it.
 - Project claims drift as the source repos evolve (e.g. test counts). Re-verify numbers against the source repo before editing a card.

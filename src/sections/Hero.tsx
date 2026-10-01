@@ -26,6 +26,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { useGameDisplayMode } from '../hooks/useGameDisplayMode';
 import { useInertWhile } from '../hooks/useInertWhile';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { pixelSprites } from '../theme/pixelSprites';
 import { duration, ease, seconds } from '../theme/motion';
 import './Hero.css';
@@ -1194,6 +1195,16 @@ export default function Hero() {
                     </Chip>
                   )}
                 </div>
+                {mode === 'desktop' && isSupabaseConfigured() && (
+                  // The dialog lives in MiniGame (lazy chunk); this only asks it to open (SCOREBOARD_EVENT).
+                  <Button
+                    variant="secondary"
+                    onClick={() => window.dispatchEvent(new CustomEvent('runner:scores'))}
+                    leadingIcon={<PixelIcon name="trophy" size={12} />}
+                  >
+                    Leaderboard
+                  </Button>
+                )}
                 {mode === 'desktop' && <ControlsHint />}
               </div>
             )}

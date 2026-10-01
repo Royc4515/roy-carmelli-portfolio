@@ -29,7 +29,20 @@ const FONT_SM  = '8px "Press Start 2P"';
 const FONT_MD  = '10px "Press Start 2P"';
 const FONT_LG  = '14px "Press Start 2P"';
 
+/** Scores always show as six digits, arcade style. */
+function pad(score: number): string {
+  return String(Math.floor(score)).padStart(6, '0');
+}
+
 // ─── GameEngine ───────────────────────────────────────────────────────────────
+
+/** Run lifecycle hooks, so the scoreboard can follow along without touching the canvas. */
+export interface GameEngineHooks {
+  /** Start pressed: a new run begins (fires once per run, before any points are scored). */
+  onRunStart?: () => void;
+  /** The run ended; `score` is the whole score shown on the game-over screen. */
+  onGameOver?: (score: number) => void;
+}
 
 export class GameEngine {
   private readonly ctx: CanvasRenderingContext2D;
@@ -54,11 +67,18 @@ export class GameEngine {
   private blinkTimer = 0;
   private blinkVisible = true;
 
+  /** Personal best shown in the HUD; the owner keeps it current with setBest. */
+  private best = 0;
+  /** The run that just ended beat `best`. */
+  private newBest = false;
+  private readonly hooks: GameEngineHooks;
+
   private readonly canvasW: number;
   private readonly canvasH: number;
 
-  constructor(ctx: CanvasRenderingContext2D) {
+  constructor(ctx: CanvasRenderingContext2D, hooks: GameEngineHooks = {}) {
     this.ctx = ctx;
+    this.hooks = hooks;
     this.canvasW = CANVAS_CONFIG.width;
     this.canvasH = CANVAS_CONFIG.height;
     this.player = new Player(this.canvasW, this.canvasH);
@@ -106,6 +126,11 @@ export class GameEngine {
   /** S / ArrowDown — slide under air obstacles */
   handleSlide(): void {
     if (this.state === 'PLAYING') this.player.slide();
+  }
+
+  /** Personal best to display. Ignores anything that is not a finite, non-negative number. */
+  setBest(best: number): void {
+    if (Number.isFinite(best) && best >= 0) this.best = Math.floor(best);
   }
 
   /** True while the game is waiting to be (re)started — i.e. a tap should begin play. */
@@ -189,15 +214,21 @@ export class GameEngine {
     this.transitionStartX = this.player.x;
     this.transitionTargetX = this.canvasW * PLAYER_CONFIG.runFraction;
     this.player.animState = 'run';
+    this.hooks.onRunStart?.();
   }
 
   private triggerGameOver(): void {
     this.state = 'GAMEOVER';
     this.player.animState = 'stand';
+    const final = Math.floor(this.score);
+    this.newBest = final > this.best;
+    if (this.newBest) this.best = final;
+    this.hooks.onGameOver?.(final);
   }
 
   private resetGame(): void {
     this.score       = 0;
+    this.newBest     = false;
     this.playTime    = 0;
     this.scrollSpeed = SCROLL_CONFIG.initialSpeed;
     this.bgOffset    = 0;
@@ -276,10 +307,16 @@ export class GameEngine {
     ctx.font         = FONT_MD;
     ctx.fillStyle    = C.brass;
     ctx.fillText(
-      String(Math.floor(this.score)).padStart(6, '0'),
+      pad(this.score),
       this.canvasW - 12,
       12,
     );
+
+    if (this.best > 0) {
+      ctx.font      = FONT_SM;
+      ctx.fillStyle = C.parchment;
+      ctx.fillText(`BEST ${pad(this.best)}`, this.canvasW - 12, 30);
+    }
   }
 
   private drawGameOverUI(): void {
@@ -300,7 +337,12 @@ export class GameEngine {
     // Score
     ctx.font      = FONT_MD;
     ctx.fillStyle = C.brass;
-    ctx.fillText(`SCORE  ${Math.floor(this.score).toString().padStart(6, '0')}`, canvasW / 2, canvasH * 0.52);
+    ctx.fillText(`SCORE  ${pad(this.score)}`, canvasW / 2, canvasH * 0.52);
+
+    // New best, or the best to beat
+    ctx.font      = FONT_SM;
+    ctx.fillStyle = this.newBest ? C.brass : C.parchment;
+    ctx.fillText(this.newBest ? 'NEW BEST!' : `BEST  ${pad(this.best)}`, canvasW / 2, canvasH * 0.6);
 
     // Restart prompt
     ctx.font      = FONT_SM;
