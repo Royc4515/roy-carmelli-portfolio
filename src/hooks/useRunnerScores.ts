@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getSupabase } from '../lib/supabase';
+import { isScoreboardConfigured } from '../lib/scoreboardConfig';
 import {
-  ScoreService,
+  ScoreApi,
   readLocalBest,
   saveLocalBest,
   type LeaderboardEntry,
   type Player,
+  type SessionState,
 } from '../lib/runnerScores';
 
 export type ScoreboardStatus =
-  /** No Supabase env vars: local best only, no sign-in, no leaderboard. */
+  /** No Google client ID in the build: local best only, no sign-in, no leaderboard. */
   | 'offline'
-  /** Client still loading / restoring the session. */
+  /** Asking the server who is signed in. */
   | 'loading'
   | 'ready';
 
@@ -24,9 +25,10 @@ export interface RunnerScores {
   leaderboardError: boolean;
   /** Set when the last finished run could not be saved online. */
   saveError: boolean;
-  /** Set when the redirect to Google could not start. */
+  /** Set when Google's token was refused or the session could not be created. */
   signInError: boolean;
-  signIn: () => void;
+  /** Hand it the credential from the Sign in with Google button. */
+  signIn: (credential: string) => void;
   signOut: () => void;
   refreshLeaderboard: () => void;
   /** Wire to the engine: a run has begun. */
@@ -36,13 +38,13 @@ export interface RunnerScores {
 }
 
 /**
- * Personal bests and the leaderboard for Roy Runner. Signed out (or with no backend
- * configured) the best lives in localStorage; signed in it lives on the server, and each run
- * is opened (`startRun`) and closed (`submit`) there so the server can sanity-check its score.
+ * Personal bests and the leaderboard for Roy Runner. Signed out (or with no scoreboard in this
+ * build) the best lives in localStorage; signed in it lives on the server, and each run is
+ * opened (`startRun`) and closed (`submit`) there so the server can sanity-check its score.
  */
-export function useRunnerScores(): RunnerScores {
-  const [service, setService] = useState<ScoreService | null>(null);
-  const [status, setStatus] = useState<ScoreboardStatus>('loading');
+export function useRunnerScores(api: ScoreApi = defaultApi): RunnerScores {
+  const enabled = isScoreboardConfigured();
+  const [status, setStatus] = useState<ScoreboardStatus>(enabled ? 'loading' : 'offline');
   const [player, setPlayer] = useState<Player | null>(null);
   const [localBest, setLocalBest] = useState(readLocalBest);
   const [serverBest, setServerBest] = useState(0);
@@ -51,117 +53,102 @@ export function useRunnerScores(): RunnerScores {
   const [saveError, setSaveError] = useState(false);
   const [signInError, setSignInError] = useState(false);
 
-  // The open run's startRun call: submit waits on it, so a run shorter than the round trip
+  // The open run's start request: submit waits on it, so a run shorter than the round trip
   // still closes the run it opened. `null` = no run open on the server.
   const runRef = useRef<Promise<boolean> | null>(null);
-  const serviceRef = useRef(service);
-  serviceRef.current = service;
   const playerRef = useRef(player);
   playerRef.current = player;
-
+  const alive = useRef(true);
   useEffect(() => {
-    let alive = true;
-    let unsubscribe = () => {};
-    getSupabase().then(async client => {
-      if (!alive) return;
-      if (!client) {
-        setStatus('offline');
-        return;
-      }
-      const svc = new ScoreService(client);
-      setService(svc);
-      unsubscribe = svc.onPlayerChange(p => {
-        if (!alive) return;
-        setPlayer(p);
-        runRef.current = null; // a run opened under another account is not this one's
-      });
-      try {
-        const p = await svc.getPlayer();
-        if (alive) setPlayer(p);
-      } catch {
-        /* treat as signed out */
-      }
-      if (alive) setStatus('ready');
-    });
+    alive.current = true;
     return () => {
-      alive = false;
-      unsubscribe();
+      alive.current = false;
     };
   }, []);
 
   const refreshLeaderboard = useCallback(() => {
-    const svc = serviceRef.current;
-    if (!svc) return;
-    svc.leaderboard().then(
+    if (!enabled) return;
+    api.leaderboard().then(
       rows => {
+        if (!alive.current) return;
         setLeaderboard(rows);
         setLeaderboardError(false);
       },
-      () => setLeaderboardError(true),
+      () => alive.current && setLeaderboardError(true),
     );
-  }, []);
+  }, [api, enabled]);
 
-  // The signed-in player's best, and a leaderboard that marks their row, on every account change.
+  const applySession = useCallback(
+    (s: SessionState) => {
+      if (!alive.current) return;
+      runRef.current = null; // a run opened under another account is not this one's
+      setPlayer(s.player);
+      setServerBest(s.best);
+      refreshLeaderboard(); // re-marks "(you)"
+    },
+    [refreshLeaderboard],
+  );
+
   useEffect(() => {
-    if (!service) return;
-    let alive = true;
-    setServerBest(0);
-    if (player) {
-      service.myBest().then(
-        b => alive && setServerBest(b),
-        () => {},
-      );
-    }
-    refreshLeaderboard();
-    return () => {
-      alive = false;
-    };
-  }, [service, player, refreshLeaderboard]);
+    if (!enabled) return;
+    api
+      .session()
+      .then(applySession, () => {
+        /* server unreachable: play on signed out */
+      })
+      .finally(() => alive.current && setStatus('ready'));
+  }, [api, enabled, applySession]);
 
   const onRunStart = useCallback(() => {
     setSaveError(false);
-    const svc = serviceRef.current;
-    runRef.current =
-      svc && playerRef.current
-        ? svc.startRun().then(
-            () => true,
-            () => false,
-          )
-        : null;
-  }, []);
+    runRef.current = playerRef.current
+      ? api.startRun().then(
+          () => true,
+          () => false,
+        )
+      : null;
+  }, [api]);
 
   const onGameOver = useCallback(
     (score: number) => {
       setLocalBest(saveLocalBest(score));
-      const svc = serviceRef.current;
       const run = runRef.current;
       runRef.current = null;
-      if (!svc || !run || !playerRef.current) return;
+      if (!run || !playerRef.current) return;
 
       setServerBest(b => Math.max(b, Math.floor(score)));
       run
         .then(opened => {
           if (!opened) throw new Error('run was never opened');
-          return svc.submit(score);
+          return api.submit(score);
         })
         .then(best => {
+          if (!alive.current) return;
           setServerBest(best);
           refreshLeaderboard();
         })
-        .catch(() => setSaveError(true));
+        .catch(() => alive.current && setSaveError(true));
     },
-    [refreshLeaderboard],
+    [api, refreshLeaderboard],
   );
 
-  const signIn = useCallback(() => {
-    setSignInError(false);
-    serviceRef.current?.signInWithGoogle().catch(() => setSignInError(true));
-  }, []);
+  const signIn = useCallback(
+    (credential: string) => {
+      setSignInError(false);
+      api.signIn(credential).then(applySession, () => alive.current && setSignInError(true));
+    },
+    [api, applySession],
+  );
 
   const signOut = useCallback(() => {
     runRef.current = null;
-    serviceRef.current?.signOut().catch(() => {});
-  }, []);
+    // Stop Google from silently picking this account again on the next visit.
+    window.google?.accounts?.id?.disableAutoSelect();
+    api.signOut().then(
+      () => applySession({ player: null, best: 0 }),
+      () => {},
+    );
+  }, [api, applySession]);
 
   return {
     status,
@@ -178,3 +165,5 @@ export function useRunnerScores(): RunnerScores {
     onGameOver,
   };
 }
+
+const defaultApi = new ScoreApi();

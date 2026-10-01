@@ -1,17 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-  AUTH_RETURN_PARAM,
   LOCAL_BEST_KEY,
   MAX_SCORE,
-  ScoreService,
+  ScoreApi,
+  ScoreApiError,
   normalizeScore,
   parseLeaderboard,
-  playerFromUser,
   readLocalBest,
   saveLocalBest,
 } from './runnerScores';
-import { fakeSupabase } from '../test/fakeSupabase';
-import type { User } from '@supabase/supabase-js';
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial));
@@ -67,15 +64,15 @@ describe('local best', () => {
 });
 
 describe('parseLeaderboard', () => {
-  it('maps rows and accepts bigint ranks sent as strings', () => {
+  it('keeps well-formed rows, Hebrew names included', () => {
     expect(
       parseLeaderboard([
-        { rank: 1, display_name: 'Roy C.', best_score: 700, is_me: true },
-        { rank: '2', display_name: 'רועי כ.', best_score: 480, is_me: false },
+        { rank: 1, name: 'רועי כ.', score: 700, isMe: false },
+        { rank: 2, name: 'Roy C.', score: 480, isMe: true },
       ]),
     ).toEqual([
-      { rank: 1, name: 'Roy C.', score: 700, isMe: true },
-      { rank: 2, name: 'רועי כ.', score: 480, isMe: false },
+      { rank: 1, name: 'רועי כ.', score: 700, isMe: false },
+      { rank: 2, name: 'Roy C.', score: 480, isMe: true },
     ]);
   });
 
@@ -86,86 +83,76 @@ describe('parseLeaderboard', () => {
       parseLeaderboard([
         null,
         'row',
-        { rank: 0, display_name: 'A', best_score: 1 },
-        { rank: 1, display_name: 7, best_score: 1 },
-        { rank: 1, display_name: 'B', best_score: -3 },
-        { rank: 1, display_name: 'C', best_score: 5, is_me: 'yes' },
+        { rank: 0, name: 'A', score: 1 },
+        { rank: '1', name: 'A', score: 1 },
+        { rank: 1, name: 7, score: 1 },
+        { rank: 1, name: '', score: 1 },
+        { rank: 1, name: 'B', score: -3 },
+        { rank: 1, name: 'C', score: 5, isMe: 'yes' },
       ]),
     ).toEqual([{ rank: 1, name: 'C', score: 5, isMe: false }]);
   });
 });
 
-describe('playerFromUser', () => {
-  const user = (meta: Record<string, unknown>) => ({ user_metadata: meta }) as unknown as User;
+/** A fetch that answers each `METHOD path` with a status and JSON body, and records calls. */
+function fakeFetch(routes: Record<string, [number, unknown]>) {
+  return vi.fn(async (url: string, init?: RequestInit) => {
+    const key = `${init?.method ?? 'GET'} ${url}`;
+    const [status, body] = routes[key] ?? [404, { error: 'not_found' }];
+    return new Response(body === undefined ? null : JSON.stringify(body), { status });
+  });
+}
 
-  it('takes the first name of the Google profile', () => {
-    expect(playerFromUser(user({ full_name: '  Roy   Carmelli ' }))).toEqual({ firstName: 'Roy' });
-    expect(playerFromUser(user({ name: 'רועי כרמלי' }))).toEqual({ firstName: 'רועי' });
+describe('ScoreApi', () => {
+  it('reads the session, tolerating a malformed player', async () => {
+    let f = fakeFetch({ 'GET /api/session': [200, { player: { firstName: 'Roy' }, best: 120 }] });
+    expect(await new ScoreApi(f as unknown as typeof fetch).session()).toEqual({ player: { firstName: 'Roy' }, best: 120 });
+    f = fakeFetch({ 'GET /api/session': [200, { player: { firstName: 3 }, best: -1 }] });
+    expect(await new ScoreApi(f as unknown as typeof fetch).session()).toEqual({ player: null, best: 0 });
   });
 
-  it('falls back to "Player" with no usable name, and null with no user', () => {
-    expect(playerFromUser(user({ full_name: '   ' }))).toEqual({ firstName: 'Player' });
-    expect(playerFromUser(user({}))).toEqual({ firstName: 'Player' });
-    expect(playerFromUser(null)).toBeNull();
-  });
-});
-
-describe('ScoreService', () => {
-  it('signs in with Google and comes back to the page with the return marker, without a hash', async () => {
-    const fake = fakeSupabase();
-    await new ScoreService(fake.client).signInWithGoogle('https://example.com/?x=1#projects');
-    expect(fake.raw.auth.signInWithOAuth).toHaveBeenCalledWith({
-      provider: 'google',
-      options: { redirectTo: `https://example.com/?x=1&${AUTH_RETURN_PARAM}=1` },
-    });
+  it('posts the Google credential as JSON, same-origin', async () => {
+    const f = fakeFetch({ 'POST /api/session': [200, { player: { firstName: 'Roy' }, best: 0 }] });
+    await new ScoreApi(f as unknown as typeof fetch).signIn('tok');
+    const [, init] = f.mock.calls[0];
+    expect(init).toMatchObject({ method: 'POST', credentials: 'same-origin', body: JSON.stringify({ credential: 'tok' }) });
+    expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
   });
 
-  it('throws when the OAuth redirect cannot start', async () => {
-    const fake = fakeSupabase();
-    fake.raw.auth.signInWithOAuth.mockResolvedValueOnce({ data: {}, error: new Error('down') } as never);
-    await expect(new ScoreService(fake.client).signInWithGoogle('https://example.com/')).rejects.toThrow('down');
-  });
-
-  it('submits whole scores and returns the server best', async () => {
-    const fake = fakeSupabase();
-    fake.setRpc('submit_runner_score', { data: 900 });
-    await expect(new ScoreService(fake.client).submit(412.8)).resolves.toBe(900);
-    expect(fake.raw.rpc).toHaveBeenCalledWith('submit_runner_score', { p_score: 412 });
+  it('starts and submits runs, sending whole scores', async () => {
+    const f = fakeFetch({ 'POST /api/runs': [200, { best: 900 }] });
+    const api = new ScoreApi(f as unknown as typeof fetch);
+    await api.startRun();
+    await expect(api.submit(412.8)).resolves.toBe(900);
+    expect(f.mock.calls.map(c => c[1]?.body)).toEqual([
+      JSON.stringify({ action: 'start' }),
+      JSON.stringify({ action: 'submit', score: 412 }),
+    ]);
   });
 
   it('refuses an invalid score before any request', async () => {
-    const fake = fakeSupabase();
-    await expect(new ScoreService(fake.client).submit(-1)).rejects.toThrow(RangeError);
-    expect(fake.raw.rpc).not.toHaveBeenCalled();
+    const f = fakeFetch({});
+    await expect(new ScoreApi(f as unknown as typeof fetch).submit(-1)).rejects.toThrow(RangeError);
+    expect(f).not.toHaveBeenCalled();
   });
 
-  it('surfaces server errors (e.g. an implausible score)', async () => {
-    const fake = fakeSupabase();
-    fake.setRpc('submit_runner_score', { error: new Error('implausible score') });
-    await expect(new ScoreService(fake.client).submit(10)).rejects.toThrow('implausible score');
+  it('turns error answers into ScoreApiError with the server code', async () => {
+    const f = fakeFetch({ 'POST /api/runs': [422, { error: 'implausible_score' }], 'GET /api/session': [503, undefined] });
+    const api = new ScoreApi(f as unknown as typeof fetch);
+    await expect(api.submit(5)).rejects.toMatchObject({ status: 422, code: 'implausible_score' });
+    await expect(api.session()).rejects.toBeInstanceOf(ScoreApiError);
   });
 
-  it('reads the leaderboard and the best through the database functions', async () => {
-    const fake = fakeSupabase();
-    fake.setRpc('runner_leaderboard', { data: [{ rank: 1, display_name: 'Roy C.', best_score: 5, is_me: false }] });
-    fake.setRpc('my_runner_best', { data: 77 });
-    const svc = new ScoreService(fake.client);
-    await expect(svc.leaderboard()).resolves.toEqual([{ rank: 1, name: 'Roy C.', score: 5, isMe: false }]);
-    expect(fake.raw.rpc).toHaveBeenCalledWith('runner_leaderboard', { p_limit: 10 });
-    await expect(svc.myBest()).resolves.toBe(77);
+  it('reads the leaderboard with the limit', async () => {
+    const f = fakeFetch({ 'GET /api/leaderboard?limit=10': [200, { rows: [{ rank: 1, name: 'Roy C.', score: 5, isMe: true }] }] });
+    expect(await new ScoreApi(f as unknown as typeof fetch).leaderboard()).toEqual([
+      { rank: 1, name: 'Roy C.', score: 5, isMe: true },
+    ]);
   });
 
-  it('reports sign-in and sign-out to listeners, and unsubscribes', async () => {
-    const fake = fakeSupabase();
-    const svc = new ScoreService(fake.client);
-    const listener = vi.fn();
-    const stop = svc.onPlayerChange(listener);
-    fake.signInAs({ user_metadata: { full_name: 'Roy Carmelli' } });
-    expect(listener).toHaveBeenLastCalledWith({ firstName: 'Roy' });
-    await svc.signOut();
-    expect(listener).toHaveBeenLastCalledWith(null);
-    stop();
-    fake.signInAs({ user_metadata: {} });
-    expect(listener).toHaveBeenCalledTimes(2);
+  it('signs out with DELETE', async () => {
+    const f = fakeFetch({ 'DELETE /api/session': [200, { player: null, best: 0 }] });
+    await new ScoreApi(f as unknown as typeof fetch).signOut();
+    expect(f).toHaveBeenCalledWith('/api/session', expect.objectContaining({ method: 'DELETE' }));
   });
 });

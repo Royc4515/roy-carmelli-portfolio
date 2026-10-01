@@ -9,7 +9,7 @@ The page is a map of five zones: Projects (quest cards), About (character sheet)
 The game ("Roy Runner") is playable on **desktop** and **mobile**:
 
 - **Desktop:** Space / ↑ / W / click to jump, ↓ / S to slide, Esc to quit.
-- **Leaderboard:** sign in with Google to save a personal best and join a public top 10 (Supabase Auth + Postgres, with RLS and a server-side time check on every score). Signed out, the best is kept on the device. Setup: [`docs/leaderboard/SETUP.md`](docs/leaderboard/SETUP.md).
+- **Leaderboard:** sign in with Google to save a personal best and join a public top 10. Vercel Functions (`api/`) verify the Google token, keep a signed session cookie and check every score against the run's real duration; scores live in Neon Postgres. Signed out, the best is kept on the device. Setup: [`docs/leaderboard/SETUP.md`](docs/leaderboard/SETUP.md).
 - **Phone (landscape):** on-screen **JUMP** / **SLIDE** buttons, tap anywhere to start/restart, and a **fullscreen** toggle (with larger controls in fullscreen). Portrait shows a "rotate your phone" prompt. Device detection uses a `(pointer: coarse)` + orientation hook so desktop behaviour is untouched.
 
 ## Stack
@@ -18,6 +18,7 @@ The game ("Roy Runner") is playable on **desktop** and **mobile**:
 - Tailwind CSS v4 (Vite plugin), design tokens in `@theme`
 - Framer Motion via `LazyMotion` + `m` (reveals and scene transitions only)
 - Vitest + Testing Library
+- Vercel Functions (`api/`, Web-standard handlers) + Neon Postgres for the game's leaderboard
 
 ## Design system
 

@@ -1,6 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
+// Google's button is a third-party widget: stand in a plain button that hands back a token.
+vi.mock('./GoogleSignInButton', () => ({
+  default: ({ onCredential }: { onCredential: (c: string) => void }) => (
+    <button type="button" onClick={() => onCredential('google-token')}>
+      Sign in with Google
+    </button>
+  ),
+}));
+
 import Scoreboard from './Scoreboard';
 import type { RunnerScores } from '../../hooks/useRunnerScores';
 
@@ -66,7 +75,7 @@ describe('Scoreboard', () => {
     const s = scores();
     render(<Scoreboard scores={s} onClose={() => {}} />);
     await userEvent.click(screen.getByRole('button', { name: /sign in with google/i }));
-    expect(s.signIn).toHaveBeenCalled();
+    expect(s.signIn).toHaveBeenCalledWith('google-token');
   });
 
   it('signed in: shows the name and best, and signs out', async () => {

@@ -1,26 +1,40 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fakeSupabase } from '../test/fakeSupabase';
-import { LOCAL_BEST_KEY } from '../lib/runnerScores';
+import { LOCAL_BEST_KEY, ScoreApi } from '../lib/runnerScores';
 
-const getSupabase = vi.hoisted(() => vi.fn());
-vi.mock('../lib/supabase', () => ({ getSupabase }));
+const config = vi.hoisted(() => ({ enabled: true }));
+vi.mock('../lib/scoreboardConfig', () => ({ isScoreboardConfigured: () => config.enabled }));
 
 import { useRunnerScores } from './useRunnerScores';
 
-const roy = { user_metadata: { full_name: 'Roy Carmelli' } };
+/** A ScoreApi whose methods are spies with sensible signed-out answers. */
+function fakeApi(over: Partial<Record<keyof ScoreApi, unknown>> = {}) {
+  const api = {
+    session: vi.fn(async () => ({ player: null, best: 0 })),
+    signIn: vi.fn(async () => ({ player: { firstName: 'Roy' }, best: 200 })),
+    signOut: vi.fn(async () => {}),
+    startRun: vi.fn(async () => {}),
+    submit: vi.fn(async (score: number) => score),
+    leaderboard: vi.fn(async () => []),
+    ...over,
+  };
+  return api as unknown as ScoreApi & typeof api;
+}
+
+const signedIn = () => fakeApi({ session: vi.fn(async () => ({ player: { firstName: 'Roy' }, best: 200 })) });
 
 beforeEach(() => {
   window.localStorage.clear();
-  getSupabase.mockReset();
+  config.enabled = true;
 });
 
 describe('useRunnerScores', () => {
-  it('without a backend: offline, best kept on this device', async () => {
-    getSupabase.mockResolvedValue(null);
+  it('without a client ID: offline, never calls the API, best kept on this device', () => {
+    config.enabled = false;
     window.localStorage.setItem(LOCAL_BEST_KEY, '40');
-    const { result } = renderHook(() => useRunnerScores());
-    await waitFor(() => expect(result.current.status).toBe('offline'));
+    const api = fakeApi();
+    const { result } = renderHook(() => useRunnerScores(api));
+    expect(result.current.status).toBe('offline');
     expect(result.current.best).toBe(40);
 
     act(() => {
@@ -29,54 +43,56 @@ describe('useRunnerScores', () => {
     });
     expect(result.current.best).toBe(95);
     expect(window.localStorage.getItem(LOCAL_BEST_KEY)).toBe('95');
+    act(() => result.current.refreshLeaderboard());
+    expect(api.session).not.toHaveBeenCalled();
+    expect(api.leaderboard).not.toHaveBeenCalled();
   });
 
-  it('signed out: never opens or submits a run on the server', async () => {
-    const fake = fakeSupabase();
-    getSupabase.mockResolvedValue(fake.client);
-    const { result } = renderHook(() => useRunnerScores());
+  it('signed out: ready, and runs never touch the server', async () => {
+    const api = fakeApi();
+    const { result } = renderHook(() => useRunnerScores(api));
     await waitFor(() => expect(result.current.status).toBe('ready'));
-    expect(result.current.player).toBeNull();
-
     act(() => {
       result.current.onRunStart();
       result.current.onGameOver(30);
     });
-    expect(fake.raw.rpc).not.toHaveBeenCalledWith('start_runner_run');
-    expect(fake.raw.rpc).not.toHaveBeenCalledWith('submit_runner_score', expect.anything());
+    expect(api.startRun).not.toHaveBeenCalled();
+    expect(api.submit).not.toHaveBeenCalled();
     expect(result.current.best).toBe(30);
   });
 
-  it('signed in: loads the server best, opens a run, then submits it once', async () => {
-    const fake = fakeSupabase({ user: roy });
-    fake.setRpc('my_runner_best', { data: 200 });
-    fake.setRpc('submit_runner_score', { data: 250 });
-    getSupabase.mockResolvedValue(fake.client);
-    const { result } = renderHook(() => useRunnerScores());
+  it('a server that is down still lets you play, signed out', async () => {
+    const api = fakeApi({ session: vi.fn(async () => Promise.reject(new Error('503'))) });
+    const { result } = renderHook(() => useRunnerScores(api));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.player).toBeNull();
+  });
+
+  it('signed in: shows the server best, opens a run, then submits it once', async () => {
+    const api = signedIn();
+    api.submit.mockResolvedValue(250);
+    const { result } = renderHook(() => useRunnerScores(api));
     await waitFor(() => expect(result.current.best).toBe(200));
     expect(result.current.player).toEqual({ firstName: 'Roy' });
 
     act(() => result.current.onRunStart());
-    expect(fake.raw.rpc).toHaveBeenCalledWith('start_runner_run');
-
+    expect(api.startRun).toHaveBeenCalledTimes(1);
     act(() => result.current.onGameOver(250));
     expect(result.current.best).toBe(250); // raised at once, before the server answers
-    await waitFor(() => expect(fake.raw.rpc).toHaveBeenCalledWith('submit_runner_score', { p_score: 250 }));
+    await waitFor(() => expect(api.submit).toHaveBeenCalledWith(250));
 
     // A second game over without a new start has no open run to close.
     act(() => result.current.onGameOver(10));
-    await waitFor(() =>
-      expect(fake.raw.rpc.mock.calls.filter(c => c[0] === 'submit_runner_score')).toHaveLength(1),
-    );
+    await waitFor(() => expect(api.leaderboard).toHaveBeenCalledTimes(2)); // load + after submit
+    expect(api.submit).toHaveBeenCalledTimes(1);
     expect(result.current.saveError).toBe(false);
   });
 
-  it('flags a run the server refused, and does not submit one it never opened', async () => {
-    const fake = fakeSupabase({ user: roy });
-    fake.setRpc('submit_runner_score', { error: new Error('implausible score') });
-    getSupabase.mockResolvedValue(fake.client);
-    const { result } = renderHook(() => useRunnerScores());
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+  it('flags a refused run, and never submits a run that failed to open', async () => {
+    const api = signedIn();
+    api.submit.mockRejectedValue(new Error('implausible_score'));
+    const { result } = renderHook(() => useRunnerScores(api));
+    await waitFor(() => expect(result.current.player).not.toBeNull());
 
     act(() => {
       result.current.onRunStart();
@@ -84,48 +100,48 @@ describe('useRunnerScores', () => {
     });
     await waitFor(() => expect(result.current.saveError).toBe(true));
 
-    fake.setRpc('start_runner_run', { error: new Error('offline') });
-    fake.raw.rpc.mockClear();
-    act(() => {
-      result.current.onRunStart();
-    });
+    api.startRun.mockRejectedValue(new Error('offline'));
+    api.submit.mockClear();
+    act(() => result.current.onRunStart());
     expect(result.current.saveError).toBe(false); // a new run clears the old flag
     act(() => result.current.onGameOver(5));
     await waitFor(() => expect(result.current.saveError).toBe(true));
-    expect(fake.raw.rpc).not.toHaveBeenCalledWith('submit_runner_score', expect.anything());
+    expect(api.submit).not.toHaveBeenCalled();
+  });
+
+  it('signs in with a Google credential and signs out again', async () => {
+    const api = fakeApi();
+    const { result } = renderHook(() => useRunnerScores(api));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+
+    act(() => result.current.signIn('google-token'));
+    await waitFor(() => expect(result.current.player).toEqual({ firstName: 'Roy' }));
+    expect(api.signIn).toHaveBeenCalledWith('google-token');
+    expect(result.current.best).toBe(200);
+
+    const disableAutoSelect = vi.fn();
+    window.google = { accounts: { id: { disableAutoSelect } as never } };
+    act(() => result.current.signOut());
+    await waitFor(() => expect(result.current.player).toBeNull());
+    expect(disableAutoSelect).toHaveBeenCalled();
+    delete window.google;
+  });
+
+  it('flags a refused sign-in', async () => {
+    const api = fakeApi({ signIn: vi.fn(async () => Promise.reject(new Error('401'))) });
+    const { result } = renderHook(() => useRunnerScores(api));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    act(() => result.current.signIn('bad'));
+    await waitFor(() => expect(result.current.signInError).toBe(true));
+    expect(result.current.player).toBeNull();
   });
 
   it('loads the leaderboard, and flags a failed load', async () => {
-    const fake = fakeSupabase();
-    fake.setRpc('runner_leaderboard', { data: [{ rank: 1, display_name: 'Roy C.', best_score: 9, is_me: false }] });
-    getSupabase.mockResolvedValue(fake.client);
-    const { result } = renderHook(() => useRunnerScores());
+    const api = fakeApi({ leaderboard: vi.fn(async () => [{ rank: 1, name: 'Roy C.', score: 9, isMe: false }]) });
+    const { result } = renderHook(() => useRunnerScores(api));
     await waitFor(() => expect(result.current.leaderboard).toHaveLength(1));
-
-    fake.setRpc('runner_leaderboard', { error: new Error('down') });
+    api.leaderboard.mockRejectedValue(new Error('down'));
     act(() => result.current.refreshLeaderboard());
     await waitFor(() => expect(result.current.leaderboardError).toBe(true));
-  });
-
-  it('follows sign-in and sign-out', async () => {
-    const fake = fakeSupabase();
-    getSupabase.mockResolvedValue(fake.client);
-    const { result } = renderHook(() => useRunnerScores());
-    await waitFor(() => expect(result.current.status).toBe('ready'));
-
-    act(() => fake.signInAs(roy));
-    expect(result.current.player).toEqual({ firstName: 'Roy' });
-    act(() => result.current.signOut());
-    await waitFor(() => expect(result.current.player).toBeNull());
-  });
-
-  it('flags a sign-in that could not start', async () => {
-    const fake = fakeSupabase();
-    fake.raw.auth.signInWithOAuth.mockResolvedValueOnce({ data: {}, error: new Error('down') } as never);
-    getSupabase.mockResolvedValue(fake.client);
-    const { result } = renderHook(() => useRunnerScores());
-    await waitFor(() => expect(result.current.status).toBe('ready'));
-    act(() => result.current.signIn());
-    await waitFor(() => expect(result.current.signInError).toBe(true));
   });
 });

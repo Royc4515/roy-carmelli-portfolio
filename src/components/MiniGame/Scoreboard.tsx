@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, type KeyboardEvent } from 'react';
 import PixelPanel from '../PixelPanel';
 import PixelIcon from '../PixelIcon';
 import { Button } from '../ui/Button';
+import GoogleSignInButton from './GoogleSignInButton';
 import type { RunnerScores } from '../../hooks/useRunnerScores';
 import './Scoreboard.css';
 
@@ -116,16 +117,14 @@ export default function Scoreboard({ scores, onClose }: ScoreboardProps) {
               <p className="text-body-s text-fg">
                 Sign in to save your best and join the board. Only your first name and last initial are shown.
               </p>
-              <Button size="sm" onClick={scores.signIn}>
-                Sign in with Google
-              </Button>
+              <GoogleSignInButton onCredential={scores.signIn} />
             </>
           )}
         </div>
 
         {(saveError || signInError) && (
           <p role="alert" className="mt-3 text-body-s text-hp">
-            {signInError ? "Couldn't reach Google sign-in. Try again in a moment." : "Your last run wasn't saved online."}
+            {signInError ? "Sign-in didn't go through. Try again in a moment." : "Your last run wasn't saved online."}
           </p>
         )}
       </PixelPanel>
