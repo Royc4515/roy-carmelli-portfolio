@@ -8,7 +8,7 @@ import { pixelSprites } from '../theme/pixelSprites';
 const AT_A_GLANCE: Array<[string, string]> = [
   ['Degree', 'B.Sc. Computer Science & Neuroscience (dual major)'],
   ['University', 'Bar-Ilan University'],
-  ['Year', '3rd year · expected graduation 2027'],
+  ['Year', '3rd year · expected graduation Feb 2028'],
   ['GPA', '85.09 / 100'],
   ['Open to', 'Student & intern roles: full-stack, frontend, AI'],
 ];

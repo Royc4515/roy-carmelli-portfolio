@@ -11,7 +11,7 @@ import './About.css';
 const AT_A_GLANCE = [
   { label: 'Degree', value: 'B.Sc. Computer Science & Neuroscience (dual major)' },
   { label: 'University', value: 'Bar-Ilan University' },
-  { label: 'Year', value: '3rd year · expected graduation 2027' },
+  { label: 'Year', value: '3rd year · expected graduation Feb 2028' },
   { label: 'GPA', value: '85.09 / 100' },
   { label: 'Open to', value: 'Student & intern roles: full-stack, frontend, AI' },
 ] as const;
