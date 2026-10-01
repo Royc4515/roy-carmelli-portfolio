@@ -28,13 +28,18 @@ game keeps a personal best in `localStorage` only, so previews and forks need no
 
 1. **Supabase project.** Create one (free tier is fine), or reuse an existing one.
 2. **Schema.** Run the migration: SQL editor -> paste the file, or `supabase db push`.
-3. **Google OAuth client.** Google Cloud Console -> APIs & Services -> Credentials ->
-   Create OAuth client ID (Web application).
-   - Authorized JavaScript origins: `https://roy-carmelli-portfolio.vercel.app`,
-     `http://localhost:5173`
-   - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`
-   - OAuth consent screen: app name, support e-mail, scopes `openid`, `email`, `profile`
-     only (no verification needed for these).
+3. **Google OAuth client** ([Google Auth Platform](https://console.cloud.google.com/auth/overview)).
+   - Branding: app name, support e-mail. Audience: External.
+   - Data Access: `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile` only
+     (non-sensitive, so no Google verification needed).
+   - Audience: **Publish app**. While it says "Testing", only listed test users can sign in
+     and everyone else gets "Access blocked".
+   - Clients -> Create client -> Web application.
+     - Authorized JavaScript origins: `https://roy-carmelli-portfolio.vercel.app`,
+       `http://localhost:5173`
+     - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`
+       (copy it from Supabase's Google provider page, it must match exactly).
+   - Save the client secret when it is shown (download the JSON); keep it out of the repo.
 4. **Supabase Auth.** Authentication -> Sign In / Providers -> Google: enable, paste the
    client ID and secret.
    Authentication -> URL Configuration:
