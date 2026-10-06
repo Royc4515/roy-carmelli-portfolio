@@ -4,6 +4,8 @@ Live: https://roy-carmelli-portfolio.vercel.app/
 
 Personal portfolio for a CS & Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. Press start and the title screen becomes Roy Runner, an endless runner on a small canvas engine built for this site: a game-state machine, a 7-state player animation machine, AABB collision and a speed that keeps climbing. Day/night theme with system preference detection.
 
+**Pixel Roy** is an AI chat in the corner that answers as Roy, only from this site, his public GitHub and his LinkedIn. A Vercel Function (`api/chat.ts`) runs each question through a daily per-visitor cap, Prompt Guard and BM25 retrieval, then a Groq model with a fallback chain, then output checks (personal details, link allowlist, wording rules). Free tier only, nothing stored. Setup and safety: [`docs/chat/SETUP.md`](docs/chat/SETUP.md).
+
 The page is a map of five zones: Projects (quest cards), About (character sheet), Skills (equipment screen with "used in" tooltips), Resume and Contact (save point). On desktop the nav doubles as a mini-map of those zones.
 
 The game ("Roy Runner") is playable on **desktop** and **mobile**:
@@ -18,7 +20,8 @@ The game ("Roy Runner") is playable on **desktop** and **mobile**:
 - Tailwind CSS v4 (Vite plugin), design tokens in `@theme`
 - Framer Motion via `LazyMotion` + `m` (reveals and scene transitions only)
 - Vitest + Testing Library
-- Vercel Functions (`api/`, Web-standard handlers) + Neon Postgres for the game's leaderboard
+- Vercel Functions (`api/`, Web-standard handlers) + Neon Postgres for the game's leaderboard and the chat's rate limit
+- Groq (free tier) for Pixel Roy's models and Prompt Guard
 
 ## Design system
 
