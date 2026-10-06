@@ -3,7 +3,7 @@
  * isolates). Stripped from names so nobody can render their row backwards or blank, or push
  * text over a neighbour's score.
  */
-const UNSAFE = /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u115f\u1160\u200b-\u200f\u2028-\u202e\u2060-\u206f\u3164\ufeff\uffa0]/g;
+export const UNSAFE = /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u115f\u1160\u200b-\u200f\u2028-\u202e\u2060-\u206f\u3164\ufeff\uffa0]/g;
 
 function clean(part: unknown): string {
   return typeof part === 'string' ? part.replace(UNSAFE, '').replace(/\s+/g, ' ').trim() : '';

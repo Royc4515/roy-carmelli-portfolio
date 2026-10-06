@@ -17,9 +17,9 @@
     <p>
       This is the personal portfolio of Roy Carmelli at
       <a href="https://roy-carmelli-portfolio.vercel.app/">roy-carmelli-portfolio.vercel.app</a>.
-      Reading the site requires no account and sets no tracking cookies. The only part that
-      handles personal data is the optional leaderboard for the Roy Runner mini-game, and only
-      if you choose to sign in with Google.
+      Reading the site requires no account and sets no tracking cookies. Two optional parts
+      handle data: the leaderboard for the Roy Runner mini-game, only if you choose to sign in
+      with Google, and the Pixel Roy chat, only if you send it a message.
     </p>
 
     <div class="box">
@@ -52,6 +52,19 @@
       days. It is HttpOnly (page scripts can't read it) and is used for nothing else.
     </p>
 
+    <h2>If you use the Pixel Roy chat</h2>
+    <p>
+      Pixel Roy is an AI that answers questions about Roy from what this site, his public GitHub
+      and his LinkedIn say. When you send a message, it and the earlier messages of the same
+      conversation go to <strong>Groq</strong>, which runs the AI model, to produce the answer.
+      Please don't type personal information into it.
+    </p>
+    <ul>
+      <li>The site does not store your messages or the answers. The conversation lives only in your open browser tab and is gone when you close or reload it.</li>
+      <li>To stop one visitor from using up the chat, the site counts messages per visitor per day. The count is kept under a scrambled code (a salted hash) made from your IP address and the date, never the address itself, and old counts are deleted after about a day.</li>
+      <li>AI answers can be wrong. They are not statements by Roy; for anything that matters, e-mail him.</li>
+    </ul>
+
     <h2>What is public</h2>
     <p>
       Your display name ("Roy C.") and best score appear on the leaderboard, which anyone
@@ -62,7 +75,8 @@
     <ul>
       <li><strong>Google</strong> handles the sign-in itself.</li>
       <li><strong>Vercel</strong> hosts the site and runs its server code. Like any web host it keeps short-lived request logs, which include IP addresses.</li>
-      <li><strong>Neon</strong> hosts the leaderboard database, in the EU (Frankfurt).</li>
+      <li><strong>Neon</strong> hosts the leaderboard database and the chat's daily message counts, in the EU (Frankfurt).</li>
+      <li><strong>Groq</strong> runs the AI model that answers chat messages. It receives the messages of the conversation, not your name or e-mail.</li>
     </ul>
     <p>The data is not sold, shared with anyone else, or used for advertising or profiling.</p>
 
