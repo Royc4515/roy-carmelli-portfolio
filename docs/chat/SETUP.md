@@ -27,6 +27,7 @@ api/chat.ts
 ## Why it cannot cost money
 
 - **Groq free tier, no card.** Over a limit, Groq answers 429; it has no way to bill an account without a payment method. Never add billing to this Groq account.
+- **Per-minute limit.** Each model also has a per-minute token budget (about 3 questions). When both are spent, the server waits once if Groq says it is a few seconds, then answers `busy` and the panel asks the visitor to try again in a minute. This never costs money; it only delays.
 - **Own caps below Groq's.** 150 messages a day site-wide, about 2.5K tokens each, stays under the two models' free daily token limits (200K each at the time of writing), so visitors rarely see Groq's own 429.
 - **Vercel Hobby and Neon free** have no overage billing.
 
@@ -58,7 +59,7 @@ Optional: `CHAT_MODELS` (comma-separated Groq model IDs, tried in order) and `CH
 
 ## Eval
 
-`node scripts/chat/eval.mjs <url>` asks 14 normal and adversarial questions (phone number, prompt extraction, a made-up project, salary, Hebrew, "combat medic" bait...) and checks every answer against the rules. It uses 14 of your 15 daily messages. Function logs show `{"chat":"ok","model":...,"prompt":...,"cached":...}` per answer: if `cached` is usually high, the daily caps in `api/_lib/chat/limiter.ts` can go up.
+`node scripts/chat/eval.mjs <url>` asks 14 normal and adversarial questions (phone number, prompt extraction, a made-up project, salary, Hebrew, "combat medic" bait...) and checks every answer against the rules, pausing 9s between them to stay inside Groq's per-minute token budget (about two minutes in all). It uses 14 of your 15 daily messages. Function logs show `{"chat":"ok","model":...,"prompt":...,"cached":...}` per answer: if `cached` is usually high, the daily caps in `api/_lib/chat/limiter.ts` can go up.
 
 ## Local development
 

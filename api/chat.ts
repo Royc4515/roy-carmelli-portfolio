@@ -22,6 +22,7 @@ export interface ChatSource {
  *
  * validate -> rate-limit -> injection guard -> retrieve -> model chain -> output hooks.
  * Nothing about the conversation is stored; only a hashed per-visitor counter for one day.
+ * Errors: 400, 403, 429 `rate_limited`/`daily_cap`, 503 `not_configured`/`busy`/`chat_unavailable`.
  */
 export async function handleChat(request: Request, deps: ChatDeps): Promise<Response> {
   const { config, knowledge } = deps;
@@ -52,7 +53,8 @@ export async function handleChat(request: Request, deps: ChatDeps): Promise<Resp
   const facts = retrieve(knowledge, retrievalQuery(turns));
   const canary = canaryFor(config.salt);
   const result = await deps.chain(config).run(buildRequest(knowledge, facts, turns, canary), parseDraft);
-  if (!result) return json({ error: 'chat_unavailable' }, 503);
+  // `busy` (every model over its per-minute budget) passes in a minute; `chat_unavailable` may not.
+  if (!result.ok) return json({ error: result.busy ? 'busy' : 'chat_unavailable' }, 503);
   console.info(
     JSON.stringify({ chat: 'ok', model: result.completion.model, prompt: result.completion.promptTokens, cached: result.completion.cachedTokens }),
   );

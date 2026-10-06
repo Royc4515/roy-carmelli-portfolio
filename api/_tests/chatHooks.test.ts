@@ -79,8 +79,16 @@ describe('styleHook', () => {
     expect(answerOf(styleHook, 'Aside—a sidebar – fast')).toBe('Aside - a sidebar - fast');
   });
 
-  it('never says "combat medic"', () => {
-    expect(answerOf(styleHook, 'I was a Combat Medic.')).toBe('I was a battalion medic.');
+  it('drops a sentence that says "combat medic" instead of rewording it', () => {
+    // Rewording once turned a correct denial into nonsense: "I never called it a battalion medic."
+    expect(answerOf(styleHook, 'I was a battalion medic. I never called it a combat medic. Ask me more!')).toBe(
+      'I was a battalion medic. Ask me more!',
+    );
+    expect(answerOf(styleHook, 'Line one\nCombat Medic is wrong\nLine three')).toBe('Line one\n\nLine three');
+  });
+
+  it('blocks an answer that was only about "combat medic"', () => {
+    expect(styleHook.apply(draft('Yes, I was a combat medic.'), ctx)).toEqual({ ok: false, reason: 'empty' });
   });
 
   it('strips markdown but keeps hyphen lists and link targets', () => {
@@ -103,8 +111,8 @@ describe('styleHook', () => {
 
 describe('runOutputHooks', () => {
   it('runs every hook in order and stops at the first block', () => {
-    const outcome = runOutputHooks(draft('A **combat medic** — see https://evil.example', ['site:about', 'x']), ctx);
-    expect(outcome).toEqual({ ok: true, draft: { answer: 'A battalion medic - see', inScope: true, sources: ['site:about'] } });
+    const outcome = runOutputHooks(draft('A **battalion medic** \u2014 see https://evil.example. Not a combat medic.', ['site:about', 'x']), ctx);
+    expect(outcome).toEqual({ ok: true, draft: { answer: 'A battalion medic - see.', inScope: true, sources: ['site:about'] } });
     expect(runOutputHooks(draft(`x ${ctx.canary} https://evil.example`), ctx)).toEqual({ ok: false, reason: 'leak' });
   });
 });

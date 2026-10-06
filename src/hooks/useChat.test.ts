@@ -56,6 +56,7 @@ describe('useChat', () => {
   it('maps API failures onto the UI error codes', () => {
     expect(errorCode(new ChatApiError(429, 'rate_limited'))).toBe('rate_limited');
     expect(errorCode(new ChatApiError(429, 'daily_cap'))).toBe('daily_cap');
+    expect(errorCode(new ChatApiError(503, 'busy'))).toBe('busy');
     expect(errorCode(new ChatApiError(400, 'invalid_messages'))).toBe('invalid');
     expect(errorCode(new ChatApiError(503, 'chat_unavailable'))).toBe('unavailable');
     expect(errorCode(new ChatApiError(404, 'unknown'))).toBe('unavailable');

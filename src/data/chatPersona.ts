@@ -36,6 +36,7 @@ export const chatPersona = {
   errors: {
     rate_limited: `That's all the questions I can take from you today. For anything else, email the real me at ${bio.email}.`,
     daily_cap: `I've answered a lot of visitors today and need to rest until tomorrow. The real me is at ${bio.email}.`,
+    busy: "I'm getting a lot of questions right now. Give me a minute and try again.",
     unavailable: `My AI side is offline right now. You can still reach the real me at ${bio.email} or through the Contact section.`,
     network: "Couldn't reach me. Check your connection and try again.",
     invalid: 'I could not read that message. Try rephrasing it in up to 500 characters.',
