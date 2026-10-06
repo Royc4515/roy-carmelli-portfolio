@@ -1,0 +1,60 @@
+/*
+ * Scoreboard dialog (Scoreboard.tsx): covers the game screen it sits in, with the panel
+ * centred and scrolling inside when the screen is short (a landscape phone).
+ */
+.scoreboard {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background-color: color-mix(in srgb, var(--color-shadow) 72%, transparent);
+}
+
+.scoreboard__dialog {
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  /* room for the panel's 8px drop, which would otherwise be clipped by the scroll box */
+  padding: 0 8px 8px 0;
+}
+
+/* Scoreboard.tsx sets role="list": Safari drops list semantics once list-style is none. */
+.scoreboard__list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scoreboard__row {
+  display: grid;
+  grid-template-columns: 3ch 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px;
+  color: var(--color-fg);
+}
+
+.scoreboard__row[data-me] {
+  background-color: var(--color-surface-sunken);
+  color: var(--color-accent-fg);
+}
+
+.scoreboard__rank {
+  color: var(--color-fg-muted);
+  text-align: right;
+}
+
+.scoreboard__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scoreboard__score {
+  color: var(--color-accent-fg);
+  font-variant-numeric: tabular-nums;
+}

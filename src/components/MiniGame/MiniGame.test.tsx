@@ -12,6 +12,7 @@ const engine = vi.hoisted(() => ({
   handleInput: vi.fn(),
   handleSlide: vi.fn(),
   isAwaitingStart: vi.fn(() => false),
+  setBest: vi.fn(),
 }));
 vi.mock('./GameEngine', () => ({
   GameEngine: class {
@@ -21,6 +22,7 @@ vi.mock('./GameEngine', () => ({
     handleInput = engine.handleInput;
     handleSlide = engine.handleSlide;
     isAwaitingStart = engine.isAwaitingStart;
+    setBest = engine.setBest;
   },
 }));
 

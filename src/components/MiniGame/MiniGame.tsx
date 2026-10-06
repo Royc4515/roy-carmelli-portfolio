@@ -7,6 +7,8 @@ import {
 } from 'react';
 import { GameEngine } from './GameEngine';
 import { CANVAS_CONFIG } from './config';
+import Scoreboard from './Scoreboard';
+import { useRunnerScores } from '../../hooks/useRunnerScores';
 import { Button } from '../ui/Button';
 import { cx } from '../ui/cx';
 import PixelIcon from '../PixelIcon';
@@ -54,6 +56,9 @@ function fsElement(): Element | null {
     null
   );
 }
+
+/** Opens the leaderboard from outside the game (Hero's desktop controls row). */
+export const SCOREBOARD_EVENT = 'runner:scores';
 
 /** Keys the game reads from anywhere on the page. */
 const JUMP_KEYS = new Set(['Space', 'KeyW', 'ArrowUp']);
@@ -123,6 +128,11 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
   const engineRef = useRef<GameEngine | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const scores = useRunnerScores();
+  const [boardOpen, setBoardOpen] = useState(false);
+  const boardOpener = useRef<HTMLElement | null>(null);
+  const scoresRef = useRef(scores);
+  scoresRef.current = scores;
 
   // Keep latest props in refs so the engine effect closure stays stable.
   const onQuitRef = useRef(onQuit);
@@ -139,7 +149,11 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
 
     ctx.imageSmoothingEnabled = false;
 
-    const engine = new GameEngine(ctx);
+    const engine = new GameEngine(ctx, {
+      onRunStart: () => scoresRef.current.onRunStart(),
+      onGameOver: score => scoresRef.current.onGameOver(score),
+    });
+    engine.setBest(scoresRef.current.best);
     engineRef.current = engine;
 
     // Loading can outlast the game (a quick Quit or Esc): only start a game still on screen,
@@ -187,6 +201,31 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
       engineRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    engineRef.current?.setBest(scores.best);
+  }, [scores.best]);
+
+  const boardAvailable = scores.status !== 'offline';
+  const openBoard = () => {
+    if (!boardAvailable) return;
+    boardOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setBoardOpen(true);
+  };
+  const closeBoard = () => {
+    setBoardOpen(false);
+    boardOpener.current?.focus();
+    boardOpener.current = null;
+  };
+  const openBoardRef = useRef(openBoard);
+  openBoardRef.current = openBoard;
+  useEffect(() => {
+    const onOpen = () => openBoardRef.current();
+    window.addEventListener(SCOREBOARD_EVENT, onOpen);
+    return () => window.removeEventListener(SCOREBOARD_EVENT, onOpen);
+  }, []);
+
+  const board = boardOpen && <Scoreboard scores={scores} onClose={closeBoard} />;
 
   // Sync local state when the user leaves native fullscreen via a system gesture (or Esc).
   useEffect(() => {
@@ -240,7 +279,14 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
   );
 
   // Desktop: a screen box that fits the canvas into the room Hero leaves it (MiniGame.css).
-  if (!showTouchControls) return <div className="minigame-desk">{canvasEl}</div>;
+  if (!showTouchControls) {
+    return (
+      <div className="minigame-desk">
+        {canvasEl}
+        {board}
+      </div>
+    );
+  }
 
   // Quit and fullscreen act on click (a real activation: browsers only grant fullscreen
   // after the finger lifts); the game keys act on pointerdown, see useKeyPress.
@@ -261,6 +307,12 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
           <PixelIcon name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'} size={24} />
         </Button>
 
+        {boardAvailable && (
+          <Button variant="icon" aria-label="Leaderboard" className="minigame__scores" onClick={openBoard}>
+            <PixelIcon name="trophy" size={24} />
+          </Button>
+        )}
+
         <div className="minigame__screen">{canvasEl}</div>
 
         <Button
@@ -279,6 +331,7 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
           Jump
         </Button>
       </div>
+      {board}
     </div>
   );
 }
