@@ -13,7 +13,9 @@ import { pixelSprites } from '../../theme/pixelSprites';
 import type { ChatPanelProps } from './ChatLauncher';
 import './ChatPanel.css';
 
-const MOBILE = '(max-width: 767px)';
+/** Phones and very short windows (landscape phones, small laptop windows) get the full-screen
+ *  sheet: a floating panel cannot fit there. Same query as the sheet block in ChatLauncher.css. */
+export const SHEET_QUERY = '(max-width: 767px), (max-height: 560px)';
 
 function SourceChips({ sources }: { sources: ChatSource[] }) {
   if (!sources.length) return null;
@@ -126,7 +128,7 @@ export default function ChatPanel({ open, onClose, chat: injected, inline = fals
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
-  const sheet = useMediaQuery(MOBILE) && !inline;
+  const sheet = useMediaQuery(SHEET_QUERY) && !inline;
   // Messages already there when the panel mounts (a remount, the gallery) do not re-type.
   const [firstId] = useState(() => messages[messages.length - 1]?.id ?? 0);
 
@@ -216,6 +218,22 @@ export default function ChatPanel({ open, onClose, chat: injected, inline = fals
           onClick={() => setSkip(s => s + 1)}
         >
           <Entry role="assistant" text={chatPersona.greeting} animate={!inline} skip={skip} onGrow={scrollToEnd} />
+          {/* The opening questions are the greeting's choice menu, so they scroll with the log and
+              never push the input out of a short panel. */}
+          {messages.length === 0 && (
+            <ul role="list" className="chat-choices">
+              {chatPersona.suggestions.map(s => (
+                <li key={s}>
+                  <button type="button" className="chat-choice text-body-s" onClick={() => submit(s)} disabled={sending}>
+                    <span className="chat-choice__cursor" aria-hidden="true">
+                      <PixelIcon name="play" size={12} />
+                    </span>
+                    {s}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
           {messages.map(m => (
             <Entry
               key={m.id}
@@ -248,21 +266,6 @@ export default function ChatPanel({ open, onClose, chat: injected, inline = fals
             </div>
           )}
         </div>
-
-        {messages.length === 0 && (
-          <ul role="list" className="chat-choices">
-            {chatPersona.suggestions.map(s => (
-              <li key={s}>
-                <button type="button" className="chat-choice text-body-s" onClick={() => submit(s)} disabled={sending}>
-                  <span className="chat-choice__cursor" aria-hidden="true">
-                    <PixelIcon name="play" size={12} />
-                  </span>
-                  {s}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
 
         <form className="chat-form" onSubmit={onSubmit}>
           <label htmlFor={inputId} className="sr-only">

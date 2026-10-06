@@ -22,7 +22,8 @@ export const chatPersona = {
   send: 'Send',
   thinking: 'Pixel Roy is thinking...',
   retry: 'Try again',
-  disclaimer: 'AI answers can be wrong. Messages go to Groq to be answered and are not stored.',
+  /** One line at the panel's width: the details live on the privacy page. */
+  disclaimer: 'AI via Groq · can be wrong · not stored ·',
   privacyLabel: 'Privacy',
   loadFailed: "Couldn't load the chat. Check your connection and reload the page.",
   errors: {

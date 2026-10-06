@@ -118,12 +118,19 @@ html[data-arcade-playing] .chat-root {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  /* don't touch / leaves room above for the navbar (64px + its 4px frame) and below for the launcher. */
-  max-height: min(620px, calc(100dvh - 208px));
+  /* don't touch / a real height, not a max: the log (flex-basis 0) fills it. Leaves room above for
+     the navbar (64px + its 4px frame) and below for the launcher. */
+  height: min(620px, calc(100dvh - 208px));
 }
 
-/* Phones: a full-screen sheet over the page (the page is inert behind it). */
-@media (max-width: 767px) {
+/* The load-failed notice is one line: no tall empty frame. */
+.chat-panel__frame--compact {
+  height: auto;
+}
+
+/* Phones and very short windows: a full-screen sheet over the page (the page is inert behind
+   it). don't touch / same query as SHEET_QUERY in ChatPanel.tsx, or the JS and CSS disagree. */
+@media (max-width: 767px), (max-height: 560px) {
   .chat-bubble {
     display: none;
   }
@@ -137,9 +144,8 @@ html[data-arcade-playing] .chat-root {
     background-color: var(--color-bg);
   }
 
-  .chat-panel__frame {
+  .chat-panel__frame:not(.chat-panel__frame--compact) {
     height: 100%;
-    max-height: none;
   }
 
   /* don't touch / an open sheet goes over the navbar (z 100); the nav is inert behind it then. */

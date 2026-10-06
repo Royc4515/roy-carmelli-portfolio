@@ -71,10 +71,13 @@ describe('ChatPanel', () => {
     expect(screen.getByText(answer)).not.toHaveClass('sr-only');
   });
 
-  it('shows the opening questions as a choice menu with a cursor on each option', () => {
+  it('shows the opening questions as a choice menu inside the log, with a cursor on each option', () => {
     render(<ChatPanel open onClose={vi.fn()} chat={chat()} />);
+    const log = screen.getByRole('log');
     for (const s of chatPersona.suggestions) {
       const option = screen.getByRole('button', { name: s });
+      // In the log they scroll with the conversation and never push the input out of a short panel.
+      expect(log).toContainElement(option);
       expect(option.querySelector('svg[data-icon="play"]')).not.toBeNull();
     }
   });

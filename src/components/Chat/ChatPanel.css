@@ -7,7 +7,7 @@
   animation: none;
 
   & .chat-panel__frame {
-    max-height: 640px;
+    height: 600px;
   }
 }
 
@@ -20,10 +20,12 @@
 
 .chat-log {
   display: flex;
-  flex: 1 1 auto;
+  /* don't touch / the log is the only part that shrinks: with flex-basis 0 and a small minimum it
+     scrolls instead of pushing the input out of a short panel (it once overflowed the frame) */
+  flex: 1 1 0;
   flex-direction: column;
   gap: 12px;
-  min-height: 160px;
+  min-height: 96px;
   margin-top: 36px;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -116,7 +118,7 @@
 .chat-choices {
   display: grid;
   gap: 4px;
-  margin: 0;
+  margin: 0 0 0 62px;
   padding: 0;
   list-style: none;
 }

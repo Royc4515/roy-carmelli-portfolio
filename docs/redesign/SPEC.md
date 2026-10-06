@@ -310,9 +310,11 @@ conversation; behaviour lives in `useChat`, copy in `src/data/chatPersona.ts`.
   sinks 4px onto its shadow and its bevel flips. Hidden while the game runs.
 - **Speech bubble:** parchment, ink frame, 12px label (≤ 24 chars), stepped parchment tail. Once
   per session (`sessionStorage`), ≥ 768px only, `aria-hidden` (the button carries the name).
-- **Panel:** wood `PixelPanel`, elevation 2, brass `tab` "PIXEL ROY · AI". Enters like the pause
-  menu (opacity + 8px, `--dur-slow`, `steps(4)`), closes instantly. Phones: full-screen sheet over
-  the nav (z 150), page inert behind it.
+- **Panel:** wood `PixelPanel`, elevation 2, brass `tab` "PIXEL ROY · AI", a fixed height of
+  `min(620px, 100dvh - 208px)`. Only the log flexes (basis 0, 96px minimum) and scrolls; the input
+  and the one-line note never move. Enters like the pause menu (opacity + 8px, `--dur-slow`,
+  `steps(4)`), closes instantly. Phones and windows under 560px tall: full-screen sheet over the
+  nav (z 150), page inert behind it.
 - **Answers:** Roy's face in a sunken well beside a parchment speech box (ink text, stepped tail
   through the frame line). Visitor lines: right-aligned raised plates with an accent line and a
   12px `YOU` eyebrow. Sentences are Plex `body-s`; text is never rendered as HTML.
@@ -322,8 +324,8 @@ conversation; behaviour lives in `useChat`, copy in `src/data/chatPersona.ts`.
   `play` marker ends a typed answer, mirrored in RTL. Nothing blinks.
 - **Thinking:** three 8px squares stepping in turn (static under reduced motion), with the
   words for screen readers.
-- **Opening questions:** an RPG choice menu, each option 44px tall with a `play` cursor that
-  lights up on hover or focus.
+- **Opening questions:** an RPG choice menu inside the log, under the greeting, each option
+  44px tall with a `play` cursor that lights up on hover or focus.
 
 ### Hooks
 - `usePrefersReducedMotion()`, `useActiveSection(ids: string[])` (IntersectionObserver, returns

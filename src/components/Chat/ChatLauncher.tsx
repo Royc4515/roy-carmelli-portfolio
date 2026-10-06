@@ -43,7 +43,7 @@ function ChatLoadFailed({ open, onClose }: ChatPanelProps) {
   if (!open) return null;
   return (
     <div className="chat-panel" role="dialog" aria-label={chatPersona.name}>
-      <PixelPanel variant="wood" elevation={2} padding="sm" className="chat-panel__frame">
+      <PixelPanel variant="wood" elevation={2} padding="sm" className="chat-panel__frame chat-panel__frame--compact">
         <div className="flex items-start justify-between gap-3">
           <p role="alert" className="text-body text-fg">
             {chatPersona.loadFailed}
