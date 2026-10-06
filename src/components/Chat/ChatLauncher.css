@@ -103,9 +103,11 @@ html[data-arcade-playing] .chat-root {
 .chat-panel {
   position: fixed;
   z-index: 1;
-  right: max(16px, calc(env(safe-area-inset-right) + 8px));
-  /* above the 91px launcher, with a 16px gap */
-  bottom: calc(max(16px, calc(env(safe-area-inset-bottom) + 8px)) + 108px);
+  /* Beside Roy, not above him: he stands next to his own dialogue box, and the panel gets almost
+     the whole window height (a 150%-zoom laptop is only ~550 CSS px tall). 72px = the 56px
+     launcher plus a 16px gap. */
+  right: calc(max(16px, calc(env(safe-area-inset-right) + 8px)) + 72px);
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
   width: min(416px, calc(100vw - 32px));
   animation: chat-pop-in var(--dur-slow) steps(4) both;
 }
@@ -118,9 +120,9 @@ html[data-arcade-playing] .chat-root {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  /* don't touch / a real height, not a max: the log (flex-basis 0) fills it. Leaves room above for
-     the navbar (64px + its 4px frame) and below for the launcher. */
-  height: min(620px, calc(100dvh - 208px));
+  /* don't touch / a real height, not a max: the log (flex-basis 0) fills it. 100px keeps the title
+     plate clear of the navbar (64px + its 4px frame) and the panel off the bottom edge. */
+  height: min(620px, calc(100dvh - 100px));
 }
 
 /* The load-failed notice is one line: no tall empty frame. */
@@ -128,9 +130,10 @@ html[data-arcade-playing] .chat-root {
   height: auto;
 }
 
-/* Phones and very short windows: a full-screen sheet over the page (the page is inert behind
-   it). don't touch / same query as SHEET_QUERY in ChatPanel.tsx, or the JS and CSS disagree. */
-@media (max-width: 767px), (max-height: 560px) {
+/* Phones, upright or sideways: a full-screen sheet over the page (the page is inert behind it).
+   Laptops are never matched: a 150%-zoom laptop window is ~550px tall, a sideways phone ~390px.
+   don't touch / same query as SHEET_QUERY in ChatPanel.tsx, or the JS and CSS disagree. */
+@media (max-width: 767px), (max-height: 440px) {
   .chat-bubble {
     display: none;
   }

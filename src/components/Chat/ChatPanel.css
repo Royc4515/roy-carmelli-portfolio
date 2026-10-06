@@ -26,7 +26,8 @@
   flex-direction: column;
   gap: 12px;
   min-height: 96px;
-  margin-top: 36px;
+  /* just clears the 44px close button that sits 4px from the top */
+  margin-top: 20px;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 12px;

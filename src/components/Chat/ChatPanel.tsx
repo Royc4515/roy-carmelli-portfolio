@@ -13,9 +13,9 @@ import { pixelSprites } from '../../theme/pixelSprites';
 import type { ChatPanelProps } from './ChatLauncher';
 import './ChatPanel.css';
 
-/** Phones and very short windows (landscape phones, small laptop windows) get the full-screen
- *  sheet: a floating panel cannot fit there. Same query as the sheet block in ChatLauncher.css. */
-export const SHEET_QUERY = '(max-width: 767px), (max-height: 560px)';
+/** Phones, upright or sideways, get the full-screen sheet; laptops (even at 150% zoom, ~550px
+ *  tall) keep the floating panel. Same query as the sheet block in ChatLauncher.css. */
+export const SHEET_QUERY = '(max-width: 767px), (max-height: 440px)';
 
 function SourceChips({ sources }: { sources: ChatSource[] }) {
   if (!sources.length) return null;
