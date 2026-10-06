@@ -1,0 +1,123 @@
+/* Pixel Roy's panel. Basic on purpose: the look will change, the structure should not need to. */
+.chat-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-panel__badge {
+  margin-left: 4px;
+  padding: 2px 4px;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.chat-log {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 120px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+  background-color: var(--color-surface-sunken);
+}
+
+.chat-msg {
+  max-width: 90%;
+  padding: 8px 12px;
+  color: var(--color-fg);
+}
+
+.chat-msg p {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.chat-msg--assistant {
+  align-self: flex-start;
+  background-color: var(--color-surface);
+  box-shadow: inset 0 0 0 2px var(--color-border);
+}
+
+.chat-msg--user {
+  align-self: flex-end;
+  background-color: var(--color-surface-raised);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.chat-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-source {
+  color: var(--color-accent-fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.chat-thinking,
+.chat-note {
+  color: var(--color-fg-muted);
+}
+
+.chat-note {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.chat-error {
+  padding: 8px 12px;
+  color: var(--color-fg);
+  box-shadow: inset 0 0 0 2px var(--color-hp);
+}
+
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-suggestion {
+  min-height: 44px;
+  padding: 8px 12px;
+  background-color: var(--color-surface-sunken);
+  color: var(--color-accent-fg);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-suggestion:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.chat-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.chat-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  background-color: var(--color-surface-sunken);
+  color: var(--color-fg);
+  box-shadow: inset 0 0 0 2px var(--color-border);
+}
+
+.chat-input::placeholder {
+  color: var(--color-fg-subtle);
+}

@@ -817,6 +817,12 @@ export default function Hero() {
     };
   }, [isPlaying]);
 
+  // Page-level overlays (the Pixel Roy chat launcher) hide while the game owns the screen.
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-arcade-playing', isPlaying);
+    return () => document.documentElement.removeAttribute('data-arcade-playing');
+  }, [isPlaying]);
+
   // While the game is open, the rest of the page (main's other sections and the footer) leaves
   // the tab order and the accessibility tree; quitting restores exactly what it changed.
   useInertWhile(isPlaying, () => [

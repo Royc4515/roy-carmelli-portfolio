@@ -1,0 +1,94 @@
+/* Pixel Roy's launcher: always in the initial bundle, so it stays tiny. */
+.chat-root {
+  /* don't touch / below the navbar (z 100): the mobile pause menu must cover the launcher. */
+  position: fixed;
+  z-index: 90;
+  right: max(16px, calc(env(safe-area-inset-right) + 8px));
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+}
+
+/* The game owns the screen while it runs (Hero sets this attribute). */
+html[data-arcade-playing] .chat-root {
+  display: none;
+}
+
+.chat-launcher {
+  --px-frame: var(--color-accent);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  background-color: var(--color-surface);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-snap);
+}
+
+.chat-launcher:active {
+  transform: translate(2px, 2px);
+}
+
+.chat-launcher__badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  padding: 4px;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 8px;
+  line-height: 8px;
+}
+
+/* The panel's frame and placement live here, not in the lazy ChatPanel.css, so the
+   load-failed fallback (rendered when that chunk is missing) still sits in the right place. */
+.chat-panel {
+  position: fixed;
+  z-index: 1;
+  right: max(16px, calc(env(safe-area-inset-right) + 8px));
+  bottom: calc(max(16px, calc(env(safe-area-inset-bottom) + 8px)) + 80px);
+  width: min(400px, calc(100vw - 32px));
+}
+
+.chat-panel[hidden] {
+  display: none;
+}
+
+.chat-panel__frame {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* don't touch / leaves room above for the navbar (64px + its 4px frame) and below for the launcher. */
+  max-height: min(600px, calc(100dvh - 180px));
+}
+
+/* Phones: a full-screen sheet over the page (the page is inert behind it). */
+@media (max-width: 767px) {
+  .chat-panel {
+    inset: 0;
+    width: auto;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    background-color: var(--color-bg);
+  }
+
+  .chat-panel__frame {
+    height: 100%;
+    max-height: none;
+  }
+
+  /* don't touch / an open sheet goes over the navbar (z 100); the nav is inert behind it then. */
+  .chat-root:has(.chat-panel:not([hidden])) {
+    z-index: 150;
+  }
+
+  /* The sheet covers the launcher; take it out of the tab order too. */
+  .chat-root:has(.chat-panel:not([hidden])) .chat-launcher {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-launcher {
+    transition: none;
+  }
+}

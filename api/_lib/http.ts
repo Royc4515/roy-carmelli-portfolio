@@ -36,21 +36,24 @@ export function isSameOriginWrite(request: Request): boolean {
   }
 }
 
-/** Every body here is tiny; anything bigger is not ours. */
+/** Every scoreboard body is tiny; anything bigger is not ours. */
 const MAX_BODY_BYTES = 4096;
 
-/** The parsed JSON object body, or `null` when it is not a JSON object within the size limit. */
-export async function readJsonObject(request: Request): Promise<Record<string, unknown> | null> {
+/**
+ * The parsed JSON object body, or `null` when it is not a JSON object within the size limit.
+ * The chat passes a larger `maxBytes`: it sends a short conversation history.
+ */
+export async function readJsonObject(request: Request, maxBytes = MAX_BODY_BYTES): Promise<Record<string, unknown> | null> {
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) return null;
   const declared = Number(request.headers.get('content-length') ?? 0);
-  if (declared > MAX_BODY_BYTES) return null;
+  if (declared > maxBytes) return null;
   let text: string;
   try {
     text = await request.text();
   } catch {
     return null;
   }
-  if (text.length > MAX_BODY_BYTES) return null;
+  if (text.length > maxBytes) return null;
   try {
     const value: unknown = JSON.parse(text);
     return typeof value === 'object' && value !== null && !Array.isArray(value)
