@@ -16,8 +16,10 @@ best in `localStorage` only, so previews and forks need nothing.
   `{action:"submit", score}` closes it and rejects a score higher than the elapsed time allows
   (8 points/s, plus 5% and 3s of slack). One submit per run, so replays fail.
 - **Board:** `GET /api/leaderboard` returns the top 10 plus the caller's own row. Names are
-  "First L." with invisible and bidi-override characters stripped. No e-mail, avatar or
-  Google id is returned, and only the name and best score are stored.
+  "First L." with invisible and bidi-override characters stripped. Stored per player: the
+  Google account id (`sub`, as the row key, never returned), the "First L." name and the best
+  score. No e-mail or avatar is stored. `public/privacy.html` says exactly this; keep the two in
+  sync.
 - **Writes** must come from the site's own origin (checked on every POST/DELETE) and be JSON.
 - **Schema:** created by the API on its first request (`create table if not exists`), so
   there is no migration to run by hand. See `api/_lib/store.ts`.
@@ -29,7 +31,14 @@ best in `localStorage` only, so previews and forks need nothing.
 ## One-time setup
 
 1. **Google OAuth client** ([Google Auth Platform](https://console.cloud.google.com/auth/overview)).
-   - Branding: app name, support e-mail. Audience: External.
+   - Branding: app name, support e-mail, developer contact. "Publish app" stays disabled
+     until the App domain links are filled in too (required for every External app):
+     - Application home page: `https://roy-carmelli-portfolio.vercel.app`
+     - Privacy policy: `https://roy-carmelli-portfolio.vercel.app/privacy.html`
+     - Terms of service: `https://roy-carmelli-portfolio.vercel.app/terms.html`
+     - Authorized domain: `roy-carmelli-portfolio.vercel.app`
+     - No logo: uploading one triggers Google's brand verification.
+   - Audience: External.
    - Data Access: `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile` only
      (non-sensitive, so no Google verification needed).
    - Audience: **Publish app**. While it says "Testing", only listed test users can sign in

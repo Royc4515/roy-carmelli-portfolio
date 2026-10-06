@@ -115,7 +115,11 @@ export default function Scoreboard({ scores, onClose }: ScoreboardProps) {
           ) : (
             <>
               <p className="text-body-s text-fg">
-                Sign in to save your best and join the board. Only your first name and last initial are shown.
+                Sign in to save your best and join the board. Only your first name and last initial are shown.{' '}
+                {/* A new tab, so reading it doesn't end the game. */}
+                <a href="/privacy.html" target="_blank" rel="noopener" className="underline">
+                  Privacy
+                </a>
               </p>
               <GoogleSignInButton onCredential={scores.signIn} />
             </>
