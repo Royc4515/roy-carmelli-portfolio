@@ -12,31 +12,90 @@ html[data-arcade-playing] .chat-root {
   display: none;
 }
 
+/* Roy standing on a small brass "AI" plate. The button is the whole figure, 56x91. */
 .chat-launcher {
-  --px-frame: var(--color-accent);
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 56px;
+  padding: 0;
+  background: none;
   cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-snap);
 }
 
-.chat-launcher:active {
-  transform: translate(2px, 2px);
+.chat-launcher__sprite {
+  position: relative;
+  display: block;
+  width: 56px;
+  height: 67px;
+
+  & > .px-character {
+    position: absolute;
+    bottom: 0;
+    /* don't touch / feet (the sheet's anchor column) on the plate's centre for every pose */
+    left: calc(28px - var(--chat-anchor-x, 14px));
+  }
 }
 
-.chat-launcher__badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  padding: 4px;
+.chat-launcher__plate {
+  display: block;
+  min-width: 40px;
+  padding: 5px 8px 3px;
   background-color: var(--color-accent);
   color: var(--color-on-accent);
-  font-size: 8px;
-  line-height: 8px;
+  text-align: center;
+  box-shadow:
+    inset 2px 2px 0 0 var(--color-bevel-hi),
+    inset -2px -2px 0 0 var(--color-bevel-lo),
+    4px 4px 0 0 var(--color-shadow);
+  transition: transform var(--dur-instant) var(--ease-snap);
+}
+
+/* A full press, like every other button: the plate sinks onto its shadow and the bevel flips. */
+.chat-launcher:active .chat-launcher__plate {
+  transform: translate(4px, 4px);
+  box-shadow:
+    inset 2px 2px 0 0 var(--color-bevel-lo),
+    inset -2px -2px 0 0 var(--color-bevel-hi);
+}
+
+/* "Ask me about my work": a parchment speech bubble beside Roy's head, once per session. */
+.chat-bubble {
+  position: absolute;
+  right: 72px;
+  bottom: 64px;
+  padding: 5px 12px 3px;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  white-space: nowrap;
+  box-shadow:
+    0 -4px 0 0 var(--color-ink),
+    0 4px 0 0 var(--color-ink),
+    -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink),
+    8px 12px 0 0 var(--color-shadow);
+  animation: chat-pop-in var(--dur-slow) steps(4) both;
+  pointer-events: none;
+
+  /* Stepped tail pointing at Roy: three 4px stairs of parchment running through the right
+     frame line, so the bubble opens into it. */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: -12px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-paper);
+    clip-path: polygon(0 0, 100% 0, 100% 33.33%, 66.67% 33.33%, 66.67% 66.67%, 33.33% 66.67%, 33.33% 100%, 0 100%);
+  }
+}
+
+@keyframes chat-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 
 /* The panel's frame and placement live here, not in the lazy ChatPanel.css, so the
@@ -45,8 +104,10 @@ html[data-arcade-playing] .chat-root {
   position: fixed;
   z-index: 1;
   right: max(16px, calc(env(safe-area-inset-right) + 8px));
-  bottom: calc(max(16px, calc(env(safe-area-inset-bottom) + 8px)) + 80px);
-  width: min(400px, calc(100vw - 32px));
+  /* above the 91px launcher, with a 16px gap */
+  bottom: calc(max(16px, calc(env(safe-area-inset-bottom) + 8px)) + 108px);
+  width: min(416px, calc(100vw - 32px));
+  animation: chat-pop-in var(--dur-slow) steps(4) both;
 }
 
 .chat-panel[hidden] {
@@ -58,16 +119,21 @@ html[data-arcade-playing] .chat-root {
   flex-direction: column;
   gap: 12px;
   /* don't touch / leaves room above for the navbar (64px + its 4px frame) and below for the launcher. */
-  max-height: min(600px, calc(100dvh - 180px));
+  max-height: min(620px, calc(100dvh - 208px));
 }
 
 /* Phones: a full-screen sheet over the page (the page is inert behind it). */
 @media (max-width: 767px) {
+  .chat-bubble {
+    display: none;
+  }
+
   .chat-panel {
     inset: 0;
     width: auto;
-    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
-      max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    /* the top padding clears the brass title plate that rides on the frame */
+    padding: max(28px, calc(env(safe-area-inset-top) + 20px)) max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     background-color: var(--color-bg);
   }
 
@@ -88,7 +154,16 @@ html[data-arcade-playing] .chat-root {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chat-launcher {
+  .chat-bubble,
+  .chat-panel {
+    animation: none;
+  }
+
+  .chat-launcher__plate {
     transition: none;
+  }
+
+  .chat-launcher:active .chat-launcher__plate {
+    transform: none;
   }
 }

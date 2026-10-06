@@ -1,59 +1,67 @@
-/* Pixel Roy's panel. Basic on purpose: the look will change, the structure should not need to. */
-.chat-panel__header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+/* Pixel Roy's panel: an RPG conversation with Roy's portrait and parchment speech boxes. */
+
+/* Gallery: shown in the flow instead of pinned to the viewport. */
+.chat-panel--inline {
+  position: static;
+  width: min(416px, 100%);
+  animation: none;
+
+  & .chat-panel__frame {
+    max-height: 640px;
+  }
 }
 
-.chat-panel__badge {
-  margin-left: 4px;
-  padding: 2px 4px;
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
+/* Top-right of the wood frame, clear of the title plate. */
+.chat-panel__close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
 }
 
 .chat-log {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 8px;
-  min-height: 120px;
+  gap: 12px;
+  min-height: 160px;
+  margin-top: 36px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 8px;
+  padding: 12px;
   background-color: var(--color-surface-sunken);
 }
 
-.chat-msg {
-  max-width: 90%;
-  padding: 8px 12px;
-  color: var(--color-fg);
-}
-
-.chat-msg p {
+.chat-entry__text {
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
 
-.chat-msg--assistant {
-  align-self: flex-start;
-  background-color: var(--color-surface);
-  box-shadow: inset 0 0 0 2px var(--color-border);
+.chat-entry__end {
+  display: inline-block;
+  margin-inline-start: 8px;
+  vertical-align: -1px;
 }
 
-.chat-msg--user {
-  align-self: flex-end;
-  background-color: var(--color-surface-raised);
-  box-shadow: inset 0 0 0 2px var(--color-accent);
+/* In a Hebrew answer the end marker points the way the text reads. */
+.chat-entry__text:dir(rtl) .chat-entry__end {
+  transform: scaleX(-1);
 }
 
 .chat-sources {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: 8px;
+  margin: 8px 0 0;
   padding: 0;
   list-style: none;
+}
+
+.chat-sources .px-chip {
+  /* a long project name wraps instead of running out of a narrow speech box */
+  max-width: 100%;
+  height: auto;
+  min-height: 28px;
+  white-space: normal;
 }
 
 .chat-source {
@@ -62,14 +70,39 @@
   text-underline-offset: 3px;
 }
 
-.chat-thinking,
-.chat-note {
-  color: var(--color-fg-muted);
+/* Thinking: three 4px squares lit in turn (motion, not blinking text; SPEC 2.5). */
+.chat-thinking {
+  /* lines up with the speech boxes, past the portrait */
+  padding: 8px 0 8px 62px;
 }
 
-.chat-note {
-  font-size: 12px;
-  line-height: 16px;
+.chat-dots {
+  display: inline-flex;
+  gap: 4px;
+
+  & > i {
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-accent);
+    animation: chat-dot 1200ms steps(1) infinite;
+  }
+
+  & > i:nth-child(2) {
+    animation-delay: 400ms;
+  }
+
+  & > i:nth-child(3) {
+    animation-delay: 800ms;
+  }
+}
+
+@keyframes chat-dot {
+  0% {
+    transform: translateY(-4px);
+  }
+  33% {
+    transform: none;
+  }
 }
 
 .chat-error {
@@ -78,28 +111,51 @@
   box-shadow: inset 0 0 0 2px var(--color-hp);
 }
 
-.chat-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* Starting questions as an RPG choice menu: each option has a ▶ cursor that lights up under
+   the pointer or focus. */
+.chat-choices {
+  display: grid;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.chat-suggestion {
+.chat-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
   min-height: 44px;
-  padding: 8px 12px;
-  background-color: var(--color-surface-sunken);
-  color: var(--color-accent-fg);
-  box-shadow: inset 0 0 0 2px var(--color-accent);
+  padding: 8px 12px 8px 32px;
+  color: var(--color-fg);
   text-align: left;
+  /* touch screens have no hover: the options must look pressable at rest */
+  box-shadow: inset 0 0 0 2px var(--color-border-subtle);
   cursor: pointer;
+  transition: background-color var(--dur-fast) steps(2);
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-surface-raised);
+    color: var(--color-accent-fg);
+  }
+
+  &:disabled {
+    cursor: default;
+    color: var(--color-fg-muted);
+  }
 }
 
-.chat-suggestion:disabled {
-  cursor: default;
-  opacity: 0.6;
+.chat-choice__cursor {
+  position: absolute;
+  left: 12px;
+  color: var(--color-fg-subtle);
+
+  .chat-choice:hover > &,
+  .chat-choice:focus-visible > & {
+    color: var(--color-accent-fg);
+  }
 }
 
 .chat-form {
@@ -120,4 +176,90 @@
 
 .chat-input::placeholder {
   color: var(--color-fg-subtle);
+}
+
+.chat-note {
+  color: var(--color-fg-muted);
+}
+
+/* ─── The conversation ─────────────────────────────────────────────────── */
+
+.chat-entry {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* Roy's portrait in a sunken well, like the HUD nameplate. */
+.chat-entry__portrait {
+  flex: none;
+  padding: 4px;
+  background-color: var(--color-surface);
+  box-shadow: inset 0 0 0 2px var(--color-border-subtle);
+}
+
+/* Parchment speech box with a stepped tail pointing at the portrait. */
+.chat-entry--assistant .chat-entry__body {
+  position: relative;
+  min-width: 0;
+  padding: 8px 12px;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow:
+    0 -4px 0 0 var(--color-ink),
+    0 4px 0 0 var(--color-ink),
+    -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink);
+
+  /* Parchment, not ink: ink is nearly the log's own colour by day. It covers the 4px frame
+     line where it joins, so the box opens into the tail. */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: -16px;
+    width: 16px;
+    height: 12px;
+    background-color: var(--color-paper);
+    /* four 4px columns stepping down from the portrait's edge to the box */
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 100%, 50% 66.67%, 25% 66.67%, 25% 33.33%, 0 33.33%);
+  }
+
+  & .chat-source {
+    --color-focus: var(--color-ink);
+    color: var(--color-ink);
+  }
+
+  & .px-chip {
+    background-color: var(--color-paper-sunken);
+    color: var(--color-ink);
+  }
+}
+
+.chat-entry--user {
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  margin-left: 48px;
+}
+
+.chat-entry--user .chat-entry__who {
+  color: var(--color-accent-fg);
+}
+
+.chat-entry--user .chat-entry__body {
+  padding: 8px 12px;
+  background-color: var(--color-surface-raised);
+  color: var(--color-fg);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-dots > i {
+    animation: none;
+  }
+
+  .chat-choice {
+    transition: none;
+  }
 }

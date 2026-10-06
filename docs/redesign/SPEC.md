@@ -301,6 +301,30 @@ Reference CSS (from the approved prototype):
 - Wrapper around `motion.div` that applies the "materialize" reveal; renders children visible
   when reduced motion is on or JS is off.
 
+### Chat (Pixel Roy)
+The AI chat (`src/components/Chat/`, setup in `docs/chat/SETUP.md`). Styled as an NPC
+conversation; behaviour lives in `useChat`, copy in `src/data/chatPersona.ts`.
+- **Launcher:** Roy standing (`Character`, `idle` ×1) on a brass `AI` plate, bottom-right, z 90
+  (below the nav). Waves (`wave`) only while pointed at or focused, and for two loops when the
+  speech bubble first appears: never endlessly beside text people are reading. Press = the plate
+  sinks 4px onto its shadow and its bevel flips. Hidden while the game runs.
+- **Speech bubble:** parchment, ink frame, 12px label (≤ 24 chars), stepped parchment tail. Once
+  per session (`sessionStorage`), ≥ 768px only, `aria-hidden` (the button carries the name).
+- **Panel:** wood `PixelPanel`, elevation 2, brass `tab` "PIXEL ROY · AI". Enters like the pause
+  menu (opacity + 8px, `--dur-slow`, `steps(4)`), closes instantly. Phones: full-screen sheet over
+  the nav (z 150), page inert behind it.
+- **Answers:** Roy's face in a sunken well beside a parchment speech box (ink text, stepped tail
+  through the frame line). Visitor lines: right-aligned raised plates with an accent line and a
+  12px `YOU` eyebrow. Sentences are Plex `body-s`; text is never rendered as HTML.
+- **Typing:** only the newest answer (and the greeting on first open) types out, capped at
+  1.2s whatever its length; a click or key press finishes it; reduced motion shows it at once.
+  The full text is in the DOM throughout (screen-reader-only until typing ends). A static
+  `play` marker ends a typed answer, mirrored in RTL. Nothing blinks.
+- **Thinking:** three 8px squares stepping in turn (static under reduced motion), with the
+  words for screen readers.
+- **Opening questions:** an RPG choice menu, each option 44px tall with a `play` cursor that
+  lights up on hover or focus.
+
 ### Hooks
 - `usePrefersReducedMotion()`, `useActiveSection(ids: string[])` (IntersectionObserver, returns
   the id nearest the top), keep `useIsMobile`, `useGameDisplayMode`, `useTheme`.

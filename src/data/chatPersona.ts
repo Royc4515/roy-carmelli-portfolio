@@ -9,6 +9,10 @@ export const chatPersona = {
   name: 'Pixel Roy',
   badge: 'AI',
   launcherLabel: 'Chat with Pixel Roy, an AI version of Roy',
+  /** Pixel font, uppercase, at most 24 characters (SPEC 2.2). */
+  bubble: 'Ask me about my work',
+  /** The visitor's label above their own lines. */
+  you: 'You',
   closeLabel: 'Close chat',
   greeting:
     "Hey, I'm Pixel Roy: an AI version of Roy that lives in this portfolio. Ask me about my projects, skills, studies or the role I'm looking for. I only know what's on this site, my GitHub and my LinkedIn, and I can get things wrong.",
