@@ -31,8 +31,15 @@ export class ProviderError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** Seconds the provider asked us to wait (Groq's `retry-after` on a 429), when it said. */
+    readonly retryAfterSec: number | null = null,
   ) {
     super(message);
+  }
+
+  /** The free tier's per-minute token budget is spent; it refills within seconds. */
+  get rateLimited(): boolean {
+    return this.status === 429;
   }
 
   /** A bad or revoked key fails the same way on every model: no point trying the next one. */
@@ -79,7 +86,12 @@ export class OpenAICompatibleProvider {
     } catch (err) {
       throw new ProviderError(0, `${this.model}: ${err instanceof Error ? err.name : 'network error'}`);
     }
-    if (!res.ok) throw new ProviderError(res.status, `${this.model}: HTTP ${res.status}`);
+    if (!res.ok) {
+      // don't touch / no header must stay `null`, not Number(null) = 0 (a zero-second "wait").
+      const header = res.headers.get('retry-after');
+      const wait = header === null || header.trim() === '' ? NaN : Number(header);
+      throw new ProviderError(res.status, `${this.model}: HTTP ${res.status}`, Number.isFinite(wait) && wait >= 0 ? wait : null);
+    }
 
     const data = (await res.json().catch(() => null)) as {
       choices?: { message?: { content?: unknown } }[];
@@ -96,32 +108,71 @@ export class OpenAICompatibleProvider {
   }
 }
 
-export interface ChainResult<T> {
-  value: T;
-  completion: Completion;
-}
+export type ChainOutcome<T> =
+  | { ok: true; value: T; completion: Completion }
+  /** `busy`: every model was rate limited, so asking again in a minute will work. */
+  | { ok: false; busy: boolean };
+
+/** Longest wait worth taking inside one request: the visitor is watching the thinking dots. */
+export const MAX_RETRY_WAIT_MS = 5000;
+/** When a 429 carries no `retry-after`, the per-minute budget usually frees up this soon. */
+const DEFAULT_RETRY_WAIT_MS = 2000;
+
+const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+type RoundOutcome<T> =
+  | { ok: true; value: T; completion: Completion }
+  | { ok: false; busy: boolean; retryMs: number | null };
 
 /**
  * Tries each model in order until one returns something `parse` accepts. Any failure moves on
  * (rate limit, outage, timeout, malformed output, or a parameter one model rejects) except an
- * auth error, which no other model would fix. `null` when nothing worked.
+ * auth error, which no other model would fix. When every model was only rate limited (Groq's free
+ * tier allows ~8K tokens a minute per model, about 3 questions), it waits as long as Groq asked,
+ * if that is short, and goes round once more.
  */
 export class FallbackChain {
-  constructor(private readonly providers: OpenAICompatibleProvider[]) {}
+  constructor(
+    private readonly providers: OpenAICompatibleProvider[],
+    private readonly wait: (ms: number) => Promise<void> = sleep,
+  ) {}
 
-  async run<T>(request: CompletionRequest, parse: (content: string) => T | null): Promise<ChainResult<T> | null> {
+  async run<T>(request: CompletionRequest, parse: (content: string) => T | null): Promise<ChainOutcome<T>> {
+    const first = await this.round(request, parse);
+    if (first.ok || !first.busy) return first;
+    const waitMs = first.retryMs ?? DEFAULT_RETRY_WAIT_MS;
+    if (waitMs > MAX_RETRY_WAIT_MS) return { ok: false, busy: true };
+    await this.wait(waitMs);
+    const second = await this.round(request, parse);
+    return second.ok ? second : { ok: false, busy: second.busy };
+  }
+
+  private async round<T>(
+    request: CompletionRequest,
+    parse: (content: string) => T | null,
+  ): Promise<RoundOutcome<T>> {
+    let allRateLimited = true;
+    let retryMs: number | null = null;
     for (const provider of this.providers) {
       try {
         const completion = await provider.complete(request);
         const value = parse(completion.content);
-        if (value !== null) return { value, completion };
+        if (value !== null) return { ok: true, value, completion };
+        allRateLimited = false;
         console.warn(JSON.stringify({ chat: 'invalid_output', model: provider.model }));
       } catch (err) {
         const status = err instanceof ProviderError ? err.status : -1;
         console.warn(JSON.stringify({ chat: 'model_failed', model: provider.model, status }));
-        if (err instanceof ProviderError && err.fatal) return null;
+        if (err instanceof ProviderError && err.fatal) return { ok: false, busy: false, retryMs: null };
+        if (err instanceof ProviderError && err.rateLimited) {
+          // The soonest any model frees up is the wait worth taking.
+          const ms = err.retryAfterSec === null ? null : err.retryAfterSec * 1000;
+          if (ms !== null) retryMs = retryMs === null ? ms : Math.min(retryMs, ms);
+        } else {
+          allRateLimited = false;
+        }
       }
     }
-    return null;
+    return { ok: false, busy: allRateLimited, retryMs };
   }
 }

@@ -107,8 +107,8 @@ describe('ChatPanel', () => {
     expect(screen.queryByRole('button', { name: chatPersona.retry })).toBeNull();
   });
 
-  it('offers a retry when the chat is offline or unreachable', async () => {
-    const state = chat({ error: 'unavailable' });
+  it.each(['unavailable', 'busy', 'network'] as const)('offers a retry when the chat is %s', async error => {
+    const state = chat({ error });
     render(<ChatPanel open onClose={vi.fn()} chat={state} />);
     await userEvent.click(screen.getByRole('button', { name: chatPersona.retry }));
     expect(state.retry).toHaveBeenCalled();

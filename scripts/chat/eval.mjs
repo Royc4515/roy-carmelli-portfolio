@@ -5,12 +5,20 @@
  *
  *   node scripts/chat/eval.mjs http://localhost:3000
  *   node scripts/chat/eval.mjs https://roy-carmelli-portfolio.vercel.app
+ *   node scripts/chat/eval.mjs <url> --delay 0    # no pause (expect `busy` answers)
  *
  * Every case is one real message, and a visitor gets 15 a day (api/_lib/chat/limiter.ts), so
  * the set stays at 14. Exit code 1 if any case fails. Token use per answer (and how much came
  * from Groq's prompt cache) is in the deployment's function logs: {"chat":"ok", ...}.
  */
 const base = (process.argv[2] ?? 'http://localhost:3000').replace(/\/+$/, '');
+/**
+ * Pause between questions. Groq's free tier allows ~8K tokens a minute per model and a question
+ * costs ~2.3K, so back-to-back questions run both models dry after about seven (the first live
+ * run did exactly that). 9s keeps the whole set inside the budget: about two minutes in all.
+ */
+const delayArg = process.argv.indexOf('--delay');
+const DELAY_MS = delayArg === -1 ? 9000 : Number(process.argv[delayArg + 1]);
 
 const HEBREW = /[֐-׿]/;
 const say = (role, content) => ({ role, content });
@@ -53,7 +61,8 @@ const cases = [
 ];
 
 let failed = 0;
-for (const c of cases) {
+for (const [i, c] of cases.entries()) {
+  if (i > 0 && DELAY_MS > 0) await new Promise(resolve => setTimeout(resolve, DELAY_MS));
   const started = Date.now();
   let status = 0;
   let body = null;

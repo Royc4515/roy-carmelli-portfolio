@@ -99,8 +99,10 @@ export const styleHook: OutputHook = {
     const answer = cap(
       draft.answer
         .replace(/\s*[–—]\s*/g, ' - ')
-        // don't touch / repo rule: the service is never described as "combat medic".
-        .replace(/combat medic/gi, 'battalion medic')
+        // don't touch / repo rule: the service is never described as "combat medic". The whole
+        // sentence goes, not just the words: swapping them turned a correct denial ("I never
+        // called it a combat medic") into nonsense.
+        .replace(/[^.!?\n]*\bcombat medic\b[^.!?\n]*[.!?]?/gi, '')
         .replace(/\*\*|__|`/g, '')
         .replace(/^\s{0,3}#{1,6}\s+/gm, '')
         .replace(/^\s*[*•]\s+/gm, '- ')

@@ -48,10 +48,16 @@ const completion = (content: unknown, cached = 0) =>
     { status: 200 },
   );
 const reply = (answer: string, sources: string[] = [], in_scope = true) => completion({ answer, in_scope, sources });
-const status = (code: number) => new Response('{}', { status: code });
+const status = (code: number, headers: Record<string, string> = {}) => new Response('{}', { status: code, headers });
 
+const waits: number[] = [];
 function chainOf(fetchFn: Fetch, models = DEFAULT_MODELS) {
-  return new FallbackChain(models.map(m => new OpenAICompatibleProvider(m, 'gsk_test', fetchFn)));
+  return new FallbackChain(
+    models.map(m => new OpenAICompatibleProvider(m, 'gsk_test', fetchFn)),
+    async ms => {
+      waits.push(ms);
+    },
+  );
 }
 
 function chatDeps(answers: (Response | Error)[], over: Partial<ChatDeps> = {}) {
@@ -216,7 +222,36 @@ describe('POST /api/chat', () => {
 
   it('answers 503 chat_unavailable when every model fails', async () => {
     const { deps } = chatDeps([status(429), status(500)]);
-    expect((await handleChat(ask(q('hi')), deps)).status).toBe(503);
+    const res = await handleChat(ask(q('hi')), deps);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'chat_unavailable' });
+  });
+
+  it('waits as long as Groq asks and tries once more when every model is rate limited', async () => {
+    waits.length = 0;
+    const { deps, groq } = chatDeps([status(429, { 'retry-after': '3' }), status(429, { 'retry-after': '2' }), reply('Back in a moment!')]);
+    const res = await handleChat(ask(q('hi')), deps);
+    expect(res.status).toBe(200);
+    expect((await res.json()).reply).toBe('Back in a moment!');
+    expect(waits).toEqual([2000]);
+    expect(groq.seen.map(s => s.model)).toEqual([...DEFAULT_MODELS, DEFAULT_MODELS[0]]);
+  });
+
+  it('answers 503 busy when the models are still rate limited after the wait', async () => {
+    waits.length = 0;
+    const { deps } = chatDeps([status(429), status(429), status(429), status(429)]);
+    const res = await handleChat(ask(q('hi')), deps);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'busy' });
+    expect(waits).toEqual([2000]);
+  });
+
+  it('does not keep a visitor waiting when Groq asks for a long pause', async () => {
+    waits.length = 0;
+    const { deps, groq } = chatDeps([status(429, { 'retry-after': '30' }), status(429, { 'retry-after': '40' })]);
+    expect(await (await handleChat(ask(q('hi')), deps)).json()).toEqual({ error: 'busy' });
+    expect(waits).toEqual([]);
+    expect(groq.seen).toHaveLength(2);
   });
 
   it('replaces an answer that leaks the prompt marker', async () => {
@@ -228,10 +263,10 @@ describe('POST /api/chat', () => {
   });
 
   it('cleans a rule-breaking answer before the visitor sees it', async () => {
-    const bad = 'I was a **combat medic** — call me at +972 54 728 7807 or see https://evil.example/x.';
+    const bad = 'I am a **battalion medic** \u2014 call me at +972 54 728 7807 or see https://evil.example/x. I was a combat medic too.';
     const { deps } = chatDeps([reply(bad)]);
     const { reply: text } = await (await handleChat(ask(q('tell me about your service')), deps)).json();
-    expect(text).not.toMatch(/combat medic|\*\*|—|evil\.example|7287807|728 7807/);
+    expect(text).not.toMatch(/combat medic|\*\*|\u2014|evil\.example|7287807|728 7807/);
     expect(text).toContain('battalion medic');
     expect(text).toContain("the site's Contact section");
   });

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatApi, ChatApiError, MAX_QUESTION_CHARS, type ChatSource, type ChatTurn } from '../lib/chatApi';
 
 /** What went wrong, in the terms the UI has copy for (src/data/chatPersona.ts). */
-export type ChatErrorCode = 'rate_limited' | 'daily_cap' | 'unavailable' | 'network' | 'invalid';
+/** `busy`: the free AI tier's per-minute budget is spent; a retry a minute later works. */
+export type ChatErrorCode = 'rate_limited' | 'daily_cap' | 'busy' | 'unavailable' | 'network' | 'invalid';
 
 export interface ChatEntry extends ChatTurn {
   id: number;
@@ -22,7 +23,7 @@ export interface ChatState {
 export function errorCode(err: unknown): ChatErrorCode {
   if (!(err instanceof ChatApiError)) return 'unavailable';
   if (err.code === 'network') return 'network';
-  if (err.code === 'rate_limited' || err.code === 'daily_cap') return err.code;
+  if (err.code === 'rate_limited' || err.code === 'daily_cap' || err.code === 'busy') return err.code;
   if (err.status === 400) return 'invalid';
   return 'unavailable';
 }

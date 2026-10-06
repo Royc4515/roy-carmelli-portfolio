@@ -258,7 +258,7 @@ export default function ChatPanel({ open, onClose, chat: injected, inline = fals
           {error && (
             <div role="alert" className="chat-error">
               <p className="text-body-s">{chatPersona.errors[error]}</p>
-              {(error === 'network' || error === 'unavailable') && (
+              {(error === 'network' || error === 'unavailable' || error === 'busy') && (
                 <Button variant="ghost" onClick={retry}>
                   {chatPersona.retry}
                 </Button>
