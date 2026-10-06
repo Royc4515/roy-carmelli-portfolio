@@ -39,6 +39,8 @@ describe('ChatPanel', () => {
     render(<ChatPanel open onClose={vi.fn()} chat={state} />);
     await userEvent.click(screen.getByRole('button', { name: chatPersona.suggestions[0] }));
     expect(state.send).toHaveBeenCalledWith(chatPersona.suggestions[0]);
+    // The suggestion buttons go away once the chat starts: focus must stay inside the panel.
+    expect(screen.getByRole('textbox')).toHaveFocus();
     await userEvent.type(screen.getByRole('textbox'), 'Where do you study?{Enter}');
     expect(state.send).toHaveBeenLastCalledWith('Where do you study?');
     expect(screen.getByRole('textbox')).toHaveValue('');
@@ -49,6 +51,35 @@ describe('ChatPanel', () => {
     expect(screen.getByRole('textbox')).toHaveAttribute('maxlength', '500');
     expect(screen.getByRole('button', { name: chatPersona.send })).toBeDisabled();
     expect(screen.getByText(chatPersona.thinking)).toBeInTheDocument();
+  });
+
+  it('types the newest answer out and finishes it on a click or key press', () => {
+    const state = chat();
+    const { rerender } = render(<ChatPanel open onClose={vi.fn()} chat={state} />);
+    const answer = 'I built Aside, a Chrome extension that opens an AI sidebar on any page.';
+    rerender(
+      <ChatPanel
+        open
+        onClose={vi.fn()}
+        chat={chat({ messages: [{ id: 1, role: 'user', content: 'hi' }, { id: 2, role: 'assistant', content: answer }] })}
+      />,
+    );
+    // The full text is there for screen readers from the start; the visible copy is still typing.
+    const full = screen.getByText(answer);
+    expect(full).toHaveClass('sr-only');
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'a' });
+    expect(screen.getByText(answer)).not.toHaveClass('sr-only');
+  });
+
+  it('shows the opening questions as a choice menu inside the log, with a cursor on each option', () => {
+    render(<ChatPanel open onClose={vi.fn()} chat={chat()} />);
+    const log = screen.getByRole('log');
+    for (const s of chatPersona.suggestions) {
+      const option = screen.getByRole('button', { name: s });
+      // In the log they scroll with the conversation and never push the input out of a short panel.
+      expect(log).toContainElement(option);
+      expect(option.querySelector('svg[data-icon="play"]')).not.toBeNull();
+    }
   });
 
   it('renders answers as text, never as HTML, with source links', () => {

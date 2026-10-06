@@ -21,6 +21,7 @@ api/chat.ts
 
 - **Knowledge** is compiled from `src/data/bio.ts`, `src/data/projects.ts`, `src/data/linkedin.ts` and `src/data/github.generated.json` by `src/lib/chatKnowledge.ts`, and written to `api/_lib/chat/knowledge.generated.ts` by its test (the server cannot import `src/`). The phone number and the city are never in it.
 - **Persona and rules** are in `api/_lib/chat/prompt.ts`. **UI copy** is in `src/data/chatPersona.ts`.
+- **Design** rules are in `docs/redesign/SPEC.md` §3 "Chat (Pixel Roy)"; before/after screenshots in `docs/chat/design/`. Both themes and the edge states render in the dev gallery (`/?gallery`, block "Chat · Pixel Roy").
 - **Nothing is stored** about a conversation. The only table, `chat_usage`, holds a salted hash per visitor per day and a daily total, and prunes itself.
 
 ## Why it cannot cost money

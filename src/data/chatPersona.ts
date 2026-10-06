@@ -9,6 +9,17 @@ export const chatPersona = {
   name: 'Pixel Roy',
   badge: 'AI',
   launcherLabel: 'Chat with Pixel Roy, an AI version of Roy',
+  /** Speech-bubble lines, one per appearance, in turn. Pixel font: Latin-1, at most 24 characters
+   *  each (SPEC 2.2), so no Hebrew here. */
+  bubbles: [
+    'Ask me about my work',
+    'Curious? Just ask!',
+    'Want to see my projects?',
+    'I answer in Hebrew too',
+    "Psst... I'm Roy's AI",
+  ],
+  /** The visitor's label above their own lines. */
+  you: 'You',
   closeLabel: 'Close chat',
   greeting:
     "Hey, I'm Pixel Roy: an AI version of Roy that lives in this portfolio. Ask me about my projects, skills, studies or the role I'm looking for. I only know what's on this site, my GitHub and my LinkedIn, and I can get things wrong.",
@@ -18,7 +29,8 @@ export const chatPersona = {
   send: 'Send',
   thinking: 'Pixel Roy is thinking...',
   retry: 'Try again',
-  disclaimer: 'AI answers can be wrong. Messages go to Groq to be answered and are not stored.',
+  /** One line at the panel's width: the details live on the privacy page. */
+  disclaimer: 'AI via Groq · can be wrong · not stored ·',
   privacyLabel: 'Privacy',
   loadFailed: "Couldn't load the chat. Check your connection and reload the page.",
   errors: {

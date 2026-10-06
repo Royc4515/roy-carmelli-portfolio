@@ -12,31 +12,94 @@ html[data-arcade-playing] .chat-root {
   display: none;
 }
 
+/* Roy standing on a small brass "AI" plate. The button is the whole figure, 56x91. */
 .chat-launcher {
-  --px-frame: var(--color-accent);
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 56px;
+  padding: 0;
+  background: none;
   cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-snap);
 }
 
-.chat-launcher:active {
-  transform: translate(2px, 2px);
+.chat-launcher__sprite {
+  position: relative;
+  display: block;
+  width: 56px;
+  height: 67px;
+
+  & > .px-character {
+    position: absolute;
+    bottom: 0;
+    /* don't touch / feet (the sheet's anchor column) on the plate's centre for every pose */
+    left: calc(28px - var(--chat-anchor-x, 14px));
+  }
 }
 
-.chat-launcher__badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  padding: 4px;
+.chat-launcher__plate {
+  display: block;
+  min-width: 40px;
+  padding: 5px 8px 3px;
   background-color: var(--color-accent);
   color: var(--color-on-accent);
-  font-size: 8px;
-  line-height: 8px;
+  text-align: center;
+  box-shadow:
+    inset 2px 2px 0 0 var(--color-bevel-hi),
+    inset -2px -2px 0 0 var(--color-bevel-lo),
+    4px 4px 0 0 var(--color-shadow);
+  transition: transform var(--dur-instant) var(--ease-snap);
+}
+
+/* A full press, like every other button: the plate sinks onto its shadow and the bevel flips. */
+.chat-launcher:active .chat-launcher__plate {
+  transform: translate(4px, 4px);
+  box-shadow:
+    inset 2px 2px 0 0 var(--color-bevel-lo),
+    inset -2px -2px 0 0 var(--color-bevel-hi);
+}
+
+/* A parchment speech bubble beside Roy's head: on load, and on every hover or focus. */
+.chat-bubble {
+  position: absolute;
+  right: 72px;
+  bottom: 64px;
+  width: max-content;
+  /* one line on a desktop; on a narrow phone a long line wraps instead of leaving the screen */
+  max-width: calc(100vw - 104px);
+  padding: 5px 12px 3px;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  line-height: 16px;
+  text-wrap: balance;
+  box-shadow:
+    0 -4px 0 0 var(--color-ink),
+    0 4px 0 0 var(--color-ink),
+    -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink),
+    8px 12px 0 0 var(--color-shadow);
+  animation: chat-pop-in var(--dur-slow) steps(4) both;
+  pointer-events: none;
+
+  /* Stepped tail pointing at Roy: three 4px stairs of parchment running through the right
+     frame line, so the bubble opens into it. */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: -12px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-paper);
+    clip-path: polygon(0 0, 100% 0, 100% 33.33%, 66.67% 33.33%, 66.67% 66.67%, 33.33% 66.67%, 33.33% 100%, 0 100%);
+  }
+}
+
+@keyframes chat-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 
 /* The panel's frame and placement live here, not in the lazy ChatPanel.css, so the
@@ -44,9 +107,13 @@ html[data-arcade-playing] .chat-root {
 .chat-panel {
   position: fixed;
   z-index: 1;
-  right: max(16px, calc(env(safe-area-inset-right) + 8px));
-  bottom: calc(max(16px, calc(env(safe-area-inset-bottom) + 8px)) + 80px);
-  width: min(400px, calc(100vw - 32px));
+  /* Beside Roy, not above him: he stands next to his own dialogue box, and the panel gets almost
+     the whole window height (a 150%-zoom laptop is only ~550 CSS px tall). 72px = the 56px
+     launcher plus a 16px gap. */
+  right: calc(max(16px, calc(env(safe-area-inset-right) + 8px)) + 72px);
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+  width: min(416px, calc(100vw - 32px));
+  animation: chat-pop-in var(--dur-slow) steps(4) both;
 }
 
 .chat-panel[hidden] {
@@ -57,23 +124,31 @@ html[data-arcade-playing] .chat-root {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  /* don't touch / leaves room above for the navbar (64px + its 4px frame) and below for the launcher. */
-  max-height: min(600px, calc(100dvh - 180px));
+  /* don't touch / a real height, not a max: the log (flex-basis 0) fills it. 100px keeps the title
+     plate clear of the navbar (64px + its 4px frame) and the panel off the bottom edge. */
+  height: min(620px, calc(100dvh - 100px));
 }
 
-/* Phones: a full-screen sheet over the page (the page is inert behind it). */
-@media (max-width: 767px) {
+/* The load-failed notice is one line: no tall empty frame. */
+.chat-panel__frame--compact {
+  height: auto;
+}
+
+/* Phones, upright or sideways: a full-screen sheet over the page (the page is inert behind it).
+   Laptops are never matched: a 150%-zoom laptop window is ~550px tall, a sideways phone ~390px.
+   don't touch / same query as SHEET_QUERY in ChatPanel.tsx, or the JS and CSS disagree. */
+@media (max-width: 767px), (max-height: 440px) {
   .chat-panel {
     inset: 0;
     width: auto;
-    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
-      max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    /* the top padding clears the brass title plate that rides on the frame */
+    padding: max(28px, calc(env(safe-area-inset-top) + 20px)) max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     background-color: var(--color-bg);
   }
 
-  .chat-panel__frame {
+  .chat-panel__frame:not(.chat-panel__frame--compact) {
     height: 100%;
-    max-height: none;
   }
 
   /* don't touch / an open sheet goes over the navbar (z 100); the nav is inert behind it then. */
@@ -88,7 +163,16 @@ html[data-arcade-playing] .chat-root {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chat-launcher {
+  .chat-bubble,
+  .chat-panel {
+    animation: none;
+  }
+
+  .chat-launcher__plate {
     transition: none;
+  }
+
+  .chat-launcher:active .chat-launcher__plate {
+    transform: none;
   }
 }
