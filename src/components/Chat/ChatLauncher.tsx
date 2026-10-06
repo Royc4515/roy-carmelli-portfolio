@@ -15,28 +15,14 @@ export interface ChatPanelProps {
 /** Build-time switch; the API needs its own server config too (docs/chat/SETUP.md). */
 export const CHAT_ENABLED = import.meta.env.VITE_CHAT_ENABLED === 'true';
 
-/** The bubble shows once per browser session, until the chat is first opened. */
-export const BUBBLE_SEEN_KEY = 'pixel-roy-bubble-seen';
-/** Long enough for the page to settle and the visitor to start reading. */
-export const BUBBLE_DELAY_MS = 2000;
+/** The page settles first, then Roy says hello. */
+export const BUBBLE_DELAY_MS = 800;
+/** The hello stays long enough to read, then clears the corner of the page. */
+export const BUBBLE_INTRO_MS = 6000;
+/** After the pointer leaves, the line lingers a moment instead of vanishing mid-read. */
+export const BUBBLE_LINGER_MS = 1500;
 /** Two loops of the 3-frame wave, then back to standing still. */
 const INTRO_WAVE_MS = 2400;
-
-function bubbleSeen(): boolean {
-  try {
-    return window.sessionStorage.getItem(BUBBLE_SEEN_KEY) === '1';
-  } catch {
-    return false; // storage blocked: show it, it is harmless
-  }
-}
-
-function markBubbleSeen(): void {
-  try {
-    window.sessionStorage.setItem(BUBBLE_SEEN_KEY, '1');
-  } catch {
-    /* storage blocked: it just shows again next visit */
-  }
-}
 
 /** Shown instead of the panel when its chunk cannot be fetched, so the button never does nothing. */
 function ChatLoadFailed({ open, onClose }: ChatPanelProps) {
@@ -64,19 +50,41 @@ const ChatPanel = lazy<ComponentType<ChatPanelProps>>(() =>
 );
 
 /**
- * Pixel Roy standing in the bottom-right corner on a small "AI" plate. He stands still (motion
- * beside text people are reading distracts), waves when pointed at or focused, and once per
- * session says hello in a speech bubble. Pressing him opens the chat panel, which stays mounted
- * after the first open so closing it keeps the conversation.
+ * Pixel Roy standing in the bottom-right corner on a small "AI" plate. He says hello in a speech
+ * bubble when the page loads, and again, with the next line, whenever he is pointed at or focused.
+ * He waves only then: motion beside text people are reading distracts. Pressing him opens the chat
+ * panel, which stays mounted after the first open so closing it keeps the conversation.
  */
 export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boolean }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [bubble, setBubble] = useState(false);
+  /** How many times the bubble has appeared; the line shown is the next one in turn. `null` = hidden. */
+  const [bubble, setBubble] = useState<number | null>(null);
   const [introWave, setIntroWave] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef(false);
+  /** Focus handed back after closing the panel is not the visitor reaching for Roy: no bubble. */
+  const quietFocus = useRef(false);
+  const shown = useRef(0);
+  const hideTimer = useRef<number | undefined>(undefined);
+
+  const hideBubble = useCallback((afterMs = 0) => {
+    window.clearTimeout(hideTimer.current);
+    if (afterMs) hideTimer.current = window.setTimeout(() => setBubble(null), afterMs);
+    else setBubble(null);
+  }, []);
+
+  /** Shows the next line; `forMs` hides it again after that long (0 keeps it up). */
+  const showBubble = useCallback(
+    (forMs = 0) => {
+      window.clearTimeout(hideTimer.current);
+      setBubble(shown.current++);
+      if (forMs) hideTimer.current = window.setTimeout(() => setBubble(null), forMs);
+    },
+    [],
+  );
+  useEffect(() => () => window.clearTimeout(hideTimer.current), []);
 
   const close = useCallback(() => {
     returnFocus.current = true;
@@ -88,14 +96,16 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
   useEffect(() => {
     if (open || !returnFocus.current) return;
     returnFocus.current = false;
+    quietFocus.current = true;
     buttonRef.current?.focus({ preventScroll: true });
+    quietFocus.current = false;
   }, [open]);
 
   useEffect(() => {
-    if (!enabled || bubbleSeen()) return;
+    if (!enabled) return;
     let stopWave: number | undefined;
     const show = window.setTimeout(() => {
-      setBubble(true);
+      showBubble(BUBBLE_INTRO_MS);
       setIntroWave(true);
       stopWave = window.setTimeout(() => setIntroWave(false), INTRO_WAVE_MS);
     }, BUBBLE_DELAY_MS);
@@ -103,7 +113,7 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
       window.clearTimeout(show);
       window.clearTimeout(stopWave);
     };
-  }, [enabled]);
+  }, [enabled, showBubble]);
 
   if (!enabled) return null;
 
@@ -113,9 +123,10 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
 
   return (
     <div className="chat-root" data-chat-root="">
-      {bubble && !open && (
-        <p className="chat-bubble text-label" aria-hidden="true">
-          {chatPersona.bubble}
+      {bubble !== null && !open && (
+        // keyed by appearance, so each new line pops in again
+        <p key={bubble} className="chat-bubble text-label" aria-hidden="true">
+          {chatPersona.bubbles[bubble % chatPersona.bubbles.length]}
         </p>
       )}
       <button
@@ -126,14 +137,25 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
         aria-expanded={open}
         aria-controls="chat-panel"
         data-pose={pose}
-        onPointerEnter={() => setHovered(true)}
-        onPointerLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)}
-        onBlur={() => setHovered(false)}
+        onPointerEnter={() => {
+          setHovered(true);
+          if (!open) showBubble();
+        }}
+        onPointerLeave={() => {
+          setHovered(false);
+          hideBubble(BUBBLE_LINGER_MS);
+        }}
+        onFocus={() => {
+          setHovered(true);
+          if (!open && !quietFocus.current) showBubble();
+        }}
+        onBlur={() => {
+          setHovered(false);
+          hideBubble(BUBBLE_LINGER_MS);
+        }}
         onClick={() => {
           setMounted(true);
-          setBubble(false);
-          markBubbleSeen();
+          hideBubble();
           setOpen(o => !o);
         }}
       >

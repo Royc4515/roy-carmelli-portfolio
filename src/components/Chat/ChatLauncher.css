@@ -59,15 +59,19 @@ html[data-arcade-playing] .chat-root {
     inset -2px -2px 0 0 var(--color-bevel-hi);
 }
 
-/* "Ask me about my work": a parchment speech bubble beside Roy's head, once per session. */
+/* A parchment speech bubble beside Roy's head: on load, and on every hover or focus. */
 .chat-bubble {
   position: absolute;
   right: 72px;
   bottom: 64px;
+  width: max-content;
+  /* one line on a desktop; on a narrow phone a long line wraps instead of leaving the screen */
+  max-width: calc(100vw - 104px);
   padding: 5px 12px 3px;
   background-color: var(--color-paper);
   color: var(--color-ink);
-  white-space: nowrap;
+  line-height: 16px;
+  text-wrap: balance;
   box-shadow:
     0 -4px 0 0 var(--color-ink),
     0 4px 0 0 var(--color-ink),
@@ -134,10 +138,6 @@ html[data-arcade-playing] .chat-root {
    Laptops are never matched: a 150%-zoom laptop window is ~550px tall, a sideways phone ~390px.
    don't touch / same query as SHEET_QUERY in ChatPanel.tsx, or the JS and CSS disagree. */
 @media (max-width: 767px), (max-height: 440px) {
-  .chat-bubble {
-    display: none;
-  }
-
   .chat-panel {
     inset: 0;
     width: auto;

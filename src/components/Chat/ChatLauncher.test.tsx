@@ -1,12 +1,12 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ChatLauncher, { BUBBLE_DELAY_MS, BUBBLE_SEEN_KEY } from './ChatLauncher';
+import ChatLauncher, { BUBBLE_DELAY_MS, BUBBLE_INTRO_MS, BUBBLE_LINGER_MS } from './ChatLauncher';
 import { chatPersona } from '../../data/chatPersona';
 
 const launcher = () => screen.getByRole('button', { name: chatPersona.launcherLabel });
-const bubble = () => screen.queryByText(chatPersona.bubble);
+const bubble = () => document.querySelector('.chat-bubble');
+const [FIRST, SECOND, THIRD] = chatPersona.bubbles;
 
-beforeEach(() => sessionStorage.clear());
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
@@ -43,45 +43,69 @@ describe('ChatLauncher', () => {
     expect(launcher()).toHaveAttribute('data-pose', 'wave');
   });
 
-  it('says hello in a bubble after a moment, waving, then stops waving', () => {
+  it('says hello in a bubble when the page loads, waving, then clears the corner', () => {
     vi.useFakeTimers();
     render(<ChatLauncher enabled />);
     expect(bubble()).toBeNull();
     act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
-    expect(bubble()).toBeInTheDocument();
+    expect(bubble()).toHaveTextContent(FIRST);
     expect(bubble()).toHaveAttribute('aria-hidden', 'true');
     expect(launcher()).toHaveAttribute('data-pose', 'wave');
-    act(() => vi.advanceTimersByTime(3000));
+    act(() => vi.advanceTimersByTime(BUBBLE_INTRO_MS));
     expect(launcher()).toHaveAttribute('data-pose', 'idle');
-    expect(bubble()).toBeInTheDocument();
+    expect(bubble()).toBeNull();
   });
 
-  it('drops the bubble once the chat is opened, for the rest of the session', () => {
+  it('shows the next line every time Roy is pointed at, and lets it linger before hiding', () => {
     vi.useFakeTimers();
-    const { unmount } = render(<ChatLauncher enabled />);
+    render(<ChatLauncher enabled />);
+    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS + BUBBLE_INTRO_MS));
+    fireEvent.pointerEnter(launcher());
+    expect(bubble()).toHaveTextContent(SECOND);
+    fireEvent.pointerLeave(launcher());
+    expect(bubble()).toHaveTextContent(SECOND);
+    act(() => vi.advanceTimersByTime(BUBBLE_LINGER_MS));
+    expect(bubble()).toBeNull();
+    fireEvent.pointerEnter(launcher());
+    expect(bubble()).toHaveTextContent(THIRD);
+  });
+
+  it('cycles back to the first line after the last one', () => {
+    vi.useFakeTimers();
+    render(<ChatLauncher enabled />);
     act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
+    for (let i = 1; i < chatPersona.bubbles.length; i++) {
+      fireEvent.pointerEnter(launcher());
+      fireEvent.pointerLeave(launcher());
+    }
+    fireEvent.pointerEnter(launcher());
+    expect(bubble()).toHaveTextContent(FIRST);
+  });
+
+  it('shows a line on keyboard focus too, and hides it while the chat is open', () => {
+    vi.useFakeTimers();
+    render(<ChatLauncher enabled />);
+    fireEvent.focus(launcher());
+    expect(bubble()).toHaveTextContent(FIRST);
     fireEvent.click(launcher());
     expect(bubble()).toBeNull();
-    expect(sessionStorage.getItem(BUBBLE_SEEN_KEY)).toBe('1');
-    unmount();
-
-    render(<ChatLauncher enabled />);
-    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS * 2));
+    fireEvent.pointerEnter(launcher());
     expect(bubble()).toBeNull();
   });
 
-  it('still works when session storage is blocked', () => {
-    vi.useFakeTimers();
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new DOMException('blocked', 'SecurityError');
-    });
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new DOMException('blocked', 'SecurityError');
-    });
+  it('keeps every line within the pixel-font rules (Latin-1, at most 24 characters)', () => {
+    for (const line of chatPersona.bubbles) {
+      expect(line.length).toBeLessThanOrEqual(24);
+      expect(line).toMatch(/^[\x20-\x7e\xa0-\xff]+$/);
+    }
+  });
+
+  it('does not pop the bubble when focus comes back from closing the panel', async () => {
     render(<ChatLauncher enabled />);
-    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
-    expect(bubble()).toBeInTheDocument();
-    expect(() => fireEvent.click(launcher())).not.toThrow();
+    await userEvent.click(launcher());
+    await screen.findByRole('dialog');
+    await userEvent.click(screen.getByRole('button', { name: chatPersona.closeLabel }));
+    expect(launcher()).toHaveFocus();
     expect(bubble()).toBeNull();
   });
 });

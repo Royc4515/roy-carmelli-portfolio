@@ -306,10 +306,13 @@ The AI chat (`src/components/Chat/`, setup in `docs/chat/SETUP.md`). Styled as a
 conversation; behaviour lives in `useChat`, copy in `src/data/chatPersona.ts`.
 - **Launcher:** Roy standing (`Character`, `idle` ×1) on a brass `AI` plate, bottom-right, z 90
   (below the nav). Waves (`wave`) only while pointed at or focused, and for two loops when the
-  speech bubble first appears: never endlessly beside text people are reading. Press = the plate
-  sinks 4px onto its shadow and its bevel flips. Hidden while the game runs.
-- **Speech bubble:** parchment, ink frame, 12px label (≤ 24 chars), stepped parchment tail. Once
-  per session (`sessionStorage`), ≥ 768px only, `aria-hidden` (the button carries the name).
+  page loads: never endlessly beside text people are reading. Press = the plate sinks 4px onto
+  its shadow and its bevel flips. Hidden while the game runs.
+- **Speech bubble:** parchment, ink frame, 12px label, stepped parchment tail, `aria-hidden` (the
+  button carries the name). It says hello 0.8s after load (gone after 6s), and again on every
+  hover or keyboard focus, each time with the next line of `chatPersona.bubbles` (Latin-1, ≤ 24
+  chars each, tested); it lingers 1.5s after the pointer leaves. Not while the panel is open, and
+  not when focus merely returns from closing it. Wraps on a narrow phone.
 - **Panel:** wood `PixelPanel`, elevation 2, brass `tab` "PIXEL ROY · AI". It opens beside Roy
   (left of the launcher, bottom-aligned), so he stands next to his own dialogue box and the panel
   gets the window's height: `min(620px, 100dvh - 100px)`, enough on a 150%-zoom laptop (~550px).

@@ -9,8 +9,15 @@ export const chatPersona = {
   name: 'Pixel Roy',
   badge: 'AI',
   launcherLabel: 'Chat with Pixel Roy, an AI version of Roy',
-  /** Pixel font, uppercase, at most 24 characters (SPEC 2.2). */
-  bubble: 'Ask me about my work',
+  /** Speech-bubble lines, one per appearance, in turn. Pixel font: Latin-1, at most 24 characters
+   *  each (SPEC 2.2), so no Hebrew here. */
+  bubbles: [
+    'Ask me about my work',
+    'Curious? Just ask!',
+    'Want to see my projects?',
+    'I answer in Hebrew too',
+    "Psst... I'm Roy's AI",
+  ],
   /** The visitor's label above their own lines. */
   you: 'You',
   closeLabel: 'Close chat',
