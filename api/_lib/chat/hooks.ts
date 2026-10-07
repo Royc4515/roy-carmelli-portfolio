@@ -92,17 +92,35 @@ function cap(text: string): string {
   return end > MAX_ANSWER_CHARS / 2 ? cut.slice(0, end + 1) : `${cut.slice(0, cut.lastIndexOf(' '))}...`;
 }
 
+/** Mostly Hebrew letters: an English answer may still quote the Hebrew role name (חוג"ד). */
+const mostlyHebrew = (text: string) =>
+  (text.match(/[\u0590-\u05FF]/g)?.length ?? 0) > (text.match(/[A-Za-z]/g)?.length ?? 0);
+
+/** The service in the site's own wording, for when every sentence of an answer had to go. */
+export const SERVICE_LINE = {
+  en: 'I served as a battalion medic (חוג"ד) and medical coordinator in the Gaza Division, an operational support role.',
+  he: 'שירתתי כחוג"ד ומתאם רפואי באוגדת עזה, בתפקיד תומך לחימה.',
+} as const;
+
+/**
+ * don't touch / repo rule: the service is never described as "combat medic". The whole sentence
+ * goes, not just the words: swapping them turned a correct denial ("I never called it a combat
+ * medic") into nonsense. When nothing is left, the answer was a one-sentence correction ("No, not
+ * a combat medic, a battalion medic"), so the correct line replaces it; blocking it showed an
+ * error on the exact question a recruiter asks (live eval, Oct 7 2026).
+ */
+function dropCombatMedic(text: string): string {
+  const kept = text.replace(/[^.!?\n]*\bcombat medic\b[^.!?\n]*[.!?]?/gi, '');
+  if (kept === text || kept.trim()) return kept;
+  return mostlyHebrew(text) ? SERVICE_LINE.he : SERVICE_LINE.en;
+}
+
 /** The site's copy rules, enforced rather than requested. */
 export const styleHook: OutputHook = {
   name: 'style',
   apply: draft => {
     const answer = cap(
-      draft.answer
-        .replace(/\s*[–—]\s*/g, ' - ')
-        // don't touch / repo rule: the service is never described as "combat medic". The whole
-        // sentence goes, not just the words: swapping them turned a correct denial ("I never
-        // called it a combat medic") into nonsense.
-        .replace(/[^.!?\n]*\bcombat medic\b[^.!?\n]*[.!?]?/gi, '')
+      dropCombatMedic(draft.answer.replace(/\s*[–—]\s*/g, ' - '))
         .replace(/\*\*|__|`/g, '')
         .replace(/^\s{0,3}#{1,6}\s+/gm, '')
         .replace(/^\s*[*•]\s+/gm, '- ')
