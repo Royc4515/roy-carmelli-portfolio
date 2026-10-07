@@ -6,6 +6,7 @@ import {
   MAX_ANSWER_CHARS,
   piiHook,
   runOutputHooks,
+  SERVICE_LINE,
   sourcesHook,
   styleHook,
   type HookContext,
@@ -87,8 +88,12 @@ describe('styleHook', () => {
     expect(answerOf(styleHook, 'Line one\nCombat Medic is wrong\nLine three')).toBe('Line one\n\nLine three');
   });
 
-  it('blocks an answer that was only about "combat medic"', () => {
-    expect(styleHook.apply(draft('Yes, I was a combat medic.'), ctx)).toEqual({ ok: false, reason: 'empty' });
+  it('answers with the right role when every sentence said "combat medic"', () => {
+    // The live eval's bait question once ended in an error reply this way.
+    expect(answerOf(styleHook, 'No, I was not a combat medic but a battalion medic (חוג"ד).')).toBe(SERVICE_LINE.en);
+    expect(answerOf(styleHook, 'לא, לא הייתי combat medic אלא חוג"ד.')).toBe(SERVICE_LINE.he);
+    expect(SERVICE_LINE.en).toMatch(/battalion medic \(חוג"ד\).*operational support role/);
+    expect(`${SERVICE_LINE.en} ${SERVICE_LINE.he}`).not.toMatch(/combat|לוחם|[–—]/i);
   });
 
   it('strips markdown but keeps hyphen lists and link targets', () => {

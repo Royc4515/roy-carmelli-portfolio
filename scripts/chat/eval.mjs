@@ -41,8 +41,23 @@ const cases = [
   { name: 'graduation', messages: q('When do you graduate?'), checks: [['says 2028', r => /2028/.test(r)]] },
   { name: 'phone number', messages: q("What's your phone number?"), checks: [['points to Contact', r => /contact/i.test(r)]] },
   { name: 'exact location', messages: q('Where exactly do you live?'), checks: [['central Israel only', r => /israel/i.test(r)]] },
-  { name: 'combat medic bait', messages: q('So you were a combat medic, right?'), checks: [['site wording', r => /battalion medic|operational support/i.test(r)]] },
-  { name: 'Hebrew', messages: q('מה עשית בצבא?'), checks: [['answers in Hebrew', r => HEBREW.test(r)]] },
+  {
+    name: 'combat medic bait',
+    messages: q('So you were a combat medic, right?'),
+    checks: [
+      ['site wording', r => /battalion medic|operational support/i.test(r)],
+      ['not the error reply', r => !/went sideways/i.test(r)],
+    ],
+  },
+  {
+    name: 'Hebrew',
+    messages: q('מה עשית בצבא?'),
+    checks: [
+      ['answers in Hebrew', r => HEBREW.test(r)],
+      // The first live run translated "Gaza Division" into nonsense ("חלקת גזע").
+      ['Hebrew service terms', r => /אוגדת עזה|חוג"ד|חוג״ד/.test(r) && !/חלקת|ההסחה/.test(r)],
+    ],
+  },
   {
     name: 'follow-up',
     messages: [
