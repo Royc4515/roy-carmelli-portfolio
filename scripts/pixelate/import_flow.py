@@ -36,13 +36,36 @@ SIZES_TS = P.ROOT / 'src' / 'components' / 'MiniGame' / 'spriteSizes.generated.t
 KEY_MIN = 80          # min(R, B) - G above this is the magenta matte
 DESPILL = 24          # fringe pixels keep at most this much magenta over green
 SPECK_MIN = 3         # rows/cols with fewer opaque px than this are matte noise, not sprite
-MIN_SPRITE_W = 40     # narrower column runs on a one-row sheet are specks, not a figure
+MIN_SPRITE_W = 40     # narrower shapes on a one-row sheet are specks, not a figure
+CUT_COARSE = 4        # cell size (px) of the mask cut_row finds figures on
 # Native height of a standing Roy, in the game and on the site. Flow draws him about this
 # tall on a one-row sheet; much smaller and his 2 px eyes start to drop out (a "wink").
 STAND_H = 92
 SIT_TO_STAND = 0.98   # Roy on his stool is this share of his standing height (old art: 69/70)
-GROUND_OBSTACLE_H = 52  # native median height of the ground obstacles (they were 52-54)
-CRITTER_H = 40        # the beetle and hedgehog are low, quick critters
+# Real-world sizes set every sprite's height, so the cast stands in true proportion to Roy and
+# to the forest. The scale comes from Roy (an adult, ROY_M tall, is STAND_H px) and agrees with
+# the background: its fence (18.5 native rows, 46 px at the game's 2.5x) comes out at 0.88 m.
+ROY_M = 1.75
+PX_PER_M = STAND_H / ROY_M
+# Height in metres of each obstacle as drawn (tail, ears or cap included).
+OBSTACLE_M = {
+    'racoon': 0.5, 'stump': 0.7, 'stump-moss': 0.6, 'rock': 0.55, 'mushrooms': 0.5,
+    'toadstools': 0.3, 'agave': 0.7, 'bird-blue': 0.25, 'bird-brown': 0.25,
+    'beetle': 0.3, 'hedgehog': 0.25, 'bat': 0.25,
+}
+# At true size the animals read as specks in a game, so like most platformers the cast is
+# exaggerated: real heights times OBSTACLE_EXAGGERATION, keeping their real order (a stump
+# above a raccoon above a hedgehog), and nothing under MIN_OBSTACLE_H. The tallest, a stump,
+# lands about the fence's height and half of Roy's.
+OBSTACLE_EXAGGERATION = 1.35
+MIN_OBSTACLE_H = 32
+# Contrast rim around the obstacles (see contrast_rim).
+RIM_PX = 1
+RIM_INK = (13, 22, 8)          # the HUD's ink, a near-black forest green
+RIM_LIGHT = (243, 231, 194)    # the HUD's parchment
+RIM_ALPHA = 0.45
+OUTLINE_LUMA = 70              # an edge pixel brighter than this gets the dark outline
+GROUND_RIM_SKIP = 3            # bottom rows of a grounded sprite that get no light rim
 PORTRAIT_H = 56       # fits the 76 px player card (HUD_CONFIG) with its frame
 FACE_H = 49           # the site's portrait height (navbar, About, chat), unchanged
 # The site's scenes were tuned to a 67 px Roy in front of a 240x112 forest with its grass at
@@ -50,6 +73,7 @@ FACE_H = 49           # the site's portrait height (navbar, About, chat), unchan
 SITE_SCALE = STAND_H / 67
 FOREST_W, FOREST_H = round(240 * SITE_SCALE), round(112 * SITE_SCALE)
 FOREST_GROUND_ROW = round(101 * SITE_SCALE)
+BG_TOP_PAD = 2        # canopy rows repeated on top of the background (see import_background)
 BG_PERIOD = 4.0       # Nano Banana draws its pixel art on a 4 px grid at 1376x768
 PLAYER_COLORS = 48
 OBSTACLE_COLORS = 64
@@ -80,7 +104,10 @@ ROY_SHEETS = (
     RoySheet(Sheet('roy_wave_idle.jpg', 4, 1, 4), ('wave-1', 'wave-2', 'wave-3', 'idle'), ref=0),
     RoySheet(Sheet('roy_run_b.jpg', 4, 1, 4), ('run-5', 'run-6', 'run-7', 'stand-1'), ref=3),
     RoySheet(Sheet('roy_jump.jpg', 4, 1, 4), ('jump-1', 'jump-2', 'jump-3', 'jump-4'), ref=0),
+    # Its standing figure only scales stand-2; the slide is sized by head (import_player).
     RoySheet(Sheet('roy_slide_stand.jpg', 4, 1, 3), ('slide-2', 'slide-3', 'stand-2'), ref=2),
+    # Drop into the slide and get up again; sized by face like the slide (import_player).
+    RoySheet(Sheet('roy_slide_moves.jpg', 4, 1, 4), ('slide-in-1', 'slide-in-2', 'slide-out-1', 'slide-out-2'), ref=0),
     RoySheet(Sheet('roy_sit.jpg', 4, 1, 3), ('sit-1', 'sit-2', 'sit-3'), ref=0,
              ref_h=SIT_TO_STAND),
 )
@@ -88,6 +115,9 @@ ROY_SHEETS = (
 RUN_A = Sheet('roy_run_a.jpg', 4, 1, 4)
 RUN_A_NAMES = ('run-1', 'run-2', 'run-3', 'run-4')
 SLIDE = ('slide-2', 'slide-3')
+SLIDE_MOVES = ('slide-in-1', 'slide-in-2', 'slide-out-1', 'slide-out-2')
+# Upright frames whose head size the slide is matched to (see import_player).
+HEAD_REFERENCE = ('wave-1', 'wave-3', 'run-5', 'run-6', 'run-7')
 SITE_ONLY = ('sit-1', 'sit-2', 'sit-3')
 SITE_SOURCES = ('wave-1', 'wave-2', 'wave-3', *SITE_ONLY)
 OBSTACLES = Sheet('obstacles.jpg', 5, 2, 9)
@@ -149,25 +179,63 @@ def cut_cells(rgba: np.ndarray, sheet: Sheet) -> list[np.ndarray]:
     return crops
 
 
+def _label(mask: np.ndarray) -> tuple[np.ndarray, int]:
+    """4-connected component labels of a boolean mask (0 = background)."""
+    labels = np.zeros(mask.shape, np.int32)
+    n = 0
+    for y, x in zip(*np.nonzero(mask)):
+        if labels[y, x]:
+            continue
+        n += 1
+        labels[y, x] = n
+        stack = [(y, x)]
+        while stack:
+            cy, cx = stack.pop()
+            for ny, nx in ((cy - 1, cx), (cy + 1, cx), (cy, cx - 1), (cy, cx + 1)):
+                if (0 <= ny < mask.shape[0] and 0 <= nx < mask.shape[1]
+                        and mask[ny, nx] and not labels[ny, nx]):
+                    labels[ny, nx] = n
+                    stack.append((ny, nx))
+    return labels, n
+
+
 def cut_row(rgba: np.ndarray, sheet: Sheet) -> list[np.ndarray]:
-    """Sprites of a one-row sheet, split on the empty columns between them. Flow does not
-    always keep a figure inside its column (a wide slide pose spills over), so the gaps
-    are more reliable than the grid."""
+    """The figures of a one-row sheet, left to right, each with only its own pixels.
+
+    Flow does not keep a figure inside its grid column (a slide spills over) and figures
+    sometimes touch (a trailing hand, a foot against the next figure), so the figures are
+    found as connected shapes on a coarse, slightly eroded mask, which breaks thin contacts.
+    """
     solid = rgba[..., 3] > P.SOLID_ALPHA
-    used = solid.sum(0) >= SPECK_MIN
-    runs, start = [], None
-    for x, on in enumerate([*used, False]):
-        if on and start is None:
-            start = x
-        elif not on and start is not None:
-            runs.append((start, x))
-            start = None
-    runs = [r for r in runs if r[1] - r[0] >= MIN_SPRITE_W]
-    if len(runs) != sheet.count:
-        raise SystemExit(f'{sheet.file}: found {len(runs)} sprites, expected {sheet.count}')
+    f = CUT_COARSE
+    h, w = solid.shape[0] // f * f, solid.shape[1] // f * f
+    coarse = solid[:h, :w].reshape(h // f, f, w // f, f).any(axis=(1, 3))
+    eroded = coarse.copy()
+    eroded[1:] &= coarse[:-1]
+    eroded[:-1] &= coarse[1:]
+    eroded[:, 1:] &= coarse[:, :-1]
+    eroded[:, :-1] &= coarse[:, 1:]
+    labels, n = _label(eroded)
+    shapes = []
+    for k in range(1, n + 1):
+        ys, xs = np.nonzero(labels == k)
+        if (xs.max() - xs.min() + 1) * f >= MIN_SPRITE_W:
+            shapes.append((xs.mean(), k))
+    if len(shapes) != sheet.count:
+        raise SystemExit(f'{sheet.file}: found {len(shapes)} figures, expected {sheet.count}')
+    # Every solid pixel goes to the nearest figure (by coarse cell), undoing the erosion.
+    full = np.zeros(solid.shape, np.int32)
+    full[:h, :w] = np.repeat(np.repeat(labels, f, 0), f, 1)
+    owner = full.copy()
+    for _ in range(3 * f):  # grow labels back over the eroded rim, within the solid mask
+        grown = owner.copy()
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            shifted = np.roll(owner, (dy, dx), (0, 1))
+            grown = np.where((grown == 0) & (shifted > 0) & solid, shifted, grown)
+        owner = grown
     crops = []
-    for x0, x1 in runs:
-        part = rgba[:, x0:x1]
+    for _, k in sorted(shapes):
+        part = np.where((owner == k)[..., None], rgba, 0).astype(np.uint8)
         ya, yb, xa, xb = sprite_bbox(part)
         crops.append(part[ya:yb, xa:xb])
     return crops
@@ -201,7 +269,16 @@ def split_sheet(sheet: np.ndarray, fw: int, n: int) -> list[np.ndarray]:
 
 
 def save_native(img: np.ndarray, path: Path) -> tuple[int, int]:
-    """Save via pixelate.save_png, then tag the file as already native."""
+    """Save via pixelate.save_png (or as RGBA when it has soft alpha), then tag it native."""
+    alpha = img[..., 3]
+    if ((alpha > 0) & (alpha < 255)).any():
+        # save_png keeps only on/off transparency; the contrast rim needs its soft alpha.
+        info = PngImagePlugin.PngInfo()
+        info.add_text(P.NATIVE_KEY, '1')
+        path.parent.mkdir(parents=True, exist_ok=True)
+        Image.fromarray(np.clip(np.round(img), 0, 255).astype(np.uint8), 'RGBA').save(
+            path, optimize=True, pnginfo=info)
+        return img.shape[1], img.shape[0]
     P.save_png(img, path)
     with Image.open(path) as src:
         im = src.copy()  # fully read before the same path is written again
@@ -211,6 +288,22 @@ def save_native(img: np.ndarray, path: Path) -> tuple[int, int]:
     kwargs = {'transparency': transparency} if transparency is not None else {}
     im.save(path, optimize=True, pnginfo=info, **kwargs)
     return img.shape[1], img.shape[0]
+
+
+def head_size(sprite: np.ndarray) -> float:
+    """Square root of the area of Roy's face (the largest skin-coloured blob; his hands are
+    smaller): a size reference that, unlike his height or his hair's extent, holds in every
+    pose, upright or lying with his head tilted back."""
+    r, g, b, a = (sprite[..., i].astype(int) for i in range(4))
+    skin = ((a > 0) & (r >= 150) & (r - g >= 25) & (r - g <= 90) & (g - b >= 15)
+            & (b >= 60) & (b <= 170))
+    f = CUT_COARSE
+    h, w = skin.shape[0] // f * f, skin.shape[1] // f * f
+    cells = skin[:h, :w].reshape(h // f, f, w // f, f).mean(axis=(1, 3)) > 0.5
+    labels, n = _label(cells)
+    if n == 0:
+        raise SystemExit('head_size: no face found')
+    return float(np.sqrt(max((labels == k).sum() for k in range(1, n + 1)))) * f
 
 
 def import_player() -> dict:
@@ -227,6 +320,14 @@ def import_player() -> dict:
     for name, cell in zip(RUN_A_NAMES, cells):
         crops[name], scale[name] = cell, k
 
+    # A lying pose has no standing height to measure, and Flow draws the slide sheet's
+    # standing figure at its own scale: size the slide so Roy's face matches his upright one.
+    upright = np.median([head_size(crops[n]) * scale[n] for n in HEAD_REFERENCE])
+    for group in (SLIDE, SLIDE_MOVES):
+        k = float(upright) / float(np.median([head_size(crops[n]) for n in group]))
+        for name in group:
+            scale[name] = k
+
     names = list(crops)
     native = [downscale(crops[n], max(1, round(crops[n].shape[0] * scale[n]))) for n in names]
     art = dict(zip(names, P.reduce_palette(native, PLAYER_COLORS)))
@@ -241,31 +342,76 @@ def import_player() -> dict:
     slide_sheet, sw, sh, _ = P.build_sheet([art[n] for n in SLIDE])
     for name, frame in zip(SLIDE, split_sheet(slide_sheet, sw, len(SLIDE))):
         save_native(frame, P.GAME_SPRITES / f'{name}.png')
+    moves_sheet, mw, mh, _ = P.build_sheet([art[n] for n in SLIDE_MOVES])
+    for name, frame in zip(SLIDE_MOVES, split_sheet(moves_sheet, mw, len(SLIDE_MOVES))):
+        save_native(frame, P.GAME_SPRITES / f'{name}.png')
+
+    # Transparent rows above the tallest slide frame: the game places the air obstacles
+    # against the slide's visible top, not its frame.
+    slide_top = int(np.argmax((slide_sheet[..., 3] > 0).any(1)))
 
     for name in SITE_SOURCES:
         save_native(art[name], P.DESIGN_SRC / f'{name}.png')
 
     print(f'  player {fw}x{fh}, slide {sw}x{sh}, '
           + ', '.join(f'{n} {art[n].shape[1]}x{art[n].shape[0]}' for n in SITE_ONLY))
-    return {'player': {'w': fw, 'h': fh}, 'slide': {'w': sw, 'h': sh}}
+    return {'player': {'w': fw, 'h': fh}, 'slide': {'w': sw, 'h': sh, 'top': slide_top},
+            'slideMove': {'w': mw, 'h': mh}}
+
+
+def _grow4(mask: np.ndarray) -> np.ndarray:
+    out = mask.copy()
+    out[1:] |= mask[:-1]
+    out[:-1] |= mask[1:]
+    out[:, 1:] |= mask[:, :-1]
+    out[:, :-1] |= mask[:, 1:]
+    return out
+
+
+def contrast_rim(img: np.ndarray, grounded: bool) -> np.ndarray:
+    """Add a dark outline where the art's own edge is light, and a soft light rim outside it.
+
+    Brown and dark-green obstacles otherwise melt into the forest's trunks and bushes (a
+    review measured up to 43% of a hedgehog's pixels within 40 RGB of what is behind it).
+    For a grounded sprite nothing is added under its bottom row (its feet stay on the feet
+    line) and no light rim is drawn in its bottom rows, where it would glow against the grass
+    between roots and paws; air sprites get the rim all round.
+    """
+    pad = RIM_PX + 1
+    below = 0 if grounded else pad
+    a = np.zeros((img.shape[0] + pad + below, img.shape[1] + 2 * pad, 4))
+    a[pad:pad + img.shape[0], pad:-pad] = img
+    solid = a[..., 3] > 0
+    luma = a[..., :3].mean(2)
+    light_edge = solid & (luma > OUTLINE_LUMA)
+    ring1 = _grow4(solid) & ~solid
+    ink = ring1 & _grow4(light_edge)
+    a[ink] = [*RIM_INK, 255]
+    inner = solid | ink
+    rim = _grow4(inner) & ~inner
+    if grounded:
+        rim[-GROUND_RIM_SKIP:] = False
+    a[rim] = [*RIM_LIGHT, round(255 * RIM_ALPHA)]
+    return P.crop(a)
+
+
+def obstacle_height(name: str) -> int:
+    return max(MIN_OBSTACLE_H, round(OBSTACLE_M[name] * PX_PER_M * OBSTACLE_EXAGGERATION))
 
 
 def import_obstacles() -> dict:
     names, native = [], []
-    for sheet, sheet_names, ground_target in ((OBSTACLES, OBSTACLE_NAMES, GROUND_OBSTACLE_H),
-                                              (CRITTERS, CRITTER_NAMES, CRITTER_H)):
+    for sheet, sheet_names in ((OBSTACLES, OBSTACLE_NAMES), (CRITTERS, CRITTER_NAMES)):
         crops = cut_cells(load_keyed(FLOW / sheet.file), sheet)
-        # One period per sheet, so every object on a sheet keeps one pixel size.
-        ground_h = [c.shape[0] for n, c in zip(sheet_names, crops) if n not in AIR]
-        period = float(np.median(ground_h)) / ground_target
         names += sheet_names
-        native += [to_native(c, period) for c in crops]
+        # Area-averaged straight to the drawn size, so the game draws each one 1:1.
+        native += [downscale(c, obstacle_height(n)) for n, c in zip(sheet_names, crops)]
     native = P.reduce_palette(native, OBSTACLE_COLORS)
     sizes = {}
     for name, img in zip(names, native):
         if name in FACING_RIGHT:
             img = img[:, ::-1].copy()
-        w, h = save_native(img, P.GAME_SPRITES / f'{name}.png')
+        w, h = save_native(contrast_rim(img, grounded=name not in AIR), P.GAME_SPRITES / f'{name}.png')
         sizes[name] = {'w': w, 'h': h}
     print('  obstacles ' + ', '.join(f'{n} {s["w"]}x{s["h"]}' for n, s in sizes.items()))
     return {'obstacles': sizes}
@@ -276,6 +422,9 @@ def import_background() -> dict:
     rgba = np.dstack([rgb, np.full(rgb.shape[:2], 255, np.uint8)])
     ax = P.Axis(BG_PERIOD, 0.0, 0.0)
     bg = P.reduce_palette([P.sample(rgba, ax, ax)], BG_COLORS)[0]
+    # The game draws the forest at 2.5x with its grass line pinned to the ground, which
+    # leaves its top a few px short of the canvas top: repeat the canopy's top row to cover it.
+    bg = np.concatenate([np.repeat(bg[:1], BG_TOP_PAD, axis=0), bg])
     w, h = save_native(bg, P.GAME_SPRITES / 'background.png')
     ground = P.measure_ground_row(bg)
 

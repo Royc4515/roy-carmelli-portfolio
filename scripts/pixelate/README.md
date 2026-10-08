@@ -22,29 +22,35 @@ unchanged sources gives byte-identical files.
 | `roy_run_a.jpg`, `roy_run_b.jpg` | 1 row: run 1-4; run 5-7, stand-1 | `run-1..7.png`, `stand-1.png` |
 | `roy_jump.jpg` | 1 row: jump 1-4 | `jump-*.png` |
 | `roy_slide_stand.jpg` | 1 row: slide 2-3, stand-2 | `slide-*.png`, `stand-2.png` |
+| `roy_slide_moves.jpg` | 1 row: drop into the slide (2), get up (2) | `slide-in-1/2.png`, `slide-out-1/2.png` |
 | `roy_sit.jpg` | 1 row: sit 1-3 | site `design-src/sprites/sit-*.png` |
 | `obstacles.jpg` | 5x2: raccoon, stumps, rock, mushrooms, toadstools, agave, 2 birds | `racoon.png`, `stump.png`, ... `bird-*.png` |
 | `critters.jpg` | 3x1: beetle, hedgehog, bat | `beetle.png`, `hedgehog.png`, `bat.png` |
 | `background.jpg` | full frame | `background.png`; site `design-src/sprites/forest.png` (a 330x154 window) |
 | `portrait.jpg` | one bust | game `portrait.png` (player card); site `design-src/sprites/face-large.png` |
 
-It also writes `src/components/MiniGame/spriteSizes.generated.ts`: the game draws the sprites
-at 1.25x their native size, so its frame sizes come from there.
+It also writes `src/components/MiniGame/spriteSizes.generated.ts`: the game draws every
+sprite 1:1, so its frame sizes come from there.
 
 1. **Key.** Pixels where `min(R, B) - G` is large are the matte; the purple fringe the matte
    leaves on the outline is capped back to neutral.
 2. **Cut.** Roy's sheets are one row of figures (one figure per column fills the image
-   height, which is what gives him ~92 px of real detail), split on the empty columns between
-   figures; the obstacle sheets are split into grid cells. Rows and columns with under 3
-   opaque pixels are matte noise.
+   height, which is what gives him ~92 px of real detail), split into connected shapes on a
+   coarse, slightly eroded mask (figures sometimes touch); the obstacle sheets are split into
+   grid cells. Rows and columns with under 3 opaque pixels are matte noise.
 3. **Native.** Flow's pixel art is not on one exact grid, and its pixel size changes from
    sheet to sheet. Roy is area-averaged so a standing Roy is 92 px tall on every sheet (one
-   reference pose per sheet sets the scale); an area average cannot drop a 2 px feature, while
-   sampling one median per cell at an off-grid scale made one eye vanish (a "wink"). Obstacles
-   are sampled with `pixelate.sample` at one period per sheet, scaled to a median height.
-4. **Palette and frames.** One palette per group; every pose drawn in the game's player box
+   reference pose per sheet sets the scale; the slide and its drop-in/get-up frames, which have
+   no standing height, are sized so the area of Roy's face matches his upright face). An area
+   average cannot drop a 2 px feature, while sampling one median per cell at an off-grid scale
+   made one eye vanish (a "wink").
+4. **Real sizes.** Every obstacle is area-averaged straight to its drawn height: its real
+   height in metres (`OBSTACLE_M`) at Roy's scale (1.75 m = 92 px), times 1.35 so small
+   animals do not read as specks, and never under 32 px.
+5. **Palette and frames.** One palette per group; every pose drawn in the game's player box
    is padded to one frame size, bottom-aligned on the feet. The birds are mirrored to face the
-   way they fly.
+   way they fly. Obstacles get a contrast rim (a dark outline where their edge is light, then a
+   soft parchment rim) so they never melt into the trunks; none is added under the feet.
 
 Every file it writes carries a `pixel-grid=1` PNG text chunk, which tells `pixelate.py` the
 image is already native.

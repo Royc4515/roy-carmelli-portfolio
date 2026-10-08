@@ -79,6 +79,8 @@ export class GameEngine {
       ...SPRITE_PATHS.player.stand,
       ...SPRITE_PATHS.player.idle,
       ...SPRITE_PATHS.player.slide,
+      ...SPRITE_PATHS.player.slideIn,
+      ...SPRITE_PATHS.player.slideOut,
       ...SPRITE_PATHS.obstacles.ground.map(o => o.src),
       ...SPRITE_PATHS.obstacles.air.map(o => o.src),
       SPRITE_PATHS.background,
@@ -245,17 +247,16 @@ export class GameEngine {
   private drawScrollingBackground(): void {
     const { ctx } = this;
     const bgSrc = SPRITE_PATHS.background;
-    const { tileW, tileH } = BACKGROUND_CONFIG;
+    const { tileW, tileH, top } = BACKGROUND_CONFIG;
 
     // Every other tile is mirrored, so neighbouring edges are the same column of pixels and
     // the loop has no seam whatever the art's edges look like. The pair repeats every 2 tiles.
-    // Drawn from y = 0: BACKGROUND_CONFIG's scale puts the grass line on the ground there;
-    // the tile is taller than the canvas, so only soil runs off the bottom.
+    // Drawn from BACKGROUND_CONFIG.top, which puts the grass line on the ground.
     const offset = this.bgOffset % (tileW * 2);
     for (let i = 0; i < 3; i++) {
       const x = Math.round(i * tileW - offset);
       if (x >= this.canvasW || x + tileW <= 0) continue;
-      this.renderer.draw(ctx, bgSrc, x, 0, tileW, tileH, i % 2 === 1);
+      this.renderer.draw(ctx, bgSrc, x, top, tileW, tileH, i % 2 === 1);
     }
   }
 
