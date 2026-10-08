@@ -41,7 +41,8 @@ sprite 1:1, so its frame sizes come from there.
 3. **Native.** Flow's pixel art is not on one exact grid, and its pixel size changes from
    sheet to sheet. Roy is area-averaged so a standing Roy is 92 px tall on every sheet (one
    reference pose per sheet sets the scale; the slide and its drop-in/get-up frames, which have
-   no standing height, are sized so the area of Roy's face matches his upright face). An area
+   no standing height, are sized so the area of Roy's head (face and hair) matches his upright
+   head). An area
    average cannot drop a 2 px feature, while sampling one median per cell at an off-grid scale
    made one eye vanish (a "wink").
 4. **Real sizes.** Every obstacle is area-averaged straight to its drawn height: its real

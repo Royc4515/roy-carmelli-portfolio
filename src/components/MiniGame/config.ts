@@ -11,8 +11,12 @@ const HITBOX_W = 36;
 // Every sprite is drawn 1:1. scripts/pixelate/import_flow.py already sizes them to real-world
 // proportions against the forest (Roy 1.75 m = 92 px, a stump 0.7 m, ...).
 const PLAYER_W = SPRITE_SIZES.player.w;
-/** Clear air (px) between the top of the slide pose and the bottom of an air obstacle. */
-const SLIDE_AIR_GAP = 12;
+/**
+ * Clear air (px) between the top of the slide pose and the bottom of an air obstacle. Roy's big
+ * head keeps even a low baseball slide at ~80% of his height, so the bird flies at the top of
+ * a standing Roy's head and the margin on each side is small (geometry.test.ts checks both).
+ */
+const SLIDE_AIR_GAP = 4;
 
 // ─── Canvas ───────────────────────────────────────────────────────────────────
 export const CANVAS_CONFIG = {
@@ -73,7 +77,8 @@ export const PLAYER_CONFIG = {
    */
   hitboxInset: {
     left: Math.floor((PLAYER_W - HITBOX_W) / 2),
-    top: 8,
+    // His whole head counts: a bird at head height has to hit it (see SLIDE_AIR_GAP).
+    top: 0,
     right: Math.ceil((PLAYER_W - HITBOX_W) / 2),
     bottom: 4,
   },

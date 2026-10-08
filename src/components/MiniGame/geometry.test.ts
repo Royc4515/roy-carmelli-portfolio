@@ -79,9 +79,10 @@ describe('Roy Runner geometry', () => {
   it('makes every air obstacle hit a standing Roy and pass over a sliding one', () => {
     for (const def of air) {
       const box = new Obstacle('air', def).getHitbox();
-      expect(overlapsY(box, standing().getHitbox())).toBe(true);
+      // A clear hit on a standing Roy's head, not a one-pixel graze...
+      expect(bottom(box) - standing().getHitbox().y).toBeGreaterThanOrEqual(6);
+      // ...and well clear of a sliding Roy's hitbox.
       expect(overlapsY(box, sliding().getHitbox())).toBe(false);
-      // With room to spare under it, so a slide is not a pixel-perfect squeeze.
       expect(sliding().getHitbox().y - bottom(box)).toBeGreaterThanOrEqual(8);
     }
   });
@@ -90,7 +91,7 @@ describe('Roy Runner geometry', () => {
     const slideTop = FEET_Y - SPRITE_SIZES.slide.h + SPRITE_SIZES.slide.top;
     for (const def of air) {
       const o = new Obstacle('air', def);
-      expect(slideTop - (o.y + def.h)).toBeGreaterThanOrEqual(8);
+      expect(slideTop - (o.y + def.h)).toBeGreaterThanOrEqual(4);
     }
   });
 

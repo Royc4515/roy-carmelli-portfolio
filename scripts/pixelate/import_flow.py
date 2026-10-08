@@ -291,18 +291,23 @@ def save_native(img: np.ndarray, path: Path) -> tuple[int, int]:
 
 
 def head_size(sprite: np.ndarray) -> float:
-    """Square root of the area of Roy's face (the largest skin-coloured blob; his hands are
-    smaller): a size reference that, unlike his height or his hair's extent, holds in every
-    pose, upright or lying with his head tilted back."""
+    """Square root of the area of Roy's head (face and hair together, the largest such
+    blob; his hands are smaller): a size reference that, unlike his height, holds in every
+    pose. The face alone shrinks in a three-quarter view and the hair alone hides when he
+    lies back; together they stay within a few percent."""
     r, g, b, a = (sprite[..., i].astype(int) for i in range(4))
+    luma = (r + g + b) / 3
     skin = ((a > 0) & (r >= 150) & (r - g >= 25) & (r - g <= 90) & (g - b >= 15)
             & (b >= 60) & (b <= 170))
+    hair = ((a > 0) & (r >= 55) & (r <= 140) & (g >= 30) & (g <= 100) & (b <= 80)
+            & (r - b >= 30) & (r - g >= 12) & (luma < 105))
+    head = skin | hair
     f = CUT_COARSE
-    h, w = skin.shape[0] // f * f, skin.shape[1] // f * f
-    cells = skin[:h, :w].reshape(h // f, f, w // f, f).mean(axis=(1, 3)) > 0.5
+    h, w = head.shape[0] // f * f, head.shape[1] // f * f
+    cells = head[:h, :w].reshape(h // f, f, w // f, f).mean(axis=(1, 3)) > 0.5
     labels, n = _label(cells)
     if n == 0:
-        raise SystemExit('head_size: no face found')
+        raise SystemExit('head_size: no head found')
     return float(np.sqrt(max((labels == k).sum() for k in range(1, n + 1)))) * f
 
 
@@ -321,7 +326,7 @@ def import_player() -> dict:
         crops[name], scale[name] = cell, k
 
     # A lying pose has no standing height to measure, and Flow draws the slide sheet's
-    # standing figure at its own scale: size the slide so Roy's face matches his upright one.
+    # standing figure at its own scale: size the slide so Roy's head matches his upright one.
     upright = np.median([head_size(crops[n]) * scale[n] for n in HEAD_REFERENCE])
     for group in (SLIDE, SLIDE_MOVES):
         k = float(upright) / float(np.median([head_size(crops[n]) for n in group]))
