@@ -111,7 +111,7 @@
   grid-template-rows: auto 1fr auto;
   grid-template-areas:
     "quit   screen fs"
-    "scores screen ."
+    "scores screen sound"
     "slide  screen jump";
   width: 100cqw;
   height: calc(var(--mg-canvas-h) + 8px);
@@ -154,11 +154,13 @@
 }
 
 .minigame__quit { grid-area: quit; }
-.minigame__scores {
-  grid-area: scores;
+.minigame__scores,
+.minigame__sound {
   align-self: center;
   justify-self: center;
 }
+.minigame__scores { grid-area: scores; }
+.minigame__sound { grid-area: sound; }
 .minigame__fs { grid-area: fs; }
 
 .minigame__key {
@@ -188,12 +190,12 @@
       (100cqh - 8px - 56px - 24px - var(--mg-key-h) - 8px - 24px) * 800 / 446
     );
 
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr auto auto 1fr;
     grid-template-rows: auto auto auto;
     grid-template-areas:
-      "quit   scores fs"
-      "screen screen screen"
-      "slide  .      jump";
+      "quit   scores sound  fs"
+      "screen screen screen screen"
+      "slide  .      .      jump";
     row-gap: 24px;
     align-self: center;
     width: calc(var(--mg-canvas-w) + 8px);
@@ -201,8 +203,14 @@
     margin-top: 0;
   }
 
+  /* Spaced from the trophy only when there is one, so a lone speaker stays centred. */
+  .minigame__scores + .minigame__sound {
+    margin-left: 16px;
+  }
+
   /* In the top bar, level with Quit and fullscreen. */
-  .minigame__scores {
+  .minigame__scores,
+  .minigame__sound {
     align-self: start;
     margin-top: 4px;
   }

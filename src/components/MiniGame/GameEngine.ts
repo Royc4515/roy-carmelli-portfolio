@@ -8,7 +8,7 @@ import {
 import { SpriteRenderer } from './SpriteRenderer';
 import { Player } from './Player';
 import { ObstacleManager } from './Obstacle';
-import type { GameState, AABB } from './types';
+import type { GameCue, GameState, AABB } from './types';
 
 // ─── AABB overlap test ────────────────────────────────────────────────────────
 function overlaps(a: AABB, b: AABB): boolean {
@@ -26,6 +26,8 @@ export interface GameEngineHooks {
   onRunStart?: () => void;
   /** The run ended; `score` is the whole score shown on the game-over screen. */
   onGameOver?: (score: number) => void;
+  /** A moment worth a sound (see GameCue); fired synchronously, inside the input handler for moves. */
+  onCue?: (cue: GameCue) => void;
 }
 
 export class GameEngine {
@@ -104,14 +106,14 @@ export class GameEngine {
   handleInput(): void {
     switch (this.state) {
       case 'IDLE':       this.beginTransition(); break;
-      case 'PLAYING':    this.player.jump();      break;
+      case 'PLAYING':    if (this.player.jump()) this.cue('jump'); break;
       case 'GAMEOVER':   this.resetGame();        break;
     }
   }
 
   /** S / ArrowDown — slide under air obstacles */
   handleSlide(): void {
-    if (this.state === 'PLAYING') this.player.slide();
+    if (this.state === 'PLAYING' && this.player.slide()) this.cue('slide');
   }
 
   /** Personal best to display. Ignores anything that is not a finite, non-negative number. */
@@ -170,7 +172,11 @@ export class GameEngine {
 
   private updatePlaying(dt: number): void {
     this.playTime += dt;
+    const before   = this.score;
     this.score    += SCORE_CONFIG.pointsPerSecond * dt;
+    if (Math.floor(this.score / SCORE_CONFIG.milestone) > Math.floor(before / SCORE_CONFIG.milestone)) {
+      this.cue('milestone');
+    }
 
     // Gradually increase scroll speed
     this.scrollSpeed = Math.min(
@@ -201,6 +207,7 @@ export class GameEngine {
     this.transitionTargetX = this.canvasW * PLAYER_CONFIG.runFraction;
     this.player.animState = 'run';
     this.hooks.onRunStart?.();
+    this.cue('start');
   }
 
   private triggerGameOver(): void {
@@ -210,6 +217,16 @@ export class GameEngine {
     this.newBest = final > this.best;
     if (this.newBest) this.best = final;
     this.hooks.onGameOver?.(final);
+    this.cue('crash');
+    if (this.newBest) this.cue('newBest');
+  }
+
+  private cue(cue: GameCue): void {
+    try {
+      this.hooks.onCue?.(cue);
+    } catch {
+      // Sound is optional: a Web Audio error must not kill the rAF loop and freeze the game.
+    }
   }
 
   private resetGame(): void {

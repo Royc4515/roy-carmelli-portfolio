@@ -267,6 +267,18 @@ describe('Hero — desktop', () => {
     expect(game.textContent).not.toMatch(/[\u2190-\u21ff]/u);
   });
 
+  it('offers a mute button with its M shortcut while playing on desktop', async () => {
+    render(<Hero />);
+    await userEvent.click(screen.getByRole('button', { name: /press start/i }));
+    await findCanvas();
+    const game = screen.getByRole('region', { name: 'Roy Runner' });
+    await userEvent.click(within(game).getByRole('button', { name: 'Mute' }));
+    expect(within(game).getByRole('button', { name: 'Unmute' })).toBeInTheDocument();
+    expect(game).toHaveTextContent(/Unmute\s*M/);
+    // Back on, so the stored choice does not leak into other tests.
+    await userEvent.click(within(game).getByRole('button', { name: 'Unmute' }));
+  });
+
   it('keeps desktop play inside the first screen under the nav, the controls row never shrinking', async () => {
     render(<Hero />);
     await userEvent.click(screen.getByRole('button', { name: /press start/i }));

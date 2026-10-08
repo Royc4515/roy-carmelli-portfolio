@@ -18,6 +18,7 @@ import ArcadeFallback from '../components/ArcadeFallback';
 import GameLoadFailed from '../components/GameLoadFailed';
 import PixelPanel from '../components/PixelPanel';
 import PixelIcon from '../components/PixelIcon';
+import SoundToggle from '../components/SoundToggle';
 import { Button } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
 import { useToast } from '../components/ui/Toast';
@@ -1207,6 +1208,14 @@ export default function Hero() {
                   >
                     Leaderboard
                   </Button>
+                )}
+                {mode === 'desktop' && (
+                  <div className="flex items-center gap-4">
+                    <SoundToggle />
+                    <Chip>
+                      <kbd className="font-[inherit]">M</kbd>
+                    </Chip>
+                  </div>
                 )}
                 {mode === 'desktop' && <ControlsHint />}
               </div>

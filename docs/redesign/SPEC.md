@@ -285,7 +285,8 @@ Reference CSS (from the approved prototype):
 - `name`, `size` (12 | 24 | 36 | 48), `title?` (when meaningful; otherwise `aria-hidden`).
 - Set: `play`, `book`, `scroll`, `person`, `star`, `sword`, `potion`, `gear`, `mail`, `github`,
   `linkedin`, `phone`, `joystick`, `sun`, `moon`, `download`, `external`, `code`, `copy`, `menu`,
-  `close`, `arrow-up`, `arrow-down`, `chevron`, `check`, `campfire`, `rotate-phone`, `trophy`.
+  `close`, `arrow-up`, `arrow-down`, `chevron`, `check`, `campfire`, `rotate-phone`, `trophy`,
+  `home`, `fullscreen`, `fullscreen-exit`, `sound`, `sound-off`.
 
 ### Character
 - Props: `pose` (`wave` | `sit` | `idle`), `scale` (1-4, integer), `decorative?`, `label?`, `flip?`.
