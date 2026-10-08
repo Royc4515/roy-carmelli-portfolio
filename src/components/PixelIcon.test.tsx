@@ -11,7 +11,7 @@ const SPEC_SET = [
   'play', 'book', 'scroll', 'person', 'star', 'sword', 'potion', 'gear', 'mail', 'github',
   'linkedin', 'phone', 'joystick', 'sun', 'moon', 'download', 'external', 'code', 'copy', 'menu',
   'close', 'arrow-up', 'arrow-down', 'chevron', 'check', 'campfire', 'rotate-phone', 'trophy',
-  'home', 'fullscreen', 'fullscreen-exit',
+  'home', 'fullscreen', 'fullscreen-exit', 'sound', 'sound-off',
 ];
 
 /** Paint a path made of `M x y h w v h h -w z` subpaths onto a 12x12 grid (count per pixel). */

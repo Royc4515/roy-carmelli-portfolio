@@ -69,17 +69,21 @@ export class Player {
     void canvasH;
   }
 
-  jump(): void {
-    if (!this.isOnGround) return;
+  /** Jumps if Roy is on the ground; returns whether he did. */
+  jump(): boolean {
+    if (!this.isOnGround) return false;
     if (this.animState === 'slide') this.slideTimer = 0; // cancel slide on jump
     this.velocityY = PHYSICS_CONFIG.jumpForce;
     this.isOnGround = false;
+    return true;
   }
 
-  slide(): void {
-    if (!this.isOnGround || this.animState === 'slide') return;
+  /** Starts a slide if Roy is running on the ground; returns whether he did. */
+  slide(): boolean {
+    if (!this.isOnGround || this.animState === 'slide') return false;
     this.animState = 'slide';
     this.slideTimer = PLAYER_CONFIG.slideDuration;
+    return true;
   }
 
   reset(canvasW: number): void {

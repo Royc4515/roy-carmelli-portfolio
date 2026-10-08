@@ -103,6 +103,8 @@ export const OBSTACLE_CONFIG = {
 // ─── Score ────────────────────────────────────────────────────────────────────
 export const SCORE_CONFIG = {
   pointsPerSecond: 8,
+  /** A chime every this many points (about every 12 s). */
+  milestone: 100,
 } as const;
 
 // ─── Sprite paths ─────────────────────────────────────────────────────────────
