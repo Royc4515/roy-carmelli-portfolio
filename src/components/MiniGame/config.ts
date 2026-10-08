@@ -9,11 +9,13 @@ const AIR_OBSTACLES = ['bird-blue', 'bird-brown', 'bat'] as const;
 /** Player hitbox width: the old 56 px sprite minus its 10 px insets, as the game was tuned. */
 const HITBOX_W = 36;
 /**
- * Roy is drawn at this multiple of his native sprite. The forest is drawn about 2.5x its
- * native pixels, so a 1:1 Roy looked small next to the trees and fences; 1.5x keeps him the
- * clear lead (about a third of the canvas height) while the obstacles keep their tuned size.
+ * Roy and the obstacles are drawn at this multiple of their native sprites. The forest is
+ * drawn about 2.5x its native pixels, so 1:1 sprites looked small in it; at 1.25x Roy (about a
+ * quarter of the canvas height) and the obstacles keep the proportions they have to each other
+ * and sit in the forest's scale. Hitboxes do not grow with it.
  */
-const PLAYER_SCALE = 1.5;
+const SPRITE_SCALE = 1.25;
+const PLAYER_SCALE = SPRITE_SCALE;
 const PLAYER_W = Math.round(SPRITE_SIZES.player.w * PLAYER_SCALE);
 
 // ─── Canvas ───────────────────────────────────────────────────────────────────
@@ -78,6 +80,8 @@ export const OBSTACLE_CONFIG = {
   airYFraction: 0.7,
   /** Uniform inner hitbox inset for all obstacles */
   hitboxInset: 10,
+  /** Drawn size over the def (hitbox) size; see Obstacle.draw. */
+  drawScale: SPRITE_SCALE,
 } as const;
 
 // ─── Score ────────────────────────────────────────────────────────────────────

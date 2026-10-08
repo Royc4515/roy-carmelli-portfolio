@@ -43,8 +43,18 @@ export class Obstacle {
     };
   }
 
+  /**
+   * The sprite is drawn OBSTACLE_CONFIG.drawScale larger than its def box, which stays the
+   * hitbox: the art matches the forest's scale while the obstacles stay as easy to clear as
+   * they were tuned. Ground obstacles grow up from the ground, air ones around their centre.
+   */
   draw(ctx: CanvasRenderingContext2D, renderer: SpriteRenderer): void {
-    renderer.draw(ctx, this.def.src, this.x, this.y, this.def.w, this.def.h);
+    const { w, h } = this.def;
+    const drawW = Math.round(w * OBSTACLE_CONFIG.drawScale);
+    const drawH = Math.round(h * OBSTACLE_CONFIG.drawScale);
+    const x = this.x - (drawW - w) / 2;
+    const y = this.kind === 'ground' ? this.y + h - drawH : this.y - (drawH - h) / 2;
+    renderer.draw(ctx, this.def.src, x, y, drawW, drawH);
   }
 }
 

@@ -29,7 +29,7 @@ unchanged sources gives byte-identical files.
 | `portrait.jpg` | one bust | game `portrait.png` (player card); site `design-src/sprites/face-large.png` |
 
 It also writes `src/components/MiniGame/spriteSizes.generated.ts`: the game draws the sprites
-at their native size (Roy at 1.5x), so its frame sizes come from there.
+at 1.25x their native size, so its frame sizes come from there.
 
 1. **Key.** Pixels where `min(R, B) - G` is large are the matte; the purple fringe the matte
    leaves on the outline is capped back to neutral.
