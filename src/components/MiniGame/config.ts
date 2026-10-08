@@ -1,4 +1,11 @@
+import { SPRITE_SIZES } from './spriteSizes.generated';
+
 const BASE = '/assets/sprites';
+
+const GROUND_OBSTACLES = [
+  'racoon', 'stump', 'stump-moss', 'rock', 'mushrooms', 'toadstools', 'agave', 'beetle', 'hedgehog',
+] as const;
+const AIR_OBSTACLES = ['bird-blue', 'bird-brown', 'bat'] as const;
 
 // ─── Canvas ───────────────────────────────────────────────────────────────────
 export const CANVAS_CONFIG = {
@@ -24,11 +31,12 @@ export const SCROLL_CONFIG = {
 
 // ─── Player ───────────────────────────────────────────────────────────────────
 export const PLAYER_CONFIG = {
-  displayW: 56,
-  displayH: 72,
+  // Native sprite sizes: the art is drawn 1:1 so its pixel grid stays crisp.
+  displayW: SPRITE_SIZES.player.w,
+  displayH: SPRITE_SIZES.player.h,
   /** Visual render size for the slide sprite */
-  slideW: 56,
-  slideH: 72,
+  slideW: SPRITE_SIZES.slide.w,
+  slideH: SPRITE_SIZES.slide.h,
   /** Collision hitbox height while sliding (much shorter than standing) */
   slideHitboxH: 32,
   /** How long a slide lasts (seconds) */
@@ -75,23 +83,34 @@ export const SPRITE_PATHS = {
   } satisfies Record<string, string[]>,
 
   obstacles: {
-    ground: [
-      { src: `${BASE}/racoon.png`,                                    w: 48, h: 52 },
-      { src: `${BASE}/sprites_for_the_202604192014(1).png`,           w: 44, h: 54 },
-      { src: `${BASE}/sprites_for_the_202604192014(2).png`,           w: 44, h: 54 },
-      { src: `${BASE}/sprites_for_the_202604192014(3).png`,           w: 44, h: 54 },
-      { src: `${BASE}/sprites_for_the_202604192014(4).png`,           w: 44, h: 54 },
-      { src: `${BASE}/sprites_for_the_202604192014(5).png`,           w: 44, h: 54 },
-      { src: `${BASE}/sprites_for_the_202604192014(6).png`,           w: 44, h: 54 },
-    ],
-    air: [
-      { src: `${BASE}/bird-blue.png`,  w: 50, h: 60 },
-      { src: `${BASE}/bird-brown.png`, w: 50, h: 60 },
-    ],
+    ground: GROUND_OBSTACLES.map(name => ({ src: `${BASE}/${name}.png`, ...SPRITE_SIZES.obstacles[name] })),
+    air: AIR_OBSTACLES.map(name => ({ src: `${BASE}/${name}.png`, ...SPRITE_SIZES.obstacles[name] })),
   },
 
   background: `${BASE}/background.png`,
-  playerScoreHUD: `${BASE}/player-score.png`,
+  portrait: `${BASE}/portrait.png`,
+} as const;
+
+// ─── Background ───────────────────────────────────────────────────────────────
+/**
+ * The background is scaled so its grass line lands where the old art's did, which keeps
+ * the ground, the obstacles and the jump arc exactly as they were tuned.
+ */
+const GRASS_ABOVE_GROUND = 24; // px from the top of the grass to CANVAS_CONFIG.groundY
+const BG_SCALE = (CANVAS_CONFIG.groundY - GRASS_ABOVE_GROUND) / SPRITE_SIZES.background.groundRow;
+
+export const BACKGROUND_CONFIG = {
+  tileW: Math.round(SPRITE_SIZES.background.w * BG_SCALE),
+  tileH: Math.round(SPRITE_SIZES.background.h * BG_SCALE),
+} as const;
+
+// ─── Player card (top-left HUD) ───────────────────────────────────────────────
+export const HUD_CONFIG = {
+  x: 8,
+  y: 8,
+  w: 208,
+  h: 76,
+  portrait: SPRITE_SIZES.portrait,
 } as const;
 
 // ─── Frame intervals (ms per frame) ───────────────────────────────────────────

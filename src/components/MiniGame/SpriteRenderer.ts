@@ -20,9 +20,18 @@ export class SpriteRenderer {
     src: string,
     x: number, y: number,
     w: number, h: number,
+    flipX = false,
   ): void {
     const img = this.cache.get(src);
-    if (img) ctx.drawImage(img, Math.round(x), Math.round(y), w, h);
+    if (!img) return;
+    if (!flipX) {
+      ctx.drawImage(img, Math.round(x), Math.round(y), w, h);
+      return;
+    }
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(img, -Math.round(x) - w, Math.round(y), w, h);
+    ctx.restore();
   }
 
   /** Natural pixel width of a loaded image, or fallback if not yet loaded */

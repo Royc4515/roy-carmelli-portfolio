@@ -38,9 +38,9 @@ export const pixelSprites: {
   face: PixelImageMeta;
   forest: ForestMeta;
 } = {
-  wave: { src: '/assets/pixel/roy-wave.png', frameW: 41, frameH: 67, frames: 3, frameMs: 400, anchorX: 15 },
-  sit: { src: '/assets/pixel/roy-sit.png', frameW: 36, frameH: 59, frames: 3, frameMs: 500, anchorX: 19 },
-  idle: { src: '/assets/pixel/roy-idle.png', frameW: 28, frameH: 67, frames: 1, frameMs: 0, anchorX: 14 },
-  face: { src: '/assets/pixel/roy-face.png', w: 38, h: 49 },
+  wave: { src: '/assets/pixel/roy-wave.png', frameW: 41, frameH: 67, frames: 3, frameMs: 400, anchorX: 16 },
+  sit: { src: '/assets/pixel/roy-sit.png', frameW: 39, frameH: 66, frames: 3, frameMs: 500, anchorX: 21 },
+  idle: { src: '/assets/pixel/roy-idle.png', frameW: 29, frameH: 67, frames: 1, frameMs: 0, anchorX: 15 },
+  face: { src: '/assets/pixel/roy-face.png', w: 46, h: 49 },
   forest: { src: '/assets/pixel/forest.png', w: 240, h: 112, groundRow: 101 },
 };
