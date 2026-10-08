@@ -101,7 +101,8 @@ export function ZoneHeader({ zone, name, title, subtitle, icon, id, className }:
         {subtitle != null && (
           <p
             className={cx(
-              'mt-2 max-w-[68ch] text-balance text-body text-fg-muted',
+              // text-pretty, not balance: balance halved the measure of a two-line subline.
+              'mt-2 max-w-[68ch] text-pretty text-body text-fg-muted',
               hasIcon && 'col-span-2 sm:col-span-1 sm:col-start-2',
             )}
           >

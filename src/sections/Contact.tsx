@@ -180,7 +180,8 @@ export default function Contact() {
                   size="lg"
                   aria-label={`Email me at ${EMAIL_SHOWN}`}
                   leadingIcon={<PixelIcon name="mail" size={24} />}
-                  className="flex-1 sm:flex-none"
+                  // Fills the row so it ends flush with the channel grid below.
+                  className="flex-1"
                 >
                   Email me
                 </Button>
@@ -200,7 +201,7 @@ export default function Contact() {
                 {EMAIL_SHOWN}
               </p>
 
-              <ul className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3 lg:flex lg:flex-wrap short:mt-4">
+              <ul className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3 short:mt-4">
                 {channels.map(channel => (
                   <li key={channel.label} className="flex flex-col items-center">
                     <Button

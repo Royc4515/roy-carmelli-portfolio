@@ -384,7 +384,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   Phones and portrait tablets (< 1024 portrait): a scene band (×3 phones, ×4 tablets, ×2 below
   700px tall) at most 38% of the viewport height, canopy cropped and anchored at the bottom so
   the character and grass stay, then the title card as a full-bleed wood slab. Phone card order:
-  eyebrow, H1, role, availability chip, CTAs, tagline, Press start. Tablets use two columns (text
+  eyebrow, H1, role, tagline, availability chip, CTAs, Press start. Tablets use two columns (text
   left; CTAs and Press start right, CTA top level with the H1). HUD and scroll cue hidden.
   Short or narrow landscape viewports (e.g. 844×390, 800×600, 640×400) get a compact title
   screen: the same overlay composition with k chosen so the forest fills the first screen and
@@ -399,9 +399,11 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   cards) two per row from 640px, the third spanning the row, and three per row from 1024px, their
   parts lined up through subgrid from 768px (24px between rows); research logs as a compact list. QuestCard anatomy: visual (16:10,
   pixel bezel) · tier tag (`star` icon + `MAIN QUEST` / `SIDE QUEST` / `RESEARCH LOG`) · kind ·
-  year · title · `tagline` · `highlights` (main only) · ≤ 4 chips + `+N` · actions: `Live` (primary,
-  external icon), `Code` (secondary, code icon), `Quest log` (ghost, `<details>` holding the full
-  `description`). Links ≥ 44px. Mobile: one column, visual on top.
+  year · title · `tagline` · `highlights` (main only) · ≤ 4 chips + `+N` (all one neutral tone) ·
+  actions: `Live` (primary, external icon), `Code` (secondary, code icon; a project with no public
+  repo shows the muted line "Private repo · code on request" instead), `Details` (ghost, the quest
+  log disclosure holding the full `description` and the whole `tech` list). Links ≥ 44px. Research
+  logs show `Live` before `Code` when a project has a demo. Mobile: one column, visual on top.
   Headings: one H3 per tier (the Research logs tab plate is the visible H3; main/side are
   screen-reader only because every card shows its tier tag), card titles H4. Every card caps chips
   at 4 + `+N`, and the `+N` never takes a row alone: the chip before it reserves its room, so the
@@ -467,7 +469,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   LinkedIn, Phone (number shown under it from 640px).
   Short laptops (`short:`): panel padding 16 and a 12/16/16/16 rhythm (text → buttons → address →
   socials → phone number); the save-point caption sits above the scene instead of below the ground.
-- **Footer.** `surface-sunken`. `Continue?` back-to-top button with `arrow-up`, name ©, and
+- **Footer.** `surface-sunken`. `Back to top` button with `arrow-up`, name ©, and
   "Built from scratch: React · TypeScript · Canvas" in readable size and contrast.
 - **ArcadeFallback.** `rotate-phone` icon (stepped rotation, static under reduced motion), text at
   ≥ 12px pixel / 16px body. Keep `data-testid="arcade-fallback-message"` and "ARCADE ZONE" text.
