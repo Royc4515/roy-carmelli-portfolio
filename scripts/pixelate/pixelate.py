@@ -67,6 +67,9 @@ SOLID_ALPHA = 128
 OPAQUE_ALPHA = 250
 INNER = 0.5            # fraction of the cell (per axis) used for the color median
 FEET_FRACTION = 0.4    # bottom share of the frame used for the horizontal anchor
+GROUND_OUTLINE_LUMA = 80  # the dark row drawn along the top of the grass is below this
+# PNG text chunk that import_flow.py writes on sources that are already one pixel per cell.
+NATIVE_KEY = 'pixel-grid'
 
 # Colors per palette group. Chosen by eye on the review sheets: enough ramps for skin and
 # denim to stay smooth, few enough that flat areas stop shimmering.
@@ -226,6 +229,13 @@ def crop(img: np.ndarray) -> np.ndarray:
 
 def pixelate(path: Path, verbose: bool = False, keep_bounds: bool = False) -> np.ndarray:
     a = load_rgba(path)
+    if Image.open(path).info.get(NATIVE_KEY) == '1':
+        # Already native (import_flow.py): there is no grid to find, only binarise alpha.
+        a[..., 3] = np.where(a[..., 3] > SOLID_ALPHA, 255, 0)
+        out = a if keep_bounds else crop(a)
+        if verbose:
+            print(f'  {path.name:18s} native -> {out.shape[1]}x{out.shape[0]}')
+        return out
     gx, gy = detect_grid(a)
     out = cleanup(sample(a, gx, gy))
     if not keep_bounds:
@@ -373,13 +383,17 @@ def measure_ground_row(forest: np.ndarray) -> int:
     """
     rgb = forest[..., :3]
     r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
-    grass = (g > r) & (g > b + 15)
+    luma = (r + g + b) / 3
+    grass = (g > r) & (g > b + 15) & (luma >= GROUND_OUTLINE_LUMA)
     frac = grass.mean(1)
+    # The outline row is what separates the grass from bushes and foliage behind it, which
+    # are green too: without this stop the climb runs on into them.
+    outline = (luma < GROUND_OUTLINE_LUMA).mean(1) >= 0.5
     h = forest.shape[0]
     y = h - 1
     while y > 0 and frac[y] < 0.6:      # dirt
         y -= 1
-    while y > 0 and frac[y - 1] >= 0.6:  # grass band
+    while y > 0 and frac[y - 1] >= 0.6 and not outline[y - 1]:  # grass band
         y -= 1
     return int(y)
 
@@ -448,11 +462,11 @@ def main() -> None:
 
     if v:
         print('grid detection:')
-    wave = [pixelate(GAME_SPRITES / f'wave-{i}.png', v) for i in (1, 2, 3)]
+    wave = [pixelate(DESIGN_SRC / f'wave-{i}.png', v) for i in (1, 2, 3)]
     sit = [pixelate(DESIGN_SRC / f'sit-{i}.png', v) for i in (1, 2, 3)]
     sit[2] = sit[2][:, ::-1].copy()  # sit-3 faces the other way in the source: mirror it
     face = pixelate(DESIGN_SRC / 'face-large.png', v)
-    forest = pixelate(GAME_SPRITES / 'background.png', v, keep_bounds=True)
+    forest = pixelate(DESIGN_SRC / 'forest.png', v, keep_bounds=True)
 
     wave = reduce_palette(wave, PALETTE['wave'])
     sit = reduce_palette(sit, PALETTE['sit'])

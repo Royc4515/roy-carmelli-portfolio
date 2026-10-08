@@ -431,21 +431,21 @@ const DESKTOP_SCENES: Array<[number, number]> = [
 ];
 
 describe('hero scene geometry', () => {
-  it('picks max(ceil(W/240), floor(H/112)) unless that makes Roy more than 60% of the scene', () => {
-    expect(sceneScale(1280, 736)).toBe(6);
-    expect(sceneScale(1440, 836)).toBe(7);
-    expect(sceneScale(1024, 704)).toBe(6);
-    expect(sceneScale(900, 636)).toBe(5);
-    // Covering 1920 / 2560 px would take x8 / x11 (Roy 66% / 90%): stay height-driven.
-    expect(sceneScale(1920, 816)).toBe(7);
-    expect(sceneScale(2560, 816)).toBe(7);
+  it('picks max(ceil(W/forest.w), floor(H/forest.h)) unless that makes Roy more than 60% of the scene', () => {
+    expect(sceneScale(1280, 736)).toBe(4);
+    expect(sceneScale(1440, 836)).toBe(5);
+    expect(sceneScale(1024, 704)).toBe(4);
+    expect(sceneScale(900, 636)).toBe(4);
+    // Covering 1920 / 2560 px would take x6 / x8 (Roy 68% / 90%): stay height-driven.
+    expect(sceneScale(1920, 816)).toBe(5);
+    expect(sceneScale(2560, 816)).toBe(5);
   });
 
   it.each(DESKTOP_SCENES)('places forest and Roy on one integer grid at %ix%i', (w, h) => {
     const s = computeHeroScene('overlay', w, h);
     const { k } = s;
     expect(Number.isInteger(s.forestX) && Number.isInteger(s.spriteX)).toBe(true);
-    // Feet on forest column 182, bottom edge on the grass line.
+    // Feet on HERO_FEET_COLUMN, bottom edge on the grass line.
     expect(s.spriteX - s.forestX).toBe((HERO_FEET_COLUMN - wave.anchorX) * k);
     expect(h - s.groundH).toBe(s.forestY + forest.groundRow * k);
     // The forest (plus mirrored copies) covers the scene; the dirt fills any height below it.
@@ -455,9 +455,10 @@ describe('hero scene geometry', () => {
     expect(right).toBeGreaterThanOrEqual(w);
     expect(s.forestY).toBeLessThanOrEqual(0);
     expect(s.forestY + forest.h * k + s.groundExtraH).toBe(h);
-    // Roy is about half the scene, fully inside it and clear of the title card.
+    // Roy is about half the scene, fully inside it and clear of the title card. One scale step
+    // is a whole Roy height (92px), so at some heights the nearest share is just under half.
     const share = (wave.frameH * k) / h;
-    expect(share).toBeGreaterThanOrEqual(0.5);
+    expect(share).toBeGreaterThanOrEqual(0.45);
     expect(share).toBeLessThanOrEqual(0.6);
     const cardEdge = containerContentLeft(w) + HERO_CARD_W + 12;
     expect(s.spriteX).toBeGreaterThanOrEqual(cardEdge + 16);
@@ -488,17 +489,17 @@ describe('hero scene geometry', () => {
   it('deepens the ground when the forest is shorter than the scene', () => {
     const s = computeHeroScene('overlay', 1280, 736);
     expect(s.forestY).toBe(0);
-    expect(s.groundExtraH).toBe(736 - forest.h * 6);
+    expect(s.groundExtraH).toBe(736 - forest.h * 4);
   });
 
-  it('puts phones in a x3 band with Roy at about 60% of the width', () => {
+  it('puts phones in a x2 band with Roy at about 60% of the width', () => {
     const s = computeHeroScene('stack', 390, 0);
-    expect(s.k).toBe(3);
-    expect(s.sceneH).toBe(forest.h * 3);
+    expect(s.k).toBe(2);
+    expect(s.sceneH).toBe(forest.h * 2);
     expect(s.groundExtraH).toBe(0);
     expect(s.forestX).toBeLessThanOrEqual(0);
-    expect(s.forestX + forest.w * 3).toBeGreaterThanOrEqual(390);
-    const centre = s.spriteX + (wave.frameW * 3) / 2;
+    expect(s.forestX + forest.w * 2).toBeGreaterThanOrEqual(390);
+    const centre = s.spriteX + (wave.frameW * 2) / 2;
     expect(Math.abs(centre / 390 - 0.6)).toBeLessThan(0.02);
   });
 
@@ -548,15 +549,15 @@ describe('hero height', () => {
     const h = heroHeight(vh) - HERO_NAV_H;
     const s = computeHeroScene('overlay', w, h, { viewportH: vh });
     const share = (wave.frameH * s.k) / h;
-    expect(share).toBeGreaterThanOrEqual(0.5);
+    expect(share).toBeGreaterThanOrEqual(0.45);
     expect(share).toBeLessThanOrEqual(0.6);
     expect(s.forestY + forest.h * s.k + s.groundExtraH).toBe(h);
     expect(s.hudClear).toBe(true);
   });
 
-  it('keeps the desktop scale when a 900px-tall viewport is filled (1440x900 stays x7)', () => {
+  it('keeps the desktop scale when a 900px-tall viewport is filled (1440x900 stays x5)', () => {
     const s = computeHeroScene('overlay', 1440, heroHeight(900) - HERO_NAV_H);
-    expect(s.k).toBe(7);
+    expect(s.k).toBe(5);
     expect(s.forestY).toBe(0);
     expect(s.hudClear).toBe(true);
   });
@@ -699,17 +700,17 @@ describe('band (stacked) geometry', () => {
   const band = (w: number, vh: number) => computeHeroScene('stack', w, 0, { viewportH: vh });
 
   it.each([
-    [360, 740, 3],
-    [390, 844, 3],
+    [360, 740, 2],
+    [390, 844, 2],
     [375, 600, 2],
-    [768, 1024, 4],
-    [820, 1180, 4],
+    [768, 1024, 3],
+    [820, 1180, 3],
   ])('%ix%i: x%i, at most 38%% of the viewport, Roy and the grass whole', (w, vh, k) => {
     const s = band(w, vh);
     expect(s.k).toBe(k);
     expect(s.sceneH).toBeLessThanOrEqual(Math.round(HERO_BAND_SHARE * vh));
     expect(s.sceneH % k).toBe(0);
-    // Anchored to the bottom: the canopy crops, the ground (11 native rows) stays.
+    // Anchored to the bottom: the canopy crops, the ground under the grass line stays.
     expect(s.forestY + forest.h * k).toBe(s.sceneH);
     expect(s.groundH).toBe((forest.h - forest.groundRow) * k);
     // Roy's head is inside the band with air above it.
@@ -719,8 +720,8 @@ describe('band (stacked) geometry', () => {
     expect(s.forestX + forest.w * k).toBeGreaterThanOrEqual(w);
   });
 
-  it('crops the canopy on phones (360x740 keeps 93 of 112 rows)', () => {
-    expect(band(360, 740).sceneH).toBe(93 * 3);
+  it('crops the canopy on phones (360x740 keeps 140 of 154 rows)', () => {
+    expect(band(360, 740).sceneH).toBe(140 * 2);
   });
 });
 
@@ -761,8 +762,8 @@ describe('compact title screen geometry', () => {
   });
 
   it('keeps the full 520px card on landscape phones and narrows it at 200% zoom', () => {
-    expect(compactOverlayFit(844, 326)).toEqual({ k: 3, cardW: HERO_CARD_W });
-    expect(compactOverlayFit(640, 336)?.k).toBe(3);
+    expect(compactOverlayFit(844, 326)).toEqual({ k: 2, cardW: HERO_CARD_W });
+    expect(compactOverlayFit(640, 336)?.k).toBe(2);
     expect(compactOverlayFit(640, 336)!.cardW).toBeLessThan(HERO_CARD_W);
   });
 });

@@ -63,14 +63,14 @@ const MiniGame = lazy<ComponentType<{ onQuit: () => void; showTouchControls: boo
    card may narrow; the card's content puts the CTAs right under the role.
 
    Band (phones and portrait tablets): the forest as a strip above the title
-   card, x3 on phones, x4 on tablets, x2 when the viewport is under 700px tall,
+   card, x2 on phones and when the viewport is under 700px tall, x3 on tablets,
    at most 38% of the viewport tall (the canopy crops, Roy and the grass stay). */
 
 const FOREST = pixelSprites.forest;
 const WAVE = pixelSprites.wave;
 
 /** Forest column Roy's feet stand on. */
-export const HERO_FEET_COLUMN = 182;
+export const HERO_FEET_COLUMN = 244;
 /** Fixed navbar height; the scene starts below it. */
 export const HERO_NAV_H = 64;
 /** The hero is at most this tall (nav included)... */
@@ -84,7 +84,7 @@ export const HERO_FILL_SLACK = 152;
 /** Title-card width on the scene (fits the two lg CTAs, 476px, side by side at p-5). */
 export const HERO_CARD_W = 520;
 /** Scale of the band on phones. */
-export const HERO_MOBILE_K = 3;
+export const HERO_MOBILE_K = 2;
 /** Roy's sprite may take at most this share of the desktop scene height. */
 export const HERO_MAX_SHARE = 0.6;
 /** The band takes at most this share of the viewport height (the canopy crops first). */
@@ -110,17 +110,14 @@ export function isTightCard(vh: number, cardW: number): boolean {
   return heroHeight(vh) - HERO_NAV_H < HERO_TIGHT_SCENE_H && cardW >= TIGHT_NAME_CARD_W;
 }
 
-/** Native rows the band always keeps: Roy (67), the ground under his feet (11) and 4 rows of air. */
+/** Native rows the band always keeps: Roy, the ground under his feet and 4 rows of air. */
 export const HERO_BAND_MIN_ROWS = FOREST.h - FOREST.groundRow + WAVE.frameH + 4;
 /**
- * Native columns [from, to) of the three birds baked into the forest. The title card's right
- * edge must never slice one: each is either fully behind the card or clear of it.
+ * Native columns [from, to) of birds baked into the forest. The title card's right edge must
+ * never slice one: each is either fully behind the card or clear of it. The current forest has
+ * none (the game's birds are obstacles, so the art leaves them out).
  */
-export const FOREST_BIRD_COLUMNS: ReadonlyArray<readonly [number, number]> = [
-  [119, 132],
-  [136, 150],
-  [150, 163],
-];
+export const FOREST_BIRD_COLUMNS: ReadonlyArray<readonly [number, number]> = [];
 /** Native forest rows repeated to deepen the ground (the bottom four dirt rows). */
 export const GROUND_STRIP_ROWS = 4;
 
@@ -131,8 +128,8 @@ const CARD_OUTSET = 12;
 const STAGE_AIR = 32;
 /** Minimum air between Roy and the scene's right edge. */
 const EDGE_AIR = 16;
-/** First dirt row under the grass (rows 106-111 are dirt): the scroll cue sits below it. */
-const DIRT_ROW = 106;
+/** First dirt row under the grass (below the grass band and its outline): the scroll cue sits below it. */
+const DIRT_ROW = 148;
 /** The title card sits at least this far below the scene top (level with the HUD). */
 const CARD_TOP_MIN = 16;
 /** Air kept under the title card's drop, inside the scene. */
@@ -216,7 +213,7 @@ export function heroHeight(vh: number): number {
 }
 
 /**
- * Desktop scene scale: max(ceil(W / 240), floor(H / 112)), unless covering the width would make
+ * Desktop scene scale: max(ceil(W / forest.w), floor(H / forest.h)), unless covering the width would make
  * Roy more than HERO_MAX_SHARE of the scene height; then floor(H / 112) (mirrors fill the sides).
  */
 export function sceneScale(width: number, height: number): number {

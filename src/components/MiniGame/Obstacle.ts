@@ -1,6 +1,7 @@
 import { CANVAS_CONFIG, OBSTACLE_CONFIG, SPRITE_PATHS, PLAYER_CONFIG } from './config';
 import type { AABB, ObstacleDef, ObstacleKind } from './types';
 import type { SpriteRenderer } from './SpriteRenderer';
+import { drawContactShadow } from './shadow';
 
 // ─── Single obstacle ──────────────────────────────────────────────────────────
 
@@ -20,8 +21,8 @@ export class Obstacle {
       // Feet touch the visual ground line
       this.y = CANVAS_CONFIG.groundY - def.h - PLAYER_CONFIG.groundOffset;
     } else {
-      // Air obstacle: some fraction down the canvas
-      this.y = CANVAS_CONFIG.height * OBSTACLE_CONFIG.airYFraction;
+      // Air obstacle: a fixed lift above the feet line (see OBSTACLE_CONFIG.airLift)
+      this.y = CANVAS_CONFIG.groundY - PLAYER_CONFIG.groundOffset - OBSTACLE_CONFIG.airLift - def.h;
     }
   }
 
@@ -34,7 +35,10 @@ export class Obstacle {
   }
 
   getHitbox(): AABB {
-    const i = OBSTACLE_CONFIG.hitboxInset;
+    const i = Math.min(
+      OBSTACLE_CONFIG.hitboxInset,
+      Math.floor(Math.min(this.def.w, this.def.h) * OBSTACLE_CONFIG.hitboxInsetShare),
+    );
     return {
       x: this.x + i,
       y: this.y + i,
@@ -44,6 +48,9 @@ export class Obstacle {
   }
 
   draw(ctx: CanvasRenderingContext2D, renderer: SpriteRenderer): void {
+    if (this.kind === 'ground') {
+      drawContactShadow(ctx, this.x + this.def.w / 2, this.def.w * 0.7);
+    }
     renderer.draw(ctx, this.def.src, this.x, this.y, this.def.w, this.def.h);
   }
 }

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import Contact, { EMAIL_COPIED_MESSAGE, EMAIL_SELECTED_MESSAGE, EMAIL_SHOWN } from './Contact';
 import { ToastProvider } from '../components/ui/Toast';
 import { bio } from '../data/bio';
+import { pixelSprites } from '../theme/pixelSprites';
 
 function renderContact() {
   return render(
@@ -137,16 +138,17 @@ describe('Contact', () => {
     const fire = container.querySelectorAll<HTMLElement>('.px-campfire');
     expect(roy).toHaveLength(1);
     expect(fire).toHaveLength(1);
-    // jsdom has no matchMedia: the narrow (×2) scene. Roy's idle frame is 28×67.
+    // jsdom has no matchMedia: the narrow (×2) scene, Roy's idle frame at x2.
     expect(fire[0]).toHaveAttribute('data-scale', '2');
-    expect(roy[0].style.width).toBe('56px');
-    expect(roy[0].style.height).toBe('134px');
+    expect(roy[0].style.width).toBe(`${pixelSprites.idle.frameW * 2}px`);
+    expect(roy[0].style.height).toBe(`${pixelSprites.idle.frameH * 2}px`);
   });
 
   it.each([
-    ['laptops (1024-1599px)', ['(min-width: 1024px)'], '3', '201px'],
-    ['large screens (1600px+)', ['(min-width: 1024px)', '(min-width: 1600px)'], '4', '268px'],
-  ])('draws the save point larger on %s', (_label, matching, scale, royHeight) => {
+    ['laptops (1024-1599px)', ['(min-width: 1024px)'], '3'],
+    ['large screens (1600px+)', ['(min-width: 1024px)', '(min-width: 1600px)'], '4'],
+  ])('draws the save point larger on %s', (_label, matching, scale) => {
+    const royHeight = `${pixelSprites.idle.frameH * Number(scale)}px`;
     const matchMedia = vi.fn((query: string) => ({
       matches: matching.includes(query),
       media: query,
