@@ -10,7 +10,7 @@ export const bio = {
   resume: {
     href: "/Roy_Carmelli_CV.pdf",
     fileName: "Roy_Carmelli_CV.pdf",
-    meta: "PDF · 1 page · updated Sep 2026",
+    meta: "PDF · 1 page · updated Oct 2026",
   },
   institution: "Bar-Ilan University",
   location: "Israel",
