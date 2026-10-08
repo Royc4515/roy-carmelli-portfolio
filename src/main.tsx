@@ -1,6 +1,7 @@
 import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LazyMotion, MotionConfig, domAnimation } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import './index.css';
 import App from './App';
 import { ToastProvider } from './components/ui/Toast';
@@ -24,7 +25,12 @@ createRoot(document.getElementById('root')!).render(
               <Gallery />
             </Suspense>
           ) : (
-            <App />
+            <>
+              <App />
+              {/* Vercel Web Analytics: cookieless page views, so no consent banner is needed.
+                  It only reports on the deployed site; in dev it logs to the console. */}
+              <Analytics />
+            </>
           )}
         </ToastProvider>
       </MotionConfig>
