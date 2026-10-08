@@ -82,6 +82,9 @@ export function metaLine({ kind, year }: Pick<Project, 'kind' | 'year'>): string
 
 type Surface = 'paper' | 'wood';
 
+/** Shown in place of the Code button when a project has no public repo. */
+export const PRIVATE_REPO_NOTE = 'Private repo · code on request';
+
 /** Tech chips shown before the `+N` chip, on every quest card. */
 const CHIP_MAX = 4;
 
@@ -208,11 +211,11 @@ function QuestVisual({ project, layout }: { project: Project; layout: QuestCardL
 }
 
 /**
- * Live · Code · Quest log. Main quests keep them on one row; side quests (too narrow for
+ * Live · Code · Details (the quest log toggle). Main quests keep them on one row; side quests (too narrow for
  * three arcade buttons) put the links on one row and the quest log on the next, the same in
  * every card so the rows line up (`stacked`). Projects.css also stacks the two side-by-side
  * main quests between 768 and 1023px. Below 640px every card uses two equal columns: Live ·
- * Code with Quest log on the row under them (`quest-actions--pair`), or Code · Quest log.
+ * Code with Details on the row under them (`quest-actions--pair`), or Code · Details.
  */
 function QuestActions({
   project,
@@ -238,7 +241,7 @@ function QuestActions({
           Live
         </Button>
       )}
-      {project.github && (
+      {project.github ? (
         <Button
           href={project.github}
           external
@@ -249,6 +252,9 @@ function QuestActions({
         >
           Code
         </Button>
+      ) : (
+        // A main quest with no Code button read as hiding something; say why it is missing.
+        <p className="quest-private text-hud uppercase">{PRIVATE_REPO_NOTE}</p>
       )}
     </>
   );
@@ -257,12 +263,12 @@ function QuestActions({
       variant="ghost"
       aria-expanded={open}
       aria-controls={questLogId(project)}
-      aria-label={`Quest log: ${project.title}`}
+      aria-label={`Details: ${project.title}`}
       onClick={onToggle}
       trailingIcon={<PixelIcon name="chevron" size={12} className="quest-log-chevron" />}
       className="quest-log-toggle"
     >
-      Quest log
+      Details
     </Button>
   );
   // The links wrapper is `display: contents` when everything shares one row.
@@ -288,6 +294,10 @@ function QuestLog({ project, open, surface }: { project: Project; open: boolean;
       className={cx('quest-log', surface === 'paper' ? 'quest-log--paper' : 'quest-log--wood')}
     >
       <p className="max-w-[68ch] text-body">{project.description}</p>
+      {/* The card shows CHIP_MAX chips and a `+N`; the full stack lives here, readable on touch too. */}
+      <p className="quest-log__tech mt-3 max-w-[68ch] text-hud">
+        <span className="uppercase">Built with:</span> {project.tech.join(' · ')}
+      </p>
     </div>
   );
 }
@@ -295,7 +305,7 @@ function QuestLog({ project, open, surface }: { project: Project; open: boolean;
 /**
  * A project as a quest card (SPEC §4 Projects). Main quests are parchment cards with a
  * visual (screenshot or item showcase), highlights and the full action row; side quests are
- * compact wood cards with the item in a slot. Both end with a "Quest log" disclosure that
+ * compact wood cards with the item in a slot. Both end with a "Details" disclosure (the quest log) that
  * holds the full description.
  *
  * The card's parts are direct children of the article (a side quest's head and title sit in a
@@ -351,7 +361,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
         </ul>
         <ChipList
           items={project.tech}
-          accentCount={3}
+          accentCount={0}
           max={CHIP_MAX}
           surface="paper"
           aria-label="Built with"
@@ -410,7 +420,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
       </div>
       <ChipList
         items={project.tech}
-        accentCount={3}
+        accentCount={0}
         max={CHIP_MAX}
         aria-label="Built with"
         className="quest-chips"
@@ -424,7 +434,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
 
 /**
  * One research log: a compact list row with the item (x1, x2 from 640px), kind · year, the
- * title, tagline and a Code link. Render inside a `<ul>`. The parts are direct children of the
+ * title, tagline and its Live and Code links. Render inside a `<ul>`. The parts are direct children of the
  * row so Projects.css can place them: below 640px the link is a 48px icon button beside the
  * meta line and title; from 640px it is a labelled button on the right.
  */
@@ -441,19 +451,35 @@ export function ResearchLogItem({ project }: { project: Project }) {
         subtitleClass="text-body text-accent-fg"
       />
       <p className="research-log__tagline max-w-[68ch] text-body text-fg-muted">{project.tagline}</p>
-      {project.github && (
-        <Button
-          href={project.github}
-          external
-          variant="secondary"
-          size="sm"
-          // 24px for the icon-only button, drawn at 12px next to the label (both integer scales).
-          leadingIcon={<PixelIcon name="code" size={24} className="research-log__icon" />}
-          aria-label={codeLabel(project.title)}
-          className="research-log__action"
-        >
-          Code
-        </Button>
+      {(project.live || project.github) && (
+        <div className="research-log__actions">
+          {project.live && (
+            <Button
+              href={project.live}
+              external
+              size="sm"
+              leadingIcon={<PixelIcon name="external" size={24} className="research-log__icon" />}
+              aria-label={liveLabel(project.title)}
+              className="research-log__action"
+            >
+              Live
+            </Button>
+          )}
+          {project.github && (
+            <Button
+              href={project.github}
+              external
+              variant="secondary"
+              size="sm"
+              // 24px for the icon-only button, drawn at 12px next to the label (both integer scales).
+              leadingIcon={<PixelIcon name="code" size={24} className="research-log__icon" />}
+              aria-label={codeLabel(project.title)}
+              className="research-log__action"
+            >
+              Code
+            </Button>
+          )}
+        </div>
       )}
     </li>
   );

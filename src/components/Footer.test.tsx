@@ -18,7 +18,7 @@ describe('Footer', () => {
     render(<Footer />);
     const link = screen.getByRole('link', { name: /back to top/i });
     expect(link).toHaveAttribute('href', '#hero');
-    expect(link).toHaveTextContent('Continue?');
+    expect(link).toHaveTextContent('Back to top');
     expect(link).not.toHaveAttribute('target');
   });
 

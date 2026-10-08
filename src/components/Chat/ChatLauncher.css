@@ -7,6 +7,25 @@
   bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
 }
 
+/* The fixed launcher (56x91 at 16px from the corner) covered the footer's last line at the end
+   of the page: stacked footers get room under them, and from 1024px, until the 1120px container
+   has margins wide enough to clear it, the right-aligned build line moves in. */
+body:has(.chat-root) footer > div {
+  padding-bottom: 120px;
+}
+
+@media (width >= 64rem) {
+  body:has(.chat-root) footer > div {
+    padding-bottom: 32px;
+  }
+}
+
+@media (64rem <= width < 74rem) {
+  body:has(.chat-root) footer > div {
+    padding-inline: 88px; /* both sides, so the name stays centred on the page */
+  }
+}
+
 /* The game owns the screen while it runs (Hero sets this attribute). */
 html[data-arcade-playing] .chat-root {
   display: none;

@@ -2,10 +2,10 @@ import PixelIcon from './PixelIcon';
 import { Button } from './ui/Button';
 
 /**
- * Site footer (SPEC §4): `Continue?` back to the title screen, the name and year, and the
+ * Site footer (SPEC §4): `Back to top` (the title screen), the name and year, and the
  * build line. One row from `lg` (the name centred on the page), stacked and centred below.
  *
- * `Continue?` is a plain in-page link to `#hero`: the browser scrolls to the top (smoothly
+ * `Back to top` is a plain in-page link to `#hero`: the browser scrolls to the top (smoothly
  * unless reduced motion is on, see index.css) and moves the keyboard starting point there,
  * so the next Tab continues from the top of the page instead of the bottom.
  */
@@ -17,15 +17,15 @@ export default function Footer() {
         <Button
           variant="ghost"
           href="#hero"
-          aria-label="Continue? Back to top"
           leadingIcon={<PixelIcon name="arrow-up" size={12} />}
           className="lg:justify-self-start"
         >
-          Continue?
+          Back to top
         </Button>
         <p className="text-hud text-fg-muted">Roy Carmelli © {year}</p>
         <p className="text-hud text-fg-subtle lg:justify-self-end lg:text-right">
-          Built from scratch: React · TypeScript · Canvas
+          {/* Non-breaking inside the stack list: a phone breaks after the colon, never before a dot. */}
+          {'Built from scratch: React\u00a0·\u00a0TypeScript\u00a0·\u00a0Canvas'}
         </p>
       </div>
     </footer>
