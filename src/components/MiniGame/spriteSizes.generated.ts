@@ -11,8 +11,8 @@ export interface Size {
 }
 
 export const SPRITE_SIZES = {
-  player: { w: 54, h: 70 },
-  slide: { w: 59, h: 69 },
+  player: { w: 68, h: 92 },
+  slide: { w: 68, h: 77 },
   obstacles: {
     racoon: { w: 66, h: 46 },
     stump: { w: 64, h: 58 },

@@ -18,25 +18,30 @@ unchanged sources gives byte-identical files.
 
 | Source (`design-src/flow/`) | Layout | Writes |
 |---|---|---|
-| `run_idle.jpg` | 4x2: run 1-7, idle | `public/assets/sprites/run-1..7.png`, `idle.png` |
-| `jump_slide_stand.jpg` | 4x2: jump 1-4, slide 2-3, stand 1-2 | `jump-*.png`, `slide-*.png`, `stand-*.png` |
-| `wave_sit.jpg` | 3x2: wave 1-3, sit 1-3 | game `wave-*.png`; site `design-src/sprites/wave-*.png`, `sit-*.png` |
+| `roy_wave_idle.jpg` | 1 row: wave 1-3, idle | game `wave-*.png`, `idle.png`; site `design-src/sprites/wave-*.png` |
+| `roy_run_a.jpg`, `roy_run_b.jpg` | 1 row: run 1-4; run 5-7, stand-1 | `run-1..7.png`, `stand-1.png` |
+| `roy_jump.jpg` | 1 row: jump 1-4 | `jump-*.png` |
+| `roy_slide_stand.jpg` | 1 row: slide 2-3, stand-2 | `slide-*.png`, `stand-2.png` |
+| `roy_sit.jpg` | 1 row: sit 1-3 | site `design-src/sprites/sit-*.png` |
 | `obstacles.jpg` | 5x2: raccoon, stumps, rock, mushrooms, toadstools, agave, 2 birds | `racoon.png`, `stump.png`, ... `bird-*.png` |
 | `critters.jpg` | 3x1: beetle, hedgehog, bat | `beetle.png`, `hedgehog.png`, `bat.png` |
-| `background.jpg` | full frame | `background.png`; site `design-src/sprites/forest.png` (a 240x112 window) |
+| `background.jpg` | full frame | `background.png`; site `design-src/sprites/forest.png` (a 330x154 window) |
 | `portrait.jpg` | one bust | game `portrait.png` (player card); site `design-src/sprites/face-large.png` |
 
-It also writes `src/components/MiniGame/spriteSizes.generated.ts`: the game draws every sprite
-1:1, so its frame sizes come from there.
+It also writes `src/components/MiniGame/spriteSizes.generated.ts`: the game draws the sprites
+at their native size (Roy at 1.5x), so its frame sizes come from there.
 
 1. **Key.** Pixels where `min(R, B) - G` is large are the matte; the purple fringe the matte
    leaves on the outline is capped back to neutral.
-2. **Cut.** Each sheet is split into its grid cells; each cell is cropped to its sprite
-   (rows and columns with under 3 opaque pixels are matte noise).
-3. **Native.** Flow's pixel art is not on one exact grid, so instead of detecting a grid each
-   sheet is resampled with one period chosen from a reference pose: a standing Roy is 70 px
-   tall in the game and 67 px on the site (the size its scenes are laid out for); obstacles
-   are scaled to a median height. Sampling is `pixelate.sample` (median of each cell's middle).
+2. **Cut.** Roy's sheets are one row of figures (one figure per column fills the image
+   height, which is what gives him ~92 px of real detail), split on the empty columns between
+   figures; the obstacle sheets are split into grid cells. Rows and columns with under 3
+   opaque pixels are matte noise.
+3. **Native.** Flow's pixel art is not on one exact grid, and its pixel size changes from
+   sheet to sheet. Roy is area-averaged so a standing Roy is 92 px tall on every sheet (one
+   reference pose per sheet sets the scale); an area average cannot drop a 2 px feature, while
+   sampling one median per cell at an off-grid scale made one eye vanish (a "wink"). Obstacles
+   are sampled with `pixelate.sample` at one period per sheet, scaled to a median height.
 4. **Palette and frames.** One palette per group; every pose drawn in the game's player box
    is padded to one frame size, bottom-aligned on the feet. The birds are mirrored to face the
    way they fly.

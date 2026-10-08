@@ -6,6 +6,15 @@ const GROUND_OBSTACLES = [
   'racoon', 'stump', 'stump-moss', 'rock', 'mushrooms', 'toadstools', 'agave', 'beetle', 'hedgehog',
 ] as const;
 const AIR_OBSTACLES = ['bird-blue', 'bird-brown', 'bat'] as const;
+/** Player hitbox width: the old 56 px sprite minus its 10 px insets, as the game was tuned. */
+const HITBOX_W = 36;
+/**
+ * Roy is drawn at this multiple of his native sprite. The forest is drawn about 2.5x its
+ * native pixels, so a 1:1 Roy looked small next to the trees and fences; 1.5x keeps him the
+ * clear lead (about a third of the canvas height) while the obstacles keep their tuned size.
+ */
+const PLAYER_SCALE = 1.5;
+const PLAYER_W = Math.round(SPRITE_SIZES.player.w * PLAYER_SCALE);
 
 // ─── Canvas ───────────────────────────────────────────────────────────────────
 export const CANVAS_CONFIG = {
@@ -31,12 +40,11 @@ export const SCROLL_CONFIG = {
 
 // ─── Player ───────────────────────────────────────────────────────────────────
 export const PLAYER_CONFIG = {
-  // Native sprite sizes: the art is drawn 1:1 so its pixel grid stays crisp.
-  displayW: SPRITE_SIZES.player.w,
-  displayH: SPRITE_SIZES.player.h,
+  displayW: PLAYER_W,
+  displayH: Math.round(SPRITE_SIZES.player.h * PLAYER_SCALE),
   /** Visual render size for the slide sprite */
-  slideW: SPRITE_SIZES.slide.w,
-  slideH: SPRITE_SIZES.slide.h,
+  slideW: Math.round(SPRITE_SIZES.slide.w * PLAYER_SCALE),
+  slideH: Math.round(SPRITE_SIZES.slide.h * PLAYER_SCALE),
   /** Collision hitbox height while sliding (much shorter than standing) */
   slideHitboxH: 32,
   /** How long a slide lasts (seconds) */
@@ -49,8 +57,17 @@ export const PLAYER_CONFIG = {
   runFraction: 0.13,
   /** Seconds for slide-in from center to running position */
   transitionDuration: 0.75,
-  /** Inner hitbox insets (px) relative to display rect */
-  hitboxInset: { left: 10, top: 8, right: 10, bottom: 4 },
+  /**
+   * Inner hitbox insets (px) relative to display rect. The sides keep the hitbox
+   * HITBOX_W wide whatever the sprite's width, so a bigger, more detailed Roy does not
+   * make the obstacles any harder to clear.
+   */
+  hitboxInset: {
+    left: Math.floor((PLAYER_W - HITBOX_W) / 2),
+    top: 8,
+    right: Math.ceil((PLAYER_W - HITBOX_W) / 2),
+    bottom: 4,
+  },
 } as const;
 
 // ─── Obstacles ────────────────────────────────────────────────────────────────

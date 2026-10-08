@@ -145,9 +145,10 @@ describe('Contact', () => {
   });
 
   it.each([
-    ['laptops (1024-1599px)', ['(min-width: 1024px)'], '3', '201px'],
-    ['large screens (1600px+)', ['(min-width: 1024px)', '(min-width: 1600px)'], '4', '268px'],
-  ])('draws the save point larger on %s', (_label, matching, scale, royHeight) => {
+    ['laptops (1024-1599px)', ['(min-width: 1024px)'], '3'],
+    ['large screens (1600px+)', ['(min-width: 1024px)', '(min-width: 1600px)'], '4'],
+  ])('draws the save point larger on %s', (_label, matching, scale) => {
+    const royHeight = `${pixelSprites.idle.frameH * Number(scale)}px`;
     const matchMedia = vi.fn((query: string) => ({
       matches: matching.includes(query),
       media: query,

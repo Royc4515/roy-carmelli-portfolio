@@ -6,9 +6,10 @@ animation is drawn in one pass and stays on-model. This script turns those sheet
 files the game loads and the sources pixelate.py reads:
 
 1. Key out the magenta matte and pull the purple fringe it leaves back to neutral.
-2. Cut each sheet into its grid cells and crop every cell to its sprite.
-3. Resample to native resolution (one PNG pixel per art pixel) with pixelate.sample, using
-   one period per sheet so a standing Roy is STAND_H px tall on every sheet.
+2. Cut each sheet into its sprites: Roy's one-row sheets on the empty columns between
+   figures, the obstacle sheets on their grid cells.
+3. Resample to native size. Roy is area-averaged (downscale) so a standing Roy is STAND_H px
+   tall on every sheet; the obstacles use pixelate.sample with one period per sheet.
 4. Share one palette per group, so colors do not shimmer between frames.
 5. Pad each animation set to one frame size, bottom-aligned on the feet.
 
@@ -35,14 +36,20 @@ SIZES_TS = P.ROOT / 'src' / 'components' / 'MiniGame' / 'spriteSizes.generated.t
 KEY_MIN = 80          # min(R, B) - G above this is the magenta matte
 DESPILL = 24          # fringe pixels keep at most this much magenta over green
 SPECK_MIN = 3         # rows/cols with fewer opaque px than this are matte noise, not sprite
-STAND_H = 70          # native height of a standing Roy (the game's player box was 72)
-SITE_STAND_H = 67     # the site's Roy, which its scene layouts are tuned to
+MIN_SPRITE_W = 40     # narrower column runs on a one-row sheet are specks, not a figure
+# Native height of a standing Roy, in the game and on the site. Flow draws him about this
+# tall on a one-row sheet; much smaller and his 2 px eyes start to drop out (a "wink").
+STAND_H = 92
+SIT_TO_STAND = 0.98   # Roy on his stool is this share of his standing height (old art: 69/70)
 GROUND_OBSTACLE_H = 52  # native median height of the ground obstacles (they were 52-54)
 CRITTER_H = 40        # the beetle and hedgehog are low, quick critters
 PORTRAIT_H = 56       # fits the 76 px player card (HUD_CONFIG) with its frame
 FACE_H = 49           # the site's portrait height (navbar, About, chat), unchanged
-FOREST_W, FOREST_H = 240, 112  # the site hero's forest size, which its layout is tuned to
-FOREST_GROUND_ROW = 101  # the site forest's grass top row, as before (pixelSprites.forest)
+# The site's scenes were tuned to a 67 px Roy in front of a 240x112 forest with its grass at
+# row 101; the forest window keeps those proportions around the larger Roy.
+SITE_SCALE = STAND_H / 67
+FOREST_W, FOREST_H = round(240 * SITE_SCALE), round(112 * SITE_SCALE)
+FOREST_GROUND_ROW = round(101 * SITE_SCALE)
 BG_PERIOD = 4.0       # Nano Banana draws its pixel art on a 4 px grid at 1376x768
 PLAYER_COLORS = 48
 OBSTACLE_COLORS = 64
@@ -57,9 +64,32 @@ class Sheet:
     count: int
 
 
-RUN = Sheet('run_idle.jpg', 4, 2, 8)           # run 1-7, idle
-JUMP = Sheet('jump_slide_stand.jpg', 4, 2, 8)  # jump 1-4, slide 2-3, stand 1-2
-WAVE = Sheet('wave_sit.jpg', 3, 2, 6)          # wave 1-3, sit 1-3
+@dataclass(frozen=True)
+class RoySheet:
+    """One row of Roy poses. `ref` is the frame that sets the sheet's scale: it is drawn
+    `ref_h` (a share of STAND_H) tall, so Roy keeps one size across sheets that Flow drew
+    at slightly different scales."""
+
+    sheet: Sheet
+    names: tuple[str, ...]
+    ref: int
+    ref_h: float = 1.0
+
+
+ROY_SHEETS = (
+    RoySheet(Sheet('roy_wave_idle.jpg', 4, 1, 4), ('wave-1', 'wave-2', 'wave-3', 'idle'), ref=0),
+    RoySheet(Sheet('roy_run_b.jpg', 4, 1, 4), ('run-5', 'run-6', 'run-7', 'stand-1'), ref=3),
+    RoySheet(Sheet('roy_jump.jpg', 4, 1, 4), ('jump-1', 'jump-2', 'jump-3', 'jump-4'), ref=0),
+    RoySheet(Sheet('roy_slide_stand.jpg', 4, 1, 3), ('slide-2', 'slide-3', 'stand-2'), ref=2),
+    RoySheet(Sheet('roy_sit.jpg', 4, 1, 3), ('sit-1', 'sit-2', 'sit-3'), ref=0,
+             ref_h=SIT_TO_STAND),
+)
+# Run 1-4 has no standing frame; it is scaled so its run frames match run 5-7.
+RUN_A = Sheet('roy_run_a.jpg', 4, 1, 4)
+RUN_A_NAMES = ('run-1', 'run-2', 'run-3', 'run-4')
+SLIDE = ('slide-2', 'slide-3')
+SITE_ONLY = ('sit-1', 'sit-2', 'sit-3')
+SITE_SOURCES = ('wave-1', 'wave-2', 'wave-3', *SITE_ONLY)
 OBSTACLES = Sheet('obstacles.jpg', 5, 2, 9)
 
 CRITTERS = Sheet('critters.jpg', 3, 1, 3)
@@ -119,9 +149,51 @@ def cut_cells(rgba: np.ndarray, sheet: Sheet) -> list[np.ndarray]:
     return crops
 
 
+def cut_row(rgba: np.ndarray, sheet: Sheet) -> list[np.ndarray]:
+    """Sprites of a one-row sheet, split on the empty columns between them. Flow does not
+    always keep a figure inside its column (a wide slide pose spills over), so the gaps
+    are more reliable than the grid."""
+    solid = rgba[..., 3] > P.SOLID_ALPHA
+    used = solid.sum(0) >= SPECK_MIN
+    runs, start = [], None
+    for x, on in enumerate([*used, False]):
+        if on and start is None:
+            start = x
+        elif not on and start is not None:
+            runs.append((start, x))
+            start = None
+    runs = [r for r in runs if r[1] - r[0] >= MIN_SPRITE_W]
+    if len(runs) != sheet.count:
+        raise SystemExit(f'{sheet.file}: found {len(runs)} sprites, expected {sheet.count}')
+    crops = []
+    for x0, x1 in runs:
+        part = rgba[:, x0:x1]
+        ya, yb, xa, xb = sprite_bbox(part)
+        crops.append(part[ya:yb, xa:xb])
+    return crops
+
+
 def to_native(crop: np.ndarray, period: float) -> np.ndarray:
     ax = P.Axis(period, 0.0, 0.0)
     return P.crop(P.cleanup(P.sample(crop, ax, ax)))
+
+
+def downscale(crop: np.ndarray, height: int) -> np.ndarray:
+    """Area-average a sprite to `height` px (alpha-premultiplied, so the matte cannot tint
+    the edges). Unlike sampling one median per cell, an area average cannot drop a feature
+    thinner than a cell, which is what made Roy's eyes vanish at off-grid scales; the shared
+    palette applied afterwards snaps the averaged colors back to flat pixel-art tones."""
+    width = max(1, round(crop.shape[1] * height / crop.shape[0]))
+    a = crop.astype(np.float64)
+    alpha = a[..., 3:4] / 255
+    premul = np.dstack([a[..., :3] * alpha, a[..., 3:4]]).round().astype(np.uint8)
+    small = np.asarray(Image.fromarray(premul).resize((width, height), Image.BOX))
+    small = small.astype(np.float64)
+    cover = small[..., 3:4] / 255
+    rgb = np.where(cover > 0, small[..., :3] / np.maximum(cover, 1e-6), 0)
+    solid = small[..., 3] >= P.SOLID_ALPHA
+    out = np.dstack([np.clip(rgb, 0, 255), np.where(solid, 255, 0)])
+    return P.crop(P.cleanup(out))
 
 
 def split_sheet(sheet: np.ndarray, fw: int, n: int) -> list[np.ndarray]:
@@ -142,43 +214,39 @@ def save_native(img: np.ndarray, path: Path) -> tuple[int, int]:
 
 
 def import_player() -> dict:
-    sheets = {s: cut_cells(load_keyed(FLOW / s.file), s) for s in (RUN, JUMP, WAVE)}
-    # The reference pose that sets each sheet's scale: idle, stand-1 and wave-1.
-    ref = {RUN: 7, JUMP: 6, WAVE: 0}
-    native = {s: [to_native(c, sheets[s][ref[s]].shape[0] / STAND_H) for c in crops]
-              for s, crops in sheets.items()}
+    crops: dict[str, np.ndarray] = {}
+    scale: dict[str, float] = {}  # native px per source px, per frame
+    for roy in ROY_SHEETS:
+        cells = cut_row(load_keyed(FLOW / roy.sheet.file), roy.sheet)
+        k = STAND_H * roy.ref_h / cells[roy.ref].shape[0]
+        for name, cell in zip(roy.names, cells):
+            crops[name], scale[name] = cell, k
+    cells = cut_row(load_keyed(FLOW / RUN_A.file), RUN_A)
+    target = np.median([crops[f'run-{i}'].shape[0] * scale[f'run-{i}'] for i in (5, 6, 7)])
+    k = float(target) / float(np.median([c.shape[0] for c in cells]))
+    for name, cell in zip(RUN_A_NAMES, cells):
+        crops[name], scale[name] = cell, k
 
-    run, idle = native[RUN][:7], native[RUN][7]
-    jump, slide, stand = native[JUMP][:4], native[JUMP][4:6], native[JUMP][6:8]
-    wave = native[WAVE][:3]
-    # The site's scenes are laid out on its own integer grid around a SITE_STAND_H Roy, so
-    # its wave and sit sources get their own sampling instead of reusing the game frames.
-    site_period = sheets[WAVE][ref[WAVE]].shape[0] / SITE_STAND_H
-    site = [to_native(c, site_period) for c in sheets[WAVE]]
-
-    upright = [*wave, *run, *jump, *stand, idle]
-    every = P.reduce_palette([*upright, *slide, *site], PLAYER_COLORS)
-    upright, slide, site = every[:17], every[17:19], every[19:]
-    for i, frame in enumerate(site[:3], 1):
-        save_native(frame, P.DESIGN_SRC / f'wave-{i}.png')
-    sit = site[3:]
+    names = list(crops)
+    native = [downscale(crops[n], max(1, round(crops[n].shape[0] * scale[n]))) for n in names]
+    art = dict(zip(names, P.reduce_palette(native, PLAYER_COLORS)))
 
     # One frame size for every pose drawn in the player box, so poses keep one scale.
-    sheet, fw, fh, _ = P.build_sheet(upright)
-    frames = split_sheet(sheet, fw, len(upright))
-    names = ([f'wave-{i}' for i in (1, 2, 3)] + [f'run-{i}' for i in range(1, 8)]
-             + [f'jump-{i}' for i in range(1, 5)] + ['stand-1', 'stand-2', 'idle'])
-    for name, frame in zip(names, frames):
+    upright = ([f'wave-{i}' for i in (1, 2, 3)] + [f'run-{i}' for i in range(1, 8)]
+               + [f'jump-{i}' for i in range(1, 5)] + ['stand-1', 'stand-2', 'idle'])
+    sheet, fw, fh, _ = P.build_sheet([art[n] for n in upright])
+    for name, frame in zip(upright, split_sheet(sheet, fw, len(upright))):
         save_native(frame, P.GAME_SPRITES / f'{name}.png')
 
-    slide_sheet, sw, sh, _ = P.build_sheet(slide)
-    for name, frame in zip(('slide-2', 'slide-3'), split_sheet(slide_sheet, sw, 2)):
+    slide_sheet, sw, sh, _ = P.build_sheet([art[n] for n in SLIDE])
+    for name, frame in zip(SLIDE, split_sheet(slide_sheet, sw, len(SLIDE))):
         save_native(frame, P.GAME_SPRITES / f'{name}.png')
 
-    for i, frame in enumerate(sit, 1):
-        save_native(frame, P.DESIGN_SRC / f'sit-{i}.png')
+    for name in SITE_SOURCES:
+        save_native(art[name], P.DESIGN_SRC / f'{name}.png')
 
-    print(f'  player {fw}x{fh}, slide {sw}x{sh}, sit {[f.shape[1::-1] for f in sit]}')
+    print(f'  player {fw}x{fh}, slide {sw}x{sh}, '
+          + ', '.join(f'{n} {art[n].shape[1]}x{art[n].shape[0]}' for n in SITE_ONLY))
     return {'player': {'w': fw, 'h': fh}, 'slide': {'w': sw, 'h': sh}}
 
 
