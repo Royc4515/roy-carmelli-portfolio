@@ -1,13 +1,14 @@
 // @vitest-environment node
-import { handleChat } from '../chat.js';
+import { handleChat, REQUEST_DEADLINE_MS } from '../chat.js';
 import { readChatConfig, DEFAULT_MODELS } from '../_lib/chat/config.js';
 import type { ChatDeps } from '../_lib/chat/deps.js';
 import { parseGuardScore, PromptGuard } from '../_lib/chat/guard.js';
 import { parseHistory, retrievalQuery } from '../_lib/chat/history.js';
-import { clientIp, PgChatLimiter, visitorBucket, type ChatLimiter, type LimitVerdict } from '../_lib/chat/limiter.js';
+import { clientIp, DB_TIMEOUT_MS, PgChatLimiter, visitorBucket, type ChatLimiter, type LimitVerdict } from '../_lib/chat/limiter.js';
 import { FallbackChain, OpenAICompatibleProvider, type Fetch } from '../_lib/chat/llm.js';
 import { buildRequest, canaryFor, parseDraft, systemPrompt } from '../_lib/chat/prompt.js';
 import { retrieve, tokenize } from '../_lib/chat/retrieve.js';
+import { TimeoutError, withTimeout } from '../_lib/chat/timeout.js';
 import { KNOWLEDGE } from '../_lib/chat/knowledge.generated.js';
 import { readJsonObject } from '../_lib/http.js';
 import { ORIGIN, req } from './fakes.js';
@@ -220,6 +221,15 @@ describe('POST /api/chat', () => {
     expect(groq.seen).toHaveLength(1);
   });
 
+  it('answers busy before Vercel would cut the request off', async () => {
+    // The first question of Oct 8 hung on a sleeping database until Vercel answered a bare 504.
+    const { deps } = chatDeps([reply('never')], { limiter: () => ({ take: () => new Promise<LimitVerdict>(() => {}) }), deadlineMs: 20 });
+    const res = await handleChat(ask(q('hi')), deps);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'busy' });
+    expect(REQUEST_DEADLINE_MS).toBeLessThan(30_000);
+  });
+
   it('answers 503 chat_unavailable when every model fails', async () => {
     const { deps } = chatDeps([status(429), status(500)]);
     const res = await handleChat(ask(q('hi')), deps);
@@ -337,6 +347,22 @@ describe('limiter', () => {
     expect(statements.filter(s => s === 'delete')).toHaveLength(1);
   });
 
+  it('gives up on a database that does not answer, and tries the schema again next time', async () => {
+    let asleep = true;
+    const limiter = new PgChatLimiter(
+      async text => {
+        if (asleep) return new Promise(() => {});
+        return text.includes('insert') ? [{ count: 1 }] : [];
+      },
+      'salt'.repeat(10),
+      20,
+    );
+    await expect(limiter.take('a', '2026-10-06')).rejects.toBeInstanceOf(TimeoutError);
+    asleep = false;
+    expect(await limiter.take('a', '2026-10-06')).toBe('ok');
+    expect(DB_TIMEOUT_MS).toBeLessThan(REQUEST_DEADLINE_MS);
+  });
+
   it('caps the whole site per day', async () => {
     let global = 149;
     const limiter = new PgChatLimiter(async (text, params = []) => {
@@ -423,5 +449,18 @@ describe('retrieve', () => {
   it('returns nothing for small talk, at most three chunks otherwise', () => {
     expect(ids('hi')).toEqual([]);
     expect(ids('react python java ai bot game data').length).toBeLessThanOrEqual(3);
+  });
+});
+
+describe('withTimeout', () => {
+  it('passes a prompt result or error through untouched', async () => {
+    expect(await withTimeout(Promise.resolve(7), 1000, 'x')).toBe(7);
+    await expect(withTimeout(Promise.reject(new Error('boom')), 1000, 'x')).rejects.toThrow('boom');
+  });
+
+  it('rejects with the step name when the work is too slow', async () => {
+    const err = await withTimeout(new Promise(() => {}), 10, 'chat_usage').catch(e => e);
+    expect(err).toBeInstanceOf(TimeoutError);
+    expect(err.step).toBe('chat_usage');
   });
 });

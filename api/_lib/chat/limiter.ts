@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { neon } from '@neondatabase/serverless';
 import type { Query } from '../store.js';
+import { withTimeout } from './timeout.js';
 
 /** Messages one visitor may send per UTC day. A real conversation is rarely longer than this. */
 export const PER_VISITOR_DAILY = 15;
@@ -9,6 +10,13 @@ export const PER_VISITOR_DAILY = 15;
  * ~2.5K tokens per uncached request give ~160; staying under it means Groq never has to say no.
  */
 export const GLOBAL_DAILY = 150;
+
+/**
+ * don't touch / longest a counter query may take. The first question of Oct 8 2026 hung until
+ * Vercel's 30s limit with no model call logged; the counter's database, its Neon compute idle all
+ * night, was the only step without a deadline. Timing out fails closed fast, with a retry button.
+ */
+export const DB_TIMEOUT_MS = 8_000;
 
 export type LimitVerdict = 'ok' | 'rate_limited' | 'daily_cap';
 
@@ -42,10 +50,11 @@ const SCHEMA = [
 export class PgChatLimiter implements ChatLimiter {
   private schemaReady: Promise<void> | null = null;
 
-  constructor(
-    private readonly query: Query,
-    private readonly salt: string,
-  ) {}
+  private readonly query: Query;
+
+  constructor(query: Query, private readonly salt: string, timeoutMs = DB_TIMEOUT_MS) {
+    this.query = (text, params) => withTimeout(query(text, params), timeoutMs, 'chat_usage');
+  }
 
   private ensureSchema(): Promise<void> {
     this.schemaReady ??= (async () => {

@@ -1,15 +1,23 @@
+import type { ChatConfig } from './_lib/chat/config.js';
 import { defaultChatDeps, type ChatDeps } from './_lib/chat/deps.js';
 import { cannedReply, runOutputHooks, type BlockReason } from './_lib/chat/hooks.js';
 import { isHebrew, parseHistory, retrievalQuery } from './_lib/chat/history.js';
 import { clientIp } from './_lib/chat/limiter.js';
 import { buildRequest, canaryFor, parseDraft } from './_lib/chat/prompt.js';
 import { retrieve } from './_lib/chat/retrieve.js';
+import type { ChatTurn } from './_lib/chat/types.js';
+import { TimeoutError, withTimeout } from './_lib/chat/timeout.js';
 import { errors, isSameOriginWrite, json, readJsonObject } from './_lib/http.js';
 
 /** 12 turns of at most 800 characters (Hebrew is 2 bytes a letter in UTF-8), plus JSON. */
 const MAX_CHAT_BODY_BYTES = 32_768;
 /** At or above this Prompt Guard score, the message is treated as a jailbreak attempt. */
 export const GUARD_THRESHOLD = 0.9;
+/**
+ * don't touch / must stay under `maxDuration` (30s) in vercel.json: past that Vercel answers a bare
+ * 504 and the panel says the AI is offline. Before it, the visitor gets `busy` and a retry button.
+ */
+export const REQUEST_DEADLINE_MS = 25_000;
 
 export interface ChatSource {
   title: string;
@@ -25,7 +33,7 @@ export interface ChatSource {
  * Errors: 400, 403, 429 `rate_limited`/`daily_cap`, 503 `not_configured`/`busy`/`chat_unavailable`.
  */
 export async function handleChat(request: Request, deps: ChatDeps): Promise<Response> {
-  const { config, knowledge } = deps;
+  const { config } = deps;
   if (!config) return errors.notConfigured();
   if (!isSameOriginWrite(request)) return errors.forbidden();
   const body = await readJsonObject(request, MAX_CHAT_BODY_BYTES);
@@ -33,6 +41,17 @@ export async function handleChat(request: Request, deps: ChatDeps): Promise<Resp
   const turns = parseHistory(body.messages);
   if (!turns) return errors.badRequest('invalid_messages');
 
+  try {
+    return await withTimeout(answer(request, deps, config, turns), deps.deadlineMs ?? REQUEST_DEADLINE_MS, 'request');
+  } catch (err) {
+    if (!(err instanceof TimeoutError)) throw err;
+    console.warn(JSON.stringify({ chat: 'deadline' }));
+    return json({ error: 'busy' }, 503);
+  }
+}
+
+async function answer(request: Request, deps: ChatDeps, config: ChatConfig, turns: ChatTurn[]): Promise<Response> {
+  const { knowledge } = deps;
   const latest = turns[turns.length - 1].content;
   const hebrew = isHebrew(latest);
   const blocked = (reason: BlockReason) => json({ reply: cannedReply(reason, hebrew, knowledge.email), sources: [], blocked: true });
@@ -42,7 +61,8 @@ export async function handleChat(request: Request, deps: ChatDeps): Promise<Resp
     const day = deps.now().toISOString().slice(0, 10);
     const verdict = await deps.limiter(config).take(clientIp(request) ?? 'unknown', day);
     if (verdict !== 'ok') return json({ error: verdict }, 429);
-  } catch {
+  } catch (err) {
+    console.warn(JSON.stringify({ chat: 'limiter_failed', reason: err instanceof TimeoutError ? 'timeout' : 'error' }));
     return json({ error: 'chat_unavailable' }, 503);
   }
 
