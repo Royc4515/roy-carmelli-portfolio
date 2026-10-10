@@ -1,3 +1,4 @@
+import { bio } from '../data/bio';
 import PixelIcon from './PixelIcon';
 import { Button } from './ui/Button';
 
@@ -23,8 +24,17 @@ export default function Footer() {
         >
           Continue?
         </Button>
-        <p className="text-hud text-fg-muted">Roy Carmelli © {year}</p>
-        <p className="text-hud text-fg-subtle lg:justify-self-end lg:text-right">
+        {/* The Hebrew name is the one visible place people searching "רועי כרמלי" can match.
+            lang + dir isolate it, so the RTL run never reorders the Latin text around it. */}
+        <p className="text-hud text-fg-muted">
+          {bio.name} ·{' '}
+          <span lang="he" dir="rtl">
+            {bio.nameHe}
+          </span>{' '}
+          © {year}
+        </p>
+        {/* One line from lg: the name column grew with the Hebrew name and would wrap "Canvas". */}
+        <p className="text-hud text-fg-subtle lg:justify-self-end lg:whitespace-nowrap lg:text-right">
           Built from scratch: React · TypeScript · Canvas
         </p>
       </div>

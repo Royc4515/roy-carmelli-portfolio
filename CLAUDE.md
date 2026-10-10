@@ -50,7 +50,7 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 ## Repo-specific rules
 - This site is what recruiters see. Every project claim in `src/data/projects.ts` must match that project's actual repo; never add metrics or claims that are not backed.
 - Describe Roy's military service as "battalion medic (חוג"ד), operational support role" - never "combat medic".
-- The site is English-only (`<html lang="en">`); Hebrew appears only in `bio.nameHe`, which also feeds the `<title>`/OG title, the JSON-LD `alternateName` and llms.txt (so searches for "רועי כרמלי" match). If any Hebrew/RTL copy is added, check both RTL and LTR rendering.
+- The site is English-only (`<html lang="en">`); Hebrew appears only in `bio.nameHe`, shown in the footer (`lang="he" dir="rtl"`) and also feeding the `<title>`/OG title, the JSON-LD `alternateName` and llms.txt (so searches for "רועי כרמלי" match). If any Hebrew/RTL copy is added, check both RTL and LTR rendering.
 - Keep `index.html` meta/OG/Twitter tags in sync with `src/seo/site.ts` (`src/seo/seo.test.ts` fails when they drift); the JSON-LD is generated from `src/data`, never hand-written in `index.html`. Degree wording in SEO copy: "Computer Science & Neuroscience".
 - Every project `description` opens with one quotable sentence: "<Name> is a ... " (what, for whom, on what stack). It is the project's JSON-LD and llms.txt description; `seo.test.ts` checks it. Team projects set `teamSize` to match the "team of N" wording.
 

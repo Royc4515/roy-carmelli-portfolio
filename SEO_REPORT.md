@@ -101,7 +101,7 @@ These sentences are the JSON-LD and `llms.txt` descriptions. The visible card ta
 | sitemap.xml | static, 1 URL | generated, 2 URLs with lastmod |
 | llms.txt | 404 | 200 |
 | Page with JavaScript off | blank | full designed page |
-| Screenshots with JS on, 1440x900 and 390x844, full page | - | **pixel-identical** to `origin/main` |
+| Screenshots with JS on, 1440x900 and 390x844, full page | - | **pixel-identical** to `origin/main` (first commit; the footer change in section 5 is the one deliberate visual change) |
 
 Lighthouse 12, local `vite preview` of both builds, one run each, so expect a few points of noise:
 
@@ -128,19 +128,15 @@ Honest reading: Lighthouse SEO was already 100 and stays 100, because Lighthouse
    - Sign in at https://www.bing.com/webmasters and choose "Import from Google Search Console" (fastest), or verify with their meta tag. Send me the tag and I'll add it.
    - Submit the sitemap.
    - Turn on IndexNow if offered.
-4. **Custom domain (recommended).** For example `roycarmelli.com` or `roycarmelli.dev`, about $10-15 a year.
-   - A `*.vercel.app` subdomain works, but a name-match domain is a stronger signal for "Roy Carmelli" and survives a host change.
-   - If you buy one: add it in Vercel and make it primary, so the vercel.app URL 301-redirects to it.
-   - Tell me, and I'll update `SITE_URL` in `src/seo/site.ts`, the head tags in `index.html` and `robots.txt` (the tests catch any drift).
-   - Then add the new domain as a Search Console property, and as a Google OAuth "Authorized JavaScript origin" for the scoreboard sign-in.
+4. **Custom domain:** you decided to stay on `roy-carmelli-portfolio.vercel.app`, which is fine. If that ever changes, `SITE_URL` in `src/seo/site.ts`, the head tags in `index.html` and `robots.txt` are the only places to update (the tests catch drift). Make the new domain primary in Vercel so the old URL 301-redirects.
 5. **Links from places that already rank for your name.** This matters more than anything on the page:
    - LinkedIn: the Website field in Contact info, plus the Featured section.
    - GitHub: the profile "Website" field, and a profile README (`Royc4515/Royc4515`) with the link and your Hebrew name. Also set the `homepage` of the portfolio repo and the main project repos (Aside, sommelier bot) to the portfolio URL.
    - Your CV PDF: make sure the portfolio URL is in it and clickable.
    - Bar-Ilan pages if any allow it (department student projects, lab pages), and the StandWithUs alumni profile if there is one.
    - A short post on LinkedIn (and dev.to or Medium, optional) about Aside or Roy Runner, linking back. AI answer engines often cite these.
-6. **Optional, if you want stronger Hebrew results:** add your Hebrew name visibly somewhere (for example the footer: "Roy Carmelli · רועי כרמלי"). I didn't add it, because the brief said not to change the design. The title, JSON-LD and llms.txt carry it for now.
 
-## 5. Something I noticed but did not change
+## 5. Follow-up changes (after your answers)
 
-The About section says "3rd year · expected graduation 2027". The CV commit (#39) and the LinkedIn data say February 2028. One of them is out of date; please check which.
+- **Hebrew name in the footer:** "Roy Carmelli · רועי כרמלי © 2026", marked `lang="he" dir="rtl"` so the RTL run sits correctly inside the LTR line. Checked at 390, 768, 1024, 1280 and 1440 px, day and night. The wider name pushed "Canvas" in the credit line onto a second line on desktop, so that line now stays on one line from `lg`. The phone layout was already two lines and is unchanged.
+- **Graduation year:** About now says "3rd year · expected graduation 2028", matching the CV and LinkedIn (February 2028).
