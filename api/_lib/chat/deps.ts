@@ -13,6 +13,8 @@ export interface ChatDeps {
   guard: (config: ChatConfig) => InjectionGuard | null;
   chain: (config: ChatConfig) => FallbackChain;
   now: () => Date;
+  /** Overrides the handler's REQUEST_DEADLINE_MS (tests). */
+  deadlineMs?: number;
 }
 
 export function defaultChatDeps(): ChatDeps {

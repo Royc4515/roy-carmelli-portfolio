@@ -11,7 +11,14 @@ describe('Footer', () => {
     vi.useFakeTimers({ now: new Date('2031-03-14T12:00:00Z'), toFake: ['Date'] });
     render(<Footer />);
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
-    expect(screen.getByText('Roy Carmelli © 2031')).toBeInTheDocument();
+    expect(screen.getByRole('contentinfo')).toHaveTextContent('Roy Carmelli · רועי כרמלי © 2031');
+  });
+
+  it('marks the Hebrew name as Hebrew, right to left', () => {
+    render(<Footer />);
+    const he = screen.getByText('רועי כרמלי');
+    expect(he).toHaveAttribute('lang', 'he');
+    expect(he).toHaveAttribute('dir', 'rtl');
   });
 
   it('links back to the top of the page with a readable name', () => {

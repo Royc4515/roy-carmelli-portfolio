@@ -20,16 +20,17 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - `src/hooks/` - theme, media queries, game display mode, active section, hash scroll.
 - `src/theme/` - tokens, motion, and the GENERATED `pixelSprites.ts`.
 - `src/dev/Gallery.tsx` - dev-only component gallery at `/?gallery`.
-- `index.html` - SEO meta, JSON-LD Person data, and the pre-paint theme script.
-- `public/` - `Roy_Carmelli_CV.pdf`, fonts, sprites, sitemap, robots, Search Console verification file.
+- `index.html` - SEO meta (title, description, canonical, OG/Twitter) and the pre-paint theme script.
+- `src/seo/` - SEO and AI-search output built from `src/data`: `site.ts` (title, description, URL), `structuredData.ts` (JSON-LD graph: WebSite, ProfilePage, Person, a node per project), `crawlerFiles.ts` (sitemap.xml, llms.txt). `src/entry-server.tsx` + `scripts/seo/prerender.mjs` prerender the page at build time. See `SEO_REPORT.md`.
+- `public/` - `Roy_Carmelli_CV.pdf`, fonts, sprites, robots.txt, Search Console verification file. `sitemap.xml` and `llms.txt` are generated into `dist/` by the build.
 - `scripts/pixelate/` - Python pipeline: `import_flow.py` turns the Google Flow sprite sheets in `design-src/flow/` into the game sprites and the site sources, then `pixelate.py` builds the site sheets + `pixelSprites.ts`. See its README.
 - `docs/redesign/SPEC.md` - design-system source of truth; `docs/redesign/*` and `docs/copy-refresh/*` hold before/after screenshots.
 
 ## Commands
 - `npm install` (or `npm ci`) - verified.
 - `npm run dev` - Vite dev server on port 5173 (unverified here).
-- `npm test` - `vitest run`; verified: 59 files / 743 tests pass (the `api/_tests` files run in the node environment). jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
-- `npm run build` - `tsc -b && vite build`; verified. `tsc -b` also typechecks `api/` (its own `api/tsconfig.json`).
+- `npm test` - `vitest run`; verified: 60 files / 768 tests pass (the `api/_tests` files run in the node environment). jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
+- `npm run build` - `tsc -b && vite build`, then `vite build --ssr src/entry-server.tsx` and `node scripts/seo/prerender.mjs` (writes the rendered page, JSON-LD, sitemap.xml and llms.txt into `dist/`); verified. `tsc -b` also typechecks `api/` (its own `api/tsconfig.json`). Check what crawlers see with `npm run build && npx vite preview`, then `curl localhost:4173`.
 - `vercel dev` - runs the site with the `/api` functions locally (needs `vercel link` + `vercel env pull`; unverified here). Plain `npm run dev` has no `/api`.
 - `npm run test:coverage` - v8 coverage (unverified).
 - `python3 scripts/pixelate/import_flow.py && python3 scripts/pixelate/pixelate.py` - needs Pillow + numpy; verified (on Windows: `uv run --with pillow --with numpy python ...`).
@@ -49,8 +50,9 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 ## Repo-specific rules
 - This site is what recruiters see. Every project claim in `src/data/projects.ts` must match that project's actual repo; never add metrics or claims that are not backed.
 - Describe Roy's military service as "battalion medic (חוג"ד), operational support role" - never "combat medic".
-- The site is English-only (`<html lang="en">`); Hebrew appears only in `bio.nameHe` and the JSON-LD `alternateName`. If any Hebrew/RTL copy is added, check both RTL and LTR rendering.
-- Keep `index.html` meta/OG/JSON-LD descriptions in sync with `bio.ts` when the headline or degree wording changes.
+- The site is English-only (`<html lang="en">`); Hebrew appears only in `bio.nameHe`, shown in the footer (`lang="he" dir="rtl"`) and also feeding the `<title>`/OG title, the JSON-LD `alternateName` and llms.txt (so searches for "רועי כרמלי" match). If any Hebrew/RTL copy is added, check both RTL and LTR rendering.
+- Keep `index.html` meta/OG/Twitter tags in sync with `src/seo/site.ts` (`src/seo/seo.test.ts` fails when they drift); the JSON-LD is generated from `src/data`, never hand-written in `index.html`. Degree wording in SEO copy: "Computer Science & Neuroscience".
+- Every project `description` opens with one quotable sentence: "<Name> is a ... " (what, for whom, on what stack). It is the project's JSON-LD and llms.txt description; `seo.test.ts` checks it. Team projects set `teamSize` to match the "team of N" wording.
 
 ## Gotchas
 - The service wording was fixed: `src/sections/About.test.tsx` now asserts "combat medic" never appears; the chat enforces the same rule in its prompt, its knowledge test and its output `styleHook`.
@@ -73,10 +75,11 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - Google "Authorized JavaScript origins" allow no wildcards: a new domain or a preview to test sign-in on must be added there by hand.
 - Chat knowledge is a GENERATED file (`api/_lib/chat/knowledge.generated.ts`) written by `src/lib/chatKnowledge.test.ts`: editing `bio.ts`, `projects.ts`, `linkedin.ts` or the GitHub snapshot fails `npm test` until it is refreshed with `-u`. It must never contain the phone number or the city (tested).
 - The chat's GitHub view is an allowlist (`scripts/chat/github-allowlist.json`); a new public repo is invisible to it until added. A repo behind a site card is folded into the card; its README is not used.
-- Chat config (`readChatConfig`) is separate from the scoreboard's, but reuses `DATABASE_URL` and `SESSION_SECRET` (as the IP-hash salt). Without them the chat API answers 503. The limiter fails closed (DB down = no model call); the Prompt Guard fails open (output hooks still run).
+- Chat config (`readChatConfig`) is separate from the scoreboard's, but reuses `DATABASE_URL` and `SESSION_SECRET` (as the IP-hash salt). Without them the chat API answers 503. The limiter fails closed (DB down = no model call); the Prompt Guard fails open (output hooks still run). Deadlines: a counter query gets 8s (`DB_TIMEOUT_MS`; a day's first question once hung past Vercel's limit, with the idle Neon compute the only step lacking a deadline) and the whole request 25s (`REQUEST_DEADLINE_MS`, answered as 503 `busy`), which must stay under `maxDuration` 30 in `vercel.json`.
 - Chat daily caps (`api/_lib/chat/limiter.ts`: 15 per visitor, 150 site-wide) are sized under Groq's free token limits; raise them only after checking `cached` in the function logs. Never add billing to the Groq account: the free tier is what makes the chat unable to cost money. The tighter limit is per minute (~8K tokens per model, about 3 questions each): when every model is rate limited, `FallbackChain` waits once (what Groq's `retry-after` asks, at most 5s) and then answers 503 `busy`, which the panel shows as "busy, try again in a minute" with a retry. `eval.mjs` pauses 9s between questions for the same reason.
 - Game sound is synthesised (Web Audio, no audio files). The engine only announces `GameCue`s (`onCue`); `MiniGame.tsx` routes them to `GameAudio` (a run's `start` starts the music, `crash` stops it). The AudioContext is created on the first unmuted cue, which always comes from a key press or tap, so browsers' autoplay lock is never hit; jsdom has no Web Audio, so in tests the audio is a silent no-op. Mute is stored as `roy-runner-sound` (`on`/`off`) and toggled by the button or `M`.
 - `Hero.tsx` sets `data-arcade-playing` on `<html>` while the game runs; the chat launcher hides on it. The launcher sits at z 90 (below the nav); an open phone sheet goes to z 150.
 - Chat design rules are in `docs/redesign/SPEC.md` §3 "Chat (Pixel Roy)". Typed answers keep the full text in the DOM as `sr-only` until typing ends (`useTypewriter` + `TypedText`), so tests find it with `getByText` and the live region announces it once; the class flips, the node is not replaced. The launcher's speech bubble rotates through `chatPersona.bubbles` (pixel font: Latin-1, at most 24 characters each, tested). Only the chat log may shrink (it once overflowed the frame on a short laptop window). The panel opens beside the launcher, not above it, so a 150%-zoom laptop (~1280x550 CSS px) still fits it; the full-screen sheet is for phones only, and `SHEET_QUERY` in `ChatPanel.tsx` must match the `@media` in `ChatLauncher.css`.
+- Prerender: the build renders the app under a jsdom shim (`scripts/seo/prerender.mjs`, 1280x800, reduced motion) into `#root data-prerendered`. `main.tsx` uses `createRoot`, not `hydrateRoot`, on purpose: layouts computed from the real window would leave mismatched attributes after hydration. A head style hides `#root[data-prerendered]` until `main.tsx` swaps in the live app (synchronously, via `flushSync`) and removes the attribute, so visitors get the same first paint as before; `<noscript>` un-hides it for no-JS readers. A component that crashes in Node/jsdom at render time now fails `npm run build`.
 - `MOBILE_SDD.md` is partly stale (mentions `Arcade.tsx` and an inline-styles-only codebase); trust the code over it.
 - Project claims drift as the source repos evolve (e.g. test counts). Re-verify numbers against the source repo before editing a card.

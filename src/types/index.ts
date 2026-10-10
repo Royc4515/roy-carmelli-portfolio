@@ -18,6 +18,8 @@ export interface Project {
   live?: string;
   tier: ProjectTier;
   status?: 'in-development';
+  /** People who built it, when it was a team project (the copy says "team of N"). Solo when absent. */
+  teamSize?: number;
   year: number;
 }
 
