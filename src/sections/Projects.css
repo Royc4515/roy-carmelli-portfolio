@@ -202,12 +202,12 @@
     padding: 32px 0 8px;
   }
 
-  /* Inline: Live · Code · Quest log share one row. */
+  /* Inline: Live · Code · Details share one row. */
   .quest-actions__links {
     display: contents;
   }
 
-  /* Stacked (from 640px): Live · Code on one row, Quest log under them. */
+  /* Stacked (from 640px): Live · Code on one row, Details under them. */
   @media (min-width: 640px) {
     .quest-actions--stacked {
       flex-direction: column;
@@ -240,6 +240,15 @@
     .quest-actions--pair > .quest-log-toggle {
       grid-column: 1 / -1;
     }
+  }
+
+  /* No public repo: a muted line where the Code button would be. */
+  .quest-private {
+    color: var(--color-ink-muted);
+  }
+
+  .quest-card--side .quest-private {
+    color: var(--color-fg-subtle);
   }
 
   .quest-log-chevron {
@@ -334,9 +343,11 @@
   }
 
   /* ── Lists ─────────────────────────────────────────────────────────── */
+  /* 32px rows: a card's hard drop and the next card's frame eat 12-16px of it,
+     so 24px left the stacked cards looking glued together. */
   .quest-list {
     display: grid;
-    gap: 24px;
+    gap: 32px 24px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -384,7 +395,7 @@
 
     .quest-list--main > li:first-child {
       grid-column: 1 / -1;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
 
     .quest-list--main > li:not(:first-child),
@@ -409,12 +420,12 @@
   }
 
   /* Rows of two: the subgrid rows take no gap, so every card with a row
-     under it keeps 24px below (its margin grows its last track, like the
+     under it keeps 32px below (its margin grows its last track, like the
      lead main quest's). That is every card but the last, and but the one
      before the last when the two share the last row (an even count). */
   @media (768px <= width < 1024px) {
     .quest-list--side > li:not(:last-child, :nth-last-child(2):nth-child(odd)) {
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
   }
 
@@ -585,7 +596,7 @@
     }
 
     /* Side quest: slot, tag, meta and title on the left; the tagline starts
-       level with the slot and Live · Code · Quest log share one row. */
+       level with the slot and Live · Code · Details share one row. */
     .quest-list--side {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -624,6 +635,8 @@
        item  meta     [code]              item  meta     [ CODE ]
        item  title    [code]              item  title    [ CODE ]
        item  tagline  tagline             item  tagline  [ CODE ]
+
+     A row with a live demo puts [ LIVE ] before [ CODE ] in the same cell.
 
      The item is x1 on a 32px plate below 640px, x2 on a 56px plate above.
 
@@ -690,12 +703,23 @@
     grid-area: tagline;
   }
 
-  .research-log__action {
+  .research-log__actions {
     grid-area: action;
+    display: flex;
+    gap: 16px;
+  }
+
+  .research-log__action {
     margin-bottom: 8px; /* the button's drop */
   }
 
   @media (width < 640px) {
+    /* Live over Code: side by side, two 48px squares squeezed the title onto four lines. */
+    .research-log__actions {
+      flex-direction: column;
+      gap: 8px;
+    }
+
     /* Icon-only: the 48px square of Button's icon variant. */
     .research-log__action {
       width: 48px;
@@ -719,7 +743,7 @@
     }
 
     .research-log__item,
-    .research-log__action {
+    .research-log__actions {
       align-self: center;
     }
 

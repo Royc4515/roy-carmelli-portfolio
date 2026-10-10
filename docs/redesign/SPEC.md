@@ -285,7 +285,8 @@ Reference CSS (from the approved prototype):
 - `name`, `size` (12 | 24 | 36 | 48), `title?` (when meaningful; otherwise `aria-hidden`).
 - Set: `play`, `book`, `scroll`, `person`, `star`, `sword`, `potion`, `gear`, `mail`, `github`,
   `linkedin`, `phone`, `joystick`, `sun`, `moon`, `download`, `external`, `code`, `copy`, `menu`,
-  `close`, `arrow-up`, `arrow-down`, `chevron`, `check`, `campfire`, `rotate-phone`, `trophy`.
+  `close`, `arrow-up`, `arrow-down`, `chevron`, `check`, `campfire`, `rotate-phone`, `trophy`,
+  `home`, `fullscreen`, `fullscreen-exit`, `sound`, `sound-off`.
 
 ### Character
 - Props: `pose` (`wave` | `sit` | `idle`), `scale` (1-4, integer), `decorative?`, `label?`, `flip?`.
@@ -300,6 +301,37 @@ Reference CSS (from the approved prototype):
 ### Reveal
 - Wrapper around `motion.div` that applies the "materialize" reveal; renders children visible
   when reduced motion is on or JS is off.
+
+### Chat (Pixel Roy)
+The AI chat (`src/components/Chat/`, setup in `docs/chat/SETUP.md`). Styled as an NPC
+conversation; behaviour lives in `useChat`, copy in `src/data/chatPersona.ts`.
+- **Launcher:** Roy standing (`Character`, `idle` ×1) on a brass `AI` plate, bottom-right, z 90
+  (below the nav). Waves (`wave`) only while pointed at or focused, and for two loops when the
+  page loads: never endlessly beside text people are reading. Press = the plate sinks 4px onto
+  its shadow and its bevel flips. Hidden while the game runs.
+- **Speech bubble:** parchment, ink frame, 12px label, stepped parchment tail, `aria-hidden` (the
+  button carries the name). It says hello 0.8s after load (gone after 6s), and again on every
+  hover or keyboard focus, each time with the next line of `chatPersona.bubbles` (Latin-1, ≤ 24
+  chars each, tested); it lingers 1.5s after the pointer leaves. Not while the panel is open, and
+  not when focus merely returns from closing it. Wraps on a narrow phone.
+- **Panel:** wood `PixelPanel`, elevation 2, brass `tab` "PIXEL ROY · AI". It opens beside Roy
+  (left of the launcher, bottom-aligned), so he stands next to his own dialogue box and the panel
+  gets the window's height: `min(620px, 100dvh - 100px)`, enough on a 150%-zoom laptop (~550px).
+  Only the log flexes (basis 0, 96px minimum) and scrolls; the input and the one-line note never
+  move. Enters like the pause menu (opacity + 8px, `--dur-slow`, `steps(4)`), closes instantly.
+  Phones only (under 768px wide, or under 440px tall when sideways): full-screen sheet over the
+  nav (z 150), page inert behind it.
+- **Answers:** Roy's face in a sunken well beside a parchment speech box (ink text, stepped tail
+  through the frame line). Visitor lines: right-aligned raised plates with an accent line and a
+  12px `YOU` eyebrow. Sentences are Plex `body-s`; text is never rendered as HTML.
+- **Typing:** only the newest answer (and the greeting on first open) types out, capped at
+  1.2s whatever its length; a click or key press finishes it; reduced motion shows it at once.
+  The full text is in the DOM throughout (screen-reader-only until typing ends). A static
+  `play` marker ends a typed answer, mirrored in RTL. Nothing blinks.
+- **Thinking:** three 8px squares stepping in turn (static under reduced motion), with the
+  words for screen readers.
+- **Opening questions:** an RPG choice menu inside the log, under the greeting, each option
+  44px tall with a `play` cursor that lights up on hover or focus.
 
 ### Hooks
 - `usePrefersReducedMotion()`, `useActiveSection(ids: string[])` (IntersectionObserver, returns
@@ -352,7 +384,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   Phones and portrait tablets (< 1024 portrait): a scene band (×3 phones, ×4 tablets, ×2 below
   700px tall) at most 38% of the viewport height, canopy cropped and anchored at the bottom so
   the character and grass stay, then the title card as a full-bleed wood slab. Phone card order:
-  eyebrow, H1, role, availability chip, CTAs, tagline, Press start. Tablets use two columns (text
+  eyebrow, H1, role, tagline, availability chip, CTAs, Press start. Tablets use two columns (text
   left; CTAs and Press start right, CTA top level with the H1). HUD and scroll cue hidden.
   Short or narrow landscape viewports (e.g. 844×390, 800×600, 640×400) get a compact title
   screen: the same overlay composition with k chosen so the forest fills the first screen and
@@ -367,9 +399,11 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   cards) two per row from 640px, the third spanning the row, and three per row from 1024px, their
   parts lined up through subgrid from 768px (24px between rows); research logs as a compact list. QuestCard anatomy: visual (16:10,
   pixel bezel) · tier tag (`star` icon + `MAIN QUEST` / `SIDE QUEST` / `RESEARCH LOG`) · kind ·
-  year · title · `tagline` · `highlights` (main only) · ≤ 4 chips + `+N` · actions: `Live` (primary,
-  external icon), `Code` (secondary, code icon), `Quest log` (ghost, `<details>` holding the full
-  `description`). Links ≥ 44px. Mobile: one column, visual on top.
+  year · title · `tagline` · `highlights` (main only) · ≤ 4 chips + `+N` (all one neutral tone) ·
+  actions: `Live` (primary, external icon), `Code` (secondary, code icon; a project with no public
+  repo shows the muted line "Private repo · code on request" instead), `Details` (ghost, the quest
+  log disclosure holding the full `description` and the whole `tech` list). Links ≥ 44px. Research
+  logs show `Live` before `Code` when a project has a demo. Mobile: one column, visual on top.
   Headings: one H3 per tier (the Research logs tab plate is the visible H3; main/side are
   screen-reader only because every card shows its tier tag), card titles H4. Every card caps chips
   at 4 + `+N`, and the `+N` never takes a row alone: the chip before it reserves its room, so the
@@ -435,7 +469,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   LinkedIn, Phone (number shown under it from 640px).
   Short laptops (`short:`): panel padding 16 and a 12/16/16/16 rhythm (text → buttons → address →
   socials → phone number); the save-point caption sits above the scene instead of below the ground.
-- **Footer.** `surface-sunken`. `Continue?` back-to-top button with `arrow-up`, name ©, and
+- **Footer.** `surface-sunken`. `Back to top` button with `arrow-up`, name ©, and
   "Built from scratch: React · TypeScript · Canvas" in readable size and contrast.
 - **ArcadeFallback.** `rotate-phone` icon (stepped rotation, static under reduced motion), text at
   ≥ 12px pixel / 16px body. Keep `data-testid="arcade-fallback-message"` and "ARCADE ZONE" text.

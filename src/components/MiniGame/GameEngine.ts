@@ -1,11 +1,14 @@
 import {
-  CANVAS_CONFIG, PLAYER_CONFIG, SCROLL_CONFIG,
+  BACKGROUND_CONFIG, CANVAS_CONFIG, PLAYER_CONFIG, SCROLL_CONFIG,
   SCORE_CONFIG, SPRITE_PATHS,
 } from './config';
+import {
+  FONT_LG, FONT_MD, FONT_SM, HUD_COLORS as C, drawPlayerCard, outlinedText, pad,
+} from './hud';
 import { SpriteRenderer } from './SpriteRenderer';
 import { Player } from './Player';
 import { ObstacleManager } from './Obstacle';
-import type { GameState, AABB } from './types';
+import type { GameCue, GameState, AABB } from './types';
 
 // ─── AABB overlap test ────────────────────────────────────────────────────────
 function overlaps(a: AABB, b: AABB): boolean {
@@ -15,21 +18,17 @@ function overlaps(a: AABB, b: AABB): boolean {
     && a.y + a.h > b.y;
 }
 
-// ─── Colours / fonts ──────────────────────────────────────────────────────────
-const C = {
-  darkGreen:   '#1a2e10',
-  forestLight: '#4a6b2e',
-  brass:       '#c9a24a',
-  parchment:   '#e8d8a8',
-  woodDark:    '#3a2818',
-  overlay:     'rgba(10,20,6,0.72)',
-} as const;
-
-const FONT_SM  = '8px "Press Start 2P"';
-const FONT_MD  = '10px "Press Start 2P"';
-const FONT_LG  = '14px "Press Start 2P"';
-
 // ─── GameEngine ───────────────────────────────────────────────────────────────
+
+/** Run lifecycle hooks, so the scoreboard can follow along without touching the canvas. */
+export interface GameEngineHooks {
+  /** Start pressed: a new run begins (fires once per run, before any points are scored). */
+  onRunStart?: () => void;
+  /** The run ended; `score` is the whole score shown on the game-over screen. */
+  onGameOver?: (score: number) => void;
+  /** A moment worth a sound (see GameCue); fired synchronously, inside the input handler for moves. */
+  onCue?: (cue: GameCue) => void;
+}
 
 export class GameEngine {
   private readonly ctx: CanvasRenderingContext2D;
@@ -54,11 +53,18 @@ export class GameEngine {
   private blinkTimer = 0;
   private blinkVisible = true;
 
+  /** Personal best shown in the HUD; the owner keeps it current with setBest. */
+  private best = 0;
+  /** The run that just ended beat `best`. */
+  private newBest = false;
+  private readonly hooks: GameEngineHooks;
+
   private readonly canvasW: number;
   private readonly canvasH: number;
 
-  constructor(ctx: CanvasRenderingContext2D) {
+  constructor(ctx: CanvasRenderingContext2D, hooks: GameEngineHooks = {}) {
     this.ctx = ctx;
+    this.hooks = hooks;
     this.canvasW = CANVAS_CONFIG.width;
     this.canvasH = CANVAS_CONFIG.height;
     this.player = new Player(this.canvasW, this.canvasH);
@@ -75,10 +81,12 @@ export class GameEngine {
       ...SPRITE_PATHS.player.stand,
       ...SPRITE_PATHS.player.idle,
       ...SPRITE_PATHS.player.slide,
+      ...SPRITE_PATHS.player.slideIn,
+      ...SPRITE_PATHS.player.slideOut,
       ...SPRITE_PATHS.obstacles.ground.map(o => o.src),
       ...SPRITE_PATHS.obstacles.air.map(o => o.src),
       SPRITE_PATHS.background,
-      SPRITE_PATHS.playerScoreHUD,
+      SPRITE_PATHS.portrait,
     ];
     await this.renderer.preload(paths);
     // Ensure Press Start 2P is available before first draw
@@ -98,14 +106,19 @@ export class GameEngine {
   handleInput(): void {
     switch (this.state) {
       case 'IDLE':       this.beginTransition(); break;
-      case 'PLAYING':    this.player.jump();      break;
+      case 'PLAYING':    if (this.player.jump()) this.cue('jump'); break;
       case 'GAMEOVER':   this.resetGame();        break;
     }
   }
 
   /** S / ArrowDown — slide under air obstacles */
   handleSlide(): void {
-    if (this.state === 'PLAYING') this.player.slide();
+    if (this.state === 'PLAYING' && this.player.slide()) this.cue('slide');
+  }
+
+  /** Personal best to display. Ignores anything that is not a finite, non-negative number. */
+  setBest(best: number): void {
+    if (Number.isFinite(best) && best >= 0) this.best = Math.floor(best);
   }
 
   /** True while the game is waiting to be (re)started — i.e. a tap should begin play. */
@@ -159,7 +172,11 @@ export class GameEngine {
 
   private updatePlaying(dt: number): void {
     this.playTime += dt;
+    const before   = this.score;
     this.score    += SCORE_CONFIG.pointsPerSecond * dt;
+    if (Math.floor(this.score / SCORE_CONFIG.milestone) > Math.floor(before / SCORE_CONFIG.milestone)) {
+      this.cue('milestone');
+    }
 
     // Gradually increase scroll speed
     this.scrollSpeed = Math.min(
@@ -189,15 +206,32 @@ export class GameEngine {
     this.transitionStartX = this.player.x;
     this.transitionTargetX = this.canvasW * PLAYER_CONFIG.runFraction;
     this.player.animState = 'run';
+    this.hooks.onRunStart?.();
+    this.cue('start');
   }
 
   private triggerGameOver(): void {
     this.state = 'GAMEOVER';
     this.player.animState = 'stand';
+    const final = Math.floor(this.score);
+    this.newBest = final > this.best;
+    if (this.newBest) this.best = final;
+    this.hooks.onGameOver?.(final);
+    this.cue('crash');
+    if (this.newBest) this.cue('newBest');
+  }
+
+  private cue(cue: GameCue): void {
+    try {
+      this.hooks.onCue?.(cue);
+    } catch {
+      // Sound is optional: a Web Audio error must not kill the rAF loop and freeze the game.
+    }
   }
 
   private resetGame(): void {
     this.score       = 0;
+    this.newBest     = false;
     this.playTime    = 0;
     this.scrollSpeed = SCROLL_CONFIG.initialSpeed;
     this.bgOffset    = 0;
@@ -228,13 +262,19 @@ export class GameEngine {
   }
 
   private drawScrollingBackground(): void {
-    const { ctx, canvasW, canvasH } = this;
+    const { ctx } = this;
     const bgSrc = SPRITE_PATHS.background;
+    const { tileW, tileH, top } = BACKGROUND_CONFIG;
 
-    // Tile width matches canvas width for a seamless horizontal loop
-    const offset = this.bgOffset % canvasW;
-    this.renderer.draw(ctx, bgSrc, -offset,          0, canvasW, canvasH);
-    this.renderer.draw(ctx, bgSrc, canvasW - offset,  0, canvasW, canvasH);
+    // Every other tile is mirrored, so neighbouring edges are the same column of pixels and
+    // the loop has no seam whatever the art's edges look like. The pair repeats every 2 tiles.
+    // Drawn from BACKGROUND_CONFIG.top, which puts the grass line on the ground.
+    const offset = this.bgOffset % (tileW * 2);
+    for (let i = 0; i < 3; i++) {
+      const x = Math.round(i * tileW - offset);
+      if (x >= this.canvasW || x + tileW <= 0) continue;
+      this.renderer.draw(ctx, bgSrc, x, top, tileW, tileH, i % 2 === 1);
+    }
   }
 
   private drawIdleUI(): void {
@@ -243,43 +283,21 @@ export class GameEngine {
     ctx.textBaseline = 'middle';
 
     // Title
-    ctx.font      = FONT_LG;
-    ctx.fillStyle = C.parchment;
-    ctx.fillText('ROY RUNNER', canvasW / 2, canvasH * 0.2);
+    ctx.font = FONT_LG;
+    outlinedText(ctx, 'ROY RUNNER', canvasW / 2, canvasH * 0.2, C.parchment);
 
-    // Blinking prompt
+    // Blinking prompt and hint sit under the title, clear of Roy idling at the centre.
     if (this.blinkVisible) {
-      ctx.font      = FONT_MD;
-      ctx.fillStyle = C.brass;
-      ctx.fillText('▶ PRESS START', canvasW / 2, canvasH * 0.78);
+      ctx.font = FONT_MD;
+      outlinedText(ctx, '▶ PRESS START', canvasW / 2, canvasH * 0.3, C.brass);
     }
 
-    // Hint
-    ctx.font      = FONT_SM;
-    ctx.fillStyle = C.forestLight;
-    ctx.fillText('SPACE, CLICK OR TAP', canvasW / 2, canvasH * 0.91);
+    ctx.font = FONT_SM;
+    outlinedText(ctx, 'SPACE, CLICK OR TAP', canvasW / 2, canvasH * 0.37, C.parchment);
   }
 
   private drawScoreHUD(): void {
-    const { ctx } = this;
-    const HUD_W = 200;
-    const HUD_H = 95;
-    const HUD_X = 8;
-    const HUD_Y = 8;
-
-    // Static HUD frame image
-    this.renderer.draw(ctx, SPRITE_PATHS.playerScoreHUD, HUD_X, HUD_Y, HUD_W, HUD_H);
-
-    // Score number — top-right corner
-    ctx.textAlign    = 'right';
-    ctx.textBaseline = 'top';
-    ctx.font         = FONT_MD;
-    ctx.fillStyle    = C.brass;
-    ctx.fillText(
-      String(Math.floor(this.score)).padStart(6, '0'),
-      this.canvasW - 12,
-      12,
-    );
+    drawPlayerCard(this.ctx, this.renderer, { score: this.score, best: this.best });
   }
 
   private drawGameOverUI(): void {
@@ -293,18 +311,24 @@ export class GameEngine {
     ctx.textBaseline = 'middle';
 
     // GAME OVER
-    ctx.font      = FONT_LG;
-    ctx.fillStyle = '#e05050';
-    ctx.fillText('GAME OVER', canvasW / 2, canvasH * 0.32);
+    ctx.font = FONT_LG;
+    outlinedText(ctx, 'GAME OVER', canvasW / 2, canvasH * 0.32, C.danger);
 
     // Score
-    ctx.font      = FONT_MD;
-    ctx.fillStyle = C.brass;
-    ctx.fillText(`SCORE  ${Math.floor(this.score).toString().padStart(6, '0')}`, canvasW / 2, canvasH * 0.52);
+    ctx.font = FONT_MD;
+    outlinedText(ctx, `SCORE  ${pad(this.score)}`, canvasW / 2, canvasH * 0.52, C.brass);
+
+    // New best, or the best to beat
+    ctx.font = FONT_SM;
+    outlinedText(
+      ctx,
+      this.newBest ? 'NEW BEST!' : `BEST  ${pad(this.best)}`,
+      canvasW / 2, canvasH * 0.6,
+      this.newBest ? C.brass : C.parchment,
+    );
 
     // Restart prompt
-    ctx.font      = FONT_SM;
-    ctx.fillStyle = C.parchment;
-    ctx.fillText('▶ PRESS TO RESTART', canvasW / 2, canvasH * 0.72);
+    ctx.font = FONT_SM;
+    outlinedText(ctx, '▶ PRESS TO RESTART', canvasW / 2, canvasH * 0.72, C.parchment);
   }
 }

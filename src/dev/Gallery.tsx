@@ -13,6 +13,8 @@ import { Reveal } from '../components/ui/Reveal';
 import { useToast } from '../components/ui/Toast';
 import PixelPanel from '../components/PixelPanel';
 import PixelIcon, { PIXEL_ICON_NAMES } from '../components/PixelIcon';
+import ChatPanel from '../components/Chat/ChatPanel';
+import type { ChatEntry, ChatState } from '../hooks/useChat';
 
 type Theme = 'day' | 'night';
 type GalleryState = 'default' | 'hover' | 'active' | 'focus' | 'disabled';
@@ -344,6 +346,10 @@ function ThemeColumn({ theme }: { theme: Theme }) {
         </div>
       </Block>
 
+      <Block title="Chat · Pixel Roy">
+        <ChatDemo />
+      </Block>
+
       <Block title="Reveal · index 0-3">
         <ul className="grid gap-6 sm:grid-cols-2">
           {[0, 1, 2, 3].map(i => (
@@ -356,6 +362,46 @@ function ThemeColumn({ theme }: { theme: Theme }) {
         </ul>
       </Block>
     </section>
+  );
+}
+
+/* ── Pixel Roy chat: a conversation (with Hebrew) and the edge states ────── */
+
+const CHAT_DEMO: ChatEntry[] = [
+  { id: 1, role: 'user', content: 'What have you built with AI?' },
+  {
+    id: 2,
+    role: 'assistant',
+    content:
+      'My main AI build is Aside, a Chrome extension that opens an AI sidebar on any page with Alt+A. It talks to six providers behind one Factory + Strategy layer.\n- Wine Sommelier Bot: a Telegram agent that runs my cellar\n- CLR: an AI pipeline for food links',
+    sources: [
+      { title: 'Aside - AI Sidebar', url: 'https://royc4515.github.io/Aside/' },
+      { title: 'Wine Sommelier Bot', url: 'https://github.com/Royc4515/gemini-sommelier-bot' },
+    ],
+  },
+  { id: 3, role: 'user', content: 'מה עשית בצבא?' },
+  { id: 4, role: 'assistant', content: 'שירתתי כחובש גדודי (חוג"ד) ורכז רפואה באוגדת עזה, תפקיד תומך לחימה. מאז אוגוסט 2024 אני במילואים פעילים.' },
+];
+
+const chatState = (over: Partial<ChatState>): ChatState => ({
+  messages: [],
+  sending: false,
+  error: null,
+  send: () => {},
+  retry: () => {},
+  ...over,
+});
+
+function ChatDemo() {
+  return (
+    <div className="grid gap-12 xl:grid-cols-2">
+      <Cell caption="Conversation · thinking">
+        <ChatPanel open inline onClose={() => {}} chat={chatState({ messages: CHAT_DEMO, sending: true })} />
+      </Cell>
+      <Cell caption="First open · error">
+        <ChatPanel open inline onClose={() => {}} chat={chatState({ error: 'unavailable' })} />
+      </Cell>
+    </div>
   );
 }
 

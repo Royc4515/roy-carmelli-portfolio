@@ -373,8 +373,11 @@
     --btn-lo: var(--color-edge);
     --btn-edge: var(--color-edge);
 
-    &:is(:hover, [data-gallery-state="hover"]) {
-      --btn-bg: color-mix(in srgb, var(--color-ink) 80%, var(--color-ink-muted));
+    /* Real hover only, like the base rule: a tapped CODE button stayed lit on phones. */
+    @media (hover: hover) {
+      &:is(:hover, [data-gallery-state="hover"]) {
+        --btn-bg: color-mix(in srgb, var(--color-ink) 80%, var(--color-ink-muted));
+      }
     }
 
     &:is(:active, [data-gallery-state="active"]) {
@@ -396,7 +399,8 @@
     @apply text-hud;
     display: inline-flex;
     align-items: center;
-    height: 28px;
+    /* min-height, not height: at a large browser font size the rem text outgrew a fixed box. */
+    min-height: 28px;
     padding: 4px 8px; /* step 10 (P2-19): SPEC 4/8, was 0 10px; the height stays 28px */
     background-color: var(--color-surface-sunken);
     color: var(--color-fg);

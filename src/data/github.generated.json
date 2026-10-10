@@ -1,0 +1,162 @@
+{
+  "owner": "Royc4515",
+  "repos": [
+    {
+      "name": "Aside",
+      "url": "https://github.com/Royc4515/Aside",
+      "description": "",
+      "language": "JavaScript",
+      "topics": [],
+      "homepage": "https://royc4515.github.io/Aside/",
+      "lastPush": "2026-10-06",
+      "readme": "Aside AI in your sidebar. On any webpage. Ask any AI about the page you're reading - summarize, extract, translate, or just chat. Six providers, one keystroke, zero context-switching. Why Aside · Install · How it works · Privacy · For developers Why Aside You're reading something - an article, a research paper, an API doc, a long email thread - and you want an AI's take now, without losing your place. Aside opens a sidebar right where you are. It reads the page so you don't have to paste anything. You pick the model. You stay on the page. One keystroke. Alt + A on any page. The sidebar slides..."
+    },
+    {
+      "name": "roy-carmelli-portfolio",
+      "url": "https://github.com/Royc4515/roy-carmelli-portfolio",
+      "description": "",
+      "language": "TypeScript",
+      "topics": [],
+      "homepage": "https://roy-carmelli-portfolio.vercel.app",
+      "lastPush": "2026-10-06",
+      "readme": "Roy Carmelli - Portfolio Live: https://roy-carmelli-portfolio.vercel.app/ Personal portfolio for a CS & Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. Press start and the title screen becomes Roy Runner, an endless runner on a small canvas engine built for this site: a game-state machine, a 7-state player animation machine, AABB collision and a speed that keeps climbing. Day/night theme with system preference detection. The page is a map of five zones:..."
+    },
+    {
+      "name": "gemini-sommelier-bot",
+      "url": "https://github.com/Royc4515/gemini-sommelier-bot",
+      "description": "A serverless, context-aware Telegram sommelier powered by Gemini 2.5 Flash. Orchestrates live Google Sheets inventory management, chemical food-pairing synergy, and resilient LLM fallback chains- all built with zero-framework Python for ultra-low latency",
+      "language": "Python",
+      "topics": [],
+      "homepage": "https://gemini-wine-sommelier.vercel.app",
+      "lastPush": "2026-10-01",
+      "readme": "Gemini Sommelier Bot Gemini Sommelier Bot is a serverless Telegram bot powered by the Google Gemini API. It operates as a highly specialized, context-aware sommelier that pairs meal selections with your live wine inventory managed via Google Sheets. Designed for robust execution, it utilizes a Vercel-deployed serverless architecture, exponential backoff for API resiliency, and a dynamic LLM fallback chain. Interface & Data State Telegram Interface (LLM Pairing) Google Sheets (Live Inventory) Context-aware recommendations based on available bottles. Source of truth for cellar management and..."
+    },
+    {
+      "name": "career-predictor",
+      "url": "https://github.com/Royc4515/career-predictor",
+      "description": "",
+      "language": "JavaScript",
+      "topics": [],
+      "homepage": "https://career-predictor-cnvg.onrender.com/",
+      "lastPush": "2026-09-30",
+      "readme": "CareerPredict AI Results are 99.7% accurate and completely made up. CareerPredict AI runs your professional DNA through 847 career trajectories, cross-references the Quantum Personality Matrix, and delivers the career destiny you truly deserve - complete with a fake happiness score, a dubious salary projection, and an AI-generated portrait of your future self. Answer 5 questions. Watch the analysis. Discover you're a JIRA Ticket Archaeologist, Legacy Systems Division. Screenshots Discover Your True Career Destiny The questions are hard. The answers are harder. 823 trajectories · 13,911 data..."
+    },
+    {
+      "name": "white-matter-tracts-game",
+      "url": "https://github.com/Royc4515/white-matter-tracts-game",
+      "description": "mini-game for self test in Neuroanatomy course 5th unit: \"the White Matter\"",
+      "language": "HTML",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-09-28",
+      "readme": "White Matter Tracts Game A modern, interactive drag-and-drop game for mastering white matter tract classification in neuroanatomy. Designed for medical students and neuroscience enthusiasts. Play Live: https://royc4515.github.io/white-matter-tracts-game/ Features Training Mode: Instant feedback. Learn by doing with immediate visual cues for correct/incorrect placements. Test Mode: Exam-style assessment. - Timer options: 30s / 60s / 90s. - Board locks upon completion or timeout. - Confetti Celebration for perfect scores! Modern UI: - Clean, scientific aesthetic using Inter typography. -..."
+    },
+    {
+      "name": "Project1_SignalProcessing",
+      "url": "https://github.com/Royc4515/Project1_SignalProcessing",
+      "description": "",
+      "language": "Jupyter Notebook",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-05-17",
+      "readme": "פרויקט 1 - עיבוד אותות ביולוגיים מטלה אישית בקורס \"עיבוד אותות במוח\" באוניברסיטת בר-אילן. מנתח שני סוגי אותות נוירונליים: רישום VSDI מגנגליון של עלוקה ורכבות ספייקים של חמישה נוירונים סינתטיים. תוכן המאגר קובץ תיאור Project1SignalProcessing.ipynb מחברת Colab עם כל הקוד והדו\"ח המלא Project 1 - Signal Processing - REPORT.pdf הדו\"ח להגשה בפורמט PDF report.html הדו\"ח בפורמט HTML (RTL, MathJax) - מקור ה-PDF buildreport.py סקריפט שמייצר את report.html מהמחברת Neuraldata.csv נתוני VSDI: ΔF/F לאורך 30 שניות ב-50 Hz spiketrains.csv רכבות ספייקים של נוירונים A-E, 100 ניסיונות, 1000 Hz graphs/ פלטי..."
+    },
+    {
+      "name": "Project2_SignalProcessing",
+      "url": "https://github.com/Royc4515/Project2_SignalProcessing",
+      "description": "",
+      "language": "Jupyter Notebook",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-06-14",
+      "readme": "פרויקט 2 - עיבוד אותות במוח צפייה במאגר המלא ב-GitHub מטלה אישית בקורס \"עיבוד אותות במוח\" באוניברסיטת בר-אילן. בפרויקט זה מבוצע ניתוח ספקטרלי מתקדם (Spectral Analysis) של אותות EEG, תוך התמקדות בהבדלים בין מצב עיניים פקוחות (EO) למצב עיניים עצומות (EC). הפרויקט עוסק בסינון תדרים, חישוב Power Spectrum דרך FFT ו-Welch, חילוץ מדד ה-IAF (Individual Alpha Frequency), ייצוג זמן-תדר (Spectrogram), ושחזור גלי אלפא נקיים. תוכן המאגר קובץ תיאור Project2.ipynb מחברת Colab עם כל הקוד והדו\"ח המלא Project2.pdf הדו\"ח הסופי בפורמט PDF report.html הדו\"ח המעוצב בפורמט HTML (RTL) buildreport.py סקריפט שמייצר את..."
+    },
+    {
+      "name": "Project3_SignalProcessing",
+      "url": "https://github.com/Royc4515/Project3_SignalProcessing",
+      "description": "Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data",
+      "language": "Jupyter Notebook",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-09-07",
+      "readme": "פרויקט 3 - עיבוד אותות במוח צפייה במאגר המלא ב-GitHub מטלה אישית בקורס \"עיבוד אותות במוח\" באוניברסיטת בר-אילן. בפרויקט זה מנותחת הקלטה בת 600 שניות של פוטנציאל שדה מקומי (LFP) שנדגמה ב-1000 Hz, יחד עם זמני הספייקים של נוירון בודד שנרשם במקביל. הפרויקט עוסק בתכנון והשוואה של מסנני FIR ו-IIR, בהשפעת שיטת הסינון על הפאזה, בחילוץ אמפליטודה ופאזה רגעיות באמצעות התמרת הילברט, ובבדיקת נעילת הפאזה בין ירי הנוירון לקצב ה-theta. תוכן המאגר קובץ תיאור Project3.ipynb מחברת Colab עם כל הקוד והדו\"ח המלא Project3.pdf הדו\"ח הסופי בפורמט PDF buildreport.py סקריפט שמייצר את report.html מהמחברת lfp.npy אות..."
+    },
+    {
+      "name": "ArkanoidGame",
+      "url": "https://github.com/Royc4515/ArkanoidGame",
+      "description": "",
+      "language": "Jupyter Notebook",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-04-29",
+      "readme": "Arkanoid Arkanoid clone in Java 17 - focused on clean OOP design patterns and a custom geometry engine. Table of Contents Architecture Geometry Engine Class Structure Controls Run Architecture Three design patterns structure the codebase. Observer - HitNotifier / HitListener Block implements HitNotifier and maintains a list of HitListener subscribers. On each hit it calls hitEvent(Block, Ball) on every registered listener. Listener Behaviour BlockRemover Removes the block and decrements a counter BallRemover Removes the ball when it reaches the death region ScoreTrackingListener Adds 5 points..."
+    },
+    {
+      "name": "background-cognitive-correlation",
+      "url": "https://github.com/Royc4515/background-cognitive-correlation",
+      "description": "Python data analysis project - socio-educational predictors of children's cognitive outcomes. Pandas, NumPy, Matplotlib, SciPy, OLS regression.",
+      "language": null,
+      "topics": [
+        "data-analysis",
+        "jupyter-notebook",
+        "matplotlib",
+        "neuroscience",
+        "pandas",
+        "python"
+      ],
+      "homepage": null,
+      "lastPush": "2026-01-22",
+      "readme": ""
+    },
+    {
+      "name": "build-your-goat",
+      "url": "https://github.com/Royc4515/build-your-goat",
+      "description": "Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies)",
+      "language": "TypeScript",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-06-28",
+      "readme": "Build Your GOAT - NBA · EuroLeague · Soccer Play now: https://royc4515.github.io/build-your-goat/ (works on desktop & mobile) A casual, TikTok-filter-style sports game. Pick a mode, spin a slot reel of legends or current stars, lock one player into each of six skill slots (timing is everything - you get the face on screen when you tap), and reveal the highest-rated \"GOAT\" you can assemble. Chase the perfect 99 OVR. Modes: NBA (Legends / Current), EuroLeague (Legends / Current), Soccer (Legends / Current), and Mondial (2026 / Legends). Basketball modes score on..."
+    },
+    {
+      "name": "Culinary-Logic-Repository",
+      "url": "https://github.com/Royc4515/Culinary-Logic-Repository",
+      "description": "an app for my personal food loving",
+      "language": "TypeScript",
+      "topics": [],
+      "homepage": "https://culinary-logic-repository.vercel.app",
+      "lastPush": "2026-10-01",
+      "readme": "Culinary Logic Repository (CLR) Culinary Logic Repository (CLR) is a smart, centralized hub for curating, organizing, and exploring your favorite culinary discoveries. Whether it's a buzzing new restaurant, an unforgettable recipe, or highly recommended kitchen gear, CLR helps you capture and structure this information effortlessly. Features AI Ingestion via Telegram: Send a URL (Instagram, TikTok, article, Google Maps link) or a rough text note to the companion Telegram bot. CLR scrapes the page, enriches places via Google Places, and uses an LLM (Groq) to extract structured metadata (title,..."
+    },
+    {
+      "name": "neetcode-submissions",
+      "url": "https://github.com/Royc4515/neetcode-submissions",
+      "description": "My NeetCode.io problem submissions",
+      "language": "Python",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-08-01",
+      "readme": ""
+    },
+    {
+      "name": "py_mini_project_1",
+      "url": "https://github.com/Royc4515/py_mini_project_1",
+      "description": "1st mini project, python and data analysis for neuroscience students",
+      "language": "Jupyter Notebook",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2025-12-08",
+      "readme": ""
+    },
+    {
+      "name": "py_mini_project_2",
+      "url": "https://github.com/Royc4515/py_mini_project_2",
+      "description": "2nd mini project in Neuroscience Data Analysis in Python course",
+      "language": "Python",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2025-12-23",
+      "readme": "MiniProject 2: Event-Related Potential (ERP) Analysis Due Disclosure I used AI-based tools (such as ChatGPT) only for reviewing code, improving documentation, adding explanations, and helping format README files. Some parts of the code were written or autofilled with the assistance of AI tools, based on my own ideas, logic, and intended implementation. All conceptual understanding, design decisions, and the overall project structure were created by me, with AI serving as a supportive tool for clarity and refinement. Overview This project calculates the Event-Related Potential (ERP) for finger..."
+    }
+  ]
+}

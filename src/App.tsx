@@ -7,6 +7,7 @@ import Skills from './sections/Skills';
 import Resume from './sections/Resume';
 import Contact from './sections/Contact';
 import { Button } from './components/ui/Button';
+import ChatLauncher from './components/Chat/ChatLauncher';
 import { useTheme } from './hooks/useTheme';
 import { useInitialHashScroll } from './hooks/useInitialHashScroll';
 
@@ -32,6 +33,7 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
+      <ChatLauncher />
     </>
   );
 }

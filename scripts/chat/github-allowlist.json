@@ -1,0 +1,22 @@
+{
+  "$comment": "Public repos pixel Roy may talk about. A repo missing here is invisible to the chat, even if public. Re-run snapshot-github.mjs after editing.",
+  "owner": "Royc4515",
+  "repos": [
+    "Aside",
+    "roy-carmelli-portfolio",
+    "gemini-sommelier-bot",
+    "career-predictor",
+    "white-matter-tracts-game",
+    "Project1_SignalProcessing",
+    "Project2_SignalProcessing",
+    "Project3_SignalProcessing",
+    "ArkanoidGame",
+    "background-cognitive-correlation",
+    "build-your-goat",
+    "Culinary-Logic-Repository",
+    "neetcode-submissions",
+    "py_mini_project_1",
+    "py_mini_project_2"
+  ],
+  "noReadme": ["neetcode-submissions"]
+}

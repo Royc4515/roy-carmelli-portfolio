@@ -18,6 +18,7 @@ import ArcadeFallback from '../components/ArcadeFallback';
 import GameLoadFailed from '../components/GameLoadFailed';
 import PixelPanel from '../components/PixelPanel';
 import PixelIcon from '../components/PixelIcon';
+import SoundToggle from '../components/SoundToggle';
 import { Button } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
 import { useToast } from '../components/ui/Toast';
@@ -26,6 +27,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { useGameDisplayMode } from '../hooks/useGameDisplayMode';
 import { useInertWhile } from '../hooks/useInertWhile';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { isScoreboardConfigured } from '../lib/scoreboardConfig';
 import { pixelSprites } from '../theme/pixelSprites';
 import { duration, ease, seconds } from '../theme/motion';
 import './Hero.css';
@@ -62,14 +64,14 @@ const MiniGame = lazy<ComponentType<{ onQuit: () => void; showTouchControls: boo
    card may narrow; the card's content puts the CTAs right under the role.
 
    Band (phones and portrait tablets): the forest as a strip above the title
-   card, x3 on phones, x4 on tablets, x2 when the viewport is under 700px tall,
+   card, x2 on phones and when the viewport is under 700px tall, x3 on tablets,
    at most 38% of the viewport tall (the canopy crops, Roy and the grass stay). */
 
 const FOREST = pixelSprites.forest;
 const WAVE = pixelSprites.wave;
 
 /** Forest column Roy's feet stand on. */
-export const HERO_FEET_COLUMN = 182;
+export const HERO_FEET_COLUMN = 244;
 /** Fixed navbar height; the scene starts below it. */
 export const HERO_NAV_H = 64;
 /** The hero is at most this tall (nav included)... */
@@ -83,7 +85,7 @@ export const HERO_FILL_SLACK = 152;
 /** Title-card width on the scene (fits the two lg CTAs, 476px, side by side at p-5). */
 export const HERO_CARD_W = 520;
 /** Scale of the band on phones. */
-export const HERO_MOBILE_K = 3;
+export const HERO_MOBILE_K = 2;
 /** Roy's sprite may take at most this share of the desktop scene height. */
 export const HERO_MAX_SHARE = 0.6;
 /** The band takes at most this share of the viewport height (the canopy crops first). */
@@ -109,17 +111,14 @@ export function isTightCard(vh: number, cardW: number): boolean {
   return heroHeight(vh) - HERO_NAV_H < HERO_TIGHT_SCENE_H && cardW >= TIGHT_NAME_CARD_W;
 }
 
-/** Native rows the band always keeps: Roy (67), the ground under his feet (11) and 4 rows of air. */
+/** Native rows the band always keeps: Roy, the ground under his feet and 4 rows of air. */
 export const HERO_BAND_MIN_ROWS = FOREST.h - FOREST.groundRow + WAVE.frameH + 4;
 /**
- * Native columns [from, to) of the three birds baked into the forest. The title card's right
- * edge must never slice one: each is either fully behind the card or clear of it.
+ * Native columns [from, to) of birds baked into the forest. The title card's right edge must
+ * never slice one: each is either fully behind the card or clear of it. The current forest has
+ * none (the game's birds are obstacles, so the art leaves them out).
  */
-export const FOREST_BIRD_COLUMNS: ReadonlyArray<readonly [number, number]> = [
-  [119, 132],
-  [136, 150],
-  [150, 163],
-];
+export const FOREST_BIRD_COLUMNS: ReadonlyArray<readonly [number, number]> = [];
 /** Native forest rows repeated to deepen the ground (the bottom four dirt rows). */
 export const GROUND_STRIP_ROWS = 4;
 
@@ -130,8 +129,8 @@ const CARD_OUTSET = 12;
 const STAGE_AIR = 32;
 /** Minimum air between Roy and the scene's right edge. */
 const EDGE_AIR = 16;
-/** First dirt row under the grass (rows 106-111 are dirt): the scroll cue sits below it. */
-const DIRT_ROW = 106;
+/** First dirt row under the grass (below the grass band and its outline): the scroll cue sits below it. */
+const DIRT_ROW = 148;
 /** The title card sits at least this far below the scene top (level with the HUD). */
 const CARD_TOP_MIN = 16;
 /** Air kept under the title card's drop, inside the scene. */
@@ -215,7 +214,7 @@ export function heroHeight(vh: number): number {
 }
 
 /**
- * Desktop scene scale: max(ceil(W / 240), floor(H / 112)), unless covering the width would make
+ * Desktop scene scale: max(ceil(W / forest.w), floor(H / forest.h)), unless covering the width would make
  * Roy more than HERO_MAX_SHARE of the scene height; then floor(H / 112) (mirrors fill the sides).
  */
 export function sceneScale(width: number, height: number): number {
@@ -816,6 +815,12 @@ export default function Hero() {
     };
   }, [isPlaying]);
 
+  // Page-level overlays (the Pixel Roy chat launcher) hide while the game owns the screen.
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-arcade-playing', isPlaying);
+    return () => document.documentElement.removeAttribute('data-arcade-playing');
+  }, [isPlaying]);
+
   // While the game is open, the rest of the page (main's other sections and the footer) leaves
   // the tab order and the accessibility tree; quitting restores exactly what it changed.
   useInertWhile(isPlaying, () => [
@@ -1014,9 +1019,10 @@ export default function Hero() {
         {eyebrow}
         {name}
         {role}
+        {/* Who he is before the buttons: on a phone the CTAs are at or below the fold anyway. */}
+        {tagline('mt-3')}
         {availability('mt-4')}
         {ctas('mt-6 flex-col sm:flex-row', 'w-full sm:w-auto')}
-        {tagline('mt-6')}
         {pressStart('mt-4')}
       </>
     );
@@ -1194,6 +1200,24 @@ export default function Hero() {
                     </Chip>
                   )}
                 </div>
+                {mode === 'desktop' && isScoreboardConfigured() && (
+                  // The dialog lives in MiniGame (lazy chunk); this only asks it to open (SCOREBOARD_EVENT).
+                  <Button
+                    variant="secondary"
+                    onClick={() => window.dispatchEvent(new CustomEvent('runner:scores'))}
+                    leadingIcon={<PixelIcon name="trophy" size={12} />}
+                  >
+                    Leaderboard
+                  </Button>
+                )}
+                {mode === 'desktop' && (
+                  <div className="flex items-center gap-4">
+                    <SoundToggle />
+                    <Chip>
+                      <kbd className="font-[inherit]">M</kbd>
+                    </Chip>
+                  </div>
+                )}
                 {mode === 'desktop' && <ControlsHint />}
               </div>
             )}

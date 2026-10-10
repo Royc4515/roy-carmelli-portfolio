@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
-import QuestCard, { QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
+import QuestCard, { PRIVATE_REPO_NOTE, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
 import { itemForProject } from './ItemSprite';
 import { projects } from '../data/projects';
 import type { Project } from '../types/index';
@@ -132,7 +132,7 @@ describe('<QuestCard> main quest (feature)', () => {
   it('toggles the quest log with the full description', async () => {
     const user = userEvent.setup();
     render(<QuestCard project={aside} layout="feature" />);
-    const toggle = screen.getByRole('button', { name: 'Quest log: Aside - AI Sidebar' });
+    const toggle = screen.getByRole('button', { name: 'Details: Aside - AI Sidebar' });
     const log = document.getElementById(toggle.getAttribute('aria-controls')!)!;
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(log).not.toBeVisible();
@@ -179,7 +179,7 @@ describe('<QuestCard> main quest (standard)', () => {
         within(card).getByRole('list', { name: 'Built with' }),
         within(card).getByRole('link', { name: /^Live demo/ }),
         within(card).getByRole('link', { name: /^Code on GitHub/ }),
-        within(card).getByRole('button', { name: /^Quest log/ }),
+        within(card).getByRole('button', { name: /^Details/ }),
       ]),
     ).toBe(true);
   });
@@ -191,12 +191,26 @@ describe('<QuestCard> main quest (standard)', () => {
     expect(list).toHaveClass('quest-highlights', 'quest-highlights--secondary');
   });
 
-  it('shows only the quest log for a private project (no Live, no Code)', () => {
+  it('says why a private project has no Code link (no Live, no Code, a note instead)', () => {
     const wolt = byId('wolt-clone');
     const { container } = render(<QuestCard project={wolt} />);
     expect(container.querySelector('svg[data-item]')).toHaveAttribute('data-item', 'delivery-bag');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: `Quest log: ${wolt.title}` })).toBeInTheDocument();
+    expect(screen.getByText(PRIVATE_REPO_NOTE)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: `Details: ${wolt.title}` })).toBeInTheDocument();
+  });
+
+  it('shows no private-repo note when the project has public code', () => {
+    render(<QuestCard project={byId('sommelier-bot')} />);
+    expect(screen.queryByText(PRIVATE_REPO_NOTE)).not.toBeInTheDocument();
+  });
+
+  it('lists every technology in the quest log, including the ones behind +N', async () => {
+    const user = userEvent.setup();
+    const wolt = byId('wolt-clone');
+    render(<QuestCard project={wolt} />);
+    await user.click(screen.getByRole('button', { name: `Details: ${wolt.title}` }));
+    expect(screen.getByText(wolt.tech.join(' · '))).toBeVisible();
   });
 });
 
@@ -229,7 +243,7 @@ describe('<QuestCard> side quest', () => {
         within(card).getByText(clr.tagline),
         within(card).getByRole('list', { name: 'Built with' }),
         within(card).getByRole('link', { name: /^Code on GitHub/ }),
-        within(card).getByRole('button', { name: /^Quest log/ }),
+        within(card).getByRole('button', { name: /^Details/ }),
       ]),
     ).toBe(true);
   });
@@ -242,7 +256,7 @@ describe('<QuestCard> side quest', () => {
   it('keeps Live · Code · Quest log in that order', () => {
     const { container } = render(<QuestCard project={byId('portfolio')} />);
     const controls = screen.getAllByRole('link').concat(screen.getAllByRole('button'));
-    expect(controls.map(c => c.textContent)).toEqual(['Live', 'Code', 'Quest log']);
+    expect(controls.map(c => c.textContent)).toEqual(['Live', 'Code', 'Details']);
     // Two links: on phones Live · Code share a row and Quest log goes under them.
     expect(container.querySelector('.quest-actions')).toHaveClass('quest-actions--pair');
   });
@@ -275,5 +289,20 @@ describe('<ResearchLogItem>', () => {
     const code = screen.getByRole('link', { name: /^Code on GitHub: Signal Processing - Neural Data/ });
     expect(code).toHaveAttribute('href', signal.github);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^Live demo/ })).not.toBeInTheDocument();
+  });
+
+  it('puts a Live link before Code when the project has a demo', () => {
+    const game = projects.find(p => p.tier === 'research' && p.live);
+    if (!game) throw new Error('no research project with a live demo');
+    render(
+      <ul>
+        <ResearchLogItem project={game} />
+      </ul>,
+    );
+    const links = screen.getAllByRole('link');
+    expect(links.map(l => l.textContent)).toEqual(['Live', 'Code']);
+    expect(links[0]).toHaveAttribute('href', game.live);
+    expect(links[0]).toHaveAttribute('aria-label', `Live demo: ${game.title} (opens in a new tab)`);
   });
 });
