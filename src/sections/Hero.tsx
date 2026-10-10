@@ -1019,9 +1019,10 @@ export default function Hero() {
         {eyebrow}
         {name}
         {role}
+        {/* Who he is before the buttons: on a phone the CTAs are at or below the fold anyway. */}
+        {tagline('mt-3')}
         {availability('mt-4')}
         {ctas('mt-6 flex-col sm:flex-row', 'w-full sm:w-auto')}
-        {tagline('mt-6')}
         {pressStart('mt-4')}
       </>
     );

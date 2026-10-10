@@ -356,16 +356,16 @@ describe('Hero — phone portrait', () => {
   });
   afterEach(() => setViewport(1024, 768));
 
-  it('stacks the band over the card and orders the card for the fold: name, role, chip, CTAs, tagline', () => {
+  it('stacks the band over the card and says who he is before the buttons: name, role, tagline, chip, CTAs', () => {
     const { container } = render(<Hero />);
     expect(container.querySelector('#hero')).toHaveAttribute('data-layout', 'stack');
     const text = container.querySelector('#hero')!.textContent!;
     const at = (needle: string) => text.indexOf(needle);
     expect(at(bio.role)).toBeGreaterThan(at('Carmelli'));
-    expect(at(bio.availability)).toBeGreaterThan(at(bio.role));
+    expect(at(bio.tagline)).toBeGreaterThan(at(bio.role));
+    expect(at(bio.availability)).toBeGreaterThan(at(bio.tagline));
     expect(at('View projects')).toBeGreaterThan(at(bio.availability));
-    expect(at(bio.tagline)).toBeGreaterThan(at('Resume'));
-    expect(at('Press start to play')).toBeGreaterThan(at(bio.tagline));
+    expect(at('Press start to play')).toBeGreaterThan(at('Resume'));
   });
 
   it('renders the PRESS START button on a phone', () => {
