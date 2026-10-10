@@ -6,9 +6,13 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { GameEngine } from './GameEngine';
+import { GameAudio } from './audio/GameAudio';
 import { CANVAS_CONFIG } from './config';
+import type { GameCue } from './types';
 import Scoreboard from './Scoreboard';
+import SoundToggle from '../SoundToggle';
 import { useRunnerScores } from '../../hooks/useRunnerScores';
+import { isRunnerMuted, subscribeRunnerMuted, toggleRunnerMuted } from '../../lib/runnerSound';
 import { Button } from '../ui/Button';
 import { cx } from '../ui/cx';
 import PixelIcon from '../PixelIcon';
@@ -63,6 +67,12 @@ export const SCOREBOARD_EVENT = 'runner:scores';
 /** Keys the game reads from anywhere on the page. */
 const JUMP_KEYS = new Set(['Space', 'KeyW', 'ArrowUp']);
 const SLIDE_KEYS = new Set(['KeyS', 'ArrowDown']);
+const MUTE_KEY = 'KeyM';
+/**
+ * Events browsers accept as the user gesture that may start audio. Touchstart and pointerdown
+ * (what starts a run and presses JUMP on touch screens) are not among them on iOS.
+ */
+const UNLOCK_EVENTS = ['keydown', 'click', 'touchend', 'pointerup'] as const;
 
 /** Space pressed on a focused control belongs to that control (it activates it), not the game. */
 function isControl(target: EventTarget | null): boolean {
@@ -70,6 +80,21 @@ function isControl(target: EventTarget | null): boolean {
     target instanceof Element &&
     target.closest('button, a[href], input, select, textarea, [role="button"]') !== null
   );
+}
+
+/** Typing an M into a text field is not a request to mute. */
+function isTextField(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLElement &&
+    (target.isContentEditable || target.closest('input, textarea, select') !== null)
+  );
+}
+
+/** Each engine cue is a sound effect; a run's start and end also start and stop the music. */
+function playCue(audio: GameAudio, cue: GameCue): void {
+  audio.play(cue);
+  if (cue === 'start') audio.startMusic();
+  else if (cue === 'crash') audio.stopMusic();
 }
 
 /** A click that trails a handled pointer press by less than this is the same tap. */
@@ -149,9 +174,16 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
 
     ctx.imageSmoothingEnabled = false;
 
+    const audio = new GameAudio(isRunnerMuted());
+    audio.setHidden(document.visibilityState === 'hidden');
+    const unsubscribeMuted = subscribeRunnerMuted(() => audio.setMuted(isRunnerMuted()));
+    const onVisibility = () => audio.setHidden(document.visibilityState === 'hidden');
+    const unlockAudio = () => audio.unlock();
+
     const engine = new GameEngine(ctx, {
       onRunStart: () => scoresRef.current.onRunStart(),
       onGameOver: score => scoresRef.current.onGameOver(score),
+      onCue: cue => playCue(audio, cue),
     });
     engine.setBest(scoresRef.current.best);
     engineRef.current = engine;
@@ -176,6 +208,8 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
       } else if (e.code === 'Escape') {
         e.preventDefault();
         onQuitRef.current?.();
+      } else if (e.code === MUTE_KEY && !e.repeat && !isTextField(e.target)) {
+        toggleRunnerMuted();
       }
     };
     // Desktop mouse: full input (start / jump / restart).
@@ -189,6 +223,8 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
     };
 
     window.addEventListener('keydown', onKey);
+    document.addEventListener('visibilitychange', onVisibility);
+    for (const type of UNLOCK_EVENTS) document.addEventListener(type, unlockAudio, true);
     canvas.addEventListener('click', onClick);
     canvas.addEventListener('touchstart', onTouchStart, { passive: false });
 
@@ -196,8 +232,12 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
       alive = false;
       engine.stop();
       window.removeEventListener('keydown', onKey);
+      document.removeEventListener('visibilitychange', onVisibility);
+      for (const type of UNLOCK_EVENTS) document.removeEventListener(type, unlockAudio, true);
       canvas.removeEventListener('click', onClick);
       canvas.removeEventListener('touchstart', onTouchStart);
+      unsubscribeMuted();
+      audio.dispose();
       engineRef.current = null;
     };
   }, []);
@@ -312,6 +352,7 @@ export default function MiniGame({ onQuit, showTouchControls = false }: MiniGame
             <PixelIcon name="trophy" size={24} />
           </Button>
         )}
+        <SoundToggle iconOnly className="minigame__sound" />
 
         <div className="minigame__screen">{canvasEl}</div>
 

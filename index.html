@@ -7,64 +7,40 @@
     <!-- Google Search Console ownership verification -->
     <meta name="google-site-verification" content="YzDkhTkRgboS7qGzVpaMq6ft7lxDWGqyvOzNzucqbmA" />
 
-    <title>Roy Carmelli - Full-Stack &amp; AI Developer | CS &amp; Neuroscience</title>
-    <meta name="description" content="Third-year CS &amp; Neuroscience student at Bar-Ilan University. I build web apps, Chrome extensions and AI tools. Open to student and intern roles in Israel." />
+    <!-- Title, description, canonical, OG/Twitter: keep in sync with src/seo/site.ts
+         (src/seo/seo.test.ts fails when they drift). The JSON-LD graph is generated from
+         src/data at build time and injected by scripts/seo/prerender.mjs. -->
+    <title>Roy Carmelli (רועי כרמלי) - Full-Stack &amp; AI Developer</title>
+    <meta name="description" content="Third-year Computer Science &amp; Neuroscience student at Bar-Ilan University. I build web apps, Chrome extensions and AI tools. Open to student and intern roles in Israel." />
     <link rel="canonical" href="https://roy-carmelli-portfolio.vercel.app/" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="author" content="Roy Carmelli" />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="Roy Carmelli" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://roy-carmelli-portfolio.vercel.app/" />
-    <meta property="og:title" content="Roy Carmelli - Full-Stack &amp; AI Developer | CS &amp; Neuroscience" />
-    <meta property="og:description" content="Third-year CS &amp; Neuroscience student at Bar-Ilan University. I build web apps, Chrome extensions and AI tools. Open to student and intern roles in Israel." />
+    <meta property="og:title" content="Roy Carmelli (רועי כרמלי) - Full-Stack &amp; AI Developer" />
+    <meta property="og:description" content="Third-year Computer Science &amp; Neuroscience student at Bar-Ilan University. I build web apps, Chrome extensions and AI tools. Open to student and intern roles in Israel." />
     <meta property="og:image" content="https://roy-carmelli-portfolio.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Roy Carmelli&#39;s pixel-art portfolio title screen: Full-Stack &amp; AI Developer, standing in a forest" />
+    <meta property="profile:first_name" content="Roy" />
+    <meta property="profile:last_name" content="Carmelli" />
 
-    <!-- Twitter -->
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Roy Carmelli - Full-Stack &amp; AI Developer | CS &amp; Neuroscience" />
-    <meta name="twitter:description" content="Third-year CS &amp; Neuroscience student at Bar-Ilan University. I build web apps, Chrome extensions and AI tools. Open to student and intern roles in Israel." />
+    <meta name="twitter:title" content="Roy Carmelli (רועי כרמלי) - Full-Stack &amp; AI Developer" />
+    <meta name="twitter:description" content="Third-year Computer Science &amp; Neuroscience student at Bar-Ilan University. I build web apps, Chrome extensions and AI tools. Open to student and intern roles in Israel." />
     <meta name="twitter:image" content="https://roy-carmelli-portfolio.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="Roy Carmelli&#39;s pixel-art portfolio title screen: Full-Stack &amp; AI Developer, standing in a forest" />
 
-    <!-- Structured data: helps Google understand who this page is about -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Roy Carmelli",
-        "alternateName": "רועי כרמלי",
-        "url": "https://roy-carmelli-portfolio.vercel.app/",
-        "image": "https://roy-carmelli-portfolio.vercel.app/og-image.png",
-        "jobTitle": "Full-Stack & AI Developer",
-        "description": "Third-year Computer Science & Neuroscience student at Bar-Ilan University who builds web apps, Chrome extensions and AI tools. Open to student and intern roles in full-stack, frontend and AI development in Israel.",
-        "knowsAbout": [
-          "Full-Stack Development",
-          "Frontend Development",
-          "Artificial Intelligence",
-          "LLM APIs",
-          "React",
-          "Node.js",
-          "JavaScript",
-          "Python",
-          "Java",
-          "Chrome Extensions",
-          "Neuroscience Data Analysis"
-        ],
-        "knowsLanguage": ["English", "Hebrew"],
-        "email": "mailto:Roy.y.carmelli@gmail.com",
-        "affiliation": {
-          "@type": "CollegeOrUniversity",
-          "name": "Bar-Ilan University"
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "IL"
-        },
-        "sameAs": [
-          "https://github.com/Royc4515",
-          "https://linkedin.com/in/roy-carmelli"
-        ]
-      }
-    </script>
+    <!-- The same person elsewhere (also the Person's sameAs in the JSON-LD) -->
+    <link rel="me" href="https://github.com/Royc4515" />
+    <link rel="me" href="https://linkedin.com/in/roy-carmelli" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 

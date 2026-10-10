@@ -2,6 +2,8 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import MiniGame from './MiniGame';
+import type { GameEngineHooks } from './GameEngine';
+import { isRunnerMuted, setRunnerMuted } from '../../lib/runnerSound';
 
 // The engine is replaced by spies so its lifecycle and input routing can be asserted. It only
 // gets built when the canvas yields a 2D context, which jsdom doesn't (the "engine" tests stub it).
@@ -14,8 +16,13 @@ const engine = vi.hoisted(() => ({
   isAwaitingStart: vi.fn(() => false),
   setBest: vi.fn(),
 }));
+/** The hooks the component handed the last engine it built. */
+const engineHooks = vi.hoisted(() => ({ current: {} as GameEngineHooks }));
 vi.mock('./GameEngine', () => ({
   GameEngine: class {
+    constructor(_ctx: unknown, hooks: GameEngineHooks = {}) {
+      engineHooks.current = hooks;
+    }
     init = engine.init;
     start = engine.start;
     stop = engine.stop;
@@ -26,7 +33,31 @@ vi.mock('./GameEngine', () => ({
   },
 }));
 
-beforeEach(() => Object.values(engine).forEach(spy => spy.mockClear()));
+const audio = vi.hoisted(() => ({
+  play: vi.fn(),
+  startMusic: vi.fn(),
+  stopMusic: vi.fn(),
+  setMuted: vi.fn(),
+  setHidden: vi.fn(),
+  unlock: vi.fn(),
+  dispose: vi.fn(),
+}));
+vi.mock('./audio/GameAudio', () => ({
+  GameAudio: class {
+    play = audio.play;
+    startMusic = audio.startMusic;
+    stopMusic = audio.stopMusic;
+    setMuted = audio.setMuted;
+    setHidden = audio.setHidden;
+    unlock = audio.unlock;
+    dispose = audio.dispose;
+  },
+}));
+
+beforeEach(() => {
+  [...Object.values(engine), ...Object.values(audio)].forEach(spy => spy.mockClear());
+  setRunnerMuted(false);
+});
 
 /** A promise resolved from outside: an engine whose sprites are still loading. */
 function deferred() {
@@ -246,5 +277,72 @@ describe('MiniGame input routing (engine running)', () => {
     await user.keyboard('{ArrowDown}');
     expect(engine.handleSlide).toHaveBeenCalledTimes(1);
   });
-});
 
+  it('plays each engine cue, with music from the start of a run to its crash', () => {
+    render(<MiniGame />);
+    const { onCue } = engineHooks.current;
+    onCue?.('start');
+    expect(audio.play).toHaveBeenLastCalledWith('start');
+    expect(audio.startMusic).toHaveBeenCalledTimes(1);
+    onCue?.('jump');
+    expect(audio.play).toHaveBeenLastCalledWith('jump');
+    onCue?.('crash');
+    expect(audio.stopMusic).toHaveBeenCalledTimes(1);
+  });
+
+  it('M toggles the sound, but not while typing in a field', async () => {
+    const user = userEvent.setup();
+    render(<MiniGame />);
+    await user.keyboard('m');
+    expect(isRunnerMuted()).toBe(true);
+    expect(audio.setMuted).toHaveBeenLastCalledWith(true);
+    await user.keyboard('{Control>}m{/Control}');
+    expect(isRunnerMuted()).toBe(true);
+
+    const field = document.createElement('input');
+    document.body.append(field);
+    field.focus();
+    await user.keyboard('m');
+    expect(isRunnerMuted()).toBe(true);
+    field.remove();
+  });
+
+  it('has a mute button among the touch controls, labelled with its action', async () => {
+    const user = userEvent.setup();
+    render(<MiniGame showTouchControls />);
+    const mute = screen.getByRole('button', { name: 'Mute sound' });
+    expect(mute.querySelector('[data-icon="sound"]')).not.toBeNull();
+    await user.click(mute);
+    const unmute = screen.getByRole('button', { name: 'Unmute sound' });
+    expect(unmute.querySelector('[data-icon="sound-off"]')).not.toBeNull();
+    expect(audio.setMuted).toHaveBeenLastCalledWith(true);
+  });
+
+  it('unlocks the audio on gestures browsers accept (a finger lift, not the touchstart)', () => {
+    const { unmount } = render(<MiniGame showTouchControls />);
+    fireEvent.touchStart(document.querySelector('canvas')!);
+    expect(audio.unlock).not.toHaveBeenCalled();
+    fireEvent.touchEnd(document.querySelector('canvas')!);
+    expect(audio.unlock).toHaveBeenCalledTimes(1);
+    unmount();
+    fireEvent.click(document.body);
+    expect(audio.unlock).toHaveBeenCalledTimes(1);
+  });
+
+  it('a mouse click on the mute button lets go of focus, so Space still jumps', async () => {
+    const user = userEvent.setup();
+    render(<MiniGame showTouchControls />);
+    await user.click(screen.getByRole('button', { name: 'Mute sound' }));
+    expect(screen.getByRole('button', { name: 'Unmute sound' })).not.toHaveFocus();
+  });
+
+  it('holds the sound while the tab is hidden and releases it on close', () => {
+    const { unmount } = render(<MiniGame />);
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(audio.setHidden).toHaveBeenLastCalledWith(true);
+    visibility.mockRestore();
+    unmount();
+    expect(audio.dispose).toHaveBeenCalledTimes(1);
+  });
+});

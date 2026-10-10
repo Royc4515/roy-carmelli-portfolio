@@ -7,6 +7,7 @@ import Skills from './Skills';
 import { skills } from '../data/bio';
 import { projects } from '../data/projects';
 import { placeTooltip } from '../components/SkillTooltip';
+import { pixelSprites } from '../theme/pixelSprites';
 
 const originalMatchMedia = window.matchMedia;
 
@@ -162,7 +163,7 @@ describe('Skills (equipment screen)', () => {
     const sprites = document.querySelectorAll('#skills [data-pose]');
     expect(sprites).toHaveLength(1);
     expect(sprites[0]).toHaveAttribute('aria-hidden', 'true');
-    expect((sprites[0] as HTMLElement).style.width).toBe(`${28 * 3}px`);
+    expect((sprites[0] as HTMLElement).style.width).toBe(`${pixelSprites.idle.frameW * 3}px`);
   });
 
   it('gives every slot heading its pixel icon', () => {

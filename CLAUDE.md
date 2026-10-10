@@ -10,7 +10,8 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - `src/data/bio.ts`, `src/data/projects.ts` - ALL recruiter-facing copy (bio, skills, project cards). Most content edits happen here.
 - `src/sections/` - page zones: Hero, Projects, About, Skills, Resume, Contact.
 - `src/components/ui/` - design-system primitives (Button, PixelPanel, Chip, ZoneHeader, ZoneBanner, Toast, Reveal).
-- `src/components/MiniGame/` - "Roy Runner" canvas engine (GameEngine, Player, Obstacle, SpriteRenderer, config) and the `Scoreboard` dialog. Lazy-loaded from `Hero.tsx`.
+- `src/components/MiniGame/` - "Roy Runner" canvas engine (GameEngine, Player, Obstacle, SpriteRenderer, config, `hud.ts` player card and outlined text, GENERATED `spriteSizes.generated.ts`), its sound in `audio/` (`GameAudio` Web Audio player, `music.ts` tracker-style song, `sounds.ts` effect recipes) and the `Scoreboard` dialog. Lazy-loaded from `Hero.tsx`.
+- `src/lib/runnerSound.ts` + `src/hooks/useRunnerMuted.ts` + `src/components/SoundToggle.tsx` - the game's mute switch, shared by Hero's desktop row (outside the lazy chunk) and the touch controls.
 - `api/` - Vercel Functions for the Roy Runner scoreboard (`session`, `runs`, `leaderboard`; shared code in `api/_lib/`, tests in `api/_tests/`). Neon Postgres via `DATABASE_URL`. Setup in `docs/leaderboard/SETUP.md`.
 - `src/lib/runnerScores.ts` (`ScoreApi` client, local best), `src/lib/googleIdentity.ts`, `src/hooks/useRunnerScores.ts`, `src/components/MiniGame/Scoreboard.tsx` - the browser side of the scoreboard.
 - `api/chat.ts` + `api/_lib/chat/` - Pixel Roy, the AI chat agent (Groq free tier): validate -> rate limit -> Prompt Guard -> BM25 retrieval -> model fallback chain -> output hooks. Setup and safety in `docs/chat/SETUP.md`.
@@ -19,19 +20,20 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - `src/hooks/` - theme, media queries, game display mode, active section, hash scroll.
 - `src/theme/` - tokens, motion, and the GENERATED `pixelSprites.ts`.
 - `src/dev/Gallery.tsx` - dev-only component gallery at `/?gallery`.
-- `index.html` - SEO meta, JSON-LD Person data, and the pre-paint theme script.
-- `public/` - `Roy_Carmelli_CV.pdf`, fonts, sprites, sitemap, robots, Search Console verification file.
-- `scripts/pixelate/` - Python pipeline that regenerates pixel art + `pixelSprites.ts`.
+- `index.html` - SEO meta (title, description, canonical, OG/Twitter) and the pre-paint theme script.
+- `src/seo/` - SEO and AI-search output built from `src/data`: `site.ts` (title, description, URL), `structuredData.ts` (JSON-LD graph: WebSite, ProfilePage, Person, a node per project), `crawlerFiles.ts` (sitemap.xml, llms.txt). `src/entry-server.tsx` + `scripts/seo/prerender.mjs` prerender the page at build time. See `SEO_REPORT.md`.
+- `public/` - `Roy_Carmelli_CV.pdf`, fonts, sprites, robots.txt, Search Console verification file. `sitemap.xml` and `llms.txt` are generated into `dist/` by the build.
+- `scripts/pixelate/` - Python pipeline: `import_flow.py` turns the Google Flow sprite sheets in `design-src/flow/` into the game sprites and the site sources, then `pixelate.py` builds the site sheets + `pixelSprites.ts`. See its README.
 - `docs/redesign/SPEC.md` - design-system source of truth; `docs/redesign/*` and `docs/copy-refresh/*` hold before/after screenshots.
 
 ## Commands
 - `npm install` (or `npm ci`) - verified.
 - `npm run dev` - Vite dev server on port 5173 (unverified here).
-- `npm test` - `vitest run`; verified: 55 files / 697 tests pass (the `api/_tests` files run in the node environment). jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
-- `npm run build` - `tsc -b && vite build`; verified. `tsc -b` also typechecks `api/` (its own `api/tsconfig.json`).
+- `npm test` - `vitest run`; verified: 60 files / 765 tests pass (the `api/_tests` files run in the node environment). jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
+- `npm run build` - `tsc -b && vite build`, then `vite build --ssr src/entry-server.tsx` and `node scripts/seo/prerender.mjs` (writes the rendered page, JSON-LD, sitemap.xml and llms.txt into `dist/`); verified. `tsc -b` also typechecks `api/` (its own `api/tsconfig.json`). Check what crawlers see with `npm run build && npx vite preview`, then `curl localhost:4173`.
 - `vercel dev` - runs the site with the `/api` functions locally (needs `vercel link` + `vercel env pull`; unverified here). Plain `npm run dev` has no `/api`.
 - `npm run test:coverage` - v8 coverage (unverified).
-- `python3 scripts/pixelate/pixelate.py` - needs Pillow + numpy (unverified).
+- `python3 scripts/pixelate/import_flow.py && python3 scripts/pixelate/pixelate.py` - needs Pillow + numpy; verified (on Windows: `uv run --with pillow --with numpy python ...`).
 - `npx vitest run src/lib/chatKnowledge.test.ts -u` - regenerates the chat knowledge after a data edit; verified.
 - `node scripts/chat/snapshot-github.mjs [--repos-json file]` - refreshes `src/data/github.generated.json` from the allowlisted public repos; verified with `--repos-json` (this cloud session's proxy blocks `api.github.com/users/...`).
 - `node scripts/chat/eval.mjs <url>` - 14 live normal and adversarial questions against a running chat (needs a real Groq key; unverified here).
@@ -48,12 +50,17 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 ## Repo-specific rules
 - This site is what recruiters see. Every project claim in `src/data/projects.ts` must match that project's actual repo; never add metrics or claims that are not backed.
 - Describe Roy's military service as "battalion medic (חוג"ד), operational support role" - never "combat medic".
-- The site is English-only (`<html lang="en">`); Hebrew appears only in `bio.nameHe` and the JSON-LD `alternateName`. If any Hebrew/RTL copy is added, check both RTL and LTR rendering.
-- Keep `index.html` meta/OG/JSON-LD descriptions in sync with `bio.ts` when the headline or degree wording changes.
+- The site is English-only (`<html lang="en">`); Hebrew appears only in `bio.nameHe`, shown in the footer (`lang="he" dir="rtl"`) and also feeding the `<title>`/OG title, the JSON-LD `alternateName` and llms.txt (so searches for "רועי כרמלי" match). If any Hebrew/RTL copy is added, check both RTL and LTR rendering.
+- Keep `index.html` meta/OG/Twitter tags in sync with `src/seo/site.ts` (`src/seo/seo.test.ts` fails when they drift); the JSON-LD is generated from `src/data`, never hand-written in `index.html`. Degree wording in SEO copy: "Computer Science & Neuroscience".
+- Every project `description` opens with one quotable sentence: "<Name> is a ... " (what, for whom, on what stack). It is the project's JSON-LD and llms.txt description; `seo.test.ts` checks it. Team projects set `teamSize` to match the "team of N" wording.
 
 ## Gotchas
 - The service wording was fixed: `src/sections/About.test.tsx` now asserts "combat medic" never appears; the chat enforces the same rule in its prompt, its knowledge test and its output `styleHook`.
-- `src/theme/pixelSprites.ts` and `public/assets/pixel/*` are generated by `scripts/pixelate/pixelate.py`. Do not hand-edit; change the script or sources and re-run.
+- `src/theme/pixelSprites.ts` and `public/assets/pixel/*` are generated by `scripts/pixelate/pixelate.py`; `public/assets/sprites/*`, `design-src/sprites/*` and `src/components/MiniGame/spriteSizes.generated.ts` by `scripts/pixelate/import_flow.py`. Do not hand-edit; change the Flow sheets in `design-src/flow/` or the scripts and re-run both.
+- Roy Runner sizes are real-world: `import_flow.py` sizes every sprite from metres (Roy 1.75 m = 92 px; obstacles x1.35 for readability, at least 32 px) and the game draws them all 1:1; Roy's hitbox stays `HITBOX_W` (36px) wide. The background is drawn at a whole 3x from `BACKGROUND_CONFIG.top`, so its grass line keeps the tuned ground and the feet land 10px into the grass band; every other background tile is mirrored, so the loop has no seam. Air obstacles sit `SLIDE_AIR_GAP` above the slide pose's visible top. A slide plays `slideFrame()` (Player.ts): two drop-in frames, the flat pose, two get-up frames, all centred on the standing frame; the hitbox stays low throughout. `src/components/MiniGame/geometry.test.ts` locks all of this (feet line, grass band, slide vs birds, jumpable at min and max speed).
+- Roy is 92px tall natively (game and site). The site forest is a 330x154 window (the old 240x112 framing around a 67px Roy, scaled by 92/67), so `Hero.tsx`'s forest-pixel constants (`HERO_FEET_COLUMN` 244, `DIRT_ROW` 148) and band scales (x2 phones, x3 tablets) follow it. Below ~90px Roy's 2px eyes drop out when resampled, so do not shrink him.
+- `src/sections/Projects.test.tsx` fails on a Windows checkout with `core.autocrlf=true` (it matches `
+` in CRLF CSS); it passes on LF checkouts.
 - Theme key `roy-portfolio-theme` is duplicated in the inline script in `index.html` and `src/hooks/useTheme.ts`; `data-theme` set pre-paint is the source of truth. Change both together.
 - Game display mode gates on `(pointer: coarse)` + orientation, not width, because landscape phones exceed the 767px breakpoint (`src/hooks/useGameDisplayMode.ts`).
 - iPhone Safari has no element Fullscreen API; `MiniGame.tsx` falls back to a CSS fixed overlay.
@@ -70,7 +77,9 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - The chat's GitHub view is an allowlist (`scripts/chat/github-allowlist.json`); a new public repo is invisible to it until added. A repo behind a site card is folded into the card; its README is not used.
 - Chat config (`readChatConfig`) is separate from the scoreboard's, but reuses `DATABASE_URL` and `SESSION_SECRET` (as the IP-hash salt). Without them the chat API answers 503. The limiter fails closed (DB down = no model call); the Prompt Guard fails open (output hooks still run). Deadlines: a counter query gets 8s (`DB_TIMEOUT_MS`; a day's first question once hung past Vercel's limit, with the idle Neon compute the only step lacking a deadline) and the whole request 25s (`REQUEST_DEADLINE_MS`, answered as 503 `busy`), which must stay under `maxDuration` 30 in `vercel.json`.
 - Chat daily caps (`api/_lib/chat/limiter.ts`: 15 per visitor, 150 site-wide) are sized under Groq's free token limits; raise them only after checking `cached` in the function logs. Never add billing to the Groq account: the free tier is what makes the chat unable to cost money. The tighter limit is per minute (~8K tokens per model, about 3 questions each): when every model is rate limited, `FallbackChain` waits once (what Groq's `retry-after` asks, at most 5s) and then answers 503 `busy`, which the panel shows as "busy, try again in a minute" with a retry. `eval.mjs` pauses 9s between questions for the same reason.
+- Game sound is synthesised (Web Audio, no audio files). The engine only announces `GameCue`s (`onCue`); `MiniGame.tsx` routes them to `GameAudio` (a run's `start` starts the music, `crash` stops it). The AudioContext is created on the first unmuted cue, which always comes from a key press or tap, so browsers' autoplay lock is never hit; jsdom has no Web Audio, so in tests the audio is a silent no-op. Mute is stored as `roy-runner-sound` (`on`/`off`) and toggled by the button or `M`.
 - `Hero.tsx` sets `data-arcade-playing` on `<html>` while the game runs; the chat launcher hides on it. The launcher sits at z 90 (below the nav); an open phone sheet goes to z 150.
 - Chat design rules are in `docs/redesign/SPEC.md` §3 "Chat (Pixel Roy)". Typed answers keep the full text in the DOM as `sr-only` until typing ends (`useTypewriter` + `TypedText`), so tests find it with `getByText` and the live region announces it once; the class flips, the node is not replaced. The launcher's speech bubble rotates through `chatPersona.bubbles` (pixel font: Latin-1, at most 24 characters each, tested). Only the chat log may shrink (it once overflowed the frame on a short laptop window). The panel opens beside the launcher, not above it, so a 150%-zoom laptop (~1280x550 CSS px) still fits it; the full-screen sheet is for phones only, and `SHEET_QUERY` in `ChatPanel.tsx` must match the `@media` in `ChatLauncher.css`.
+- Prerender: the build renders the app under a jsdom shim (`scripts/seo/prerender.mjs`, 1280x800, reduced motion) into `#root data-prerendered`. `main.tsx` uses `createRoot`, not `hydrateRoot`, on purpose: layouts computed from the real window would leave mismatched attributes after hydration. A head style hides `#root[data-prerendered]` until `main.tsx` swaps in the live app (synchronously, via `flushSync`) and removes the attribute, so visitors get the same first paint as before; `<noscript>` un-hides it for no-JS readers. A component that crashes in Node/jsdom at render time now fails `npm run build`.
 - `MOBILE_SDD.md` is partly stale (mentions `Arcade.tsx` and an inline-styles-only codebase); trust the code over it.
 - Project claims drift as the source repos evolve (e.g. test counts). Re-verify numbers against the source repo before editing a card.
