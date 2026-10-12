@@ -86,7 +86,7 @@ describe('projectsUsing (real data)', () => {
       'signal-processing',
     ]);
     expect(ids('TypeScript')).toEqual(['portfolio', 'clr']);
-    expect(ids('JavaScript')).toEqual(['ai-sidebar', 'white-matter-game']);
+    expect(ids('JavaScript')).toEqual(['ai-sidebar', 'nechita-raka', 'white-matter-game']);
   });
 
   it('normalizes versions: React 19 and Java 17', () => {
@@ -99,7 +99,7 @@ describe('projectsUsing (real data)', () => {
     expect(ids('Telegram Bot API')).toEqual(['sommelier-bot', 'clr']);
     expect(ids('Google OAuth')).toEqual(['career-predictor']);
     expect(ids('Claude API')).toEqual(['ai-sidebar']);
-    expect(ids('Node.js')).toEqual(['wolt-clone', 'career-predictor']);
+    expect(ids('Node.js')).toEqual(['wolt-clone', 'nechita-raka', 'career-predictor']);
   });
 
   it('returns nothing for skills no project lists', () => {
@@ -141,7 +141,7 @@ describe('skillDetail', () => {
       name: 'JavaScript',
       slot: 'Weapons',
       category: 'Languages',
-      usedIn: ['Aside', 'White Matter Tracts Game'],
+      usedIn: ['Aside', 'Nechita Raka', 'White Matter Tracts Game'],
       note: null,
     });
     expect(skillDetail('Design Patterns', group('CS Foundations'), projects).usedIn).toEqual([

@@ -3,7 +3,7 @@
 import type { Knowledge } from './types.js';
 
 export const KNOWLEDGE: Knowledge = {
-  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student or intern role in full-stack, frontend or AI development in Israel. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Wolt Clone - Food-Delivery App [main quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, get one of 45 made-up futures and an AI portrait of you in it. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
+  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student or intern role in full-stack, frontend or AI development in Israel. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Wolt Clone - Food-Delivery App [main quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | Nechita Raka - First-Year CS Hub [side quest, Site + AI chat] - A Hebrew site for first-year CS students at Bar-Ilan: 11 guides, links, the academic calendar and an AI chat that answers from its data. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, get one of 45 made-up futures and an AI portrait of you in it. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
   "chunks": [
     {
       "id": "site:about",
@@ -30,7 +30,7 @@ export const KNOWLEDGE: Knowledge = {
       "source": "site",
       "title": "Aside - AI Sidebar",
       "url": "https://royc4515.github.io/Aside/",
-      "text": "Aside - AI Sidebar (Chrome extension, 2026).\nAside is a Chrome extension (Manifest V3, plain JavaScript, no build step) that opens an AI assistant from six providers in a sidebar next to any web page you're reading. Press Alt+A and the page's main text is already extracted as context; it goes out only with a message you send, and one toggle turns it off. Six providers sit behind one interface: Claude, Gemini, OpenAI, Grok, Groq and local Ollama, each with its own model list and a Custom option for new model IDs. Answers stream in (SSE, or NDJSON for Ollama), and compare mode sends one prompt to two models so you can keep the better answer. One-tap actions summarize the page, pull its data into a table, and explain, translate or rewrite a selection. API keys and chat history stay in chrome.storage.local and are never synced. Under the hood, a ProviderFactory picks the provider at runtime, each provider is a swappable strategy on a shared BaseProvider, and OpenAI, Grok and Groq share one OpenAI-compatible parent class. The sidebar talks to the page through a nonce-checked postMessage bridge and renders Markdown with its own parser. There's also a GitHub Pages landing site.\nHighlights: Six AI providers behind one Factory + Strategy layer; Streaming answers (SSE / NDJSON) and a two-model compare mode; Plain JavaScript on MV3: no build step, English/Hebrew UI with RTL.\nTech: JavaScript, Chrome MV3, OOP, i18n / RTL, Streaming / SSE, Service Worker, Factory Pattern, Strategy Pattern, Claude API, Gemini API, OpenAI API, Groq API, Ollama, GitHub Pages.\nCode: https://github.com/Royc4515/Aside\nLive: https://royc4515.github.io/Aside/\nGitHub repo Aside: JavaScript, last push 2026-10-06.",
+      "text": "Aside - AI Sidebar (Chrome extension, 2026).\nAside is a Chrome extension (Manifest V3, plain JavaScript, no build step) that opens an AI assistant from six providers in a sidebar next to any web page you're reading. Press Alt+A and the page's main text is already extracted as context; it goes out only with a message you send, and one toggle turns it off. Six providers sit behind one interface: Claude, Gemini, OpenAI, Grok, Groq and local Ollama, each with its own model list and a Custom option for new model IDs. Answers stream in (SSE, or NDJSON for Ollama), and compare mode sends one prompt to two models so you can keep the better answer. One-tap actions summarize the page, pull its data into a table, and explain, translate or rewrite a selection. API keys and chat history stay in chrome.storage.local and are never synced. Under the hood, a ProviderFactory picks the provider at runtime, each provider is a swappable strategy on a shared BaseProvider, and OpenAI, Grok and Groq share one OpenAI-compatible parent class. The sidebar talks to the page through a nonce-checked postMessage bridge and renders Markdown with its own parser. There's also a GitHub Pages landing site.\nHighlights: Six AI providers behind one Factory + Strategy layer; Streaming answers (SSE / NDJSON) and a two-model compare mode; Plain JavaScript on MV3: no build step, English/Hebrew UI with RTL.\nTech: JavaScript, Chrome MV3, OOP, i18n / RTL, Streaming / SSE, Service Worker, Factory Pattern, Strategy Pattern, Claude API, Gemini API, OpenAI API, Groq API, Ollama, GitHub Pages.\nCode: https://github.com/Royc4515/Aside\nLive: https://royc4515.github.io/Aside/\nGitHub repo Aside: JavaScript, last push 2026-10-10.",
       "keywords": [
         "ai-sidebar",
         "aside",
@@ -122,7 +122,7 @@ export const KNOWLEDGE: Knowledge = {
       "source": "site",
       "title": "Personal Portfolio",
       "url": "https://roy-carmelli-portfolio.vercel.app/",
-      "text": "Personal Portfolio (Website + engine, 2026).\nPersonal Portfolio is this site, my portfolio for recruiters, built from scratch (no template) with React 18, TypeScript, Vite, Tailwind CSS and Framer Motion and deployed on Vercel. Press start and the title screen turns into Roy Runner, an endless runner on a small canvas engine I built for it: a game-state machine, a 7-state animation machine for the player, AABB collision, and a speed that keeps climbing. It plays with a keyboard or touch controls, with a fullscreen mode on phones. Day and night themes follow your system setting. Pixel Roy, the little me in the corner, is an AI chat that answers questions about me, using only what this site, my public GitHub and my LinkedIn say. A Vercel Function screens each question with Prompt Guard, pulls the relevant facts with BM25 search, and asks a Groq model, falling back to a second one when the first is busy. Every answer then passes output checks: no personal details, no links outside my own, no rule-breaking wording. It runs on Groq's free tier with a daily cap per visitor, and conversations are not stored.\nTech: TypeScript, React 18, Canvas, Vite, Tailwind CSS, Framer Motion, Groq API, Serverless Functions, Vitest, Vercel.\nCode: https://github.com/Royc4515/roy-carmelli-portfolio\nLive: https://roy-carmelli-portfolio.vercel.app/\nGitHub repo roy-carmelli-portfolio: TypeScript, last push 2026-10-06.",
+      "text": "Personal Portfolio (Website + engine, 2026).\nPersonal Portfolio is this site, my portfolio for recruiters, built from scratch (no template) with React 18, TypeScript, Vite, Tailwind CSS and Framer Motion and deployed on Vercel. Press start and the title screen turns into Roy Runner, an endless runner on a small canvas engine I built for it: a game-state machine, a 7-state animation machine for the player, AABB collision, and a speed that keeps climbing. It plays with a keyboard or touch controls, with a fullscreen mode on phones. Day and night themes follow your system setting. Pixel Roy, the little me in the corner, is an AI chat that answers questions about me, using only what this site, my public GitHub and my LinkedIn say. A Vercel Function screens each question with Prompt Guard, pulls the relevant facts with BM25 search, and asks a Groq model, falling back to a second one when the first is busy. Every answer then passes output checks: no personal details, no links outside my own, no rule-breaking wording. It runs on Groq's free tier with a daily cap per visitor, and conversations are not stored.\nTech: TypeScript, React 18, Canvas, Vite, Tailwind CSS, Framer Motion, Groq API, Serverless Functions, Vitest, Vercel.\nCode: https://github.com/Royc4515/roy-carmelli-portfolio\nLive: https://roy-carmelli-portfolio.vercel.app/\nGitHub repo roy-carmelli-portfolio: TypeScript, last push 2026-10-10.",
       "keywords": [
         "portfolio",
         "personal",
@@ -146,6 +146,42 @@ export const KNOWLEDGE: Knowledge = {
         "roy-carmelli-portfolio",
         "roy",
         "carmelli"
+      ]
+    },
+    {
+      "id": "site:project:nechita-raka",
+      "source": "site",
+      "title": "Nechita Raka - First-Year CS Hub",
+      "url": "https://nechita-raka.vercel.app/",
+      "text": "Nechita Raka - First-Year CS Hub (Site + AI chat, 2026).\nNechita Raka (Hebrew for 'soft landing') is a Hebrew student hub I built as a mentor for first-year Computer Science students at Bar-Ilan University, in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 11 step-by-step guides (course registration, exams and the second sitting, reserve duty, the campus shuttle), each with its own URL to share in a group; 22 links in five categories; 29 FAQ answers; and the academic calendar as a timeline that shows the current week, with 43 dates and an .ics download. All of the content lives in one data.js file that any mentor can edit from a phone on GitHub. A check script and CI validate it on every change, and the build prerenders it into the HTML with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google, Bing and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Nothing from the conversation is stored, and 24 server tests run in GitHub Actions. An independent project, not an official university site.\nTech: JavaScript, Node.js, Groq API, Serverless Functions, Neon Postgres, Vercel, GitHub Actions, SEO / JSON-LD, Hebrew / RTL.\nCode: https://github.com/Royc4515/nechita-raka\nLive: https://nechita-raka.vercel.app/\nGitHub repo nechita-raka: JavaScript, last push 2026-10-11.",
+      "keywords": [
+        "nechita-raka",
+        "nechita",
+        "raka",
+        "first",
+        "year",
+        "cs",
+        "hub",
+        "site",
+        "ai",
+        "chat",
+        "javascript",
+        "node",
+        "js",
+        "groq",
+        "api",
+        "serverless",
+        "functions",
+        "neon",
+        "postgres",
+        "vercel",
+        "github",
+        "actions",
+        "seo",
+        "json",
+        "ld",
+        "hebrew",
+        "rtl"
       ]
     },
     {
@@ -185,7 +221,7 @@ export const KNOWLEDGE: Knowledge = {
       "source": "site",
       "title": "CLR - Culinary Logic Repository",
       "url": "https://github.com/Royc4515/Culinary-Logic-Repository",
-      "text": "CLR - Culinary Logic Repository (AI pipeline, 2026, in development).\nCLR (Culinary Logic Repository) is a food knowledge base I feed from Telegram, where an LLM pipeline in Python files what I send as a recipe, a restaurant or kitchen gear in a React 19 + TypeScript web app. Send a link, a note, a voice memo or a photo; a Python (Flask) backend decides whether it's a restaurant, a recipe or kitchen gear, extracts structured JSON with an LLM (Groq by default, with Gemini and Anthropic swappable), checks restaurant details against Google Places, and shows a preview to save or discard. The React 19 + TypeScript web app has a gallery, a map, search and filters. Supabase holds the data and handles Google sign-in; the frontend runs on Vercel and the backend on Render. Still in development.\nTech: TypeScript, Python, Groq API, Telegram Bot API, React 19, Supabase, Vercel, Render.\nCode: https://github.com/Royc4515/Culinary-Logic-Repository\nGitHub repo Culinary-Logic-Repository: TypeScript, last push 2026-10-01.",
+      "text": "CLR - Culinary Logic Repository (AI pipeline, 2026, in development).\nCLR (Culinary Logic Repository) is a food knowledge base I feed from Telegram, where an LLM pipeline in Python files what I send as a recipe, a restaurant or kitchen gear in a React 19 + TypeScript web app. Send a link, a note, a voice memo or a photo; a Python (Flask) backend decides whether it's a restaurant, a recipe or kitchen gear, extracts structured JSON with an LLM (Groq by default, with Gemini and Anthropic swappable), checks restaurant details against Google Places, and shows a preview to save or discard. The React 19 + TypeScript web app has a gallery, a map, search and filters. Supabase holds the data and handles Google sign-in; the frontend runs on Vercel and the backend on Render. Still in development.\nTech: TypeScript, Python, Groq API, Telegram Bot API, React 19, Supabase, Vercel, Render.\nCode: https://github.com/Royc4515/Culinary-Logic-Repository\nGitHub repo Culinary-Logic-Repository: TypeScript, last push 2026-10-08.",
       "keywords": [
         "clr",
         "culinary",
@@ -310,11 +346,16 @@ export const KNOWLEDGE: Knowledge = {
       "source": "github",
       "title": "GitHub: Project3_SignalProcessing",
       "url": "https://github.com/Royc4515/Project3_SignalProcessing",
-      "text": "Repo Project3_SignalProcessing (https://github.com/Royc4515/Project3_SignalProcessing).\nSignal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data\nREADME excerpt: פרויקט 3 - עיבוד אותות במוח צפייה במאגר המלא ב-GitHub מטלה אישית בקורס \"עיבוד אותות במוח\" באוניברסיטת בר-אילן. בפרויקט זה מנותחת הקלטה בת 600 שניות של פוטנציאל שדה מקומי (LFP) שנדגמה ב-1000 Hz, יחד עם זמני הספייקים של נוירון בודד שנרשם במקביל. הפרויקט עוסק בתכנון והשוואה של מסנני FIR ו-IIR, בהשפעת שיטת הסינון על הפאזה, בחילוץ אמפליטודה ופאזה רגעיות באמצעות התמרת הילברט, ובבדיקת נעילת הפאזה בין ירי הנוירון לקצב ה-theta. תוכן המאגר קובץ תיאור Project3.ipynb מחברת Colab עם כל הקוד והדו\"ח המלא Project3.pdf הדו\"ח הסופי בפורמט PDF buildreport.py סקריפט שמייצר את report.html מהמחברת lfp.npy אות...\nLanguage: Jupyter Notebook.\nLast push: 2026-09-07.",
+      "text": "Repo Project3_SignalProcessing (https://github.com/Royc4515/Project3_SignalProcessing).\nSignal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data\nREADME excerpt: פרויקט 3 - עיבוד אותות במוח צפייה במאגר המלא ב-GitHub מטלה אישית בקורס \"עיבוד אותות במוח\" באוניברסיטת בר-אילן. בפרויקט זה מנותחת הקלטה בת 600 שניות של פוטנציאל שדה מקומי (LFP) שנדגמה ב-1000 Hz, יחד עם זמני הספייקים של נוירון בודד שנרשם במקביל. הפרויקט עוסק בתכנון והשוואה של מסנני FIR ו-IIR, בהשפעת שיטת הסינון על הפאזה, בחילוץ אמפליטודה ופאזה רגעיות באמצעות התמרת הילברט, ובבדיקת נעילת הפאזה בין ירי הנוירון לקצב ה-theta. תוכן המאגר קובץ תיאור Project3.ipynb מחברת Colab עם כל הקוד והדו\"ח המלא Project3.pdf הדו\"ח הסופי בפורמט PDF buildreport.py סקריפט שמייצר את report.html מהמחברת lfp.npy אות...\nLanguage: Jupyter Notebook.\nTopics: lfp, neuroscience, python, signal-processing, spike-analysis.\nLast push: 2026-09-07.",
       "keywords": [
         "project3_signalprocessing",
         "project3",
-        "signalprocessing"
+        "signalprocessing",
+        "lfp",
+        "neuroscience",
+        "python",
+        "signal-processing",
+        "spike-analysis"
       ]
     },
     {
@@ -322,12 +363,16 @@ export const KNOWLEDGE: Knowledge = {
       "source": "github",
       "title": "GitHub: build-your-goat",
       "url": "https://github.com/Royc4515/build-your-goat",
-      "text": "Repo build-your-goat (https://github.com/Royc4515/build-your-goat).\nBuild Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies)\nREADME excerpt: Build Your GOAT - NBA · EuroLeague · Soccer Play now: https://royc4515.github.io/build-your-goat/ (works on desktop & mobile) A casual, TikTok-filter-style sports game. Pick a mode, spin a slot reel of legends or current stars, lock one player into each of six skill slots (timing is everything - you get the face on screen when you tap), and reveal the highest-rated \"GOAT\" you can assemble. Chase the perfect 99 OVR. Modes: NBA (Legends / Current), EuroLeague (Legends / Current), Soccer (Legends / Current), and Mondial (2026 / Legends). Basketball modes score on...\nLanguage: TypeScript.\nLast push: 2026-06-28.",
+      "text": "Repo build-your-goat (https://github.com/Royc4515/build-your-goat).\nBuild Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies)\nREADME excerpt: Build Your GOAT - NBA · EuroLeague · Soccer Play now: https://royc4515.github.io/build-your-goat/ (works on desktop & mobile) A casual, TikTok-filter-style sports game. Pick a mode, spin a slot reel of legends or current stars, lock one player into each of six skill slots (timing is everything - you get the face on screen when you tap), and reveal the highest-rated \"GOAT\" you can assemble. Chase the perfect 99 OVR. Modes: NBA (Legends / Current), EuroLeague (Legends / Current), Soccer (Legends / Current), and Mondial (2026 / Legends). Basketball modes score on...\nLanguage: TypeScript.\nTopics: game, nba, typescript, vanilla-js.\nLast push: 2026-06-28.",
       "keywords": [
         "build-your-goat",
         "build",
         "your",
-        "goat"
+        "goat",
+        "game",
+        "nba",
+        "typescript",
+        "vanilla-js"
       ]
     },
     {
@@ -419,9 +464,9 @@ export const KNOWLEDGE: Knowledge = {
     "https://linkedin.com/in/roy-carmelli",
     "https://www.linkedin.com/in/roy-carmelli",
     "https://royc4515.github.io/Aside",
+    "https://nechita-raka.vercel.app",
     "https://career-predictor-cnvg.onrender.com",
     "https://royc4515.github.io/white-matter-tracts-game",
-    "https://gemini-wine-sommelier.vercel.app",
     "https://culinary-logic-repository.vercel.app"
   ]
 };
