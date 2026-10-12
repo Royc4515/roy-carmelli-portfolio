@@ -4,30 +4,58 @@
     {
       "name": "Aside",
       "url": "https://github.com/Royc4515/Aside",
-      "description": "",
+      "description": "Browser extension: ask any of six LLM providers about the page you're reading, in a sidebar",
       "language": "JavaScript",
-      "topics": [],
+      "topics": [
+        "ai",
+        "browser-extension",
+        "chrome-extension",
+        "javascript",
+        "llm"
+      ],
       "homepage": "https://royc4515.github.io/Aside/",
-      "lastPush": "2026-10-06",
-      "readme": "Aside AI in your sidebar. On any webpage. Ask any AI about the page you're reading - summarize, extract, translate, or just chat. Six providers, one keystroke, zero context-switching. Why Aside · Install · How it works · Privacy · For developers Why Aside You're reading something - an article, a research paper, an API doc, a long email thread - and you want an AI's take now, without losing your place. Aside opens a sidebar right where you are. It reads the page so you don't have to paste anything. You pick the model. You stay on the page. One keystroke. Alt + A on any page. The sidebar slides..."
+      "lastPush": "2026-10-10",
+      "readme": "Aside - AI sidebar for Chrome AI in your sidebar. On any webpage. Aside is a free, open-source Chrome extension that opens an AI sidebar on any webpage, so you can summarize, translate, extract or chat about the page with Claude, ChatGPT (OpenAI), Gemini, Grok, Groq or a local Ollama model, using your own API key (BYOK). Keys stay in your browser, there is no server or analytics, and the interface comes in English and Hebrew with full RTL support. Website · אתר בעברית Demo · Why Aside · Install · How it works · Privacy · FAQ · For developers See it in action 30 seconds, sound on: Alt + A on..."
     },
     {
       "name": "roy-carmelli-portfolio",
       "url": "https://github.com/Royc4515/roy-carmelli-portfolio",
-      "description": "",
+      "description": "My personal portfolio site",
       "language": "TypeScript",
+      "topics": [
+        "portfolio",
+        "react",
+        "typescript",
+        "vite"
+      ],
+      "homepage": "https://roy-carmelli-portfolio.vercel.app/",
+      "lastPush": "2026-10-10",
+      "readme": "Roy Carmelli - Portfolio Live: https://roy-carmelli-portfolio.vercel.app/ Personal portfolio for a CS & Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. Press start and the title screen becomes Roy Runner, an endless runner on a small canvas engine built for this site: a game-state machine, a 7-state player animation machine, AABB collision and a speed that keeps climbing. Day/night theme with system preference detection. Pixel Roy is an AI chat in the corner..."
+    },
+    {
+      "name": "nechita-raka",
+      "url": "https://github.com/Royc4515/nechita-raka",
+      "description": "נחיתה רכה - מדמ\"ח בר אילן: מרכז מידע לסטודנטים בשנה א'",
+      "language": "JavaScript",
       "topics": [],
-      "homepage": "https://roy-carmelli-portfolio.vercel.app",
-      "lastPush": "2026-10-06",
-      "readme": "Roy Carmelli - Portfolio Live: https://roy-carmelli-portfolio.vercel.app/ Personal portfolio for a CS & Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. Press start and the title screen becomes Roy Runner, an endless runner on a small canvas engine built for this site: a game-state machine, a 7-state player animation machine, AABB collision and a speed that keeps climbing. Day/night theme with system preference detection. The page is a map of five zones:..."
+      "homepage": "https://nechita-raka.vercel.app",
+      "lastPush": "2026-10-11",
+      "readme": "נחיתה רכה - מדמ\"ח בר אילן מרכז מידע קטן לסטודנטים בשנה א' במדעי המחשב באוניברסיטת בר אילן: קישורים חשובים, קבוצות וואטסאפ, לוח השנה האקדמי ותשובות לשאלות נפוצות. נבנה על ידי רועי כרמלי, חונך בנחיתה רכה, תשפ\"ז. אתר עצמאי של חונך בתוכנית. אינו אתר רשמי של אוניברסיטת בר אילן או של אגודת הסטודנטים. הקבצים קובץ מה יש בו data.js כל התוכן: קטגוריות, פריטים, תאריכים, שאלות ותשובות. זה הקובץ היחיד שצריך לערוך כדי לעדכן את האתר. index.html הדף עצמו (עיצוב וקוד). לא צריך לגעת בו כדי לעדכן תוכן. biu-5787.ics קובץ היומן עם כל התאריכים. manifest.webmanifest, icons/ מה שמאפשר להוסיף את האתר למסך הבית...."
     },
     {
       "name": "gemini-sommelier-bot",
       "url": "https://github.com/Royc4515/gemini-sommelier-bot",
       "description": "A serverless, context-aware Telegram sommelier powered by Gemini 2.5 Flash. Orchestrates live Google Sheets inventory management, chemical food-pairing synergy, and resilient LLM fallback chains- all built with zero-framework Python for ultra-low latency",
       "language": "Python",
-      "topics": [],
-      "homepage": "https://gemini-wine-sommelier.vercel.app",
+      "topics": [
+        "ai-agent",
+        "gemini",
+        "llm",
+        "python",
+        "serverless",
+        "telegram-bot"
+      ],
+      "homepage": "https://roy-carmelli-portfolio.vercel.app/",
       "lastPush": "2026-10-01",
       "readme": "Gemini Sommelier Bot Gemini Sommelier Bot is a serverless Telegram bot powered by the Google Gemini API. It operates as a highly specialized, context-aware sommelier that pairs meal selections with your live wine inventory managed via Google Sheets. Designed for robust execution, it utilizes a Vercel-deployed serverless architecture, exponential backoff for API resiliency, and a dynamic LLM fallback chain. Interface & Data State Telegram Interface (LLM Pairing) Google Sheets (Live Inventory) Context-aware recommendations based on available bottles. Source of truth for cellar management and..."
     },
@@ -46,7 +74,11 @@
       "url": "https://github.com/Royc4515/white-matter-tracts-game",
       "description": "mini-game for self test in Neuroanatomy course 5th unit: \"the White Matter\"",
       "language": "HTML",
-      "topics": [],
+      "topics": [
+        "education",
+        "game",
+        "neuroanatomy"
+      ],
       "homepage": null,
       "lastPush": "2026-09-28",
       "readme": "White Matter Tracts Game A modern, interactive drag-and-drop game for mastering white matter tract classification in neuroanatomy. Designed for medical students and neuroscience enthusiasts. Play Live: https://royc4515.github.io/white-matter-tracts-game/ Features Training Mode: Instant feedback. Learn by doing with immediate visual cues for correct/incorrect placements. Test Mode: Exam-style assessment. - Timer options: 30s / 60s / 90s. - Board locks upon completion or timeout. - Confetti Celebration for perfect scores! Modern UI: - Clean, scientific aesthetic using Inter typography. -..."
@@ -76,7 +108,13 @@
       "url": "https://github.com/Royc4515/Project3_SignalProcessing",
       "description": "Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data",
       "language": "Jupyter Notebook",
-      "topics": [],
+      "topics": [
+        "lfp",
+        "neuroscience",
+        "python",
+        "signal-processing",
+        "spike-analysis"
+      ],
       "homepage": null,
       "lastPush": "2026-09-07",
       "readme": "פרויקט 3 - עיבוד אותות במוח צפייה במאגר המלא ב-GitHub מטלה אישית בקורס \"עיבוד אותות במוח\" באוניברסיטת בר-אילן. בפרויקט זה מנותחת הקלטה בת 600 שניות של פוטנציאל שדה מקומי (LFP) שנדגמה ב-1000 Hz, יחד עם זמני הספייקים של נוירון בודד שנרשם במקביל. הפרויקט עוסק בתכנון והשוואה של מסנני FIR ו-IIR, בהשפעת שיטת הסינון על הפאזה, בחילוץ אמפליטודה ופאזה רגעיות באמצעות התמרת הילברט, ובבדיקת נעילת הפאזה בין ירי הנוירון לקצב ה-theta. תוכן המאגר קובץ תיאור Project3.ipynb מחברת Colab עם כל הקוד והדו\"ח המלא Project3.pdf הדו\"ח הסופי בפורמט PDF buildreport.py סקריפט שמייצר את report.html מהמחברת lfp.npy אות..."
@@ -102,7 +140,8 @@
         "matplotlib",
         "neuroscience",
         "pandas",
-        "python"
+        "python",
+        "regression"
       ],
       "homepage": null,
       "lastPush": "2026-01-22",
@@ -113,7 +152,12 @@
       "url": "https://github.com/Royc4515/build-your-goat",
       "description": "Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies)",
       "language": "TypeScript",
-      "topics": [],
+      "topics": [
+        "game",
+        "nba",
+        "typescript",
+        "vanilla-js"
+      ],
       "homepage": null,
       "lastPush": "2026-06-28",
       "readme": "Build Your GOAT - NBA · EuroLeague · Soccer Play now: https://royc4515.github.io/build-your-goat/ (works on desktop & mobile) A casual, TikTok-filter-style sports game. Pick a mode, spin a slot reel of legends or current stars, lock one player into each of six skill slots (timing is everything - you get the face on screen when you tap), and reveal the highest-rated \"GOAT\" you can assemble. Chase the perfect 99 OVR. Modes: NBA (Legends / Current), EuroLeague (Legends / Current), Soccer (Legends / Current), and Mondial (2026 / Legends). Basketball modes score on..."
@@ -125,7 +169,7 @@
       "language": "TypeScript",
       "topics": [],
       "homepage": "https://culinary-logic-repository.vercel.app",
-      "lastPush": "2026-10-01",
+      "lastPush": "2026-10-08",
       "readme": "Culinary Logic Repository (CLR) Culinary Logic Repository (CLR) is a smart, centralized hub for curating, organizing, and exploring your favorite culinary discoveries. Whether it's a buzzing new restaurant, an unforgettable recipe, or highly recommended kitchen gear, CLR helps you capture and structure this information effortlessly. Features AI Ingestion via Telegram: Send a URL (Instagram, TikTok, article, Google Maps link) or a rough text note to the companion Telegram bot. CLR scrapes the page, enriches places via Google Places, and uses an LLM (Groq) to extract structured metadata (title,..."
     },
     {

@@ -91,8 +91,8 @@ describe('Skills (equipment screen)', () => {
     expect(within(tip).getByText('Languages')).toBeInTheDocument();
     expect(tip).toHaveTextContent(/Used in/i);
     const used = within(tip).getAllByRole('listitem').map(li => li.textContent);
-    expect(used).toEqual(['Aside,', 'White Matter Tracts Game']);
-    expect(js).toHaveAccessibleDescription(/Used in: Aside, White Matter Tracts Game/);
+    expect(used).toEqual(['Aside,', 'Nechita Raka,', 'White Matter Tracts Game']);
+    expect(js).toHaveAccessibleDescription(/Used in: Aside, Nechita Raka, White Matter Tracts Game/);
 
     act(() => js.blur());
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
@@ -360,7 +360,7 @@ describe('Skills on mobile (< 768px)', () => {
     expect(row).toHaveTextContent('CLR');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     // The hidden tooltip still describes the item for assistive tech.
-    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Wine Sommelier Bot, Personal Portfolio, CLR/);
+    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Wine Sommelier Bot, Personal Portfolio, CLR/);
 
     await user.click(item('Vercel'));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();

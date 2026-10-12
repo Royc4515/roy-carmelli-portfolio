@@ -185,9 +185,9 @@ describe('<QuestCard> main quest (standard)', () => {
   });
 
   it('marks its highlights as secondary (hidden below 640px, restated in the quest log)', () => {
-    const wolt = byId('wolt-clone');
-    render(<QuestCard project={wolt} />);
-    const list = screen.getByText(wolt.highlights![0]).closest('ul')!;
+    const nechita = byId('nechita-raka');
+    render(<QuestCard project={nechita} />);
+    const list = screen.getByText(nechita.highlights![0]).closest('ul')!;
     expect(list).toHaveClass('quest-highlights', 'quest-highlights--secondary');
   });
 
