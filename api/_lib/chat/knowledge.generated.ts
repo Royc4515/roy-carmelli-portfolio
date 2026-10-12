@@ -3,7 +3,7 @@
 import type { Knowledge } from './types.js';
 
 export const KNOWLEDGE: Knowledge = {
-  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student or intern role in full-stack, frontend or AI development in Israel. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Wolt Clone - Food-Delivery App [main quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | Nechita Raka - First-Year CS Hub [side quest, Site + AI chat] - A site for first-year CS students at Bar-Ilan: 11 guides, links, the academic calendar and an AI chat that answers from its data. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, get one of 45 made-up futures and an AI portrait of you in it. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
+  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student or intern role in full-stack, frontend or AI development in Israel. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Nechita Raka - First-Year CS Hub [main quest, Site + AI chat] - A site for first-year CS students at Bar-Ilan: 11 guides, links, the academic calendar and an AI chat that answers from its data. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Wolt Clone - Food-Delivery App [side quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, get one of 45 made-up futures and an AI portrait of you in it. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
   "chunks": [
     {
       "id": "site:about",
@@ -61,6 +61,42 @@ export const KNOWLEDGE: Knowledge = {
       ]
     },
     {
+      "id": "site:project:nechita-raka",
+      "source": "site",
+      "title": "Nechita Raka - First-Year CS Hub",
+      "url": "https://nechita-raka.vercel.app/",
+      "text": "Nechita Raka - First-Year CS Hub (Site + AI chat, 2026).\nNechita Raka (Hebrew for 'soft landing') is a student hub I built as a mentor for first-year Computer Science students at Bar-Ilan University, in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 11 step-by-step guides (course registration, exams and the second sitting, reserve duty, the campus shuttle), each with its own URL to share in a group; 22 links in five categories; 29 FAQ answers; and the academic calendar as a timeline that shows the current week, with 43 dates and an .ics download. All of the content lives in one data.js file that any mentor can edit from a phone on GitHub. A check script and CI validate it on every change, and the build prerenders it into the HTML with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google, Bing and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Nothing from the conversation is stored, and 24 server tests run in GitHub Actions. An independent project, not an official university site.\nHighlights: 11 guides with their own URLs, 29 FAQs, the year as a timeline; Bit and Byte chat: Prompt Guard, Neon rate limits, Groq fallback; One data.js any mentor edits; prerendered for Google and AI.\nTech: JavaScript, Node.js, Groq API, Serverless Functions, Neon Postgres, Vercel, GitHub Actions, SEO / JSON-LD, Hebrew / RTL.\nCode: https://github.com/Royc4515/nechita-raka\nLive: https://nechita-raka.vercel.app/\nGitHub repo nechita-raka: JavaScript, last push 2026-10-11.",
+      "keywords": [
+        "nechita-raka",
+        "nechita",
+        "raka",
+        "first",
+        "year",
+        "cs",
+        "hub",
+        "site",
+        "ai",
+        "chat",
+        "javascript",
+        "node",
+        "js",
+        "groq",
+        "api",
+        "serverless",
+        "functions",
+        "neon",
+        "postgres",
+        "vercel",
+        "github",
+        "actions",
+        "seo",
+        "json",
+        "ld",
+        "hebrew",
+        "rtl"
+      ]
+    },
+    {
       "id": "site:project:sommelier-bot",
       "source": "site",
       "title": "Wine Sommelier Bot",
@@ -93,7 +129,7 @@ export const KNOWLEDGE: Knowledge = {
       "source": "site",
       "title": "Wolt Clone - Food-Delivery App",
       "url": "https://roy-carmelli-portfolio.vercel.app/#projects",
-      "text": "Wolt Clone - Food-Delivery App (Full-stack web app, 2026).\nWolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, the admin pages, and the client's 273 tests. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The repo is private; I can share it on request.\nHighlights: React 19 client: browse, search, cart, checkout, orders; Co-wrote the Node client for a C++ recommender over TCP; 273 frontend tests; docker compose runs the whole stack.\nTech: React 19, Node.js, Express, MongoDB, React Native, Docker, JWT auth, C++.\nCode: private repo, shared on request.",
+      "text": "Wolt Clone - Food-Delivery App (Full-stack web app, 2026).\nWolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, the admin pages, and the client's 273 tests. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The repo is private; I can share it on request.\nTech: React 19, Node.js, Express, MongoDB, React Native, Docker, JWT auth, C++.\nCode: private repo, shared on request.",
       "keywords": [
         "wolt-clone",
         "wolt",
@@ -146,42 +182,6 @@ export const KNOWLEDGE: Knowledge = {
         "roy-carmelli-portfolio",
         "roy",
         "carmelli"
-      ]
-    },
-    {
-      "id": "site:project:nechita-raka",
-      "source": "site",
-      "title": "Nechita Raka - First-Year CS Hub",
-      "url": "https://nechita-raka.vercel.app/",
-      "text": "Nechita Raka - First-Year CS Hub (Site + AI chat, 2026).\nNechita Raka (Hebrew for 'soft landing') is a student hub I built as a mentor for first-year Computer Science students at Bar-Ilan University, in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 11 step-by-step guides (course registration, exams and the second sitting, reserve duty, the campus shuttle), each with its own URL to share in a group; 22 links in five categories; 29 FAQ answers; and the academic calendar as a timeline that shows the current week, with 43 dates and an .ics download. All of the content lives in one data.js file that any mentor can edit from a phone on GitHub. A check script and CI validate it on every change, and the build prerenders it into the HTML with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google, Bing and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Nothing from the conversation is stored, and 24 server tests run in GitHub Actions. An independent project, not an official university site.\nTech: JavaScript, Node.js, Groq API, Serverless Functions, Neon Postgres, Vercel, GitHub Actions, SEO / JSON-LD, Hebrew / RTL.\nCode: https://github.com/Royc4515/nechita-raka\nLive: https://nechita-raka.vercel.app/\nGitHub repo nechita-raka: JavaScript, last push 2026-10-11.",
-      "keywords": [
-        "nechita-raka",
-        "nechita",
-        "raka",
-        "first",
-        "year",
-        "cs",
-        "hub",
-        "site",
-        "ai",
-        "chat",
-        "javascript",
-        "node",
-        "js",
-        "groq",
-        "api",
-        "serverless",
-        "functions",
-        "neon",
-        "postgres",
-        "vercel",
-        "github",
-        "actions",
-        "seo",
-        "json",
-        "ld",
-        "hebrew",
-        "rtl"
       ]
     },
     {

@@ -20,6 +20,23 @@ export const projects: Project[] = [
     year: 2026,
   },
   {
+    id: "nechita-raka",
+    kind: "Site + AI chat",
+    tier: "main",
+    tagline: "A site for first-year CS students at Bar-Ilan: 11 guides, links, the academic calendar and an AI chat that answers from its data.",
+    highlights: [
+      "11 guides with their own URLs, 29 FAQs, the year as a timeline",
+      "Bit and Byte chat: Prompt Guard, Neon rate limits, Groq fallback",
+      "One data.js any mentor edits; prerendered for Google and AI",
+    ],
+    title: "Nechita Raka - First-Year CS Hub",
+    description: "Nechita Raka (Hebrew for 'soft landing') is a student hub I built as a mentor for first-year Computer Science students at Bar-Ilan University, in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 11 step-by-step guides (course registration, exams and the second sitting, reserve duty, the campus shuttle), each with its own URL to share in a group; 22 links in five categories; 29 FAQ answers; and the academic calendar as a timeline that shows the current week, with 43 dates and an .ics download. All of the content lives in one data.js file that any mentor can edit from a phone on GitHub. A check script and CI validate it on every change, and the build prerenders it into the HTML with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google, Bing and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Nothing from the conversation is stored, and 24 server tests run in GitHub Actions. An independent project, not an official university site.",
+    tech: ["JavaScript", "Node.js", "Groq API", "Serverless Functions", "Neon Postgres", "Vercel", "GitHub Actions", "SEO / JSON-LD", "Hebrew / RTL"],
+    github: "https://github.com/Royc4515/nechita-raka",
+    live: "https://nechita-raka.vercel.app/",
+    year: 2026,
+  },
+  {
     id: "sommelier-bot",
     kind: "Telegram bot",
     tier: "main",
@@ -35,24 +52,19 @@ export const projects: Project[] = [
     github: "https://github.com/Royc4515/gemini-sommelier-bot",
     year: 2026,
   },
+
+  // ───────────── Side quests ─────────────
   {
     id: "wolt-clone",
     teamSize: 2,
     kind: "Full-stack web app",
-    tier: "main",
+    tier: "side",
     tagline: "A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client.",
-    highlights: [
-      "React 19 client: browse, search, cart, checkout, orders",
-      "Co-wrote the Node client for a C++ recommender over TCP",
-      "273 frontend tests; docker compose runs the whole stack",
-    ],
     title: "Wolt Clone - Food-Delivery App",
     description: "Wolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, the admin pages, and the client's 273 tests. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The repo is private; I can share it on request.",
     tech: ["React 19", "Node.js", "Express", "MongoDB", "React Native", "Docker", "JWT auth", "C++"],
     year: 2026,
   },
-
-  // ───────────── Side quests ─────────────
   {
     id: "portfolio",
     kind: "Website + engine",
@@ -63,18 +75,6 @@ export const projects: Project[] = [
     tech: ["TypeScript", "React 18", "Canvas", "Vite", "Tailwind CSS", "Framer Motion", "Groq API", "Serverless Functions", "Vitest", "Vercel"],
     github: "https://github.com/Royc4515/roy-carmelli-portfolio",
     live: "https://roy-carmelli-portfolio.vercel.app/",
-    year: 2026,
-  },
-  {
-    id: "nechita-raka",
-    kind: "Site + AI chat",
-    tier: "side",
-    tagline: "A site for first-year CS students at Bar-Ilan: 11 guides, links, the academic calendar and an AI chat that answers from its data.",
-    title: "Nechita Raka - First-Year CS Hub",
-    description: "Nechita Raka (Hebrew for 'soft landing') is a student hub I built as a mentor for first-year Computer Science students at Bar-Ilan University, in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 11 step-by-step guides (course registration, exams and the second sitting, reserve duty, the campus shuttle), each with its own URL to share in a group; 22 links in five categories; 29 FAQ answers; and the academic calendar as a timeline that shows the current week, with 43 dates and an .ics download. All of the content lives in one data.js file that any mentor can edit from a phone on GitHub. A check script and CI validate it on every change, and the build prerenders it into the HTML with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google, Bing and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Nothing from the conversation is stored, and 24 server tests run in GitHub Actions. An independent project, not an official university site.",
-    tech: ["JavaScript", "Node.js", "Groq API", "Serverless Functions", "Neon Postgres", "Vercel", "GitHub Actions", "SEO / JSON-LD", "Hebrew / RTL"],
-    github: "https://github.com/Royc4515/nechita-raka",
-    live: "https://nechita-raka.vercel.app/",
     year: 2026,
   },
   {

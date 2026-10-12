@@ -31,6 +31,16 @@ export const QUEST_SCREENSHOTS: Readonly<Record<string, QuestScreenshot>> = {
     height: 720,
     alt: 'Aside landing page: "Every AI model. One sidebar." beside a preview of the sidebar open next to a web page.',
   },
+  'nechita-raka': {
+    src: '/assets/projects/nechita-raka-1280.webp',
+    srcSet: '/assets/projects/nechita-raka-640.webp 640w, /assets/projects/nechita-raka-1280.webp 1280w',
+    // A standard main card: one of the two columns under the feature card from 768px, full
+    // width on phones.
+    sizes: '(min-width: 1024px) 540px, (min-width: 768px) 50vw, calc(100vw - 80px)',
+    width: 1280,
+    height: 720,
+    alt: 'Nechita Raka home page in Hebrew: the parachute mascot, a search box, the guides, links and calendar tabs, and the academic-year timeline showing week 1 of semester A.',
+  },
 };
 
 export type QuestCardLayout = 'feature' | 'standard';

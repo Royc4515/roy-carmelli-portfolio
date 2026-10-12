@@ -99,7 +99,7 @@ describe('projectsUsing (real data)', () => {
     expect(ids('Telegram Bot API')).toEqual(['sommelier-bot', 'clr']);
     expect(ids('Google OAuth')).toEqual(['career-predictor']);
     expect(ids('Claude API')).toEqual(['ai-sidebar']);
-    expect(ids('Node.js')).toEqual(['wolt-clone', 'nechita-raka', 'career-predictor']);
+    expect(ids('Node.js')).toEqual(['nechita-raka', 'wolt-clone', 'career-predictor']);
   });
 
   it('returns nothing for skills no project lists', () => {

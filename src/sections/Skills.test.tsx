@@ -360,7 +360,7 @@ describe('Skills on mobile (< 768px)', () => {
     expect(row).toHaveTextContent('CLR');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     // The hidden tooltip still describes the item for assistive tech.
-    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Wine Sommelier Bot, Personal Portfolio, Nechita Raka, CLR/);
+    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Wine Sommelier Bot, Personal Portfolio, CLR/);
 
     await user.click(item('Vercel'));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();
