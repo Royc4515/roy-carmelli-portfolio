@@ -8,7 +8,7 @@ import { projects } from '../data/projects';
 describe('byTier', () => {
   it('keeps data order within a tier', () => {
     expect(byTier(projects, 'main').map(p => p.id)).toEqual(['ai-sidebar', 'nechita-raka', 'sommelier-bot']);
-    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['wolt-clone', 'portfolio', 'career-predictor', 'clr']);
+    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['groupie', 'wolt-clone', 'portfolio', 'career-predictor', 'clr']);
     expect(byTier(projects, 'research').map(p => p.id)).toEqual([
       'cognitive-correlation',
       'signal-processing',
@@ -54,6 +54,7 @@ describe('<Projects>', () => {
       'Wine Sommelier Bot',
     ]);
     expect(titlesIn('Side quests')).toEqual([
+      'Groupie - WhatsApp Year in Review',
       'Wolt Clone - Food-Delivery App',
       'Personal Portfolio',
       'CareerPredict AI',
