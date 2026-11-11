@@ -43,6 +43,25 @@ export const QUEST_SCREENSHOTS: Readonly<Record<string, QuestScreenshot>> = {
   },
 };
 
+/**
+ * Screenshots for side quests, shown inside the quest log. A side card has no visual band (its
+ * rows line up across the side list through subgrid), so the shot waits in "Details"; with the
+ * log closed the lazy image is `display: none` and never downloads.
+ */
+export const QUEST_LOG_SCREENSHOTS: Readonly<Record<string, QuestScreenshot>> = {
+  'wolt-clone': {
+    src: '/assets/projects/wolt-clone-1280.webp',
+    srcSet: '/assets/projects/wolt-clone-640.webp 640w, /assets/projects/wolt-clone-1280.webp 1280w',
+    // Short laptop screens: one full-width card per row · lg: a third of the 1120px list ·
+    // from 640px: half the list · phones: full width.
+    sizes:
+      '(min-width: 1024px) and (max-height: 960px) 640px, (min-width: 1024px) 320px, (min-width: 640px) 45vw, calc(100vw - 80px)',
+    width: 1280,
+    height: 880,
+    alt: 'Wolt Clone home page in dark theme: food category tiles, a Promoted row and an All Restaurants row of restaurant cards with delivery fees, times and ratings.',
+  },
+};
+
 export type QuestCardLayout = 'feature' | 'standard';
 
 export interface QuestCardProps {
@@ -297,12 +316,26 @@ function QuestActions({
 }
 
 function QuestLog({ project, open, surface }: { project: Project; open: boolean; surface: Surface }) {
+  const shot = QUEST_LOG_SCREENSHOTS[project.id];
   return (
     <div
       id={questLogId(project)}
       hidden={!open}
       className={cx('quest-log', surface === 'paper' ? 'quest-log--paper' : 'quest-log--wood')}
     >
+      {shot && (
+        <img
+          src={shot.src}
+          srcSet={shot.srcSet}
+          sizes={shot.sizes}
+          width={shot.width}
+          height={shot.height}
+          alt={shot.alt}
+          loading="lazy"
+          decoding="async"
+          className="quest-log__shot mb-4 block h-auto w-full"
+        />
+      )}
       <p className="max-w-[68ch] text-body">{project.description}</p>
       {/* The card shows CHIP_MAX chips and a `+N`; the full stack lives here, readable on touch too. */}
       <p className="quest-log__tech mt-3 max-w-[68ch] text-hud">

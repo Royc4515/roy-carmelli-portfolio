@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
-import QuestCard, { PRIVATE_REPO_NOTE, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
+import QuestCard, { PRIVATE_REPO_NOTE, QUEST_LOG_SCREENSHOTS, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
 import { itemForProject } from './ItemSprite';
 import { projects } from '../data/projects';
 import type { Project } from '../types/index';
@@ -210,6 +210,24 @@ describe('<QuestCard> main quest (standard)', () => {
   it('shows no private-repo note when the project has public code', () => {
     render(<QuestCard project={byId('sommelier-bot')} />);
     expect(screen.queryByText(PRIVATE_REPO_NOTE)).not.toBeInTheDocument();
+  });
+
+  it('keeps the Wolt Clone screenshot in the quest log, lazy, until Details opens', async () => {
+    const user = userEvent.setup();
+    const wolt = byId('wolt-clone');
+    render(<QuestCard project={wolt} />);
+    const img = screen.getByRole('img', { name: /Wolt Clone home page/, hidden: true });
+    expect(img.closest('.quest-log')).toHaveAttribute('hidden');
+    expect(img).toHaveAttribute('loading', 'lazy');
+    expect(img.getAttribute('srcset')).toContain('wolt-clone-640.webp 640w');
+    expect(img).toHaveAttribute('width', '1280');
+    expect(img).toHaveAttribute('height', '880');
+    await user.click(screen.getByRole('button', { name: `Details: ${wolt.title}` }));
+    expect(screen.getByRole('img', { name: /Wolt Clone home page/ })).toBeVisible();
+  });
+
+  it('only gives quest-log screenshots to side quests that exist', () => {
+    for (const id of Object.keys(QUEST_LOG_SCREENSHOTS)) expect(byId(id).tier).toBe('side');
   });
 
   it('lists every technology in the quest log, including the ones behind +N', async () => {

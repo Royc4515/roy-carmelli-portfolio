@@ -276,6 +276,12 @@
     box-shadow: inset 0 0 0 2px var(--color-border-subtle);
   }
 
+  /* A side quest's screenshot in its log: a 2px ink frame, like the monitor's
+     screen edge, so the photo does not bleed into the sunken wood. */
+  .quest-log__shot {
+    box-shadow: 0 0 0 2px var(--color-ink);
+  }
+
   /* Unrolls in four steps. `hidden` keeps display: none while closed. */
   .quest-log:not([hidden]) {
     animation: quest-log-open var(--dur-slow) steps(4, end) both;
