@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
-import QuestCard, { PRIVATE_REPO_NOTE, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
+import QuestCard, { PRIVATE_REPO_NOTE, QUEST_LOG_SCREENSHOTS, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
 import { itemForProject } from './ItemSprite';
 import { projects } from '../data/projects';
 import type { Project } from '../types/index';
@@ -192,17 +192,42 @@ describe('<QuestCard> main quest (standard)', () => {
   });
 
   it('says why a private project has no Code link (no Live, no Code, a note instead)', () => {
-    const wolt = byId('wolt-clone');
-    const { container } = render(<QuestCard project={wolt} />);
+    // No card is code-less and live-less today; strip one so the fallback stays covered.
+    const hidden = { ...byId('wolt-clone'), github: undefined, live: undefined };
+    const { container } = render(<QuestCard project={hidden} />);
     expect(container.querySelector('svg[data-item]')).toHaveAttribute('data-item', 'delivery-bag');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText(PRIVATE_REPO_NOTE)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: `Details: ${wolt.title}` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: `Details: ${hidden.title}` })).toBeInTheDocument();
+  });
+
+  it('links the Wolt Clone code now that its repo is public', () => {
+    render(<QuestCard project={byId('wolt-clone')} />);
+    expect(screen.getByRole('link', { name: /code/i })).toHaveAttribute('href', 'https://github.com/Royc4515/Wolt-clone');
+    expect(screen.queryByText(PRIVATE_REPO_NOTE)).not.toBeInTheDocument();
   });
 
   it('shows no private-repo note when the project has public code', () => {
     render(<QuestCard project={byId('sommelier-bot')} />);
     expect(screen.queryByText(PRIVATE_REPO_NOTE)).not.toBeInTheDocument();
+  });
+
+  it('keeps the Wolt Clone screenshot in the quest log, lazy, until Details opens', async () => {
+    const user = userEvent.setup();
+    const wolt = byId('wolt-clone');
+    render(<QuestCard project={wolt} />);
+    const img = screen.getByRole('img', { name: /Wolt Clone home page/, hidden: true });
+    expect(img.closest('.quest-log')).toHaveAttribute('hidden');
+    expect(img).toHaveAttribute('loading', 'lazy');
+    expect(img.getAttribute('srcset')).toContain('wolt-clone-640.webp 640w');
+    expect(img).toHaveAttribute('width', '1280');
+    expect(img).toHaveAttribute('height', '880');
+    await user.click(screen.getByRole('button', { name: `Details: ${wolt.title}` }));
+    expect(screen.getByRole('img', { name: /Wolt Clone home page/ })).toBeVisible();
+  });
+
+  it('only gives quest-log screenshots to side quests that exist', () => {
+    for (const id of Object.keys(QUEST_LOG_SCREENSHOTS)) expect(byId(id).tier).toBe('side');
   });
 
   it('lists every technology in the quest log, including the ones behind +N', async () => {
