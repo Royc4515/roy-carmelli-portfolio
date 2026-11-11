@@ -60,6 +60,16 @@
       "readme": "Gemini Sommelier Bot Gemini Sommelier Bot is a serverless Telegram bot powered by the Google Gemini API. It operates as a highly specialized, context-aware sommelier that pairs meal selections with your live wine inventory managed via Google Sheets. Designed for robust execution, it utilizes a Vercel-deployed serverless architecture, exponential backoff for API resiliency, and a dynamic LLM fallback chain. Interface & Data State Telegram Interface (LLM Pairing) Google Sheets (Live Inventory) Context-aware recommendations based on available bottles. Source of truth for cellar management and..."
     },
     {
+      "name": "Wolt-clone",
+      "url": "https://github.com/Royc4515/Wolt-clone",
+      "description": "Project in Advanced system programing course",
+      "language": "JavaScript",
+      "topics": [],
+      "homepage": null,
+      "lastPush": "2026-07-04",
+      "readme": "Wolt-Clone A full-stack food-delivery web app - React UI · Express API · C++ recommender, all in one docker compose up. Quick Start · Features · Architecture · API · Demo A Wolt-style food-delivery application. The UI is a React single-page app that talks to our Node.js + Express server (Ex3), which in turn bridges to the legacy Ex2 C++ recommendation server for personalized recommendations. The whole stack runs together with one command. Everything the UI shows - restaurants, menus, orders, search results, recommendations - is fetched live from the server; nothing is hard-coded in the..."
+    },
+    {
       "name": "career-predictor",
       "url": "https://github.com/Royc4515/career-predictor",
       "description": "",
@@ -67,7 +77,7 @@
       "topics": [],
       "homepage": "https://career-predictor-cnvg.onrender.com/",
       "lastPush": "2026-09-30",
-      "readme": "CareerPredict AI Results are 99.7% accurate and completely made up. CareerPredict AI runs your professional DNA through 847 career trajectories, cross-references the Quantum Personality Matrix, and delivers the career destiny you truly deserve - complete with a fake happiness score, a dubious salary projection, and an AI-generated portrait of your future self. Answer 5 questions. Watch the analysis. Discover you're a JIRA Ticket Archaeologist, Legacy Systems Division. Screenshots Discover Your True Career Destiny The questions are hard. The answers are harder. 823 trajectories · 13,911 data..."
+      "readme": "CareerPredict AI Results are 99.7% accurate and completely made up. CareerPredict AI runs your professional DNA through 847 career trajectories, cross-references the Quantum Personality Matrix, and delivers the career destiny you truly deserve - complete with a fake happiness score, a dubious salary projection, and an AI-generated portrait of your future self. Answer 5 questions. Watch the analysis. Land on the cover of The Forecast as a JIRA Ticket Archaeologist, Legacy Systems Division. Screenshots The front page. The sample cover cycles through real headlines. Keyboard-first. A highlighter..."
     },
     {
       "name": "white-matter-tracts-game",

@@ -72,8 +72,9 @@ export const projects: Project[] = [
     tier: "side",
     tagline: "A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client.",
     title: "Wolt Clone - Food-Delivery App",
-    description: "Wolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, and the admin pages. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The repo is private; I can share it on request.",
+    description: "Wolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, and the admin pages. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens.",
     tech: ["React 19", "Node.js", "Express", "MongoDB", "React Native", "Docker", "JWT auth", "C++"],
+    github: "https://github.com/Royc4515/Wolt-clone",
     year: 2026,
   },
   {

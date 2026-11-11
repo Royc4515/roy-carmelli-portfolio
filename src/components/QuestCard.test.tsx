@@ -192,12 +192,19 @@ describe('<QuestCard> main quest (standard)', () => {
   });
 
   it('says why a private project has no Code link (no Live, no Code, a note instead)', () => {
-    const wolt = byId('wolt-clone');
-    const { container } = render(<QuestCard project={wolt} />);
+    // No card is code-less and live-less today; strip one so the fallback stays covered.
+    const hidden = { ...byId('wolt-clone'), github: undefined, live: undefined };
+    const { container } = render(<QuestCard project={hidden} />);
     expect(container.querySelector('svg[data-item]')).toHaveAttribute('data-item', 'delivery-bag');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText(PRIVATE_REPO_NOTE)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: `Details: ${wolt.title}` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: `Details: ${hidden.title}` })).toBeInTheDocument();
+  });
+
+  it('links the Wolt Clone code now that its repo is public', () => {
+    render(<QuestCard project={byId('wolt-clone')} />);
+    expect(screen.getByRole('link', { name: /code/i })).toHaveAttribute('href', 'https://github.com/Royc4515/Wolt-clone');
+    expect(screen.queryByText(PRIVATE_REPO_NOTE)).not.toBeInTheDocument();
   });
 
   it('shows no private-repo note when the project has public code', () => {
