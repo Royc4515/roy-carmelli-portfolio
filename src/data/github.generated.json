@@ -67,7 +67,7 @@
       "topics": [],
       "homepage": null,
       "lastPush": "2026-11-11",
-      "readme": "Wolt-Clone A full-stack food-delivery web app - React UI · Express API · C++ recommender, all in one docker compose up. Quick Start · Features · Architecture · API · Demo A Wolt-style food-delivery application. The UI is a React single-page app that talks to our Node.js + Express server (Ex3), which in turn bridges to the legacy Ex2 C++ recommendation server for personalized recommendations. The whole stack runs together with one command. Everything the UI shows - restaurants, menus, orders, search results, recommendations - is fetched live from the server; nothing is hard-coded in the..."
+      "readme": "Wolt-Clone A full-stack food-delivery web app - React UI · Express API · C++ recommender, all in one docker compose up. Quick Start · Features · Architecture · API · Demo A Wolt-style food-delivery application with two clients: a React single-page web app and a React Native (Expo) mobile app. Both talk to one Node.js + Express API backed by MongoDB, which in turn bridges to the legacy Ex2 C++ recommendation server for personalized recommendations. The whole server stack runs together with one command. Everything the UI shows - restaurants, menus, orders, search results, recommendations - is..."
     },
     {
       "name": "career-predictor",
