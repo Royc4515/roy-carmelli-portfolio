@@ -50,7 +50,7 @@ describe('<Projects>', () => {
         .map(h => h.textContent);
     expect(titlesIn('Main quests')).toEqual([
       'Aside - AI Sidebar',
-      'Nechita Raka - First-Year CS Hub',
+      'Nechita Raka - First-Year Student Hub',
       'Wine Sommelier Bot',
     ]);
     expect(titlesIn('Side quests')).toEqual([
