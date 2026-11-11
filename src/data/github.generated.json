@@ -62,11 +62,11 @@
     {
       "name": "Wolt-clone",
       "url": "https://github.com/Royc4515/Wolt-clone",
-      "description": "Project in Advanced system programing course",
+      "description": "Wolt-style food-delivery app: React web + React Native (Expo) clients, Express/MongoDB API, C++ recommender, one docker compose up",
       "language": "JavaScript",
       "topics": [],
       "homepage": null,
-      "lastPush": "2026-07-04",
+      "lastPush": "2026-11-11",
       "readme": "Wolt-Clone A full-stack food-delivery web app - React UI · Express API · C++ recommender, all in one docker compose up. Quick Start · Features · Architecture · API · Demo A Wolt-style food-delivery application. The UI is a React single-page app that talks to our Node.js + Express server (Ex3), which in turn bridges to the legacy Ex2 C++ recommendation server for personalized recommendations. The whole stack runs together with one command. Everything the UI shows - restaurants, menus, orders, search results, recommendations - is fetched live from the server; nothing is hard-coded in the..."
     },
     {
