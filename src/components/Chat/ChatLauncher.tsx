@@ -93,10 +93,11 @@ const ChatPanel = lazy<ComponentType<ChatPanelProps>>(() =>
  * bubble when the page loads, and again, with the next line, whenever he is pointed at or focused.
  * He waves only then: motion beside text people are reading distracts. Pressing him opens the chat
  * panel, which stays mounted after the first open so closing it keeps the conversation.
- * On phones the first screen is the hero's text and full-width buttons, so there he is docked as
- * a small "Ask AI" plate on the top-right corner of the hero art (it scrolls away with the art
- * and covers no text); once the hero has scrolled clear of his corner he stands there as usual
- * and says hello.
+ * On phones the first screen is the hero's text and full-width buttons, so there he is docked on
+ * the top-right corner of the hero art as a speech bubble ("Ask me anything", tagged AI) coming
+ * from the big waving Roy: it scrolls away with the art and covers no text, and it needs no
+ * second, smaller Roy beside the first. Once the hero has scrolled clear of his corner he stands
+ * there as usual and says hello.
  */
 export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -220,6 +221,12 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
         <span className="chat-launcher__plate text-label" aria-hidden="true">
           {docked ? chatPersona.dockedBadge : chatPersona.badge}
         </span>
+        {/* Docked, the bubble speaks in Roy's voice; the tag says it is the AI answering. */}
+        {docked && (
+          <span className="chat-launcher__tag text-label" aria-hidden="true">
+            {chatPersona.badge}
+          </span>
+        )}
       </button>
       {mounted && (
         <Suspense fallback={null}>

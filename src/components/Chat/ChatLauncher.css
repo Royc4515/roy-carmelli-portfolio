@@ -72,29 +72,83 @@ html[data-arcade-playing] .chat-root {
 
 /* Phones, first screen: docked on the top-right corner of the hero art. Absolute, so it
    scrolls away with the art instead of riding over the tagline and the full-width buttons
-   (the fixed corner covered them). Just the plate, 44px tall, saying what it does.
-   don't touch / 80px = the 64px navbar, its 4px line and 12px of air; .chat-root must have no
-   positioned ancestor, or `top` stops meaning "from the top of the page". */
+   (the fixed corner covered them).
+   don't touch / 84px = the 64px navbar, its 4px line and 16px of air (12 + the bubble's 4px
+   frame); .chat-root must have no positioned ancestor, or `top` stops meaning "from the top of
+   the page". */
 .chat-root[data-docked] {
   position: absolute;
-  top: 80px;
+  top: 84px;
   bottom: auto;
+  /* 4px more than the fixed corner: the frame is drawn outside the box */
+  right: max(20px, calc(env(safe-area-inset-right) + 12px));
 }
 
 .chat-root[data-docked] .chat-launcher {
+  position: relative;
   width: auto;
+  animation: chat-pop-in var(--dur-slow) steps(4) 0.6s both;
 }
 
 .chat-root[data-docked] .chat-launcher__sprite {
   display: none;
 }
 
+/* The plate becomes the parchment speech bubble the corner figure uses, here said by the hero's
+   big Roy. Two short lines: one line would reach over his hair on a 390px screen. */
 .chat-root[data-docked] .chat-launcher__plate {
+  position: relative;
   display: flex;
   align-items: center;
+  width: 112px;
   min-height: 44px;
-  padding: 2px 12px 0;
-  white-space: nowrap;
+  padding: 7px 10px 5px;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  line-height: 16px;
+  text-align: left;
+  box-shadow:
+    0 -4px 0 0 var(--color-ink),
+    0 4px 0 0 var(--color-ink),
+    -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink),
+    8px 12px 0 0 var(--color-shadow);
+
+  /* Stepped tail towards Roy, below and to the left: three 4px stairs of parchment running
+     through the bottom frame line. */
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -12px;
+    left: 12px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-paper);
+    clip-path: polygon(0 0, 100% 0, 100% 33.33%, 66.67% 33.33%, 66.67% 66.67%, 33.33% 66.67%, 33.33% 100%, 0 100%);
+  }
+}
+
+/* Pressed: the bubble sinks onto its shadow and keeps its ink frame. */
+.chat-root[data-docked] .chat-launcher:active .chat-launcher__plate {
+  transform: translate(4px, 4px);
+  box-shadow:
+    0 -4px 0 0 var(--color-ink),
+    0 4px 0 0 var(--color-ink),
+    -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink);
+}
+
+/* A brass "AI" tag riding the bubble's top-right corner. */
+.chat-launcher__tag {
+  position: absolute;
+  top: -14px;
+  right: -8px;
+  padding: 3px 6px 1px;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  box-shadow:
+    inset 2px 2px 0 0 var(--color-bevel-hi),
+    inset -2px -2px 0 0 var(--color-bevel-lo);
 }
 
 /* A full press, like every other button: the plate sinks onto its shadow and the bevel flips. */
@@ -210,7 +264,8 @@ html[data-arcade-playing] .chat-root {
 
 @media (prefers-reduced-motion: reduce) {
   .chat-bubble,
-  .chat-panel {
+  .chat-panel,
+  .chat-root[data-docked] .chat-launcher {
     animation: none;
   }
 
