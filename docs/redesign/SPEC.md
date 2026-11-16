@@ -314,11 +314,23 @@ conversation; behaviour lives in `useChat`, copy in `src/data/chatPersona.ts`.
   hover or keyboard focus, each time with the next line of `chatPersona.bubbles` (Latin-1, ≤ 24
   chars each, tested); it lingers 1.5s after the pointer leaves. Not while the panel is open, and
   not when focus merely returns from closing it. Wraps on a narrow phone.
+- **Motion (chat only):** the chat is the one place that moves smoothly instead of in pixel
+  steps. Things that arrive use the `--ease-pop` spring (corner bubble out of its tail, the corner
+  figure rising 28px, the docked bubble growing from Roy's mouth, a new docked line squashing in);
+  the docked bubble idles on a 4px float and its AI tag catches a glint every 5s. Only `transform`
+  and `opacity` animate. Reduced motion turns all of it off and shows each line whole.
+- **Docked bubble (phones, first screen):** while the hero still reaches under the launcher's
+  corner, the launcher is a parchment speech bubble on the hero art, left of the big Roy with its
+  tail at his mouth, tagged `AI`. It types `chatPersona.bubbles` one after another (60 chars/s,
+  3.2s hold, block caret). `ChatLauncher.tsx` measures Roy (`[data-hero-roy]` in a `stack` hero)
+  and sets `right`, `top` and a width of 104-168px; under 136px it drops letter spacing and uses
+  6px padding so "PROJECTS?" fits (320px phones). With no room beside him (overlay hero) it takes
+  the art's top-right corner. It scrolls away with the art and covers no text.
 - **Panel:** wood `PixelPanel`, elevation 2, brass `tab` "PIXEL ROY · AI". It opens beside Roy
   (left of the launcher, bottom-aligned), so he stands next to his own dialogue box and the panel
   gets the window's height: `min(620px, 100dvh - 100px)`, enough on a 150%-zoom laptop (~550px).
   Only the log flexes (basis 0, 96px minimum) and scrolls; the input and the one-line note never
-  move. Enters like the pause menu (opacity + 8px, `--dur-slow`, `steps(4)`), closes instantly.
+  move. Enters smoothly (opacity + 16px + scale 0.97, 300ms, `--ease-snap`), closes instantly.
   Phones only (under 768px wide, or under 440px tall when sideways): full-screen sheet over the
   nav (z 150), page inert behind it.
 - **Answers:** Roy's face in a sunken well beside a parchment speech box (ink text, stepped tail

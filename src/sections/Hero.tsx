@@ -1045,7 +1045,9 @@ export default function Hero() {
         )}
         {/* Night: the world gets two moonlight washes, Roy (between them) one, so he stays lit. */}
         <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
+        {/* data-hero-roy: the chat launcher reads this box to dock its speech bubble beside him. */}
         <m.div
+          data-hero-roy=""
           className="absolute"
           style={{ left: `${scene.spriteX}px`, bottom: `${scene.groundH}px` }}
           initial={false}
