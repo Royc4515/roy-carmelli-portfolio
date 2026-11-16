@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import '@fontsource-variable/newsreader/opsz.css';
-import '@fontsource-variable/newsreader/opsz-italic.css';
+// Italic without the optical-size axis: it is only used at two sizes, and that file is 64 kB
+// instead of 147 kB.
+import '@fontsource-variable/newsreader/wght-italic.css';
 import '@fontsource-variable/inter/wght.css';
 import { useTheme } from '../../hooks/useTheme';
 import { OptionShell } from '../shared/OptionShell';

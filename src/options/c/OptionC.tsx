@@ -58,7 +58,14 @@ function Feature({ project, index }: { project: Project; index: number }) {
   const highlights = project.highlights ?? [];
 
   return (
-    <article className="oc-feature oc-reveal" data-flip={index % 2 === 1 ? '' : undefined}>
+    <article
+      className="oc-feature oc-reveal"
+      data-flip={index % 2 === 1 ? '' : undefined}
+      // Esc closes an open story from anywhere inside the card, like any disclosure panel.
+      onKeyDown={event => {
+        if (event.key === 'Escape' && open) setOpen(false);
+      }}
+    >
       <div className="oc-feature__visual">
         {image ? (
           <img
