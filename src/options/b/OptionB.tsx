@@ -146,7 +146,7 @@ function ProjectTile({ project, variant, morph, onOpen }: ProjectTileProps) {
         <div className="ob-tile__media" aria-hidden="true">
           <div className="ob-frame">
             {/* Decorative here (alt ""): the tile already names the project; the dialog's copy has the alt. */}
-            <img src={image.src} srcSet={image.srcSet} sizes="(min-width: 900px) 520px, 92vw" width={image.width} height={image.height} alt="" loading="lazy" decoding="async" />
+            <img src={image.src} srcSet={image.srcSet} sizes="(min-width: 900px) 960px, 92vw" width={image.width} height={image.height} alt="" loading="lazy" decoding="async" />
           </div>
         </div>
       )}
