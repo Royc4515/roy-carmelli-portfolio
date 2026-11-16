@@ -255,6 +255,17 @@ function CaseStudy({ project, onClose, onOpen }: { project: Project; onClose: ()
           </ul>
         </aside>
       </div>
+      {/* The reader is most convinced here, so the two actions of the page are here too. */}
+      <div className="oa-case__cta">
+        <ResumeLink />
+        <a className="oa-cta oa-cta--quiet" href={MAILTO}>
+          <ArrowRight className="oa-cta__icon" />
+          <span>
+            <span className="oa-cta__label">Email me</span>
+            <span className="oa-cta__meta">{EMAIL_SHOWN}</span>
+          </span>
+        </a>
+      </div>
       <button type="button" className="oa-next" onClick={() => onOpen(next)}>
         <span className="oa-next__label">Next</span>
         <span className="oa-next__name">{splitTitle(next.title).name}</span>

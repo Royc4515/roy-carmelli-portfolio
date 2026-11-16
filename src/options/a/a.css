@@ -105,7 +105,13 @@ html[data-option='a'][data-theme='night'] {
 
 /* ── Hero ─────────────────────────────────────────────────────────────── */
 .oa-hero {
-  padding: clamp(2rem, 9vh, 6.5rem) 0 clamp(3.5rem, 10vh, 7rem);
+  /* The first screen is the hero alone (the top line is 4rem): the next section must not
+     peek in half-revealed at the fold. Capped so a tall monitor does not get a void. */
+  min-height: min(calc(100svh - 4rem), 56rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vh, 4rem) 0 clamp(3rem, 12vh, 8rem);
 }
 .oa-hero__eyebrow {
   display: flex;
@@ -624,7 +630,7 @@ html[data-option='a'][data-theme='night'] {
     .oa-reveal {
       animation: oa-rise linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 55%;
+      animation-range: entry 0% entry 35%;
     }
   }
   @keyframes oa-rise {
@@ -690,5 +696,26 @@ html[data-option='a']::view-transition-group(*) {
   }
   .oa-index .oa-link {
     min-height: 2rem;
+  }
+}
+
+.oa-case__cta {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+}
+.oa-case__cta + .oa-next {
+  margin-top: clamp(2rem, 5vw, 3rem);
+}
+
+/* Phones: the case-study button takes its own row, so Live and Source stay side by side
+   instead of one of them wrapping alone. */
+@media (max-width: 30rem) {
+  .oa-more {
+    flex-basis: 100%;
+  }
+  .oa-work__actions {
+    gap: 0 1.5rem;
   }
 }
