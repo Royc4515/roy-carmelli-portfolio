@@ -93,11 +93,11 @@ html[data-arcade-playing] .chat-root {
   animation: chat-dock-float 3.4s ease-in-out 0.9s infinite alternate;
 }
 
-/* Arrives once, growing out of Roy's hand (the tail's corner). */
+/* Arrives once, growing out of the tail's corner (Roy's mouth). */
 .chat-root[data-docked] .chat-launcher {
   position: relative;
   width: auto;
-  transform-origin: 0 100%;
+  transform-origin: 100% 14px;
   animation: chat-dock-in 520ms var(--ease-pop) 0.15s backwards;
 }
 
@@ -105,63 +105,41 @@ html[data-arcade-playing] .chat-root {
   display: none;
 }
 
-/* The plate becomes the parchment speech bubble the corner figure uses, here said by the hero's
-   big Roy. Narrow (three short lines at most): a wider bubble would reach over his hair on a
-   390px screen.
+/* The plate becomes the corner figure's speech bubble (the shared look is under "Parchment
+   speech bubble" below), here said by the hero's big Roy. Narrow (three short lines at most):
+   a wider bubble would reach over his hair on a 390px screen.
    don't touch / the animations here fill `backwards` only, never `forwards`: a filled transform
    would outrank the :active press below. */
 .chat-root[data-docked] .chat-launcher__plate {
   position: relative;
   display: flex;
   align-items: center;
-  width: max-content;
   max-width: var(--chat-dock-max, 124px);
   min-height: 44px;
   padding: 7px 10px 5px;
-  background-color: var(--color-paper);
-  color: var(--color-ink);
-  line-height: 16px;
   text-align: left;
-  transform-origin: 0 100%;
-  box-shadow:
-    0 -4px 0 0 var(--color-ink),
-    0 4px 0 0 var(--color-ink),
-    -4px 0 0 0 var(--color-ink),
-    4px 0 0 0 var(--color-ink),
-    8px 12px 0 0 var(--color-shadow);
   /* Every new line is a new bubble (keyed in ChatLauncher.tsx): a quick squash and settle. */
   animation: chat-dock-swap 380ms var(--ease-pop) backwards;
   transition:
     transform 140ms var(--ease-snap),
     box-shadow 140ms var(--ease-snap);
-
-  /* Stepped tail towards Roy, below and to the left: three 4px stairs of parchment running
-     through the bottom frame line. */
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -12px;
-    left: 12px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--color-paper);
-    clip-path: polygon(0 0, 100% 0, 100% 33.33%, 66.67% 33.33%, 66.67% 66.67%, 33.33% 66.67%, 33.33% 100%, 0 100%);
-  }
 }
 
 /* Beside Roy (the usual place on an upright phone; ChatLauncher.tsx sets `right`, `top` and
-   the width from where he stands): the bubble is to his left, its tail at his mouth, like the
-   corner figure's bubble. Everything grows out of the tail. */
-.chat-root[data-dock-side="beside"] .chat-launcher,
-.chat-root[data-dock-side="beside"] .chat-launcher__plate {
-  transform-origin: 100% 14px;
+   the width from where he stands) the bubble is to his left with its tail at his mouth, exactly
+   like the corner figure's bubble, so it needs no rules of its own.
+   With no room beside him it sits in the art's top-right corner, above him: there the tail
+   leaves the bottom-left corner, and everything grows out of that corner instead. */
+.chat-root[data-docked]:not([data-dock-side]) .chat-launcher,
+.chat-root[data-docked]:not([data-dock-side]) .chat-launcher__plate {
+  transform-origin: 0 100%;
 }
 
-.chat-root[data-dock-side="beside"] .chat-launcher__plate::after {
-  top: 8px;
-  right: -12px;
-  bottom: auto;
-  left: auto;
+.chat-root[data-docked]:not([data-dock-side]) .chat-launcher__plate::after {
+  top: auto;
+  right: auto;
+  bottom: -12px;
+  left: 12px;
 }
 
 /* A 320px-wide phone leaves about 120px beside him: tighter padding and no letter spacing, so
@@ -206,11 +184,7 @@ html[data-arcade-playing] .chat-root {
 /* Pressed: the bubble sinks onto its shadow and keeps its ink frame. */
 .chat-root[data-docked] .chat-launcher:active .chat-launcher__plate {
   transform: translate(4px, 4px) scale(0.98);
-  box-shadow:
-    0 -4px 0 0 var(--color-ink),
-    0 4px 0 0 var(--color-ink),
-    -4px 0 0 0 var(--color-ink),
-    4px 0 0 0 var(--color-ink);
+  box-shadow: var(--chat-ink-frame);
 }
 
 /* A brass "AI" tag riding the bubble's top-right corner; a glint crosses it now and then. */
@@ -262,32 +236,31 @@ html[data-arcade-playing] .chat-root {
     inset -2px -2px 0 0 var(--color-bevel-hi);
 }
 
-/* A parchment speech bubble beside Roy's head: on load, and on every hover or focus. */
-.chat-bubble {
-  position: absolute;
-  right: 72px;
-  bottom: 64px;
+/* ── Parchment speech bubble ────────────────────────────────────────────
+   One look, defined once, for the two bubbles that say Roy's lines: the
+   corner figure's (`.chat-bubble`) and the one docked beside the hero's Roy
+   on phones (the launcher's plate). Parchment, a 4px ink frame drawn as
+   shadows, a drop shadow, and a stepped tail on the right pointing at him. */
+.chat-root {
+  --chat-ink-frame:
+    0 -4px 0 0 var(--color-ink), 0 4px 0 0 var(--color-ink), -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink);
+}
+
+.chat-bubble,
+.chat-root[data-docked] .chat-launcher__plate {
   width: max-content;
-  /* one line on a desktop; on a narrow phone a long line wraps instead of leaving the screen */
-  max-width: calc(100vw - 104px);
-  padding: 5px 12px 3px;
   background-color: var(--color-paper);
   color: var(--color-ink);
   line-height: 16px;
-  text-wrap: balance;
-  box-shadow:
-    0 -4px 0 0 var(--color-ink),
-    0 4px 0 0 var(--color-ink),
-    -4px 0 0 0 var(--color-ink),
-    4px 0 0 0 var(--color-ink),
-    8px 12px 0 0 var(--color-shadow);
-  /* grows out of its tail, towards Roy */
+  /* everything grows out of the tail, towards Roy */
   transform-origin: 100% 14px;
-  animation: chat-bubble-in 420ms var(--ease-pop) both;
-  pointer-events: none;
+  box-shadow:
+    var(--chat-ink-frame),
+    8px 12px 0 0 var(--color-shadow);
 
-  /* Stepped tail pointing at Roy: three 4px stairs of parchment running through the right
-     frame line, so the bubble opens into it. */
+  /* Stepped tail: three 4px stairs of parchment running through the right frame line, so the
+     bubble opens into it. */
   &::after {
     content: "";
     position: absolute;
@@ -298,6 +271,19 @@ html[data-arcade-playing] .chat-root {
     background-color: var(--color-paper);
     clip-path: polygon(0 0, 100% 0, 100% 33.33%, 66.67% 33.33%, 66.67% 66.67%, 33.33% 66.67%, 33.33% 100%, 0 100%);
   }
+}
+
+/* The corner figure's bubble, beside his head: on load, and on every hover or focus. */
+.chat-bubble {
+  position: absolute;
+  right: 72px;
+  bottom: 64px;
+  /* one line on a desktop; on a narrow phone a long line wraps instead of leaving the screen */
+  max-width: calc(100vw - 104px);
+  padding: 5px 12px 3px;
+  text-wrap: balance;
+  animation: chat-bubble-in 420ms var(--ease-pop) both;
+  pointer-events: none;
 }
 
 @keyframes chat-bubble-in {

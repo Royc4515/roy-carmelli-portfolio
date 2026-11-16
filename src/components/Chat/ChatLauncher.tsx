@@ -26,6 +26,9 @@ export const BUBBLE_LINGER_MS = 1500;
 /** Two loops of the 3-frame wave, then back to standing still. */
 const INTRO_WAVE_MS = 2400;
 
+/** Roy's nth line, for both bubbles (the corner figure's and the docked one): they take turns. */
+const bubbleLine = (n: number) => chatPersona.bubbles[n % chatPersona.bubbles.length];
+
 /** Docked on the hero art: each line stays this long once it has finished typing. */
 export const DOCK_LINE_MS = 3200;
 
@@ -222,7 +225,7 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
     : undefined;
   /** Which line the docked bubble is on; it moves on by itself (a phone has no hover to ask). */
   const [dockLine, setDockLine] = useState(0);
-  const dockText = chatPersona.bubbles[dockLine % chatPersona.bubbles.length];
+  const dockText = bubbleLine(dockLine);
   useEffect(() => {
     if (!docked) return;
     const next = window.setTimeout(() => setDockLine(l => l + 1), typeDuration(dockText.length) + DOCK_LINE_MS);
@@ -300,7 +303,7 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
       {bubble !== null && !open && !docked && (
         // keyed by appearance, so each new line pops in again
         <p key={bubble} className="chat-bubble text-label" aria-hidden="true">
-          {chatPersona.bubbles[bubble % chatPersona.bubbles.length]}
+          {bubbleLine(bubble)}
         </p>
       )}
       <button
