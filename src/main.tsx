@@ -6,12 +6,19 @@ import './index.css';
 import App from './App';
 import { AppProviders } from './AppProviders';
 import { PRERENDERED_ATTR } from './seo/prerenderMarker';
+import { readOptionRoute } from './options/route';
 
 // Dev-only component gallery at /?gallery. `import.meta.env.DEV` is a literal
 // `false` in production builds, so the dynamic import (and its chunk) is dropped.
 const Gallery = import.meta.env.DEV ? lazy(() => import('./dev/Gallery')) : null;
 const showGallery =
   import.meta.env.DEV && new URLSearchParams(window.location.search).has('gallery');
+
+// Design options for review at /?options and /?option=a..d (docs/portfolio-options/OPTIONS.md).
+// Lazy, so a normal visit downloads none of it; unlike the gallery it also ships in production
+// builds, because the options are reviewed on a preview deployment.
+const OptionsRoot = lazy(() => import('./options/OptionsRoot'));
+const optionRoute = readOptionRoute(window.location.search);
 
 const container = document.getElementById('root')!;
 
@@ -27,7 +34,11 @@ flushSync(() =>
   root.render(
     <StrictMode>
       <AppProviders>
-        {showGallery && Gallery ? (
+        {optionRoute ? (
+          <Suspense fallback={null}>
+            <OptionsRoot route={optionRoute} />
+          </Suspense>
+        ) : showGallery && Gallery ? (
           <Suspense fallback={null}>
             <Gallery />
           </Suspense>
@@ -45,4 +56,6 @@ flushSync(() =>
 );
 container.removeAttribute(PRERENDERED_ATTR);
 // The boot card (index.html) covered the wait for this script; the app is on screen now.
-document.getElementById('boot')?.remove();
+// An option is still downloading its own chunk at this point: it removes the card itself
+// once it has rendered (src/options/shared/ready.ts), so the wait is never a blank page.
+if (!optionRoute) document.getElementById('boot')?.remove();
