@@ -117,14 +117,26 @@ void main() {
   float px = uDensity / uRes.y;          // one device pixel, in cell units
   vec2 id0 = floor(q);
 
+  // The 4x4 block of cell bodies around this pixel, computed once: every soma and every
+  // connection below reads from it (computing neighbours per edge cost twice the hashes).
+  vec2 pts[16];
+  for (int j = 0; j < 4; j++) {
+    for (int i = 0; i < 4; i++) {
+      pts[j * 4 + i] = cellPoint(id0 + vec2(float(i) - 1.0, float(j) - 1.0));
+    }
+  }
+
   float line = 0.0;
   float body = 0.0;
   vec2 glow = vec2(0.0);
+  float w = px * 0.75;
 
-  for (int j = -1; j <= 1; j++) {
-    for (int i = -1; i <= 1; i++) {
-      vec2 id = id0 + vec2(float(i), float(j));
-      vec2 a = cellPoint(id);
+  for (int j = 0; j < 3; j++) {
+    for (int i = 0; i < 3; i++) {
+      vec2 id = id0 + vec2(float(i) - 1.0, float(j) - 1.0);
+      vec2 a = pts[j * 4 + i];
+      vec2 right = pts[j * 4 + i + 1];
+      vec2 up = pts[(j + 1) * 4 + i];
       float h = hash(id + 3.7);
 
       float d = length(q - a);
@@ -134,16 +146,13 @@ void main() {
       // A tight core plus a soft halo, scaled by how hard the cell is firing.
       glow += act * (exp(-d * d * 60.0) * 1.1 + exp(-d * d * 7.0) * 0.38);
 
-      float w = px * 0.75;
-      if (hash(id + 1.3) > 0.28) {
-        line = max(line, smoothstep(w + px, w, segment(q, a, cellPoint(id + vec2(1.0, 0.0)))));
-      }
-      if (hash(id + 5.9) > 0.28) {
-        line = max(line, smoothstep(w + px, w, segment(q, a, cellPoint(id + vec2(0.0, 1.0)))));
-      }
+      if (hash(id + 1.3) > 0.28) line = max(line, smoothstep(w + px, w, segment(q, a, right)));
+      if (hash(id + 5.9) > 0.28) line = max(line, smoothstep(w + px, w, segment(q, a, up)));
+      // Some cells also get one diagonal, either way across their grid square.
       if (hash(id + 9.1) > 0.6) {
-        vec2 diag = vec2(1.0, h > 0.5 ? 1.0 : -1.0);
-        line = max(line, smoothstep(w + px, w, segment(q, a, cellPoint(id + diag))));
+        vec2 far = pts[(j + 1) * 4 + i + 1];
+        float dd = h > 0.5 ? segment(q, a, far) : segment(q, right, up);
+        line = max(line, smoothstep(w + px, w, dd));
       }
     }
   }
@@ -170,6 +179,15 @@ void main() {
 /** Cap the backing store: a 3x phone would shade nine times the pixels for no visible gain. */
 const MAX_DPR = 1.5;
 const MAX_DPR_SMALL = 1.25;
+/**
+ * Without a GPU (software rendering, some remote desktops) the shader is slow. The loop times
+ * itself in windows of this many frames: a slow window first lowers the resolution, and if the
+ * lowest one is still slow the loop gives up and leaves a still frame.
+ */
+const QUALITY_WINDOW = 24;
+const SLOW_FRAME_MS = 45;
+const HOPELESS_FRAME_MS = 110;
+const QUALITY_STEPS = [1, 0.7, 0.5];
 /** Roughly one cell per this many CSS pixels, within sane bounds for tiny and huge canvases. */
 const CELL_PX = 84;
 /** The pointer's pull fades out this long after it last moved. */
@@ -197,6 +215,8 @@ export function createNeuralField(
   canvas: HTMLCanvasElement,
   initial: FieldColors,
   onFirstFrame: () => void,
+  /** Called once if even the lowest resolution cannot animate smoothly; the loop has stopped. */
+  onTooSlow: () => void,
 ): NeuralField | null {
   // jsdom (tests, the build-time prerender) has a canvas element whose getContext returns null.
   let gl: WebGLRenderingContext | null = null;
@@ -226,6 +246,9 @@ export function createNeuralField(
   let pointer: { x: number; y: number } | null = null;
   let pointerAt = 0;
   let strength = 0;
+  let quality = 0;
+  let windowFrames = 0;
+  let windowMs = 0;
 
   function init(): boolean {
     const vs = compile(ctx, ctx.VERTEX_SHADER, VERTEX);
@@ -256,7 +279,7 @@ export function createNeuralField(
     const box = canvas.getBoundingClientRect();
     if (box.width < 2 || box.height < 2) return;
     const cap = box.width < 600 ? MAX_DPR_SMALL : MAX_DPR;
-    const dpr = Math.min(window.devicePixelRatio || 1, cap);
+    const dpr = Math.min(window.devicePixelRatio || 1, cap) * QUALITY_STEPS[quality];
     const w = Math.round(box.width * dpr);
     const h = Math.round(box.height * dpr);
     if (canvas.width !== w || canvas.height !== h) {
@@ -292,9 +315,29 @@ export function createNeuralField(
 
   function tick(now: number): void {
     if (!running) return;
+    const elapsed = now - last;
     // Clamp the step: after a background tab or a long task the field must not jump ahead.
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const dt = Math.min(0.05, elapsed / 1000);
     last = now;
+    // A gap over a second is a paused tab or a debugger, not a slow GPU: leave it out.
+    if (elapsed < 1000) {
+      windowMs += elapsed;
+      windowFrames += 1;
+    }
+    if (windowFrames >= QUALITY_WINDOW) {
+      const average = windowMs / windowFrames;
+      windowFrames = 0;
+      windowMs = 0;
+      if (average > SLOW_FRAME_MS && quality < QUALITY_STEPS.length - 1) {
+        quality += 1;
+        resize();
+      } else if (average > HOPELESS_FRAME_MS) {
+        running = false;
+        draw();
+        onTooSlow();
+        return;
+      }
+    }
     time += dt;
     const target = pointer && now - pointerAt < POINTER_IDLE_MS ? 1 : 0;
     strength += (target - strength) * Math.min(1, dt * 4);
@@ -341,6 +384,8 @@ export function createNeuralField(
       cancelAnimationFrame(frame);
       if (running && !lost) {
         last = performance.now();
+        windowFrames = 0;
+        windowMs = 0;
         frame = requestAnimationFrame(tick);
       }
     },

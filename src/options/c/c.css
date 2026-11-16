@@ -97,7 +97,7 @@ html[data-option='c'][data-theme='night'] {
   height: 44px;
   border-radius: 12px;
   border: 1px solid var(--oc-line);
-  font: 600 0.9375rem/1 var(--oc-display);
+  font: 600 1rem/1 var(--oc-display);
   letter-spacing: 0.02em;
 }
 .oc-nav {
@@ -109,7 +109,7 @@ html[data-option='c'][data-theme='night'] {
   min-height: 44px;
   padding: 0 0.75rem;
   border-radius: 10px;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--oc-muted);
   transition: color 0.15s ease, background-color 0.15s ease;
@@ -150,7 +150,7 @@ html[data-option='c'][data-theme='night'] {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--oc-muted);
 }
@@ -206,7 +206,7 @@ html[data-option='c'][data-theme='night'] {
 }
 .oc-hero__meta {
   margin-top: 0.75rem;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--oc-muted);
 }
@@ -358,7 +358,7 @@ html[data-option='c'][data-theme='night'] {
   background: var(--oc-surface);
   border: 1px solid var(--oc-line);
   color: var(--oc-fg);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.2;
 }
@@ -406,13 +406,20 @@ html[data-option='c'][data-theme='night'] {
   border-inline-end-width: 0;
 }
 @media (max-width: 39.99rem) {
-  /* Icon-only on phones, with the label kept for screen readers by the clip below. */
+  /* Icon-only on phones; the label stays in the accessibility tree (clipped, not removed). */
   .oc-field__pause {
     width: 44px;
     padding: 0;
     justify-content: center;
-    font-size: 0;
     gap: 0;
+  }
+  .oc-field__pause-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
@@ -428,9 +435,9 @@ html[data-option='c'][data-theme='night'] {
   margin-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 .oc-eyebrow {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--oc-accent);
 }
@@ -446,7 +453,7 @@ html[data-option='c'][data-theme='night'] {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--oc-muted);
 }
@@ -510,7 +517,7 @@ html[data-option='c'][data-theme='night'] {
   border-top: 1px solid var(--oc-line);
 }
 .oc-feature__type span {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0;
   color: var(--oc-accent);
@@ -662,7 +669,7 @@ html[data-option='c'][data-theme='night'] {
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
   border: 1px solid var(--oc-line);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.3;
   color: var(--oc-muted);
@@ -695,7 +702,7 @@ html[data-option='c'][data-theme='night'] {
   letter-spacing: -0.01em;
 }
 .oc-row__kind {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--oc-muted);
 }
@@ -745,9 +752,9 @@ html[data-option='c'][data-theme='night'] {
 }
 .oc-facts dt,
 .oc-skills dt {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--oc-accent);
 }
@@ -851,7 +858,7 @@ html[data-option='c'][data-theme='night'] {
   /* Room for the review chip, so it never covers the last line. */
   padding: 1.5rem 0 5rem;
   border-top: 1px solid var(--oc-line);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   color: var(--oc-muted);
 }
 .oc-footer [lang='he'] {

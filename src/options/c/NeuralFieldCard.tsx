@@ -49,7 +49,13 @@ export function NeuralFieldCard({ theme }: { theme: Theme }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const field = createNeuralField(canvas, FIELD_COLORS[theme], () => setReady(true));
+    const field = createNeuralField(
+      canvas,
+      FIELD_COLORS[theme],
+      () => setReady(true),
+      // Too slow to animate even at low resolution (no GPU): show the still, offer Play.
+      () => setChoice(false),
+    );
     fieldRef.current = field;
     setSupport(field ? 'webgl' : 'none');
     if (!field) return;
@@ -120,7 +126,7 @@ export function NeuralFieldCard({ theme }: { theme: Theme }) {
           onClick={() => setChoice(!wantsMotion)}
         >
           <span aria-hidden="true" className="oc-field__pause-icon" data-paused={wantsMotion ? undefined : ''} />
-          {wantsMotion ? 'Pause animation' : 'Play animation'}
+          <span className="oc-field__pause-label">{wantsMotion ? 'Pause animation' : 'Play animation'}</span>
         </button>
       )}
     </div>

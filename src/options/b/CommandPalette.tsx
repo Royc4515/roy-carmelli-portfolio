@@ -38,6 +38,16 @@ export function filterCommands(commands: Command[], query: string): Command[] {
  */
 export function CommandPalette({ open, onClose, commands }: CommandPaletteProps) {
   const ref = useModalDialog(open, onClose);
+  return (
+    <dialog ref={ref} className="ob-palette" aria-label="Command palette">
+      {/* Mounted per opening, so the query and highlight always start clean. Resetting them in
+          an effect instead lost a race with a fast typist's first keystrokes. */}
+      {open && <PaletteBody onClose={onClose} commands={commands} />}
+    </dialog>
+  );
+}
+
+function PaletteBody({ onClose, commands }: Omit<CommandPaletteProps, 'open'>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const uid = useId();
@@ -53,24 +63,15 @@ export function CommandPalette({ open, onClose, commands }: CommandPaletteProps)
     return [...byGroup.entries()];
   }, [results]);
 
-  // Each opening starts clean; a stale query from last time would hide most commands.
-  useEffect(() => {
-    if (!open) return;
-    setQuery('');
-    setActive(0);
-    inputRef.current?.focus();
-  }, [open]);
-
   // The list can shrink under the highlighted row while typing.
   const activeIndex = Math.min(active, Math.max(0, results.length - 1));
   const optionId = (index: number) => `${uid}-opt-${index}`;
 
   useEffect(() => {
-    if (!open) return;
     const row = listRef.current?.querySelector<HTMLElement>('[aria-selected="true"]');
     // Optional call: jsdom has no scrollIntoView.
     row?.scrollIntoView?.({ block: 'nearest' });
-  }, [activeIndex, open, results]);
+  }, [activeIndex, results]);
 
   const run = (command: Command | undefined) => {
     if (!command) return;
@@ -110,9 +111,7 @@ export function CommandPalette({ open, onClose, commands }: CommandPaletteProps)
 
   let index = -1;
   return (
-    <dialog ref={ref} className="ob-palette" aria-label="Command palette">
-      {open && (
-        <>
+    <>
           <div className="ob-palette__field">
             <Search className="ob-palette__icon" />
             <input
@@ -189,8 +188,6 @@ export function CommandPalette({ open, onClose, commands }: CommandPaletteProps)
               <kbd>Esc</kbd> close
             </span>
           </p>
-        </>
-      )}
-    </dialog>
+    </>
   );
 }
