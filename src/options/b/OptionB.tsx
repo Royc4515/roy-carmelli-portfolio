@@ -78,8 +78,8 @@ function Tile({ className, children, style }: { className?: string; children: Re
 
 interface ProjectTileProps {
   project: Project;
-  /** Layout role in the bento: wide with a screenshot, or the typographic one. */
-  variant: 'feature' | 'media' | 'type';
+  /** Layout role in the bento: wide with a screenshot, or the typographic one (no screenshot exists). */
+  variant: 'feature' | 'type';
   /** This tile is the one the open (or last opened) dialog morphs from and back to. */
   morph: boolean;
   onOpen: (project: Project) => void;
@@ -94,6 +94,8 @@ function ProjectTile({ project, variant, morph, onOpen }: ProjectTileProps) {
       className={`ob-tile--project ob-tile--${variant}`}
       style={morph ? ({ viewTransitionName: CARD_TRANSITION_NAME } as CSSProperties) : undefined}
     >
+      {/* The tile is the query container; this inner box is what its width lays out. */}
+      <div className="ob-tile__in">
       <div className="ob-tile__body">
         <p className="ob-kicker">
           {project.kind} <span aria-hidden="true">/</span> {project.year}
@@ -148,6 +150,7 @@ function ProjectTile({ project, variant, morph, onOpen }: ProjectTileProps) {
           </div>
         </div>
       )}
+      </div>
     </Tile>
   );
 }
@@ -360,7 +363,6 @@ export default function OptionB() {
             <div className="ob-bento__grid">
               {aside && <ProjectTile project={aside} variant="feature" morph={isMorph(aside)} onOpen={openProject} />}
               {sommelier && <ProjectTile project={sommelier} variant="type" morph={isMorph(sommelier)} onOpen={openProject} />}
-              {nechita && <ProjectTile project={nechita} variant="media" morph={isMorph(nechita)} onOpen={openProject} />}
               <Tile className="ob-tile--fact ob-tile--edu">
                 <p className="ob-kicker">Education</p>
                 <h3 className="ob-fact__title">{DEGREE}</h3>
@@ -373,6 +375,7 @@ export default function OptionB() {
                 <p className="ob-fact__text">{SERVICE_ORG}</p>
                 <p className="ob-fact__meta">{SERVICE_PERIOD}</p>
               </Tile>
+              {nechita && <ProjectTile project={nechita} variant="feature" morph={isMorph(nechita)} onOpen={openProject} />}
               <Tile className="ob-tile--more">
                 <p className="ob-kicker">More work</p>
                 <div className="ob-more">

@@ -69,7 +69,6 @@ function Feature({ project, index }: { project: Project; index: number }) {
             width={image.width}
             height={image.height}
             alt={image.alt}
-            loading="lazy"
             decoding="async"
           />
         ) : (
@@ -119,7 +118,11 @@ function Feature({ project, index }: { project: Project; index: number }) {
           </button>
           {projectLinks(project).map(link => (
             <ExternalLink key={link.href} href={link.href} className="oc-link">
-              {link.label}
+              {/* Short visible labels keep all three actions on one row; the full one is read out. */}
+              <span aria-hidden="true">{link.href === project.live ? 'Live site' : 'GitHub'}</span>
+              <span className="opt-sr">
+                {link.label}, {name}
+              </span>
               <ArrowUpRight />
             </ExternalLink>
           ))}

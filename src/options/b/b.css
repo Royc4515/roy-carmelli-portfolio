@@ -265,8 +265,8 @@ html[data-option='b'][data-theme='night'] {
   color: var(--b-fg);
   background: var(--b-surface-2);
 }
-.ob-cmd__text,
-.ob-cmd__kbd {
+.ob-cmd .ob-cmd__text,
+.ob-cmd .ob-cmd__kbd {
   display: none;
 }
 .opt-b kbd {
@@ -295,14 +295,14 @@ html[data-option='b'][data-theme='night'] {
   .ob-cmd:hover {
     border-color: var(--b-fg);
   }
-  .ob-cmd__text {
+  .ob-cmd .ob-cmd__text {
     display: inline;
     min-width: 72px;
     text-align: left;
     font-size: 0.9375rem;
     font-weight: 500;
   }
-  .ob-cmd__kbd {
+  .ob-cmd .ob-cmd__kbd {
     display: inline-grid;
   }
 }
@@ -311,17 +311,17 @@ html[data-option='b'][data-theme='night'] {
 
 .ob-hero {
   position: relative;
-  padding-top: clamp(40px, 9vh, 104px);
-  padding-bottom: clamp(40px, 7vh, 80px);
+  padding-top: clamp(40px, 8vh, 88px);
+  padding-bottom: clamp(16px, 3vh, 32px);
 }
 /* One quiet light behind the headline: depth without an image. */
 .ob-hero::before {
   content: '';
   position: absolute;
   z-index: -1;
-  left: -10%;
+  left: 0;
   top: -56px;
-  width: min(760px, 120%);
+  width: min(760px, 100%);
   height: 420px;
   background: radial-gradient(closest-side, var(--b-glow), transparent);
   pointer-events: none;
@@ -525,6 +525,9 @@ html[data-option='b'][data-theme='night'] {
   }
 }
 
+.ob-tile__in {
+  height: 100%;
+}
 .ob-tile__body {
   display: flex;
   flex-direction: column;
@@ -707,9 +710,10 @@ html[data-option='b'][data-theme='night'] {
 
 @container ob-tile (min-width: 620px) {
   /* Wide tile: text beside the screenshot, which bleeds off the right and bottom edges. */
-  .ob-tile--feature {
+  .ob-tile--feature .ob-tile__in {
     display: grid;
     grid-template-columns: minmax(0, 11fr) minmax(0, 10fr);
+    height: 100%;
   }
   .ob-tile--feature .ob-tile__body {
     padding: 28px;
@@ -753,13 +757,14 @@ html[data-option='b'][data-theme='night'] {
   .ob-tile--type {
     grid-column: span 4;
   }
-  .ob-tile--media {
-    grid-column: span 7;
-    grid-row: span 2;
-  }
+  /* Second band mirrors the first: two facts stacked on the left, the wide tile on the right. */
   .ob-tile--edu,
   .ob-tile--service {
-    grid-column: span 5;
+    grid-column: 1 / span 4;
+  }
+  .ob-tile--feature ~ .ob-tile--feature {
+    grid-column: 5 / span 8;
+    grid-row: 2 / span 2;
   }
   .ob-tile--more {
     grid-column: span 12;
