@@ -147,6 +147,11 @@ describe('ChatLauncher on a phone', () => {
     const hero = document.createElement('section');
     hero.id = 'hero';
     hero.getBoundingClientRect = () => ({ bottom: heroBottom }) as DOMRect;
+    const roy = document.createElement('div');
+    roy.setAttribute('data-hero-roy', '');
+    // His box on screen (jsdom has no layout): taps are tested against it.
+    roy.getBoundingClientRect = () => ({ left: 200, right: 300, top: 100, bottom: 300, width: 0 }) as DOMRect;
+    hero.append(roy);
     document.body.append(hero);
     // Frames run at once, a second apart: a scroll event is enough to move the launcher, and a
     // typed line is complete after two frames (it never takes longer than MAX_TYPE_MS).
@@ -211,6 +216,59 @@ describe('ChatLauncher on a phone', () => {
     expect(await screen.findByRole('dialog', { name: /pixel roy/i })).toBeInTheDocument();
     // An open chat is never docked: on a phone its sheet covers the page.
     expect(docked()).toBe(false);
+  });
+
+  const heroRoy = () => document.querySelector<HTMLElement>('#hero [data-hero-roy]')!;
+  /** A click that reaches the hero at a point on screen, whatever element lies on top there. */
+  const clickHeroAt = (clientX: number, clientY: number, target: Element = document.getElementById('hero')!) =>
+    act(() => {
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX, clientY }));
+    });
+
+  it('opens the chat from the hero\'s Roy himself too, while the bubble is docked beside him', async () => {
+    vi.mocked(window.requestAnimationFrame).mockRestore();
+    heroBottom = window.innerHeight + 400;
+    render(<ChatLauncher enabled />);
+    expect(heroRoy()).toHaveAttribute('data-chat-target');
+    // On the hero itself, not on his element: on a sideways phone the title card's wrapper
+    // covers him and is what receives the tap.
+    clickHeroAt(250, 200);
+    expect(await screen.findByRole('dialog', { name: /pixel roy/i })).toBeInTheDocument();
+    expect(launcher()).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('ignores a tap beside him, and a tap on a real control that happens to lie over him', () => {
+    heroBottom = window.innerHeight + 400;
+    render(<ChatLauncher enabled />);
+    clickHeroAt(150, 200); // left of his box
+    clickHeroAt(250, 350); // below it
+    expect(screen.queryByRole('dialog')).toBeNull();
+    const resume = document.createElement('a');
+    document.getElementById('hero')!.append(resume);
+    clickHeroAt(250, 200, resume);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('leaves the hero\'s Roy alone once the bubble is no longer docked, and while the game runs', async () => {
+    vi.mocked(window.requestAnimationFrame).mockRestore();
+    heroBottom = window.innerHeight + 400;
+    const { unmount } = render(<ChatLauncher enabled />);
+
+    // The game owns the screen: his spot is not a button.
+    document.documentElement.setAttribute('data-arcade-playing', '');
+    clickHeroAt(250, 200);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    document.documentElement.removeAttribute('data-arcade-playing');
+
+    // Scrolled past the hero: the corner figure is the launcher now.
+    heroBottom = 0;
+    act(() => {
+      window.dispatchEvent(new Event('scroll'));
+    });
+    await vi.waitFor(() => expect(heroRoy()).not.toHaveAttribute('data-chat-target'));
+    clickHeroAt(250, 200);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    unmount();
   });
 
   it('stands in his corner once the hero has cleared it, and says hello once', () => {

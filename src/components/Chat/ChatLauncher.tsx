@@ -266,6 +266,38 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
     quietFocus.current = false;
   }, [open]);
 
+  // Docked, the bubble is the hero's Roy talking, so people tap him, not only the bubble: his
+  // figure opens the chat too. A pointer shortcut only; the bubble stays the one real button
+  // (focusable, labelled), so keyboard and screen-reader users lose nothing.
+  useEffect(() => {
+    if (!docked) return;
+    const hero = document.getElementById('hero');
+    const roy = hero?.querySelector<HTMLElement>('[data-hero-roy]');
+    if (!hero || !roy) return;
+    // don't touch / listen on the hero and test the point against his box, not on his element:
+    // in the overlay hero (a sideways phone) the title card's full-width wrapper lies over him
+    // and takes the click, so a listener on him never fires there.
+    const openChat = (event: MouseEvent) => {
+      // While the game runs he is faded out and the launcher is hidden: his spot is not a button.
+      if (document.documentElement.hasAttribute('data-arcade-playing')) return;
+      // A real control under the finger (a button or link of the title card) keeps its own job.
+      if (event.target instanceof Element && event.target.closest('a, button, input, [role="button"]')) return;
+      const box = roy.getBoundingClientRect();
+      const inside =
+        event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
+      if (!inside) return;
+      setMounted(true);
+      hideBubble();
+      setOpen(true);
+    };
+    hero.addEventListener('click', openChat);
+    roy.setAttribute('data-chat-target', '');
+    return () => {
+      hero.removeEventListener('click', openChat);
+      roy.removeAttribute('data-chat-target');
+    };
+  }, [docked, hideBubble]);
+
   useEffect(() => {
     if (!enabled || !visible || introduced.current) return;
     introduced.current = true;

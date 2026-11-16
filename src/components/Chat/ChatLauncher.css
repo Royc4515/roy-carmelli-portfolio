@@ -156,6 +156,12 @@ html[data-arcade-playing] .chat-root {
   left: -4px;
 }
 
+/* While the bubble is docked, the hero's Roy opens the chat too (ChatLauncher.tsx marks him). */
+[data-hero-roy][data-chat-target] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* The typed part, then the rest of the line holding its place unseen. */
 .chat-dock-line {
   text-wrap: balance;
