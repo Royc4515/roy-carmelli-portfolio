@@ -1,0 +1,1135 @@
+/* Option B "Console": a product-grade developer-tool look. Every rule is scoped to
+   html[data-option='b'] or an `ob-` class, so it never reaches the pixel site. Colours are
+   OKLCH tokens; the contrast pairs were measured (text >= 4.5:1, control borders >= 3:1). */
+
+html[data-option='b'] {
+  --b-bg: oklch(98.4% 0.002 265);
+  --b-surface: oklch(100% 0 0);
+  --b-surface-2: oklch(96.4% 0.003 265);
+  --b-line: oklch(90% 0.004 265);
+  /* Control borders: 3:1 against both the ground and the surface. */
+  --b-line-strong: oklch(60% 0.012 265);
+  --b-fg: oklch(20% 0.012 265);
+  --b-muted: oklch(41% 0.014 265);
+  --b-subtle: oklch(48% 0.014 265);
+  --b-accent: oklch(47% 0.19 272);
+  --b-ok: oklch(50% 0.14 152);
+  --b-on-primary: oklch(98.4% 0.002 265);
+  --b-glow: oklch(47% 0.19 272 / 0.09);
+  --b-shadow: 0 1px 2px oklch(20% 0.02 265 / 0.06), 0 8px 24px -12px oklch(20% 0.02 265 / 0.12);
+  --b-inner: inset 0 1px 0 oklch(100% 0 0 / 0.8);
+  --b-backdrop: oklch(20% 0.02 265 / 0.45);
+
+  --b-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --b-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --b-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --o-bg: var(--b-bg);
+  --o-fg: var(--b-fg);
+  --o-font: var(--b-sans);
+  --o-focus: var(--b-accent);
+  --o-select-bg: var(--b-accent);
+  --o-select-fg: var(--b-on-primary);
+  --o-scroll-pad: 76px;
+}
+
+html[data-option='b'][data-theme='night'] {
+  --b-bg: oklch(13.5% 0.004 265);
+  --b-surface: oklch(17% 0.005 265);
+  --b-surface-2: oklch(20.5% 0.006 265);
+  --b-line: oklch(26% 0.007 265);
+  --b-line-strong: oklch(54% 0.012 265);
+  --b-fg: oklch(96% 0.003 265);
+  --b-muted: oklch(74% 0.01 265);
+  --b-subtle: oklch(66% 0.012 265);
+  --b-accent: oklch(78% 0.12 272);
+  --b-ok: oklch(80% 0.17 152);
+  --b-on-primary: oklch(13.5% 0.004 265);
+  --b-glow: oklch(78% 0.12 272 / 0.1);
+  --b-shadow: 0 1px 2px oklch(0% 0 0 / 0.4), 0 12px 32px -16px oklch(0% 0 0 / 0.6);
+  --b-inner: inset 0 1px 0 oklch(100% 0 0 / 0.05);
+  --b-backdrop: oklch(0% 0 0 / 0.62);
+}
+
+/* ── Primitives ─────────────────────────────────────────────────────────── */
+
+.ob-wrap {
+  width: 100%;
+  max-width: 1152px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+@media (min-width: 768px) {
+  .ob-wrap {
+    padding-inline: 32px;
+  }
+}
+
+.opt-b svg {
+  flex: none;
+  font-size: 1.125rem;
+}
+
+.ob-kicker {
+  font: 500 0.8125rem/1.4 var(--b-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--b-subtle);
+}
+
+.ob-h2 {
+  font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.125rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  /* Focused by "Go to" in the palette; a programmatic focus needs no ring. */
+  outline: none;
+}
+
+.ob-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+.ob-btn:active {
+  transform: scale(0.98);
+}
+.ob-btn--primary {
+  background: var(--b-fg);
+  color: var(--b-on-primary) !important;
+  box-shadow: var(--b-shadow);
+}
+.ob-btn--primary:hover {
+  background: color-mix(in oklab, var(--b-fg) 86%, var(--b-bg));
+}
+.ob-btn--ghost {
+  border-color: var(--b-line-strong);
+  background: var(--b-surface);
+}
+.ob-btn--ghost:hover {
+  background: var(--b-surface-2);
+  border-color: var(--b-fg);
+}
+
+.ob-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--b-muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.ob-icon-btn:hover {
+  background: var(--b-surface-2);
+  color: var(--b-fg);
+}
+
+.ob-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ob-chip {
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--b-line);
+  background: var(--b-surface-2);
+  font: 500 0.8125rem/1.5 var(--b-mono);
+  color: var(--b-muted);
+}
+.ob-chip--more {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ob-checks {
+  display: grid;
+  gap: 8px;
+}
+.ob-checks li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--b-muted);
+}
+/* A drawn tick, so the list keeps list semantics without a glyph that gets read aloud. */
+.ob-checks li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--b-ok);
+  border-bottom: 2px solid var(--b-ok);
+  transform: rotate(-45deg);
+}
+
+.ob-frame {
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--b-line);
+  background: var(--b-surface-2);
+  box-shadow: var(--b-shadow);
+}
+.ob-frame img {
+  display: block;
+  width: 100%;
+}
+
+/* ── Top bar ────────────────────────────────────────────────────────────── */
+
+.ob-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--b-line);
+  background: color-mix(in oklab, var(--b-bg) 80%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+}
+.ob-bar__in {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.ob-bar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.ob-bar__mark {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--b-accent), var(--b-ok));
+}
+.ob-bar__nav {
+  display: none;
+  margin-left: 16px;
+  gap: 4px;
+}
+.ob-bar__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--b-muted);
+  transition: color 0.15s ease;
+}
+.ob-bar__nav a:hover {
+  color: var(--b-fg);
+}
+.ob-bar__tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* Phones: a 44px search icon. From 768px: a search-field look with the shortcut. */
+.ob-cmd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--b-muted);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ob-cmd:hover {
+  color: var(--b-fg);
+  background: var(--b-surface-2);
+}
+.ob-cmd__text,
+.ob-cmd__kbd {
+  display: none;
+}
+.opt-b kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--b-line);
+  background: var(--b-surface-2);
+  font: 500 0.8125rem/1.3 var(--b-mono);
+  color: var(--b-muted);
+}
+@media (min-width: 768px) {
+  .ob-bar__nav {
+    display: flex;
+  }
+  /* A keyboard is likely: show the field and its shortcut. */
+  .ob-cmd {
+    height: 36px;
+    padding: 0 6px 0 10px;
+    border-color: var(--b-line-strong);
+    background: var(--b-surface);
+    box-shadow: var(--b-inner);
+  }
+  .ob-cmd:hover {
+    border-color: var(--b-fg);
+  }
+  .ob-cmd__text {
+    display: inline;
+    min-width: 72px;
+    text-align: left;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+  .ob-cmd__kbd {
+    display: inline-grid;
+  }
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+
+.ob-hero {
+  position: relative;
+  padding-top: clamp(40px, 9vh, 104px);
+  padding-bottom: clamp(40px, 7vh, 80px);
+}
+/* One quiet light behind the headline: depth without an image. */
+.ob-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: -10%;
+  top: -56px;
+  width: min(760px, 120%);
+  height: 420px;
+  background: radial-gradient(closest-side, var(--b-glow), transparent);
+  pointer-events: none;
+}
+.ob-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--b-line);
+  background: var(--b-surface);
+  box-shadow: var(--b-inner);
+  font: 500 0.8125rem/1.4 var(--b-mono);
+  color: var(--b-muted);
+}
+.ob-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--b-ok);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--b-ok) 22%, transparent);
+}
+.ob-hero__name {
+  margin-top: 20px;
+  font-size: clamp(2.75rem, 1.6rem + 5.2vw, 4.75rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+.ob-hero__role {
+  margin-top: 12px;
+  font-size: clamp(1.25rem, 1rem + 1.1vw, 1.625rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--b-subtle);
+}
+.ob-hero__pitch {
+  margin-top: 20px;
+  max-width: 34rem;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--b-muted);
+}
+.ob-hero__cta {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* The address and its copy button read as one control with two halves. */
+.ob-mail {
+  display: inline-flex;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid var(--b-line-strong);
+  background: var(--b-surface);
+  box-shadow: var(--b-inner);
+}
+.ob-mail__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 12px 0 14px;
+  border-radius: 9px 0 0 9px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+.ob-mail__copy {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-height: 42px;
+  border: 0;
+  border-left: 1px solid var(--b-line);
+  border-radius: 0 9px 9px 0;
+  background: transparent;
+  color: var(--b-muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.ob-mail__link:hover,
+.ob-mail__copy:hover {
+  background: var(--b-surface-2);
+  color: var(--b-fg);
+}
+.ob-hero__meta {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 20px;
+  font: 500 0.8125rem/1.4 var(--b-mono);
+  color: var(--b-subtle);
+}
+.ob-hero__meta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--b-muted);
+  transition: color 0.15s ease;
+}
+.ob-hero__meta a:hover {
+  color: var(--b-fg);
+}
+@media (max-width: 479px) {
+  .ob-hero__cta > * {
+    width: 100%;
+  }
+  .ob-mail__link {
+    flex: 1;
+  }
+  /* The file note takes its own line above the two profile links. */
+  .ob-hero__meta span {
+    flex-basis: 100%;
+  }
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+
+.ob-section {
+  padding-block: clamp(40px, 6vw, 72px);
+}
+.ob-section > .ob-h2 {
+  margin-bottom: 24px;
+}
+.ob-split {
+  display: grid;
+  gap: 20px;
+  border-top: 1px solid var(--b-line);
+}
+.ob-split > .ob-h2 {
+  margin-bottom: 0;
+}
+@media (min-width: 900px) {
+  /* Linear's section pattern: the heading holds the left column, the text reads on the right. */
+  .ob-split {
+    grid-template-columns: 4fr 8fr;
+    gap: 32px;
+  }
+}
+.ob-prose {
+  display: grid;
+  gap: 1.1em;
+  max-width: 42rem;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--b-muted);
+}
+.ob-prose p:first-child {
+  color: var(--b-fg);
+}
+
+/* ── Bento ──────────────────────────────────────────────────────────────── */
+
+.ob-bento {
+  container: ob-bento / inline-size;
+}
+.ob-bento__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.ob-tile {
+  position: relative;
+  /* A tile lays itself out from its own width, wherever the grid puts it. */
+  container: ob-tile / inline-size;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--b-line);
+  background: var(--b-surface);
+  box-shadow: var(--b-inner), var(--b-shadow);
+  transition: border-color 0.2s ease;
+}
+/* Pointer-following spotlight: fed by trackPointer(), mouse only, never under reduced motion. */
+.ob-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), var(--b-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ob-tile--project:hover {
+    border-color: var(--b-line-strong);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ob-tile:hover::before {
+      opacity: 1;
+    }
+  }
+}
+
+.ob-tile__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  min-width: 0;
+}
+.ob-tile__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.ob-tile__descriptor {
+  font-weight: 500;
+  color: var(--b-subtle);
+}
+.ob-tile__tagline {
+  color: var(--b-muted);
+  max-width: 36rem;
+}
+.ob-tile__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.ob-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--b-line-strong);
+  background: var(--b-surface);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+/* don't touch / the whole tile is the button's hit area; the links get z-index to stay above it. */
+.ob-open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.ob-open svg {
+  transition: transform 0.2s var(--b-ease);
+}
+.ob-tile--project:hover .ob-open {
+  background: var(--b-surface-2);
+  border-color: var(--b-fg);
+}
+.ob-tile--project:hover .ob-open svg {
+  transform: translateX(3px);
+}
+.ob-tile__link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--b-muted);
+  transition: color 0.15s ease;
+}
+.ob-tile__link:hover {
+  color: var(--b-fg);
+}
+.ob-tile__link svg {
+  font-size: 1rem;
+}
+
+.ob-tile__media {
+  padding: 0 22px;
+  /* The screenshot runs off the tile's bottom edge, like a product panel past the fold. */
+  margin-bottom: -18px;
+}
+.ob-tile__media .ob-frame {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* The typographic tile (no screenshot exists): its real highlights as numbered steps. */
+.ob-steps {
+  counter-reset: ob-step;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--b-line);
+}
+.ob-steps li {
+  counter-increment: ob-step;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--b-line);
+  line-height: 1.45;
+}
+.ob-steps li::before {
+  content: '0' counter(ob-step);
+  font: 500 0.8125rem/1.8 var(--b-mono);
+  color: var(--b-accent);
+}
+
+.ob-tile--fact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px;
+}
+.ob-fact__title {
+  margin-top: 6px;
+  font-size: 1.1875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+.ob-fact__text {
+  color: var(--b-muted);
+}
+.ob-fact__meta {
+  margin-top: auto;
+  padding-top: 10px;
+  font: 500 0.8125rem/1.5 var(--b-mono);
+  color: var(--b-subtle);
+}
+
+.ob-tile--more {
+  padding: 22px;
+}
+.ob-more {
+  margin-top: 14px;
+  display: grid;
+  gap: 24px;
+}
+.ob-more__title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.ob-rows {
+  margin-top: 6px;
+}
+.ob-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 4px 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--b-line);
+}
+.ob-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+.ob-row__name {
+  font-weight: 600;
+}
+.ob-row__kind {
+  font: 500 0.8125rem/1.5 var(--b-mono);
+  color: var(--b-subtle);
+}
+.ob-row__tag {
+  margin-top: 2px;
+  line-height: 1.5;
+  color: var(--b-muted);
+}
+.ob-row__links {
+  display: flex;
+  gap: 14px;
+  margin-top: -10px;
+}
+
+@container ob-tile (min-width: 620px) {
+  /* Wide tile: text beside the screenshot, which bleeds off the right and bottom edges. */
+  .ob-tile--feature {
+    display: grid;
+    grid-template-columns: minmax(0, 11fr) minmax(0, 10fr);
+  }
+  .ob-tile--feature .ob-tile__body {
+    padding: 28px;
+  }
+  .ob-tile--feature .ob-tile__media {
+    align-self: end;
+    padding: 28px 0 0 4px;
+    margin: 0 -72px -18px 0;
+  }
+  .ob-tile--feature .ob-tile__media .ob-frame {
+    border-top-right-radius: 0;
+  }
+  .ob-tile--feature .ob-tile__title {
+    font-size: 1.875rem;
+  }
+  .ob-more {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+@container ob-bento (min-width: 640px) {
+  .ob-bento__grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .ob-bento__grid > * {
+    grid-column: span 6;
+  }
+  .ob-tile--edu,
+  .ob-tile--service {
+    grid-column: span 3;
+  }
+}
+@container ob-bento (min-width: 940px) {
+  .ob-bento__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .ob-tile--feature {
+    grid-column: span 8;
+  }
+  .ob-tile--type {
+    grid-column: span 4;
+  }
+  .ob-tile--media {
+    grid-column: span 7;
+    grid-row: span 2;
+  }
+  .ob-tile--edu,
+  .ob-tile--service {
+    grid-column: span 5;
+  }
+  .ob-tile--more {
+    grid-column: span 12;
+  }
+}
+
+/* ── Skills ─────────────────────────────────────────────────────────────── */
+
+.ob-skills__row {
+  display: grid;
+  gap: 2px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--b-line);
+}
+.ob-skills__row:first-child {
+  padding-top: 0;
+}
+.ob-skills dt {
+  font: 500 0.8125rem/1.6 var(--b-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--b-subtle);
+}
+.ob-skills dd {
+  font-size: 1.0625rem;
+}
+@media (min-width: 640px) {
+  .ob-skills__row {
+    grid-template-columns: 200px 1fr;
+    align-items: baseline;
+    gap: 16px;
+  }
+}
+.ob-certs__title {
+  margin: 24px 0 10px;
+}
+
+/* ── Contact and footer ─────────────────────────────────────────────────── */
+
+.ob-contact {
+  padding: clamp(24px, 5vw, 48px);
+}
+.ob-contact__blurb {
+  margin-top: 12px;
+  max-width: 34rem;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--b-muted);
+}
+.ob-contact__actions {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@media (max-width: 479px) {
+  .ob-contact__actions .ob-btn--primary {
+    width: 100%;
+  }
+  .ob-contact__actions .ob-btn--ghost {
+    flex: 1;
+  }
+}
+.ob-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  /* Room for the review chip in the bottom-left corner. */
+  padding-block: 28px 76px;
+  border-top: 1px solid var(--b-line);
+  font-size: 0.9375rem;
+  color: var(--b-subtle);
+}
+
+.ob-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 950;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--b-fg);
+  color: var(--b-on-primary);
+  box-shadow: var(--b-shadow);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s ease, transform 0.2s var(--b-ease);
+  pointer-events: none;
+}
+.ob-toast[data-show] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ── Dialogs ────────────────────────────────────────────────────────────── */
+
+.ob-dialog,
+.ob-palette {
+  /* don't touch / Tailwind's preflight zeroes every margin, which un-centres a <dialog>. */
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--b-line);
+  background: var(--b-surface);
+  color: var(--b-fg);
+  box-shadow: 0 24px 64px -16px oklch(0% 0 0 / 0.45);
+  overflow: hidden;
+}
+.ob-dialog::backdrop,
+.ob-palette::backdrop {
+  background: var(--b-backdrop);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* Phones: a sheet from the bottom edge. */
+.ob-dialog {
+  margin: auto 0 0;
+  width: 100vw;
+  max-width: 100vw;
+  max-height: 92dvh;
+  border-width: 1px 0 0;
+  border-radius: 18px 18px 0 0;
+}
+/* Only while open: `display` on a closed <dialog> would show it. */
+.ob-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 720px) {
+  .ob-dialog {
+    margin: auto;
+    width: min(760px, calc(100vw - 48px));
+    max-height: min(86dvh, 900px);
+    border-width: 1px;
+    border-radius: 18px;
+  }
+}
+.ob-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 22px;
+  border-bottom: 1px solid var(--b-line);
+}
+.ob-dialog__scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 22px 32px;
+}
+@media (min-width: 720px) {
+  .ob-dialog__head {
+    padding-left: 32px;
+  }
+  .ob-dialog__scroll {
+    padding: 28px 32px 36px;
+  }
+}
+.ob-dialog__title {
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+.ob-dialog__descriptor {
+  font-weight: 500;
+  color: var(--b-subtle);
+}
+.ob-dialog__lead {
+  margin-top: 14px;
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+.ob-dialog__media {
+  margin-top: 22px;
+}
+.ob-dialog__checks {
+  margin-top: 22px;
+}
+.ob-dialog__p {
+  margin-top: 1.05em;
+  line-height: 1.65;
+  color: var(--b-muted);
+}
+.ob-dialog__checks + .ob-dialog__p {
+  margin-top: 22px;
+}
+.ob-dialog__stack-title {
+  margin: 26px 0 10px;
+}
+.ob-dialog__links {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ob-palette {
+  margin: 10dvh auto auto;
+  width: min(620px, calc(100vw - 24px));
+  max-width: none;
+  max-height: min(72dvh, 560px);
+  border-radius: 14px;
+}
+.ob-palette[open] {
+  display: flex;
+  flex-direction: column;
+}
+.ob-palette__field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 4px 16px;
+  border-bottom: 1px solid var(--b-line);
+}
+.ob-palette__icon {
+  color: var(--b-subtle);
+}
+.ob-palette__input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  border: 0;
+  background: transparent;
+  color: var(--b-fg);
+  /* 16px: anything smaller makes iOS Safari zoom the page on focus. */
+  font: 400 1rem/1 var(--b-sans);
+  /* The dialog's own border shows where focus is; a ring inside it would be a second frame. */
+  outline: none;
+}
+.ob-palette__input::placeholder {
+  color: var(--b-subtle);
+  opacity: 1;
+}
+.ob-palette__field:focus-within {
+  box-shadow: inset 0 -2px 0 var(--b-accent);
+}
+.ob-palette__esc {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+.ob-palette__list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 8px 8px;
+}
+.ob-palette__group-title {
+  padding: 10px 8px 4px;
+}
+.ob-palette__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  scroll-margin: 8px;
+}
+.ob-palette__option[aria-selected='true'] {
+  background: var(--b-surface-2);
+  box-shadow: inset 2px 0 0 var(--b-accent);
+}
+.ob-palette__option-icon {
+  display: inline-grid;
+  color: var(--b-subtle);
+}
+.ob-palette__option[aria-selected='true'] .ob-palette__option-icon {
+  color: var(--b-accent);
+}
+.ob-palette__option-label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ob-palette__option-hint {
+  margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 0.8125rem/1.4 var(--b-mono);
+  color: var(--b-subtle);
+}
+.ob-palette__empty {
+  padding: 28px 12px;
+  text-align: center;
+  color: var(--b-muted);
+}
+.ob-palette__foot {
+  display: none;
+  gap: 18px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--b-line);
+  font: 500 0.8125rem/1.4 var(--b-mono);
+  color: var(--b-subtle);
+}
+.ob-palette__foot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+/* Key hints only where there is a keyboard to press them on. */
+@media (hover: hover) and (pointer: fine) {
+  .ob-palette__foot {
+    display: flex;
+  }
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* First paint: the hero settles in once, in reading order. */
+  .ob-hero > * {
+    animation: ob-rise 0.5s var(--b-ease) both;
+  }
+  .ob-hero > :nth-child(2) { animation-delay: 0.04s; }
+  .ob-hero > :nth-child(3) { animation-delay: 0.08s; }
+  .ob-hero > :nth-child(4) { animation-delay: 0.12s; }
+  .ob-hero > :nth-child(5) { animation-delay: 0.16s; }
+  .ob-hero > :nth-child(6) { animation-delay: 0.2s; }
+
+  /* Browsers without View Transitions still get a soft entrance (Baseline 2024). */
+  .ob-palette[open] {
+    transition: opacity 0.16s ease, transform 0.2s var(--b-ease);
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+  }
+}
+@keyframes ob-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* Tile to dialog and back: one shared name, swapped in OptionB.tsx. withViewTransition()
+   skips the transition under reduced motion, so these never run then. */
+html[data-option='b']::view-transition-group(ob-card) {
+  animation-duration: 0.34s;
+  animation-timing-function: var(--b-ease);
+}
+html[data-option='b']::view-transition-old(ob-card),
+html[data-option='b']::view-transition-new(ob-card) {
+  /* Fill the morphing box instead of letterboxing two different aspect ratios. */
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+html[data-option='b']::view-transition-old(root),
+html[data-option='b']::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opt-b *,
+  .opt-b *::before,
+  .opt-b *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
