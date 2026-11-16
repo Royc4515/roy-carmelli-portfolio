@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Skills from './Skills';
 import { skills } from '../data/bio';
 import { projects } from '../data/projects';
-import { placeTooltip } from '../components/SkillTooltip';
 import { pixelSprites } from '../theme/pixelSprites';
 
 const originalMatchMedia = window.matchMedia;
@@ -94,6 +93,7 @@ describe('Skills (equipment screen)', () => {
     expect(used).toEqual(['Aside,', 'Nechita Raka,', 'Groupie,', 'White Matter Tracts Game']);
     expect(js).toHaveAccessibleDescription(/Used in: Aside, Nechita Raka, Groupie, White Matter Tracts Game/);
 
+    // Keyboard focus leaving the grid takes its description with it.
     act(() => js.blur());
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
@@ -125,19 +125,56 @@ describe('Skills (equipment screen)', () => {
     expect(tip).not.toHaveTextContent(/Used in/i);
   });
 
-  it('opens on hover, closes on leave and on Esc', async () => {
+  it('opens on hover and stays after the pointer leaves, so it can travel to the strip', async () => {
     const user = userEvent.setup();
     render(<Skills />);
 
     await user.hover(item('Python'));
     expect(screen.getByRole('tooltip')).toHaveTextContent('Wine Sommelier Bot');
     await user.unhover(item('Python'));
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Wine Sommelier Bot');
+    expect(item('Python')).toHaveAttribute('data-open');
+
+    // Another item replaces it; only one description shows at a time.
+    await user.hover(item('Vite'));
+    expect(screen.getAllByRole('tooltip')).toHaveLength(1);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Vite');
+    expect(item('Vite')).toHaveAttribute('data-open');
+    expect(item('Python')).not.toHaveAttribute('data-open');
+  });
+
+  it('closes on Esc and on a press outside the items', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+
+    await user.hover(item('Vite'));
+    await user.keyboard('{Escape}');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
     await user.hover(item('Vite'));
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
-    await user.keyboard('{Escape}');
+    fireEvent.pointerDown(document.body);
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('a press on the strip itself keeps it open', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    await user.hover(item('Python'));
+    fireEvent.pointerDown(screen.getByRole('tooltip'));
+    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+  });
+
+  it('places the description against the panel, not against its item', async () => {
+    const user = userEvent.setup();
+    render(<Skills />);
+    await user.hover(item('Python'));
+    const tip = screen.getByRole('tooltip');
+    // No positioned ancestor between the strip and the panel, or it would hang off the item again.
+    const panel = tip.closest('.skill-panel')!;
+    expect(panel).toHaveClass('relative', 'md:pb-26');
+    for (let el = tip.parentElement; el && el !== panel; el = el.parentElement) {
+      expect(el.className).not.toMatch(/(^|\s)(relative|absolute|sticky|fixed)(\s|$)/);
+    }
   });
 
   it('keyboard: Tab opens, Enter toggles, Esc closes', async () => {
@@ -530,6 +567,15 @@ describe('Skills.css short-mode sizes', () => {
     expect(skillsCss).toContain(`@media ${SHORT_QUERY} {`);
   });
 
+  it('lays the inspector strip along the panel bottom, and over the status line on short screens', () => {
+    const strip = skillsCss.slice(skillsCss.indexOf('  .skill-tip {'), skillsCss.indexOf('  .skill-detail {'));
+    expect(strip).toMatch(/position: absolute;[\s\S]*bottom: 28px;/);
+    // The short block is the only place it moves to the top.
+    const short = strip.slice(strip.indexOf(`@media ${SHORT_QUERY} {`));
+    expect(short).toContain('top: calc(var(--skill-panel-pt) - 4px);');
+    expect(short).toContain('bottom: auto;');
+  });
+
   it('sizes the tall xl slot lines in their own block, which never meets the short one', () => {
     expect(skillsCss).toContain(`@media ${XL_TALL_QUERY} {`);
   });
@@ -543,36 +589,5 @@ describe('Skills.css short-mode sizes', () => {
       expect(found.length).toBeGreaterThan(0);
       for (const px of found) expect(px % 4).toBe(0);
     }
-  });
-});
-
-describe('placeTooltip', () => {
-  const viewport = { width: 1000, height: 800 };
-  const size = { width: 200, height: 100 };
-  const anchor = (left: number, top: number, width = 80) => ({
-    left,
-    right: left + width,
-    top,
-    bottom: top + 36,
-  });
-
-  it('hangs below, left-aligned with the item, by default', () => {
-    expect(placeTooltip(anchor(100, 200), size, viewport)).toEqual({ x: 0, side: 'bottom' });
-  });
-
-  it('flips left (right edges aligned) near the right edge', () => {
-    // 900 + 200 > 1000 - 16: align the right edges, 980 - 200 = 780.
-    expect(placeTooltip(anchor(900, 200), size, viewport)).toEqual({ x: -120, side: 'bottom' });
-  });
-
-  it('clamps to the margin when neither alignment fits', () => {
-    const narrow = { width: 240, height: 800 };
-    // right-aligned would start at -40; clamped to 16.
-    expect(placeTooltip(anchor(120, 200, 40), size, narrow).x).toBe(16 - 120);
-  });
-
-  it('flips up near the bottom, but only if it fits above', () => {
-    expect(placeTooltip(anchor(100, 700), size, viewport).side).toBe('top');
-    expect(placeTooltip(anchor(100, 120), size, { width: 1000, height: 260 }).side).toBe('bottom');
   });
 });

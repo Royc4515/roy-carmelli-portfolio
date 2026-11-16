@@ -126,41 +126,56 @@
     padding: 0 6px;
   }
 
-  /* ── Tooltip: paper card, 4px ink frame, hard drop. Hangs 12px under (or
-     over) its item, shifted by --tip-x so it stays inside the viewport. */
+  /* ── Inspector strip: the open item's description, a paper band with a 4px
+     ink frame and a hard drop. From 768px it lies along the panel's bottom
+     edge, in the 76px Skills.tsx keeps free there (md:pb-26), so it covers no
+     item and is always in the same place. It used to hang under its item,
+     over the next rows. Name, category and "Used in" share one line and wrap
+     onto a second on narrow panels.
+     don't touch / placed against .skill-panel: neither the item's cell nor
+     its slot row may be positioned (Skills.tsx). */
   .skill-tip {
     --px-frame: var(--color-ink);
     position: absolute;
-    top: calc(100% + 12px);
-    left: var(--tip-x, 0px);
+    right: 28px;
+    bottom: 28px;
+    left: 28px;
     z-index: 30;
-    width: max-content;
-    min-width: 13rem;
-    max-width: min(20rem, calc(100vw - 2rem));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 4px;
+    min-height: 56px;
+    padding: 8px 16px;
     animation: skill-tip-in var(--dur-base) var(--ease-snap) both;
 
     &[hidden] {
       display: none;
     }
+  }
 
-    /* Bridge over the gap, so the pointer can travel onto the tooltip. */
-    &::before {
-      content: "";
-      position: absolute;
-      inset-inline: 0;
-      bottom: 100%;
-      height: 16px;
-    }
+  /* "Used in" and its projects, in a row that wraps with the strip. */
+  .skill-tip__used,
+  .skill-tip__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 4px;
+  }
 
-    &[data-side="top"] {
-      top: auto;
-      bottom: calc(100% + 12px);
-      animation-name: skill-tip-in-top;
-
-      &::before {
-        top: 100%;
-        bottom: auto;
-      }
+  /* Short laptop screens have no room under the slots (the zone fits one
+     screen): the strip lies over the status line instead, which says nothing
+     about the item anyway. 4px taller than the line on each side. */
+  @media (width >= 64rem) and (height <= 60rem) {
+    .skill-tip {
+      top: calc(var(--skill-panel-pt) - 4px);
+      right: 16px;
+      bottom: auto;
+      left: 16px;
+      min-height: 24px;
+      padding: 2px 12px;
     }
   }
 
@@ -313,12 +328,5 @@
   from {
     opacity: 0;
     transform: translateY(4px);
-  }
-}
-
-@keyframes skill-tip-in-top {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
   }
 }
