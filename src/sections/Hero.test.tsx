@@ -291,12 +291,11 @@ describe('Hero — desktop', () => {
     expect(screen.getByRole('button', { name: /^quit$/i }).closest('.shrink-0')).not.toBeNull();
   });
 
-  it('draws the HUD meters on the 4px grid (8x12 segments, 4px apart)', () => {
+  it('has no player nameplate: no HP / XP meters and no level', () => {
+    // The nameplate carried no information and "LVL 3" read as a self-rating.
     const { container } = render(<Hero />);
-    const segments = container.querySelectorAll('[data-meter-segment]');
-    expect(segments).toHaveLength(16);
-    segments.forEach(seg => expect(seg).toHaveClass('h-3', 'w-2'));
-    expect(segments[0].parentElement).toHaveClass('gap-1');
+    expect(container.querySelectorAll('[data-meter-segment]')).toHaveLength(0);
+    expect(container).not.toHaveTextContent(/LVL|\bHP\b|\bXP\b/);
   });
 });
 

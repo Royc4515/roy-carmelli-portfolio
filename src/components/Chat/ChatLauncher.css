@@ -70,6 +70,170 @@ html[data-arcade-playing] .chat-root {
   transition: transform var(--dur-instant) var(--ease-snap);
 }
 
+/* ── Motion ─────────────────────────────────────────────────────────────
+   The chat is the one place on the site that moves smoothly instead of in
+   pixel steps: springs (--ease-pop) for things that arrive, a slow ease for
+   things that idle. Only `transform` and `opacity` animate, so every frame is
+   composited and nothing reflows. Reduced motion turns all of it off (end of
+   this file). */
+
+/* Phones, first screen: docked on the top-right corner of the hero art. Absolute, so it
+   scrolls away with the art instead of riding over the tagline and the full-width buttons
+   (the fixed corner covered them).
+   don't touch / 84px = the 64px navbar, its 4px line and 16px of air (12 + the bubble's 4px
+   frame); .chat-root must have no positioned ancestor, or `top` stops meaning "from the top of
+   the page". */
+.chat-root[data-docked] {
+  position: absolute;
+  top: 84px;
+  bottom: auto;
+  /* 4px more than the fixed corner: the frame is drawn outside the box */
+  right: max(20px, calc(env(safe-area-inset-right) + 12px));
+  /* Idle: the bubble hovers, 4px up and down, so it reads as alive without flashing. */
+  animation: chat-dock-float 3.4s ease-in-out 0.9s infinite alternate;
+}
+
+/* Arrives once, growing out of the tail's corner (Roy's mouth). */
+.chat-root[data-docked] .chat-launcher {
+  position: relative;
+  width: auto;
+  transform-origin: 100% 14px;
+  animation: chat-dock-in 520ms var(--ease-pop) 0.15s backwards;
+}
+
+.chat-root[data-docked] .chat-launcher__sprite {
+  display: none;
+}
+
+/* The plate becomes the corner figure's speech bubble (the shared look is under "Parchment
+   speech bubble" below), here said by the hero's big Roy. Narrow (three short lines at most):
+   a wider bubble would reach over his hair on a 390px screen.
+   don't touch / the animations here fill `backwards` only, never `forwards`: a filled transform
+   would outrank the :active press below. */
+.chat-root[data-docked] .chat-launcher__plate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: var(--chat-dock-max, 124px);
+  min-height: 44px;
+  padding: 7px 10px 5px;
+  text-align: left;
+  /* Every new line is a new bubble (keyed in ChatLauncher.tsx): a quick squash and settle. */
+  animation: chat-dock-swap 380ms var(--ease-pop) backwards;
+  transition:
+    transform 140ms var(--ease-snap),
+    box-shadow 140ms var(--ease-snap);
+}
+
+/* Beside Roy (the usual place on an upright phone; ChatLauncher.tsx sets `right`, `top` and
+   the width from where he stands) the bubble is to his left with its tail at his mouth, exactly
+   like the corner figure's bubble, so it needs no rules of its own.
+   With no room beside him it sits in the art's top-right corner, above him: there the tail
+   leaves the bottom-left corner, and everything grows out of that corner instead. */
+.chat-root[data-docked]:not([data-dock-side]) .chat-launcher,
+.chat-root[data-docked]:not([data-dock-side]) .chat-launcher__plate {
+  transform-origin: 0 100%;
+}
+
+.chat-root[data-docked]:not([data-dock-side]) .chat-launcher__plate::after {
+  top: auto;
+  right: auto;
+  bottom: -12px;
+  left: 12px;
+}
+
+/* A 320px-wide phone leaves about 120px beside him: tighter padding and no letter spacing, so
+   the longest word of the lines still fits on one line. */
+.chat-root[data-dock-compact] .chat-launcher__plate {
+  padding-inline: 6px;
+  letter-spacing: 0;
+}
+
+/* The tag moves to the far corner, away from his face. */
+.chat-root[data-dock-side="beside"] .chat-launcher__tag {
+  right: auto;
+  /* -4px: the bubble can sit 8px from the screen edge, and the tag must stay on screen */
+  left: -4px;
+}
+
+/* While the bubble is docked, the hero's Roy opens the chat too (ChatLauncher.tsx marks him). */
+[data-hero-roy][data-chat-target] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The typed part, then the rest of the line holding its place unseen. */
+.chat-dock-line {
+  text-wrap: balance;
+}
+
+.chat-dock-line__rest {
+  visibility: hidden;
+}
+
+/* A block caret after the last typed letter. Zero net width (border + equal negative margin),
+   so it never pushes a word onto the next line. It blinks once the line is complete. */
+.chat-dock-line__typed::after {
+  content: "";
+  display: inline-block;
+  height: 10px;
+  margin-right: -6px;
+  border-right: 6px solid currentColor;
+  vertical-align: baseline;
+  animation: chat-caret 900ms steps(1) infinite;
+}
+
+.chat-dock-line[data-typing] .chat-dock-line__typed::after {
+  animation: none;
+}
+
+/* Pressed: the bubble sinks onto its shadow and keeps its ink frame. */
+.chat-root[data-docked] .chat-launcher:active .chat-launcher__plate {
+  transform: translate(4px, 4px) scale(0.98);
+  box-shadow: var(--chat-ink-frame);
+}
+
+/* A brass "AI" tag riding the bubble's top-right corner; a glint crosses it now and then. */
+.chat-launcher__tag {
+  position: absolute;
+  top: -14px;
+  right: -8px;
+  overflow: hidden;
+  padding: 3px 6px 1px;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  box-shadow:
+    inset 2px 2px 0 0 var(--color-bevel-hi),
+    inset -2px -2px 0 0 var(--color-bevel-lo);
+  animation: chat-tag-in 420ms var(--ease-pop) 0.5s backwards;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.55) 50%, transparent 65%);
+    transform: translateX(-120%);
+    animation: chat-tag-glint 5s ease-in-out 1.6s infinite;
+  }
+}
+
+/* The corner figure rises into place with a small overshoot: on load, and on phones when the
+   hero has scrolled clear and he takes over from the docked bubble. */
+.chat-root:not([data-docked]) .chat-launcher {
+  animation: chat-rise 520ms var(--ease-pop) backwards;
+}
+
+/* Pointed at (desktop): he hops a little; the plate's own press stays as it was. */
+.chat-launcher__sprite {
+  transition: transform 220ms var(--ease-pop);
+}
+
+@media (hover: hover) {
+  .chat-launcher:hover .chat-launcher__sprite {
+    transform: translateY(-4px);
+  }
+}
+
 /* A full press, like every other button: the plate sinks onto its shadow and the bevel flips. */
 .chat-launcher:active .chat-launcher__plate {
   transform: translate(4px, 4px);
@@ -78,30 +242,31 @@ html[data-arcade-playing] .chat-root {
     inset -2px -2px 0 0 var(--color-bevel-hi);
 }
 
-/* A parchment speech bubble beside Roy's head: on load, and on every hover or focus. */
-.chat-bubble {
-  position: absolute;
-  right: 72px;
-  bottom: 64px;
+/* ── Parchment speech bubble ────────────────────────────────────────────
+   One look, defined once, for the two bubbles that say Roy's lines: the
+   corner figure's (`.chat-bubble`) and the one docked beside the hero's Roy
+   on phones (the launcher's plate). Parchment, a 4px ink frame drawn as
+   shadows, a drop shadow, and a stepped tail on the right pointing at him. */
+.chat-root {
+  --chat-ink-frame:
+    0 -4px 0 0 var(--color-ink), 0 4px 0 0 var(--color-ink), -4px 0 0 0 var(--color-ink),
+    4px 0 0 0 var(--color-ink);
+}
+
+.chat-bubble,
+.chat-root[data-docked] .chat-launcher__plate {
   width: max-content;
-  /* one line on a desktop; on a narrow phone a long line wraps instead of leaving the screen */
-  max-width: calc(100vw - 104px);
-  padding: 5px 12px 3px;
   background-color: var(--color-paper);
   color: var(--color-ink);
   line-height: 16px;
-  text-wrap: balance;
+  /* everything grows out of the tail, towards Roy */
+  transform-origin: 100% 14px;
   box-shadow:
-    0 -4px 0 0 var(--color-ink),
-    0 4px 0 0 var(--color-ink),
-    -4px 0 0 0 var(--color-ink),
-    4px 0 0 0 var(--color-ink),
+    var(--chat-ink-frame),
     8px 12px 0 0 var(--color-shadow);
-  animation: chat-pop-in var(--dur-slow) steps(4) both;
-  pointer-events: none;
 
-  /* Stepped tail pointing at Roy: three 4px stairs of parchment running through the right
-     frame line, so the bubble opens into it. */
+  /* Stepped tail: three 4px stairs of parchment running through the right frame line, so the
+     bubble opens into it. */
   &::after {
     content: "";
     position: absolute;
@@ -114,10 +279,81 @@ html[data-arcade-playing] .chat-root {
   }
 }
 
-@keyframes chat-pop-in {
+/* The corner figure's bubble, beside his head: on load, and on every hover or focus. */
+.chat-bubble {
+  position: absolute;
+  right: 72px;
+  bottom: 64px;
+  /* one line on a desktop; on a narrow phone a long line wraps instead of leaving the screen */
+  max-width: calc(100vw - 104px);
+  padding: 5px 12px 3px;
+  text-wrap: balance;
+  animation: chat-bubble-in 420ms var(--ease-pop) both;
+  pointer-events: none;
+}
+
+@keyframes chat-bubble-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: scale(0.6) translateX(8px);
+  }
+}
+
+@keyframes chat-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+
+@keyframes chat-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.9);
+  }
+}
+
+@keyframes chat-dock-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-8deg);
+  }
+}
+
+@keyframes chat-dock-swap {
+  from {
+    opacity: 0.4;
+    transform: scale(0.86);
+  }
+}
+
+@keyframes chat-dock-float {
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes chat-tag-in {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(20deg);
+  }
+}
+
+/* The glint crosses in the first tenth of the loop, then waits. */
+@keyframes chat-tag-glint {
+  0% {
+    transform: translateX(-120%);
+  }
+  12%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes chat-caret {
+  50% {
+    opacity: 0;
   }
 }
 
@@ -132,7 +368,8 @@ html[data-arcade-playing] .chat-root {
   right: calc(max(16px, calc(env(safe-area-inset-right) + 8px)) + 72px);
   bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
   width: min(416px, calc(100vw - 32px));
-  animation: chat-pop-in var(--dur-slow) steps(4) both;
+  transform-origin: 100% 100%;
+  animation: chat-panel-in 300ms var(--ease-snap) both;
 }
 
 .chat-panel[hidden] {
@@ -183,15 +420,23 @@ html[data-arcade-playing] .chat-root {
 
 @media (prefers-reduced-motion: reduce) {
   .chat-bubble,
-  .chat-panel {
-    animation: none;
+  .chat-panel,
+  .chat-root[data-docked],
+  .chat-launcher,
+  .chat-root .chat-launcher__plate,
+  .chat-launcher__tag,
+  .chat-launcher__tag::after,
+  .chat-dock-line__typed::after {
+    animation: none !important;
   }
 
-  .chat-launcher__plate {
+  .chat-launcher__plate,
+  .chat-launcher__sprite {
     transition: none;
   }
 
-  .chat-launcher:active .chat-launcher__plate {
+  .chat-launcher:active .chat-launcher__plate,
+  .chat-launcher:hover .chat-launcher__sprite {
     transform: none;
   }
 }

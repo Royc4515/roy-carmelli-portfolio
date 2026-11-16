@@ -39,9 +39,9 @@ describe('About', () => {
     );
   });
 
-  it('titles the character sheet and shows name and role', () => {
+  it('titles the at-a-glance panel and shows name and role', () => {
     render(<About />);
-    expect(screen.getByRole('heading', { level: 3, name: 'Character sheet' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: 'At a glance' })).toBeInTheDocument();
     expect(screen.getByText(bio.name)).toBeInTheDocument();
     expect(screen.getByText(bio.role)).toBeInTheDocument();
   });
@@ -79,9 +79,11 @@ describe('About', () => {
     expect(signatures.find(el => el.tagName === 'P')).toHaveClass('short:hidden');
   });
 
-  it('shows the achievement derived from the bio', () => {
+  it('shows the service line derived from the bio, without game wording', () => {
     render(<About />);
-    expect(screen.getByText('Achievement')).toBeInTheDocument();
+    expect(screen.getByText('Military service')).toBeInTheDocument();
+    // The service record is not framed as a game achievement or a character sheet.
+    expect(screen.queryByText(/achievement|character sheet/i)).not.toBeInTheDocument();
     expect(
       screen.getByText((_, el) => el?.textContent === 'Battalion medic · led a unit from 12 to 30+'),
     ).toBeInTheDocument();

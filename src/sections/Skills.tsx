@@ -22,7 +22,13 @@ import { Reveal } from '../components/ui/Reveal';
 import { cx } from '../components/ui/cx';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useMediaQuery } from '../hooks/useMediaQuery';
-import { equipmentStats, skillDetail, type SkillDetail, type SkillGroup } from '../lib/skillUsage';
+import {
+  CERTIFICATION_CATEGORY,
+  equipmentStats,
+  skillDetail,
+  type SkillDetail,
+  type SkillGroup,
+} from '../lib/skillUsage';
 import { moveInGrid, type GridPos } from '../lib/equipmentGrid';
 import './Skills.css';
 
@@ -69,9 +75,11 @@ interface ItemProps {
   /** < 768px: details open in an inline row under the slot, by tap or focus only. */
   inline: boolean;
   pointer: MutableRefObject<PointerMemo>;
+  /** A certificate, not a technology: drawn as plain text, without the item's sunken slot. */
+  plain: boolean;
 }
 
-function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inline, pointer }: ItemProps) {
+function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inline, pointer, plain }: ItemProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const itemKey = cellKey(pos);
   const isOpen = open?.key === itemKey;
@@ -95,7 +103,7 @@ function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inlin
     >
       <button
         type="button"
-        className="skill-item text-hud"
+        className={cx('skill-item text-hud', plain && 'skill-item--plain')}
         tabIndex={active ? 0 : -1}
         aria-describedby={tipId}
         // < 768px the item toggles the inline detail row under its slot, so it says whether
@@ -172,16 +180,9 @@ function SkillSlot({ group, row, baseId, active, setActive, open, setOpen, inlin
       <div role="rowheader" className="skill-slot__header">
         <h3 className="flex items-center gap-2 text-hud uppercase">
           {icon && <PixelIcon name={icon} size={12} className="skill-slot__icon shrink-0" />}
-          {/* Tall screens from xl stack the slot over its category (Skills.css). */}
-          <span className="skill-slot__title">
-            {/* Reads "Weapons: Languages"; the dot is visual only. */}
-            <span className="text-fg-subtle">
-              {group.slot}
-              <span className="skill-slot__dot" aria-hidden="true"> ·</span>
-              <span className="sr-only">:</span>
-            </span>{' '}
-            <span className="text-accent-fg">{group.category}</span>
-          </span>
+          {/* The category only: the RPG slot name ("Weapons", "Armor") used to sit beside it
+              and made every heading read twice. The slot survives as the icon. */}
+          <span className="skill-slot__title text-accent-fg">{group.category}</span>
         </h3>
       </div>
       <div className="mt-3 flex flex-wrap gap-2 xl:mt-0 xl:gap-x-(--skill-gap-x) xl:gap-y-(--skill-row-gap) short:mt-0 short:gap-x-(--skill-gap-x) short:gap-y-(--skill-row-gap)">
@@ -197,6 +198,7 @@ function SkillSlot({ group, row, baseId, active, setActive, open, setOpen, inlin
             setOpen={setOpen}
             inline={inline}
             pointer={pointer}
+            plain={group.category === CERTIFICATION_CATEGORY}
           />
         ))}
       </div>
@@ -221,12 +223,12 @@ function Keycap({ children, wide = false }: { children: ReactNode; wide?: boolea
 
 /**
  * Left column (≥ 768px; phones skip it, Roy already stands in Hero, About and Contact):
- * Roy in an inset well, his level, a few stats counted from the data, and the grid's
+ * Roy in an inset well, his year, a few stats counted from the data, and the grid's
  * controls, shown while the grid has keyboard focus. From xl the column narrows to 152px so
  * the slots beside it keep one line each.
  *
  * Short laptop screens (`short:`): a status line over the slots instead. The well goes (Roy
- * stands in Hero and Contact too); the level sits in the slot-heading column, the stats and
+ * stands in Hero and Contact too); the year sits in the slot-heading column, the stats and
  * the keycap hint in the item column (the frame joins the panel's subgrid, see Skills).
  */
 function CharacterFrame() {
@@ -243,7 +245,7 @@ function CharacterFrame() {
       </PixelPanel>
       <div className="min-w-0 flex-1 lg:mt-6 short:contents">
         <p className="text-label text-accent-fg short:col-start-1 short:row-start-1">
-          Roy · LVL 3<span className="sr-only">, third-year student</span>
+          Roy · 3rd year
         </p>
         <dl className="mt-3 short:col-start-2 short:row-start-1 short:mt-0 short:flex short:items-center">
           {stats.map(stat => (

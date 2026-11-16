@@ -264,6 +264,15 @@
     padding: 16px;
   }
 
+  /* The description: short paragraphs in a readable measure. */
+  .quest-log__text {
+    max-width: 68ch;
+  }
+
+  .quest-log__text > p + p {
+    margin-top: 12px;
+  }
+
   .quest-log--paper {
     background-color: var(--color-paper-sunken);
     color: var(--color-ink);
@@ -496,6 +505,34 @@
 
     .quest-card--feature .quest-monitor {
       width: calc(100% - 64px);
+    }
+
+    /* The open log is a full-width row under both columns, its text in two
+       columns, so the card grows by a few lines, not by a screen. */
+    .quest-card--feature > .quest-log {
+      grid-column: 1 / -1;
+      margin-top: var(--quest-pad);
+    }
+
+    /* don't touch / the screenshot bleeds to the card's bottom edge with a
+       negative margin; with the log open under it that margin would pull the
+       log over the screenshot. */
+    .quest-card--feature:has(> .quest-log:not([hidden])) > .quest-visual {
+      margin-bottom: 0;
+    }
+
+    .quest-card--feature > .quest-log .quest-log__text {
+      max-width: none;
+      columns: 2;
+      column-gap: 32px;
+    }
+
+    .quest-card--feature > .quest-log .quest-log__text > p {
+      break-inside: avoid;
+    }
+
+    .quest-card--feature > .quest-log .quest-log__tech {
+      max-width: none;
     }
   }
 

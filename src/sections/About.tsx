@@ -7,7 +7,7 @@ import { Reveal } from '../components/ui/Reveal';
 import { pixelSprites } from '../theme/pixelSprites';
 import './About.css';
 
-/** The five "at a glance" facts, shown as the character sheet's stat block. */
+/** The five "at a glance" facts, shown as the side panel's stat block. */
 const AT_A_GLANCE = [
   { label: 'Degree', value: 'B.Sc. Computer Science & Neuroscience (dual major)' },
   { label: 'University', value: 'Bar-Ilan University' },
@@ -21,7 +21,7 @@ const AT_A_GLANCE = [
  * unit as it grew from 12 to 30+). Two parts so a narrow sheet breaks after
  * the "·", never inside the phrase.
  */
-const ACHIEVEMENT = ['Battalion medic ·', 'led a unit from 12 to 30+'] as const;
+const SERVICE = ['Battalion medic ·', 'led a unit from 12 to 30+'] as const;
 
 /** The portrait is the native face sprite at ×2 (×1 on short laptop screens, About.css). */
 const FACE_SCALE = 2;
@@ -42,8 +42,10 @@ const paragraphs = bio.about
 
 /**
  * Zone 02 · The Adventurer (SPEC §4 About): the bio on a parchment panel next
- * to a wood "character sheet" with the portrait, the at-a-glance stat block
- * and one achievement drawn from the bio. Stacks (story first) below 1024px.
+ * to a wood "at a glance" panel with the portrait, the stat block and the
+ * service line drawn from the bio. Stacks (story first) below 1024px.
+ * The panel uses plain labels on purpose: real credentials and military
+ * service are not dressed as game items.
  */
 export default function About() {
   return (
@@ -107,11 +109,11 @@ export default function About() {
                 <h3 className="inline-flex items-center gap-2 text-label">
                   {/* Same plate as Training logs: icon centred on the caps. */}
                   <PixelIcon name="person" size={12} className="-mt-0.5 block flex-none" />
-                  Character sheet
+                  At a glance
                 </h3>
               }
             >
-              {/* 768-1023 the full-width sheet splits: portrait + achievement | stats. */}
+              {/* 768-1023 the full-width sheet splits: portrait + service | stats. */}
               <div className="about-sheet">
                 <div className="about-sheet__id flex items-center gap-4 short:gap-3">
                   <div className="about-portrait shrink-0" style={faceShortSize}>
@@ -141,12 +143,11 @@ export default function About() {
                   ))}
                 </dl>
 
-                <div className="about-sheet__feat about-achievement">
-                  <PixelIcon name="trophy" size={24} className="shrink-0 text-accent-fg" />
+                <div className="about-sheet__feat about-service">
                   <p className="min-w-0">
-                    <span className="block text-label text-accent-fg">Achievement</span>
+                    <span className="block text-label text-accent-fg">Military service</span>
                     <span className="mt-1 block text-body font-semibold text-fg short:mt-0 short:text-body-s short:font-semibold">
-                      {ACHIEVEMENT[0]} <span className="whitespace-nowrap">{ACHIEVEMENT[1]}</span>
+                      {SERVICE[0]} <span className="whitespace-nowrap">{SERVICE[1]}</span>
                     </span>
                   </p>
                 </div>

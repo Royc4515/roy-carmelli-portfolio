@@ -145,7 +145,13 @@ const CARD_H_ESTIMATE = 456;
  */
 const CARD_MIN_W = 288;
 const CARD_MIN_W_MD = 360;
-/** The HUD nameplate: 16px below the scene top, its box 266x89 plus a 4px frame and 8px drop. */
+/**
+ * The box of the old player nameplate (HP / XP / LVL), top right: 16px below the scene top,
+ * 266x89 plus a 4px frame and 8px drop. The nameplate itself was removed (it carried no
+ * information), but the composition was tuned around it.
+ * don't touch / Roy's position and the title card's top still follow this box (`hudClear`);
+ * dropping it moves both at every viewport and breaks the geometry tests in Hero.test.tsx.
+ */
 const HUD_TOP = 16;
 const HUD_W = 266;
 const HUD_H = 89;
@@ -664,68 +670,6 @@ function GroundStrips({
   );
 }
 
-/** Eight 8x12 segments 4px apart: the meter sits on the 4px grid. */
-function Meter({
-  label,
-  filled,
-  fillClass,
-  end,
-}: {
-  label: string;
-  filled: number;
-  fillClass: string;
-  end: ReactNode;
-}) {
-  return (
-    <span className="flex items-center gap-2 text-hud">
-      <span className="w-5 text-fg-muted">{label}</span>
-      <span className="flex gap-1">
-        {Array.from({ length: 8 }, (_, i) => (
-          <span
-            key={i}
-            data-meter-segment=""
-            className={cx('block h-3 w-2', i < filled ? fillClass : 'bg-surface-sunken')}
-          />
-        ))}
-      </span>
-      {end}
-    </span>
-  );
-}
-
-/** Player nameplate, top-right of the scene. Decorative except its screen-reader line. */
-function HudNameplate() {
-  return (
-    <PixelPanel variant="wood" padding="sm" elevation={1} className="pointer-events-auto">
-      {/* Fixed tracks (46px = the face well) keep every label on whole pixels. */}
-      <div aria-hidden="true" className="grid grid-cols-[46px_176px] grid-rows-[17px_20px_20px] items-end gap-x-3">
-        <span className="row-span-3 block self-stretch bg-surface-sunken p-1">
-          <img
-            src={pixelSprites.face.src}
-            alt=""
-            width={pixelSprites.face.w}
-            height={pixelSprites.face.h}
-            className="pixelated block"
-          />
-        </span>
-        <span className="text-label text-accent-fg">Player 1</span>
-        <Meter label="HP" filled={8} fillClass="bg-hp" end={<span className="text-fg">MAX</span>} />
-        <Meter
-          label="XP"
-          filled={5}
-          fillClass="bg-xp"
-          end={
-            <span className="text-fg" title="3rd year">
-              LVL 3
-            </span>
-          }
-        />
-      </div>
-      <span className="sr-only">Level 3: third-year student</span>
-    </PixelPanel>
-  );
-}
-
 /** Desktop game controls, next to Esc: HTML so they stay crisp at any zoom. */
 function ControlsHint() {
   return (
@@ -751,7 +695,7 @@ function ControlsHint() {
 /**
  * The title screen of Roy Runner: the game's forest at an integer scale, Roy waving on
  * its grass line at the same pixel scale, a title card (name, role, tagline, availability,
- * CTAs, Press start) and a player HUD. Press start (or the navbar's `arcade:play` event) fades
+ * CTAs, Press start). Press start (or the navbar's `arcade:play` event) fades
  * the title card out and runs the lazily loaded mini-game over the same scene; a phone held
  * upright gets the rotate prompt instead.
  */
@@ -765,7 +709,6 @@ export default function Hero() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const hudRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<HTMLDivElement>(null);
   const pressStartRef = useRef<HTMLButtonElement>(null);
   const wasPlaying = useRef(false);
@@ -855,9 +798,9 @@ export default function Hero() {
     return () => window.removeEventListener('keydown', onKey);
   }, [isPlaying, quit]);
 
-  // The faded-out title card and HUD leave the tab order; focus follows the scene swap.
+  // The faded-out title card leaves the tab order; focus follows the scene swap.
   useLayoutEffect(() => {
-    for (const el of [titleRef.current, hudRef.current]) {
+    for (const el of [titleRef.current]) {
       el?.toggleAttribute('inert', isPlaying);
     }
     if (isPlaying) {
@@ -1102,7 +1045,9 @@ export default function Hero() {
         )}
         {/* Night: the world gets two moonlight washes, Roy (between them) one, so he stays lit. */}
         <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
+        {/* data-hero-roy: the chat launcher reads this box to dock its speech bubble beside him. */}
         <m.div
+          data-hero-roy=""
           className="absolute"
           style={{ left: `${scene.spriteX}px`, bottom: `${scene.groundH}px` }}
           initial={false}
@@ -1117,22 +1062,6 @@ export default function Hero() {
         </m.div>
         <div aria-hidden="true" className="hero-night-wash pointer-events-none absolute inset-0" />
       </div>
-
-      {/* ── HUD nameplate (desktop) ─────────────────────────────────────── */}
-      {overlay && scene.hudClear && (
-        <div className="pointer-events-none absolute inset-x-0 top-16 z-10">
-          <div className="mx-auto flex max-w-[1120px] justify-end px-6 pt-4 lg:px-8">
-            <m.div
-              ref={hudRef}
-              initial={false}
-              animate={isPlaying ? { opacity: 0, y: -16 } : { opacity: 1, y: 0 }}
-              transition={slide(16)}
-            >
-              <HudNameplate />
-            </m.div>
-          </div>
-        </div>
-      )}
 
       {/* ── Title card ──────────────────────────────────────────────────── */}
       <m.div

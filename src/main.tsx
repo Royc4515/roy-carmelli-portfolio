@@ -44,3 +44,5 @@ flushSync(() =>
   ),
 );
 container.removeAttribute(PRERENDERED_ATTR);
+// The boot card (index.html) covered the wait for this script; the app is on screen now.
+document.getElementById('boot')?.remove();

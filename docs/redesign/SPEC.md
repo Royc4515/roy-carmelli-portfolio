@@ -32,7 +32,7 @@ the character, both themes and all existing content.
 | Project tiers | main: `ai-sidebar`, `career-predictor`, `sommelier-bot` · side: `clr`, `arkanoid-game`, `portfolio` · research: `signal-processing`, `cognitive-correlation`, `white-matter-game`. |
 | Availability | Hero chip: `bio.availability`. Contact paragraph: `bio.contactBlurb`. |
 | Assets | Site UI uses native-resolution art in `public/assets/pixel/`. Files the mini-game loads stay in `public/assets/sprites/` with the same names and pixel dimensions (no engine change); they may be re-encoded in place (256-colour palette + lossless PNG optimisation) when the game shows no visible difference at 100%. Unused files are deleted; hi-res sources the pixel pipeline needs move to `design-src/`. |
-| Hero | Game title screen: forest backdrop at integer scale, character on the ground line at the same pixel scale, title card, HUD nameplate. |
+| Hero | Game title screen: forest backdrop at integer scale, character on the ground line at the same pixel scale, title card. |
 | Contact | No form (no backend). `mailto:` plus copy-to-clipboard with a toast. |
 | Icons | One pixel icon set (`PixelIcon`). No emoji anywhere in the UI. |
 
@@ -314,11 +314,23 @@ conversation; behaviour lives in `useChat`, copy in `src/data/chatPersona.ts`.
   hover or keyboard focus, each time with the next line of `chatPersona.bubbles` (Latin-1, ≤ 24
   chars each, tested); it lingers 1.5s after the pointer leaves. Not while the panel is open, and
   not when focus merely returns from closing it. Wraps on a narrow phone.
+- **Motion (chat only):** the chat is the one place that moves smoothly instead of in pixel
+  steps. Things that arrive use the `--ease-pop` spring (corner bubble out of its tail, the corner
+  figure rising 28px, the docked bubble growing from Roy's mouth, a new docked line squashing in);
+  the docked bubble idles on a 4px float and its AI tag catches a glint every 5s. Only `transform`
+  and `opacity` animate. Reduced motion turns all of it off and shows each line whole.
+- **Docked bubble (phones, first screen):** while the hero still reaches under the launcher's
+  corner, the launcher is a parchment speech bubble on the hero art, left of the big Roy with its
+  tail at his mouth, tagged `AI`. It types `chatPersona.bubbles` one after another (60 chars/s,
+  3.2s hold, block caret). `ChatLauncher.tsx` measures Roy (`[data-hero-roy]` in a `stack` hero)
+  and sets `right`, `top` and a width of 104-168px; under 136px it drops letter spacing and uses
+  6px padding so "PROJECTS?" fits (320px phones). With no room beside him (overlay hero) it takes
+  the art's top-right corner. It scrolls away with the art and covers no text.
 - **Panel:** wood `PixelPanel`, elevation 2, brass `tab` "PIXEL ROY · AI". It opens beside Roy
   (left of the launcher, bottom-aligned), so he stands next to his own dialogue box and the panel
   gets the window's height: `min(620px, 100dvh - 100px)`, enough on a 150%-zoom laptop (~550px).
   Only the log flexes (basis 0, 96px minimum) and scrolls; the input and the one-line note never
-  move. Enters like the pause menu (opacity + 8px, `--dur-slow`, `steps(4)`), closes instantly.
+  move. Enters smoothly (opacity + 16px + scale 0.97, 300ms, `--ease-snap`), closes instantly.
   Phones only (under 768px wide, or under 440px tall when sideways): full-screen sheet over the
   nav (z 150), page inert behind it.
 - **Answers:** Roy's face in a sunken well beside a parchment speech box (ink text, stepped tail
@@ -365,14 +377,15 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   the top and the ground is extended downward by repeating its bottom dirt rows (shifted per
   strip); a taller one is anchored to the bottom. Scene height is the hero height (see §2.3) minus 64px.
   The character's feet sit on forest column 182 on the grass line; its x is chosen per viewport
-  so the title card never covers it, no baked-in bird sits on its head and the HUD stays clear.
+  so the title card never covers it, no baked-in bird sits on its head and the top-right box of the former nameplate stays clear.
   Title card: wood panel, elevation 2, 520px, left-aligned to the page container, its top
-  aligned with the HUD top: `PLAYER ONE`
+  16px under the scene top: `PLAYER ONE`
   eyebrow, H1 name on two lines, role (`bio.role`), tagline, availability chip, `View projects`
-  (primary lg) + `Resume` (secondary lg, PDF), ghost `Press start to play`. HUD nameplate
-  top-right (omitted when it would collide). Static `SCROLL` cue on the dirt. Night: moonlight
+  (primary lg) + `Resume` (secondary lg, PDF), ghost `Press start to play`. There is no player
+  nameplate (HP / XP / LVL): it carried no information and "LVL 3" read as a self-rating; the
+  layout still reserves its box so the composition did not move. Static `SCROLL` cue on the dirt. Night: moonlight
   washes over the forest (stronger) and the character (lighter). Pressing start fades the card
-  and HUD out (`--dur-scene`, stepped slide) and fades the lazily loaded game in over the dimmed
+  out (`--dur-scene`, stepped slide) and fades the lazily loaded game in over the dimmed
   scene; Esc/Quit return focus to Press start. Press start and `Play` first bring the hero to
   the top of the viewport (the page scroll then locks). During desktop play the game sits on an
   opaque `bg` backdrop no taller than the first screen under the nav, the rest of `main` and the
@@ -385,7 +398,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   700px tall) at most 38% of the viewport height, canopy cropped and anchored at the bottom so
   the character and grass stay, then the title card as a full-bleed wood slab. Phone card order:
   eyebrow, H1, role, tagline, availability chip, CTAs, Press start. Tablets use two columns (text
-  left; CTAs and Press start right, CTA top level with the H1). HUD and scroll cue hidden.
+  left; CTAs and Press start right, CTA top level with the H1). Scroll cue hidden.
   Short or narrow landscape viewports (e.g. 844×390, 800×600, 640×400) get a compact title
   screen: the same overlay composition with k chosen so the forest fills the first screen and
   the character stands whole, a narrower card when needed (never slicing a bird), and CTAs
@@ -407,7 +420,7 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   Headings: one H3 per tier (the Research logs tab plate is the visible H3; main/side are
   screen-reader only because every card shows its tier tag), card titles H4. Every card caps chips
   at 4 + `+N`, and the `+N` never takes a row alone: the chip before it reserves its room, so the
-  two wrap together. An open quest log never stretches its neighbour (`:has()` releases the subgrid).
+  two wrap together. An open quest log never stretches its neighbour (`:has()` releases the subgrid). The log shows the description as short paragraphs (opening sentence in semibold, then groups of whole sentences); on the lead card from 1024px it is a full-width row under the screenshot with the text in two columns.
   Hover lift keeps its hit area. The visual's backdrop bleeds to the inner edge of the 4px frame,
   never over it: the card padding and the bleed are one value (`--quest-pad`: 16, 20 from `md`,
   16 on short laptops). Item art uses fixed bitmap colours with a half-strength night
@@ -423,9 +436,11 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   8 · 8 · 12 · 12 · 12 from the meta line; the subtitle follows the name on its line; Live · Code ·
   Quest log share one row. DOM and reading order are unchanged; the 2-up and 3-up grids don't apply.
   The research log panel scrolls as a whole (each row fits).
-- **About (Zone 02 · The Adventurer).** 7/12 story on a paper panel (≤ 65ch) + 5/12 "Character
-  sheet" (inset panel): face ×2, the existing at-a-glance rows (HUD labels, Plex values), one
-  achievement row derived from the bio ("Field medic · scaled a unit from 12 to 30+").
+- **About (Zone 02 · The Adventurer).** 7/12 story on a paper panel (≤ 65ch) + 5/12 "At a glance"
+  panel (inset): face ×2, the at-a-glance rows (HUD labels, Plex values), one "Military service"
+  row derived from the bio ("Battalion medic · led a unit from 12 to 30+"). Plain labels on
+  purpose: credentials and service are never framed as game items (no "Character sheet", no
+  "Achievement", no trophy).
   Short laptops (`short:`): the story column keeps 632px (600px of text, 12 lines of 16/26, 12px
   paragraph gaps, 16px padding) with the "- Roy" sign-off on its last line; the sheet takes the
   remaining 360-400px: ×1 portrait beside the name, 14px values in an 88px label column, stat rows
@@ -433,8 +448,9 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   under the zone header (100svh − 196px), so a nav jump always shows it whole; on screens under
   ~590px tall (1097×516) the end of the story runs past the fold.
 - **Skills (Zone 03 · Equipment).** Equipment screen: character (idle, ×3) in a wood frame on the
-  left; slots on the right, one per `skills[i].slot` (Weapons, Armor, Magic, Potions, Tomes,
-  Trinkets, Achievements). Each item is a focusable chip; hover/focus shows a Stardew-style
+  left; slots on the right, one per skill group, headed by its category alone ("Languages", not
+  "Weapons · Languages": the RPG slot name survives only as the heading icon). Certificates are
+  plain text, not sunken chips, so they do not read as technologies. Each item is a focusable chip; hover/focus shows a Stardew-style
   tooltip with "Used in: …" computed from `projects` (normalize e.g. `React 19` → `React`).
   Items not used in any project show no "Used in" line (never invent data); CS Foundations say
   "Studied in coursework", certifications "Certificate earned". Mobile: stacked, tooltip becomes
@@ -445,8 +461,8 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
   keeping the column, Home/End, Ctrl+Home/End; the tooltip follows focus, Esc closes. Items carry a
   2px `border-subtle` line and a dotted inspect cue (brass on hover/focus/open); a keycap hint
   shows while the grid has keyboard focus. Tall screens from xl (1280px, taller than the short
-  laptops; CSS only, same DOM): the frame column narrows to 152px (well, "ROY · LVL 3", stats) and
-  each slot is one line of items beside its heading, the slot name over its category in a heading
+  laptops; CSS only, same DOM): the frame column narrows to 152px (well, "ROY · 3RD YEAR", stats) and
+  each slot is one line of items beside its heading, in a heading
   column the rows share through subgrids, slots in data order. Items stay 36px tall with 8px
   padding, 4px apart in a line and 8px between lines (only Magic takes two); 28px between slots
   ends the last one level with the frame column. Every width from xl lays out the same (the zone is
