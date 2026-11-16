@@ -47,7 +47,11 @@ const ROW_LENGTHS = skills.map(group => group.items.length);
 
 const cellKey = ({ row, col }: GridPos) => `${row}-${col}`;
 
-/** How the open tooltip was opened: hover closes on leave, the others on blur / outside tap. */
+/**
+ * How the open description was opened. From 768px it shows in the inspector strip and stays
+ * until another item, Esc or a press elsewhere replaces it (so the pointer can leave the item
+ * and travel to the strip); under 768px it is the inline row, closed by blur or an outside tap.
+ */
 type OpenVia = 'hover' | 'focus' | 'tap';
 
 interface OpenItem {
@@ -80,7 +84,6 @@ interface ItemProps {
 }
 
 function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inline, pointer, plain }: ItemProps) {
-  const anchorRef = useRef<HTMLDivElement>(null);
   const itemKey = cellKey(pos);
   const isOpen = open?.key === itemKey;
 
@@ -88,17 +91,14 @@ function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inlin
     setOpen(current => (current && current.key === itemKey && test(current) ? null : current));
 
   return (
+    // don't touch / no `relative` here or on the slot row: the description inside is placed
+    // against the panel (the inspector strip), not against its item.
     <div
-      ref={anchorRef}
       role="gridcell"
-      className="relative"
       data-skill-item={itemKey}
       onPointerEnter={e => {
         if (e.pointerType !== 'mouse' || inline) return;
         setOpen(current => (current?.key === itemKey ? current : { key: itemKey, via: 'hover' }));
-      }}
-      onPointerLeave={e => {
-        if (e.pointerType === 'mouse') closeIf(current => current.via === 'hover');
       }}
     >
       <button
@@ -122,7 +122,10 @@ function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inlin
           if (Date.now() - pointer.current.at < POINTER_FOCUS_MS) return;
           setOpen({ key: itemKey, via: 'focus' });
         }}
-        onBlur={() => closeIf(current => current.via !== 'hover')}
+        onBlur={() => {
+          // The strip keeps the last inspected item; only the inline row closes with focus.
+          if (inline) closeIf(current => current.via !== 'hover');
+        }}
         onClick={() => {
           setActive(pos);
           const type = Date.now() - pointer.current.at < POINTER_FOCUS_MS ? pointer.current.type : null;
@@ -141,7 +144,7 @@ function SkillItem({ pos, tipId, detail, active, setActive, open, setOpen, inlin
       >
         <span className="skill-item__label">{detail.name}</span>
       </button>
-      <SkillTooltip id={tipId} detail={detail} open={isOpen && !inline} anchorRef={anchorRef} />
+      <SkillTooltip id={tipId} detail={detail} open={isOpen && !inline} />
     </div>
   );
 }
@@ -172,10 +175,7 @@ function SkillSlot({ group, row, baseId, active, setActive, open, setOpen, inlin
     <Reveal
       index={row}
       role="row"
-      className={cx(
-        'relative xl:col-span-2 xl:grid xl:grid-cols-subgrid xl:items-start short:col-span-2 short:grid short:grid-cols-subgrid short:items-start',
-        openIndex >= 0 && 'z-10',
-      )}
+      className="xl:col-span-2 xl:grid xl:grid-cols-subgrid xl:items-start short:col-span-2 short:grid short:grid-cols-subgrid short:items-start"
     >
       <div role="rowheader" className="skill-slot__header">
         <h3 className="flex items-center gap-2 text-hud uppercase">
@@ -295,14 +295,16 @@ function CharacterFrame() {
  * is one line of items beside its heading, the headings in a column of their own (CSS only).
  * On short laptop screens (`short:`, CSS only) it becomes a compact inventory that fits one
  * screen: the frame gives way to a status line over those slot lines. Hovering, focusing or
- * tapping an item opens a tooltip whose "Used in" line is computed from the projects' tech
- * lists (src/lib/skillUsage.ts), never written by hand.
+ * tapping an item shows its description, whose "Used in" line is computed from the projects'
+ * tech lists (src/lib/skillUsage.ts), never written by hand. From 768px the description appears
+ * in an inspector strip (along the panel's bottom edge; over the status line on short laptop
+ * screens), so it never covers the items; under 768px it is an inline row under the slot.
  *
  * Keyboard: the slots form one ARIA layout grid (row = slot, cell = item) with a roving
  * tabindex, so the whole screen is a single Tab stop. Arrows move between items (Left /
  * Right in a slot, Up / Down across slots), Home / End go to the ends of a slot, Ctrl +
- * Home / End to the ends of the grid (src/lib/equipmentGrid.ts). The tooltip follows focus;
- * Esc closes it.
+ * Home / End to the ends of the grid (src/lib/equipmentGrid.ts). The description follows
+ * focus; Esc closes it.
  */
 export default function Skills() {
   const baseId = useId();
@@ -395,7 +397,9 @@ export default function Skills() {
           variant="wood"
           elevation={2}
           padding="lg"
-          className="skill-panel short:px-4 short:pt-(--skill-panel-pt) short:pb-(--skill-panel-pb)"
+          // relative: the inspector strip is placed against the panel. md:pb-26 keeps 76px free
+          // along its bottom edge for the strip (28px padding + 64px strip + 12px of air).
+          className="skill-panel relative md:pb-26 short:px-4 short:pt-(--skill-panel-pt) short:pb-(--skill-panel-pb)"
         >
           <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[152px_minmax(0,1fr)] xl:gap-x-8 short:grid-cols-[max-content_minmax(0,1fr)] short:gap-x-(--skill-col-gap) short:gap-y-(--skill-status-gap)">
             <CharacterFrame />
@@ -405,6 +409,12 @@ export default function Skills() {
               aria-label="Equipment"
               className="skill-grid grid items-start gap-8 xl:grid-cols-[max-content_minmax(0,1fr)] xl:gap-x-(--skill-col-gap) xl:gap-y-(--skill-slot-gap) short:col-span-2 short:grid-cols-subgrid short:gap-x-(--skill-col-gap) short:gap-y-(--skill-row-gap)"
               onKeyDown={onGridKeyDown}
+              // Keyboard focus leaving the whole grid takes its description with it; a hovered
+              // one stays (the pointer may be on its way to the strip).
+              onBlur={e => {
+                if (e.currentTarget.contains(e.relatedTarget)) return;
+                setOpen(current => (current && current.via !== 'hover' ? null : current));
+              }}
             >
               {skills.map((group, row) => (
                 <SkillSlot

@@ -450,15 +450,20 @@ Each section: `<section id aria-labelledby>` with a `ZoneHeader` (except Hero).
 - **Skills (Zone 03 · Equipment).** Equipment screen: character (idle, ×3) in a wood frame on the
   left; slots on the right, one per skill group, headed by its category alone ("Languages", not
   "Weapons · Languages": the RPG slot name survives only as the heading icon). Certificates are
-  plain text, not sunken chips, so they do not read as technologies. Each item is a focusable chip; hover/focus shows a Stardew-style
-  tooltip with "Used in: …" computed from `projects` (normalize e.g. `React 19` → `React`).
+  plain text, not sunken chips, so they do not read as technologies. Each item is a focusable chip; hover/focus shows its
+  description with "Used in: …" computed from `projects` (normalize e.g. `React 19` → `React`)
+  in an **inspector strip**: a paper band with a 4px ink frame along the panel's bottom edge
+  (the panel keeps 76px free for it), or over the status line on short laptops, where the zone
+  must fit one screen. It never covers an item (the old tooltip hung under its item, over the
+  next rows) and it stays after the pointer leaves, until another item, Esc or a press outside
+  the items; keyboard focus leaving the grid closes it.
   Items not used in any project show no "Used in" line (never invent data); CS Foundations say
-  "Studied in coursework", certifications "Certificate earned". Mobile: stacked, tooltip becomes
+  "Studied in coursework", certifications "Certificate earned". Mobile: stacked, the description becomes
   an inline detail row on tap (the item carries `aria-expanded` there, and only there); character
   well and stats hidden below 768px.
   Keyboard: the equipment is one ARIA layout grid (`grid` / `row` with the slot h3 as `rowheader` /
   `gridcell`) with a roving tabindex: one Tab stop, Left/Right within a slot, Up/Down across slots
-  keeping the column, Home/End, Ctrl+Home/End; the tooltip follows focus, Esc closes. Items carry a
+  keeping the column, Home/End, Ctrl+Home/End; the description follows focus, Esc closes. Items carry a
   2px `border-subtle` line and a dotted inspect cue (brass on hover/focus/open); a keycap hint
   shows while the grid has keyboard focus. Tall screens from xl (1280px, taller than the short
   laptops; CSS only, same DOM): the frame column narrows to 152px (well, "ROY · 3RD YEAR", stats) and
