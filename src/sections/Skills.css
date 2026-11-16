@@ -77,6 +77,16 @@
     }
   }
 
+  /* A certificate is not a technology: plain text, no sunken slot, so the row
+     reads as a list of credentials beside the tools. Hover, focus and open
+     still draw the brass line (they set --skill-line). */
+  .skill-item--plain {
+    --skill-line: transparent;
+    background-color: transparent;
+    color: var(--color-fg-muted);
+    padding-inline: 4px;
+  }
+
   /* Inspect cue: a dotted pixel underline (2px dots, 2px gaps) under the label,
      the usual "hover me for more" mark of a tooltip. */
   .skill-item__label {
@@ -190,15 +200,6 @@
       min-height: var(--skill-h);
     }
 
-    .skill-slot__title {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .skill-slot__dot {
-      display: none;
-    }
-
     .skill-item {
       padding: 0 8px;
 
@@ -304,20 +305,6 @@
     .skill-tip,
     .skill-detail {
       animation: none;
-    }
-  }
-}
-
-/* Tall screens from xl: the slot icon sits on the heading's first line (the
-   h3's `items-center` utility would centre it on both). */
-@layer utilities {
-  @media (width >= 80rem) and (height > 60rem) {
-    .skill-slot__header > h3 {
-      align-items: flex-start;
-    }
-
-    .skill-slot__header .skill-slot__icon {
-      margin-top: 2px;
     }
   }
 }

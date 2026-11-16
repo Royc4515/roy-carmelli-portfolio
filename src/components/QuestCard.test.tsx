@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
-import QuestCard, { PRIVATE_REPO_NOTE, QUEST_LOG_SCREENSHOTS, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
+import QuestCard, { descriptionParagraphs, PRIVATE_REPO_NOTE, QUEST_LOG_SCREENSHOTS, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
 import { itemForProject } from './ItemSprite';
 import { projects } from '../data/projects';
 import type { Project } from '../types/index';
@@ -32,6 +32,38 @@ describe('splitTitle', () => {
     expect(splitTitle('Multi-step')).toEqual({ name: 'Multi-step' });
     expect(splitTitle(' - leading')).toEqual({ name: ' - leading' });
     expect(splitTitle('Trailing - ')).toEqual({ name: 'Trailing - ' });
+  });
+});
+
+describe('descriptionParagraphs', () => {
+  it('gives back the whole description, in order, for every project', () => {
+    for (const project of projects) {
+      expect(descriptionParagraphs(project.description).join(' ')).toBe(project.description.trim());
+    }
+  });
+
+  it('leads with the quotable opening sentence and keeps every paragraph short', () => {
+    for (const project of projects) {
+      const [lead, ...rest] = descriptionParagraphs(project.description);
+      expect(lead.endsWith('.')).toBe(true);
+      expect(project.description.startsWith(lead)).toBe(true);
+      // A single sentence may run long; a group of sentences never passes the cap.
+      for (const paragraph of rest) {
+        const sentences = paragraph.split(/(?<=[.!?])\s+(?=[A-Z])/);
+        if (sentences.length > 1) expect(paragraph.length).toBeLessThanOrEqual(360);
+      }
+    }
+  });
+
+  it('does not break inside a dotted name or after an abbreviation', () => {
+    expect(descriptionParagraphs('Keys stay in chrome.storage.local and never sync. Done e.g. this way.')).toEqual([
+      'Keys stay in chrome.storage.local and never sync.',
+      'Done e.g. this way.',
+    ]);
+  });
+
+  it('returns nothing for an empty description', () => {
+    expect(descriptionParagraphs('   ')).toEqual([]);
   });
 });
 

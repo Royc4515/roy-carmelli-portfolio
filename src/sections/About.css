@@ -77,14 +77,15 @@
     }
   }
 
-  /* Achievement plate: a sunken slot with a brass inner line. */
-  .about-achievement {
+  /* Service line: a sunken slot with a quiet inner line. */
+  .about-service {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 12px 12px 16px;
     background-color: var(--color-surface-sunken);
-    box-shadow: inset 0 0 0 2px var(--color-accent);
+    /* A quiet inset line, not the gold trophy frame: this is a service record. */
+    box-shadow: inset 0 0 0 2px var(--color-border-subtle);
   }
 
   /* The letter's sign-off on short screens (About.tsx): floated into the end
@@ -143,7 +144,7 @@
       padding-block: 0;
     }
 
-    .about-achievement {
+    .about-service {
       padding: 8px 12px;
     }
   }

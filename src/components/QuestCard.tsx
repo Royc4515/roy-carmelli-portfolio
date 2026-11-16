@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { Fragment, useState, type CSSProperties } from 'react';
 import type { Project } from '../types/index';
 import PixelPanel from './PixelPanel';
 import PixelIcon from './PixelIcon';
@@ -315,8 +315,36 @@ function QuestActions({
   );
 }
 
+/** A paragraph of the quest log holds at most this many characters (about four lines). */
+const LOG_PARAGRAPH_MAX = 360;
+
+/**
+ * Splits a project description into short paragraphs: the opening sentence alone (it is the
+ * quotable "<Name> is a ..." line), then the rest in groups of whole sentences. A description
+ * used to render as one block of up to 2,000 characters, which nobody reads.
+ * A sentence ends at ". " before a capital, so "chrome.storage.local" and "e.g. this" stay whole.
+ * Joining the parts with a space gives back the original text.
+ */
+export function descriptionParagraphs(description: string): string[] {
+  const sentences = description.trim().split(/(?<=[.!?])\s+(?=[A-Z])/);
+  const [lead, ...rest] = sentences;
+  const paragraphs: string[] = lead ? [lead] : [];
+  let current = '';
+  for (const sentence of rest) {
+    if (current && current.length + 1 + sentence.length > LOG_PARAGRAPH_MAX) {
+      paragraphs.push(current);
+      current = sentence;
+    } else {
+      current = current ? `${current} ${sentence}` : sentence;
+    }
+  }
+  if (current) paragraphs.push(current);
+  return paragraphs;
+}
+
 function QuestLog({ project, open, surface }: { project: Project; open: boolean; surface: Surface }) {
   const shot = QUEST_LOG_SCREENSHOTS[project.id];
+  const paragraphs = descriptionParagraphs(project.description);
   return (
     <div
       id={questLogId(project)}
@@ -336,7 +364,15 @@ function QuestLog({ project, open, surface }: { project: Project; open: boolean;
           className="quest-log__shot mb-4 block h-auto w-full"
         />
       )}
-      <p className="max-w-[68ch] text-body">{project.description}</p>
+      <div className="quest-log__text text-body">
+        {paragraphs.map((text, i) => (
+          <Fragment key={text.slice(0, 32)}>
+            {/* The space keeps the log's text equal to the description (tests, copy-paste). */}
+            {i > 0 && ' '}
+            <p className={i === 0 ? 'font-semibold' : undefined}>{text}</p>
+          </Fragment>
+        ))}
+      </div>
       {/* The card shows CHIP_MAX chips and a `+N`; the full stack lives here, readable on touch too. */}
       <p className="quest-log__tech mt-3 max-w-[68ch] text-hud">
         <span className="uppercase">Built with:</span> {project.tech.join(' · ')}
@@ -412,7 +448,7 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
           style={chipListStyle(project.tech)}
         />
         <QuestActions project={project} open={open} onToggle={toggle} stacked={false} />
-        <QuestLog project={project} open={open} surface="paper" />
+        {layout !== 'feature' && <QuestLog project={project} open={open} surface="paper" />}
       </>
     );
 
@@ -425,7 +461,16 @@ export default function QuestCard({ project, layout = 'standard', className }: Q
         className={cx('quest-card quest-card--main', `quest-card--${layout}`, className)}
       >
         <QuestVisual project={project} layout={layout} />
-        {layout === 'feature' ? <div className="quest-body">{body}</div> : body}
+        {layout === 'feature' ? (
+          <>
+            <div className="quest-body">{body}</div>
+            {/* Outside the text column: from 1024px the open log spans the whole card under the
+                screenshot (Projects.css), instead of stretching a 5/12 column to 1,000px. */}
+            <QuestLog project={project} open={open} surface="paper" />
+          </>
+        ) : (
+          body
+        )}
       </PixelPanel>
     );
   }

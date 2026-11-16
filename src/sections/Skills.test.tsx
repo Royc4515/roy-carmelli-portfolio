@@ -61,7 +61,7 @@ describe('Skills (equipment screen)', () => {
     const slotHeadings = screen.getAllByRole('heading', { level: 3 });
     expect(slotHeadings).toHaveLength(skills.length);
     skills.forEach((g, i) => {
-      expect(slotHeadings[i]).toHaveAccessibleName(`${g.slot}: ${g.category}`);
+      expect(slotHeadings[i]).toHaveAccessibleName(g.category);
     });
     for (const group of skills) {
       for (const name of group.items) {
@@ -216,9 +216,7 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     expect(rows).toHaveLength(skills.length);
     rows.forEach((row, i) => {
       const header = within(row).getByRole('rowheader');
-      expect(within(header).getByRole('heading', { level: 3 })).toHaveAccessibleName(
-        `${skills[i].slot}: ${skills[i].category}`,
-      );
+      expect(within(header).getByRole('heading', { level: 3 })).toHaveAccessibleName(skills[i].category);
       const cells = within(row).getAllByRole('gridcell');
       expect(cells.map(c => within(c).getByRole('button').textContent)).toEqual(skills[i].items);
     });
@@ -419,12 +417,12 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     const grid = screen.getByRole('grid', { name: 'Equipment' });
     expect(status.compareDocumentPosition(grid) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     // The level, the stats and the keycap hint all ride the status line.
-    expect(within(status).getByText(/Roy · LVL 3/)).toBeInTheDocument();
+    expect(within(status).getByText(/Roy · 3rd year/)).toBeInTheDocument();
     expect(status.querySelector('dl')?.textContent).toContain(`Projects${projects.length}`);
     expect(within(status).getByTestId('skill-keys')).toBeInTheDocument();
     // The slots are the grid's own rows, in data order.
     expect(within(grid).getAllByRole('row').map(r => within(r).getByRole('heading').textContent)).toEqual(
-      skills.map(g => `${g.slot} ·: ${g.category}`),
+      skills.map(g => g.category),
     );
   });
 
@@ -490,12 +488,22 @@ describe('Skills on tall screens from xl', () => {
     expect(well).toHaveClass('short:hidden');
   });
 
-  it('stacks the slot over its category visually, without changing the heading name', () => {
+  it('names each slot by its category alone, with no RPG slot word or level', () => {
     render(<Skills />);
     const heading = screen.getAllByRole('heading', { level: 3 })[0];
-    expect(heading).toHaveAccessibleName(`${skills[0].slot}: ${skills[0].category}`);
-    expect(heading.querySelector('.skill-slot__title')).not.toBeNull();
-    expect(heading.querySelector('.skill-slot__dot')).toHaveAttribute('aria-hidden', 'true');
+    expect(heading).toHaveAccessibleName(skills[0].category);
+    expect(heading).not.toHaveTextContent(skills[0].slot);
+    expect(document.querySelector('#skills')).not.toHaveTextContent(/LVL/);
+  });
+
+  it('draws certificates as plain text, not as technology slots', () => {
+    render(<Skills />);
+    for (const group of skills) {
+      const plain = group.category === 'Certifications';
+      for (const name of group.items) {
+        expect(item(name).classList.contains('skill-item--plain')).toBe(plain);
+      }
+    }
   });
 
   it('Up / Down go to the slot above or below, in data order', async () => {
