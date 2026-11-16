@@ -1,11 +1,24 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ChatLauncher, { BUBBLE_DELAY_MS, BUBBLE_INTRO_MS, BUBBLE_LINGER_MS } from './ChatLauncher';
+import ChatLauncher, { BUBBLE_DELAY_MS, BUBBLE_INTRO_MS, BUBBLE_LINGER_MS, LAUNCHER_REACH_PX } from './ChatLauncher';
 import { chatPersona } from '../../data/chatPersona';
 
 const launcher = () => screen.getByRole('button', { name: chatPersona.launcherLabel });
 const bubble = () => document.querySelector('.chat-bubble');
 const [FIRST, SECOND, THIRD] = chatPersona.bubbles;
+
+// jsdom has no matchMedia. Default: a desktop window (no query matches).
+const mediaStub = (matches: (query: string) => boolean) =>
+  ((query: string) => ({
+    matches: matches(query),
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  })) as unknown as typeof window.matchMedia;
+
+beforeEach(() => {
+  window.matchMedia = mediaStub(() => false);
+});
 
 afterEach(() => {
   vi.useRealTimers();
@@ -107,5 +120,90 @@ describe('ChatLauncher', () => {
     await userEvent.click(screen.getByRole('button', { name: chatPersona.closeLabel }));
     expect(launcher()).toHaveFocus();
     expect(bubble()).toBeNull();
+  });
+});
+
+/**
+ * Phones: the launcher used to sit on the hero's tagline and buttons on the first screen. It now
+ * stays away until the hero has scrolled clear of its corner, and says hello then.
+ */
+describe('ChatLauncher on a phone', () => {
+  /** Leave requestAnimationFrame alone: the spy below runs the measure at once. */
+  const TIMEOUTS_ONLY = { toFake: ['setTimeout', 'clearTimeout'] as ('setTimeout' | 'clearTimeout')[] };
+  let heroBottom = 0;
+
+  beforeEach(() => {
+    window.matchMedia = mediaStub(query => query === '(max-width: 767px)');
+    const hero = document.createElement('section');
+    hero.id = 'hero';
+    hero.getBoundingClientRect = () => ({ bottom: heroBottom }) as DOMRect;
+    document.body.append(hero);
+    // Measure at once, so a scroll event is enough to move the launcher in the tests.
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(cb => {
+      cb(0);
+      return 0;
+    });
+  });
+
+  afterEach(() => {
+    document.getElementById('hero')?.remove();
+  });
+
+  const root = () => document.querySelector<HTMLElement>('[data-chat-root]')!;
+  const scrollHeroTo = (bottom: number) => {
+    heroBottom = bottom;
+    act(() => {
+      window.dispatchEvent(new Event('scroll'));
+    });
+  };
+
+  it('stays out of the way, silent, while the hero reaches under its corner', () => {
+    vi.useFakeTimers(TIMEOUTS_ONLY);
+    heroBottom = window.innerHeight + 400;
+    render(<ChatLauncher enabled />);
+    expect(root()).not.toBeVisible();
+    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS + BUBBLE_INTRO_MS));
+    expect(bubble()).toBeNull();
+  });
+
+  it('appears once the hero has cleared its corner, and says hello once', () => {
+    vi.useFakeTimers(TIMEOUTS_ONLY);
+    heroBottom = window.innerHeight + 400;
+    render(<ChatLauncher enabled />);
+
+    scrollHeroTo(window.innerHeight - LAUNCHER_REACH_PX + 1);
+    expect(root()).not.toBeVisible();
+    scrollHeroTo(window.innerHeight - LAUNCHER_REACH_PX);
+    expect(root()).toBeVisible();
+    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
+    expect(bubble()).toHaveTextContent(FIRST);
+    act(() => vi.advanceTimersByTime(BUBBLE_INTRO_MS));
+
+    // Back up to the hero and down again: he hides and returns, without repeating the hello.
+    scrollHeroTo(window.innerHeight + 400);
+    expect(root()).not.toBeVisible();
+    scrollHeroTo(0);
+    expect(root()).toBeVisible();
+    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
+    expect(bubble()).toBeNull();
+  });
+
+  it('tries the hello again if the visitor scrolled back before he spoke', () => {
+    vi.useFakeTimers(TIMEOUTS_ONLY);
+    heroBottom = 0;
+    render(<ChatLauncher enabled />);
+    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS - 1));
+    scrollHeroTo(window.innerHeight + 400);
+    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
+    expect(bubble()).toBeNull();
+    scrollHeroTo(0);
+    act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
+    expect(bubble()).toHaveTextContent(FIRST);
+  });
+
+  it('shows at once on a page with no hero to protect', () => {
+    document.getElementById('hero')?.remove();
+    render(<ChatLauncher enabled />);
+    expect(root()).toBeVisible();
   });
 });

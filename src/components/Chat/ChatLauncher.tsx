@@ -5,6 +5,7 @@ import PixelIcon from '../PixelIcon';
 import { Button } from '../ui/Button';
 import { chatPersona } from '../../data/chatPersona';
 import { pixelSprites } from '../../theme/pixelSprites';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import './ChatLauncher.css';
 
 export interface ChatPanelProps {
@@ -23,6 +24,44 @@ export const BUBBLE_INTRO_MS = 6000;
 export const BUBBLE_LINGER_MS = 1500;
 /** Two loops of the 3-frame wave, then back to standing still. */
 const INTRO_WAVE_MS = 2400;
+
+/** The launcher and its drop reach this far up from the bottom edge (91px figure, 16px inset, air). */
+export const LAUNCHER_REACH_PX = 120;
+
+/**
+ * Phones only (`watch`): false while the hero still reaches under the launcher's corner.
+ * On a phone the first screen is the hero's text and its full-width buttons, and the fixed
+ * launcher with its hello bubble used to sit on top of the tagline and the buttons' right end.
+ * Without a hero on the page there is nothing to protect, so it reports true.
+ */
+function useHeroCleared(watch: boolean): boolean {
+  const [cleared, setCleared] = useState(!watch);
+  useEffect(() => {
+    const hero = watch ? document.getElementById('hero') : null;
+    if (!hero) {
+      setCleared(true);
+      return;
+    }
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      setCleared(hero.getBoundingClientRect().bottom <= window.innerHeight - LAUNCHER_REACH_PX);
+    };
+    // One measure per frame at most: scroll fires far more often than the page paints.
+    const schedule = () => {
+      if (!frame) frame = window.requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
+  }, [watch]);
+  return cleared;
+}
 
 /** Shown instead of the panel when its chunk cannot be fetched, so the button never does nothing. */
 function ChatLoadFailed({ open, onClose }: ChatPanelProps) {
@@ -54,6 +93,7 @@ const ChatPanel = lazy<ComponentType<ChatPanelProps>>(() =>
  * bubble when the page loads, and again, with the next line, whenever he is pointed at or focused.
  * He waves only then: motion beside text people are reading distracts. Pressing him opens the chat
  * panel, which stays mounted after the first open so closing it keeps the conversation.
+ * On phones he waits until the hero has scrolled clear of his corner, and says hello then.
  */
 export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -68,6 +108,12 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
   const quietFocus = useRef(false);
   const shown = useRef(0);
   const hideTimer = useRef<number | undefined>(undefined);
+  const isPhone = useIsMobile();
+  const heroCleared = useHeroCleared(enabled && isPhone);
+  // An open chat keeps him on screen: on a phone its sheet covers the page anyway.
+  const visible = !isPhone || heroCleared || open;
+  /** The hello runs once, the first time he is on screen. */
+  const introduced = useRef(false);
 
   const hideBubble = useCallback((afterMs = 0) => {
     window.clearTimeout(hideTimer.current);
@@ -102,9 +148,12 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
   }, [open]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !visible || introduced.current) return;
+    introduced.current = true;
+    let said = false;
     let stopWave: number | undefined;
     const show = window.setTimeout(() => {
+      said = true;
       showBubble(BUBBLE_INTRO_MS);
       setIntroWave(true);
       stopWave = window.setTimeout(() => setIntroWave(false), INTRO_WAVE_MS);
@@ -112,8 +161,10 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
     return () => {
       window.clearTimeout(show);
       window.clearTimeout(stopWave);
+      // Cancelled before he spoke (scrolled back up, or StrictMode's second run): try again.
+      if (!said) introduced.current = false;
     };
-  }, [enabled, showBubble]);
+  }, [enabled, visible, showBubble]);
 
   if (!enabled) return null;
 
@@ -122,7 +173,7 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
   const anchor = { '--chat-anchor-x': `${pixelSprites[pose].anchorX}px` } as CSSProperties;
 
   return (
-    <div className="chat-root" data-chat-root="">
+    <div className="chat-root" data-chat-root="" hidden={!visible}>
       {bubble !== null && !open && (
         // keyed by appearance, so each new line pops in again
         <p key={bubble} className="chat-bubble text-label" aria-hidden="true">

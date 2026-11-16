@@ -21,6 +21,32 @@ type Node = Record<string, unknown>;
 const graph = () => structuredData({ dateModified: '2026-10-09' })['@graph'] as Node[];
 const byType = (type: string) => graph().filter(n => n['@type'] === type);
 
+describe('index.html boot card (shown while the JavaScript loads)', () => {
+  it('carries the name, role, availability and resume from src/data/bio.ts', () => {
+    const boot = head().getElementById('boot')!;
+    expect(boot).not.toBeNull();
+    const lines = [...boot.querySelectorAll('p')].map(p => p.textContent);
+    expect(lines).toEqual(expect.arrayContaining([bio.name, bio.role, bio.availability]));
+    const resume = boot.querySelector('a')!;
+    expect(resume.getAttribute('href')).toBe(bio.resume.href);
+    expect(resume.getAttribute('download')).toBe(bio.resume.fileName);
+  });
+
+  it('stays out of search snippets, steps aside without JavaScript, and is removed by the app', () => {
+    const doc = head();
+    expect(doc.getElementById('boot')!.hasAttribute('data-nosnippet')).toBe(true);
+    expect(doc.querySelector('head noscript')?.textContent).toContain('#boot');
+    // It sits before #root, so the app's markup never ends up inside it.
+    expect(doc.getElementById('boot')!.nextElementSibling?.id).toBe('root');
+    expect(read('src/main.tsx')).toContain("document.getElementById('boot')?.remove()");
+  });
+
+  it('has no em dash and never says combat medic', () => {
+    const text = head().getElementById('boot')!.textContent ?? '';
+    expect(text).not.toMatch(/\u2014|combat medic/i);
+  });
+});
+
 describe('index.html head', () => {
   it('matches src/seo/site.ts (title, description, canonical)', () => {
     const doc = head();

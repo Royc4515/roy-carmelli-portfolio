@@ -66,9 +66,58 @@
       /* --color-bg of the active theme until the stylesheet loads; follows the token after that */
       body { background-color: var(--color-bg, #1a2e10); }
       :root[data-theme="night"] body { background-color: var(--color-bg, #0a0f1e); }
+
+      /* Boot card: who this is and the CV, shown when the JavaScript is slow to arrive. The
+         prerendered page in #root stays invisible until the app replaces it (its layout is
+         computed for one desktop window), so a slow connection used to show a blank screen
+         for seconds. main.tsx removes the card in the same frame the app renders.
+         don't touch / the 0.4s delay keeps the card from flashing on a normal load: it only
+         becomes visible if the app has not rendered by then. */
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 24px;
+        text-align: center;
+        font: 400 16px/1.5 "IBM Plex Sans", system-ui, sans-serif;
+        color: var(--color-fg, #ede0b8);
+        visibility: hidden;
+        animation: boot-show 1ms linear 0.4s forwards;
+      }
+      #boot p { margin: 0; }
+      #boot .boot-name { font: 400 24px/1.4 "Press Start 2P", ui-monospace, monospace; }
+      #boot .boot-role { font-weight: 600; color: var(--color-accent-fg, #dcb65c); }
+      #boot .boot-note { color: var(--color-fg-muted, #c9b87a); }
+      #boot a {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 12px 20px;
+        font-weight: 600;
+        text-decoration: none;
+        background-color: var(--color-accent, #c9a24a);
+        color: var(--color-on-accent, #1a2e10);
+      }
+      #boot a:focus-visible { outline: 2px solid var(--color-fg, #ede0b8); outline-offset: 4px; }
+      @keyframes boot-show { to { visibility: visible; } }
     </style>
+    <!-- Without JavaScript the prerendered page itself is shown, so the boot card steps aside. -->
+    <noscript><style>#boot { display: none; }</style></noscript>
   </head>
   <body>
+    <!-- Keep in sync with src/data/bio.ts (name, role, availability, resume): src/seo/seo.test.ts
+         fails when they drift. data-nosnippet: search results quote the real page, not this card. -->
+    <div id="boot" data-nosnippet>
+      <p class="boot-name">Roy Carmelli</p>
+      <p class="boot-role">Full-Stack &amp; AI Developer</p>
+      <p>Student &amp; intern roles · Israel</p>
+      <a href="/Roy_Carmelli_CV.pdf" download="Roy_Carmelli_CV.pdf">Download resume (PDF)</a>
+      <p class="boot-note">Loading the full site...</p>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
