@@ -249,6 +249,8 @@ export function createNeuralField(
   let quality = 0;
   let windowFrames = 0;
   let windowMs = 0;
+  /** The first window after a start is page-load jank (fonts, images), not the shader: skip it. */
+  let warmedUp = false;
 
   function init(): boolean {
     const vs = compile(ctx, ctx.VERTEX_SHADER, VERTEX);
@@ -328,7 +330,9 @@ export function createNeuralField(
       const average = windowMs / windowFrames;
       windowFrames = 0;
       windowMs = 0;
-      if (average > SLOW_FRAME_MS && quality < QUALITY_STEPS.length - 1) {
+      if (!warmedUp) {
+        warmedUp = true;
+      } else if (average > SLOW_FRAME_MS && quality < QUALITY_STEPS.length - 1) {
         quality += 1;
         resize();
       } else if (average > HOPELESS_FRAME_MS) {
@@ -386,6 +390,7 @@ export function createNeuralField(
         last = performance.now();
         windowFrames = 0;
         windowMs = 0;
+        warmedUp = false;
         frame = requestAnimationFrame(tick);
       }
     },
