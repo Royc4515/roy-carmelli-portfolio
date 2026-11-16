@@ -678,10 +678,9 @@ html[data-option='b'][data-theme='night'] {
 }
 .ob-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: 4px 16px;
-  padding: 12px 0;
+  gap: 0 16px;
+  padding: 12px 0 4px;
   border-top: 1px solid var(--b-line);
 }
 .ob-row__head {
@@ -704,8 +703,17 @@ html[data-option='b'][data-theme='night'] {
 }
 .ob-row__links {
   display: flex;
-  gap: 14px;
-  margin-top: -10px;
+  gap: 18px;
+}
+@container ob-tile (min-width: 520px) {
+  /* Room for the links beside the text instead of under it. */
+  .ob-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-bottom: 12px;
+  }
+  .ob-row__links {
+    margin-top: -10px;
+  }
 }
 
 @container ob-tile (min-width: 620px) {
@@ -719,12 +727,21 @@ html[data-option='b'][data-theme='night'] {
     padding: 28px;
   }
   .ob-tile--feature .ob-tile__media {
-    align-self: end;
-    padding: 28px 0 0 4px;
-    margin: 0 -72px -18px 0;
+    display: flex;
+    padding: 28px 0 0;
+    margin: 0;
   }
+  /* Cropped to its top-left corner at reading size, instead of a thumbnail of the whole page. */
   .ob-tile--feature .ob-tile__media .ob-frame {
-    border-top-right-radius: 0;
+    flex: 1;
+    border-width: 1px 0 0 1px;
+    border-radius: 12px 0 0;
+  }
+  .ob-tile--feature .ob-tile__media img {
+    height: 100%;
+    min-height: 300px;
+    object-fit: cover;
+    object-position: left top;
   }
   .ob-tile--feature .ob-tile__title {
     font-size: 1.875rem;

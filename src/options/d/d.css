@@ -867,3 +867,9 @@ html[data-option='d'][data-theme='night'] .od-window__night {
     transition: none;
   }
 }
+
+/* The review chip sits under the chat (launcher z 90, phone sheet z 150): on a phone the open
+   chat is a full-screen sheet and the chip would lie on its input. */
+.opt-d .opt-review {
+  z-index: 80;
+}
