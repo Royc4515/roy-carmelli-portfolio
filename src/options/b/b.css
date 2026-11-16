@@ -78,7 +78,7 @@ html[data-option='b'][data-theme='night'] {
 }
 
 .ob-h2 {
-  font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.125rem);
+  font-size: 1.875rem;
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.025em;
@@ -286,7 +286,6 @@ html[data-option='b'][data-theme='night'] {
   }
   /* A keyboard is likely: show the field and its shortcut. */
   .ob-cmd {
-    height: 36px;
     padding: 0 6px 0 10px;
     border-color: var(--b-line-strong);
     background: var(--b-surface);
@@ -294,6 +293,12 @@ html[data-option='b'][data-theme='night'] {
   }
   .ob-cmd:hover {
     border-color: var(--b-fg);
+  }
+  /* A mouse can hit a slimmer field; a tablet finger keeps the full 44px. */
+  @media (pointer: fine) {
+    .ob-cmd {
+      height: 36px;
+    }
   }
   .ob-cmd .ob-cmd__text {
     display: inline;
@@ -354,8 +359,8 @@ html[data-option='b'][data-theme='night'] {
 }
 .ob-hero__role {
   margin-top: 12px;
-  font-size: clamp(1.25rem, 1rem + 1.1vw, 1.625rem);
-  font-weight: 500;
+  font-size: 1.5rem;
+  font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--b-subtle);
@@ -388,7 +393,7 @@ html[data-option='b'][data-theme='night'] {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 12px 0 14px;
   border-radius: 9px 0 0 9px;
   font-size: 0.9375rem;
@@ -399,7 +404,7 @@ html[data-option='b'][data-theme='night'] {
   display: inline-grid;
   place-items: center;
   width: 44px;
-  min-height: 42px;
+  min-height: 44px;
   border: 0;
   border-left: 1px solid var(--b-line);
   border-radius: 0 9px 9px 0;
@@ -542,7 +547,6 @@ html[data-option='b'][data-theme='night'] {
   letter-spacing: -0.025em;
 }
 .ob-tile__descriptor {
-  font-weight: 500;
   color: var(--b-subtle);
 }
 .ob-tile__tagline {
@@ -742,9 +746,6 @@ html[data-option='b'][data-theme='night'] {
     min-height: 300px;
     object-fit: cover;
     object-position: left top;
-  }
-  .ob-tile--feature .ob-tile__title {
-    font-size: 1.875rem;
   }
   .ob-more {
     grid-template-columns: 1fr 1fr;
