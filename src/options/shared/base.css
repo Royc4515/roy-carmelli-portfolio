@@ -11,7 +11,9 @@ html[data-option][data-theme='night'] {
   color-scheme: dark;
 }
 
-html[data-option] body {
+/* don't touch / `:root` raises the specificity above index.html's inline
+   `:root[data-theme="night"] body` rule, which otherwise keeps the pixel site's night ground. */
+html:root[data-option] body {
   background-color: var(--o-bg, #fff);
   color: var(--o-fg, #111);
   font-family: var(--o-font, system-ui, sans-serif);
