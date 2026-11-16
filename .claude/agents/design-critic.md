@@ -63,10 +63,31 @@ Save working captures in the scratchpad. Copy only the screenshots the report ci
 - Viewports: 375x812, 768x1024, 1280x800, 1440x900. Full page plus one capture per section at the top of the viewport.
 - Both themes.
 - States: hover and focus on each kind of button, link, card and chip; open menu; open details; any dialog; game idle, running and game over; chat closed and open when available; error and empty states.
-- Motion: for each animated element, take three frames 150 ms apart, and repeat with `reducedMotion: 'reduce'`.
 - A slow load: throttle to slow 3G once and capture at 1 s, 3 s and 6 s.
 
 Look at every capture you take with the Read tool. A capture you did not look at is not evidence.
+
+### Screen recordings
+
+Stills cannot show pacing, easing, jank or how a page feels to move through, so record the flows as video. Playwright records a context when it is created with `recordVideo: { dir, size }`; the `.webm` file is written when the context closes. `ffmpeg` is on the PATH.
+
+Record these, each as its own context so each is its own file, at 1280x800 and again on an emulated phone:
+
+1. Arrival: load the page and do nothing for 4 s, so entrance animation and layout settling are on tape.
+2. Tour: scroll from top to bottom at reading pace (about 400 px per second in small wheel steps), then use the nav to jump to each section.
+3. Interaction: hover and focus the main buttons, open and close the menu, open one project's details, toggle the theme.
+4. Play: start the game, play for about 10 s, crash, restart, quit.
+5. Reduced motion: repeat the Arrival and Tour flows with `reducedMotion: 'reduce'`.
+
+You cannot watch a video directly. To review one, extract frames and read them as images:
+
+- Overview: `ffmpeg -i in.webm -vf fps=4 frames/f-%03d.png`, then read every frame around each transition and a sample of the rest.
+- A contact sheet for pacing at a glance: `ffmpeg -i in.webm -vf "fps=4,scale=320:-1,tile=6x4" sheet.png`.
+- Smoothness: extract at `fps=30` around one animation and check that consecutive frames differ by even steps. Uneven or repeated frames are jank, but a headless recording drops frames by itself, so report jank only if it also shows in a second recording.
+
+Judge from the frames: how long before the page is usable, whether anything moves that does not need to, whether motion draws the eye to the right place, whether transitions share one duration and easing, and whether anything flashes, jumps or overlaps mid-transition.
+
+Keep at most four recordings that the report cites, each under 5 MB (`ffmpeg -i in.webm -b:v 600k out.webm` if larger), in `docs/design-review/recordings/`. They are for the owner to watch; say in the report which seconds to look at.
 
 ## Step 4 - Measure
 
@@ -103,7 +124,7 @@ Dimensions:
 6. Restraint and density: what could be removed with no loss. List the removals.
 7. Consistency: do like things look and behave alike.
 8. Imagery and illustration: quality, originality, cohesion, and whether it looks generated.
-9. Motion and feedback: purposeful or decorative, timing, reduced-motion behaviour.
+9. Motion and feedback: purposeful or decorative, timing, reduced-motion behaviour. Score this from the recordings, not from stills.
 10. Content design: is the copy specific and credible, is there a clear next step, is every claim visibly backed.
 11. Interaction and usability: Nielsen's ten heuristics, checked by using the page.
 12. Responsive behaviour: does the layout reorganise or merely shrink.
@@ -116,7 +137,7 @@ Dimensions:
 Relative judgment is far more reliable than absolute judgment, so this step decides any "premium" or "tasteful" verdict.
 
 - Use the references from the brief. If none were given, find five: two widely admired developer portfolios in a restrained style, two in the same genre as the site under review, and one portfolio known to have worked for a similar role and seniority. Record why each was chosen.
-- Capture each reference at 1440x900 and on the phone, first screen and one content section.
+- Capture each reference at 1440x900 and on the phone, first screen and one content section, and record its Arrival flow. Many sites in the game genre hide their content behind a start screen: note how many seconds and actions it takes to reach the owner's name, role, projects and contact details, and compare that to the site under review.
 - For each rubric dimension 1 to 9 and 15, compare the site to each reference pairwise and name the winner and the concrete difference ("reference uses two type sizes on the first screen, the site uses six").
 - If the network blocks a reference, say so and drop it. If fewer than three references could be captured, state that the benchmark is weak.
 
