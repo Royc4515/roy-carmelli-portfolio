@@ -8,6 +8,9 @@ import type { ChatErrorCode } from '../hooks/useChat';
 export const chatPersona = {
   name: 'Pixel Roy',
   badge: 'AI',
+  /** The launcher's plate while it is docked on the hero art (phones, first screen): no figure
+   *  beside it there, so it says what it does. Pixel font: Latin-1. */
+  dockedBadge: 'Ask AI',
   launcherLabel: 'Chat with Pixel Roy, an AI version of Roy',
   /** Speech-bubble lines, one per appearance, in turn. Pixel font: Latin-1, at most 24 characters
    *  each (SPEC 2.2), so no Hebrew here. */

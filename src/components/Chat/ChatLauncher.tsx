@@ -93,7 +93,10 @@ const ChatPanel = lazy<ComponentType<ChatPanelProps>>(() =>
  * bubble when the page loads, and again, with the next line, whenever he is pointed at or focused.
  * He waves only then: motion beside text people are reading distracts. Pressing him opens the chat
  * panel, which stays mounted after the first open so closing it keeps the conversation.
- * On phones he waits until the hero has scrolled clear of his corner, and says hello then.
+ * On phones the first screen is the hero's text and full-width buttons, so there he is docked as
+ * a small "Ask AI" plate on the top-right corner of the hero art (it scrolls away with the art
+ * and covers no text); once the hero has scrolled clear of his corner he stands there as usual
+ * and says hello.
  */
 export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -110,9 +113,10 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
   const hideTimer = useRef<number | undefined>(undefined);
   const isPhone = useIsMobile();
   const heroCleared = useHeroCleared(enabled && isPhone);
-  // An open chat keeps him on screen: on a phone its sheet covers the page anyway.
-  const visible = !isPhone || heroCleared || open;
-  /** The hello runs once, the first time he is on screen. */
+  // Docked: the plate on the hero art. An open chat is never docked (its sheet covers the page).
+  const docked = isPhone && !heroCleared && !open;
+  const visible = !docked;
+  /** The hello runs once, the first time he stands in his corner. */
   const introduced = useRef(false);
 
   const hideBubble = useCallback((afterMs = 0) => {
@@ -173,8 +177,8 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
   const anchor = { '--chat-anchor-x': `${pixelSprites[pose].anchorX}px` } as CSSProperties;
 
   return (
-    <div className="chat-root" data-chat-root="" hidden={!visible}>
-      {bubble !== null && !open && (
+    <div className="chat-root" data-chat-root="" data-docked={docked || undefined}>
+      {bubble !== null && !open && !docked && (
         // keyed by appearance, so each new line pops in again
         <p key={bubble} className="chat-bubble text-label" aria-hidden="true">
           {chatPersona.bubbles[bubble % chatPersona.bubbles.length]}
@@ -214,7 +218,7 @@ export default function ChatLauncher({ enabled = CHAT_ENABLED }: { enabled?: boo
           <Character pose={pose} scale={1} decorative />
         </span>
         <span className="chat-launcher__plate text-label" aria-hidden="true">
-          {chatPersona.badge}
+          {docked ? chatPersona.dockedBadge : chatPersona.badge}
         </span>
       </button>
       {mounted && (

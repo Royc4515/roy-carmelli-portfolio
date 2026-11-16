@@ -70,6 +70,33 @@ html[data-arcade-playing] .chat-root {
   transition: transform var(--dur-instant) var(--ease-snap);
 }
 
+/* Phones, first screen: docked on the top-right corner of the hero art. Absolute, so it
+   scrolls away with the art instead of riding over the tagline and the full-width buttons
+   (the fixed corner covered them). Just the plate, 44px tall, saying what it does.
+   don't touch / 80px = the 64px navbar, its 4px line and 12px of air; .chat-root must have no
+   positioned ancestor, or `top` stops meaning "from the top of the page". */
+.chat-root[data-docked] {
+  position: absolute;
+  top: 80px;
+  bottom: auto;
+}
+
+.chat-root[data-docked] .chat-launcher {
+  width: auto;
+}
+
+.chat-root[data-docked] .chat-launcher__sprite {
+  display: none;
+}
+
+.chat-root[data-docked] .chat-launcher__plate {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 2px 12px 0;
+  white-space: nowrap;
+}
+
 /* A full press, like every other button: the plate sinks onto its shadow and the bevel flips. */
 .chat-launcher:active .chat-launcher__plate {
   transform: translate(4px, 4px);

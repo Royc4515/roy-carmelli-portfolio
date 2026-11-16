@@ -124,8 +124,9 @@ describe('ChatLauncher', () => {
 });
 
 /**
- * Phones: the launcher used to sit on the hero's tagline and buttons on the first screen. It now
- * stays away until the hero has scrolled clear of its corner, and says hello then.
+ * Phones: the fixed launcher used to sit on the hero's tagline and buttons on the first screen.
+ * There it is docked as an "Ask AI" plate on the hero art instead; once the hero has scrolled
+ * clear of its corner it stands there as usual and says hello.
  */
 describe('ChatLauncher on a phone', () => {
   /** Leave requestAnimationFrame alone: the spy below runs the measure at once. */
@@ -150,6 +151,8 @@ describe('ChatLauncher on a phone', () => {
   });
 
   const root = () => document.querySelector<HTMLElement>('[data-chat-root]')!;
+  const docked = () => root().hasAttribute('data-docked');
+  const plate = () => launcher().querySelector('.chat-launcher__plate');
   const scrollHeroTo = (bottom: number) => {
     heroBottom = bottom;
     act(() => {
@@ -157,33 +160,50 @@ describe('ChatLauncher on a phone', () => {
     });
   };
 
-  it('stays out of the way, silent, while the hero reaches under its corner', () => {
+  it('is there from the start, docked as a labelled plate that says nothing over the hero', () => {
     vi.useFakeTimers(TIMEOUTS_ONLY);
     heroBottom = window.innerHeight + 400;
     render(<ChatLauncher enabled />);
-    expect(root()).not.toBeVisible();
+    expect(launcher()).toBeVisible();
+    expect(docked()).toBe(true);
+    expect(plate()).toHaveTextContent(chatPersona.dockedBadge);
     act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS + BUBBLE_INTRO_MS));
+    expect(bubble()).toBeNull();
+    // Pointing at the plate does not pop a bubble either: there is no figure to speak.
+    fireEvent.pointerEnter(launcher());
     expect(bubble()).toBeNull();
   });
 
-  it('appears once the hero has cleared its corner, and says hello once', () => {
+  it('opens the chat from the docked plate', async () => {
+    // The panel schedules its own frames; the run-at-once spy would recurse on them.
+    vi.mocked(window.requestAnimationFrame).mockRestore();
+    heroBottom = window.innerHeight + 400;
+    render(<ChatLauncher enabled />);
+    await userEvent.click(launcher());
+    expect(await screen.findByRole('dialog', { name: /pixel roy/i })).toBeInTheDocument();
+    // An open chat is never docked: on a phone its sheet covers the page.
+    expect(docked()).toBe(false);
+  });
+
+  it('stands in his corner once the hero has cleared it, and says hello once', () => {
     vi.useFakeTimers(TIMEOUTS_ONLY);
     heroBottom = window.innerHeight + 400;
     render(<ChatLauncher enabled />);
 
     scrollHeroTo(window.innerHeight - LAUNCHER_REACH_PX + 1);
-    expect(root()).not.toBeVisible();
+    expect(docked()).toBe(true);
     scrollHeroTo(window.innerHeight - LAUNCHER_REACH_PX);
-    expect(root()).toBeVisible();
+    expect(docked()).toBe(false);
+    expect(plate()).toHaveTextContent(chatPersona.badge);
     act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
     expect(bubble()).toHaveTextContent(FIRST);
     act(() => vi.advanceTimersByTime(BUBBLE_INTRO_MS));
 
-    // Back up to the hero and down again: he hides and returns, without repeating the hello.
+    // Back up to the hero and down again: he docks and returns, without repeating the hello.
     scrollHeroTo(window.innerHeight + 400);
-    expect(root()).not.toBeVisible();
+    expect(docked()).toBe(true);
     scrollHeroTo(0);
-    expect(root()).toBeVisible();
+    expect(docked()).toBe(false);
     act(() => vi.advanceTimersByTime(BUBBLE_DELAY_MS));
     expect(bubble()).toBeNull();
   });
@@ -201,9 +221,13 @@ describe('ChatLauncher on a phone', () => {
     expect(bubble()).toHaveTextContent(FIRST);
   });
 
-  it('shows at once on a page with no hero to protect', () => {
+  it('is never docked on a page with no hero to protect', () => {
     document.getElementById('hero')?.remove();
     render(<ChatLauncher enabled />);
-    expect(root()).toBeVisible();
+    expect(docked()).toBe(false);
+  });
+
+  it('keeps the docked label within the pixel-font rules (Latin-1)', () => {
+    expect(chatPersona.dockedBadge).toMatch(/^[\x20-\xff]{1,24}$/);
   });
 });
