@@ -76,7 +76,11 @@ async function loadAllImages(page) {
       root.scrollTop = y;
       await new Promise(r => setTimeout(r, 120));
     }
-    await Promise.all([...document.images].map(img => (img.complete ? null : img.decode().catch(() => null))));
+    // Bounded: decode() never settles for a lazy image that stays hidden (display: none).
+    await Promise.race([
+      Promise.all([...document.images].map(img => (img.complete ? null : img.decode().catch(() => null)))),
+      new Promise(r => setTimeout(r, 4000)),
+    ]);
     root.scrollTop = 0;
   });
   await page.waitForTimeout(500);

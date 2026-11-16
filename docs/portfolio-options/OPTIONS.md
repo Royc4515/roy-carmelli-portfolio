@@ -27,12 +27,31 @@ If you decide to keep the current design, that is defensible: it is the most mem
 
 All from the same production build. "First screen" is what is visible without scrolling. A type style is a distinct font family, size and weight. Interactive elements are links, buttons and inputs. The review chip ("Options", bottom left) is excluded.
 
-{{TABLE}}
+| | Current site | A Editorial | B Console | C Signal | D Two modes |
+|---|---|---|---|---|---|
+| Page height, desktop 1440 px | 6,019 px | 6,606 px | 4,419 px | 6,001 px | 5,392 px |
+| Page height, phone 375 px | 12,004 px | 7,858 px | 7,474 px | 9,072 px | 8,445 px |
+| First screen desktop: words | 52 | 43 | 128 | 52 | 68 |
+| First screen desktop: type styles | 7 | 7 | 7 | 6 | 7 |
+| First screen desktop: interactive | 12 | 6 | 10 | 8 | 10 |
+| First screen phone: words | 41 | 43 | 73 | 47 | 49 |
+| First screen phone: type styles | 5 | 7 | 7 | 7 | 6 |
+| First screen phone: interactive | 6 | 6 | 7 | 8 | 6 |
+| Horizontal scroll at 375 px | none | none | none | none | none |
+| Slow 3G: first contentful paint | 6.0 s | 6.0 s | 6.0 s | 6.0 s | 6.0 s |
+| Slow 3G: usable | 8.9 s | 13.2 s | 13.3 s | 13.3 s | 13.2 s |
+| Slow 3G: largest contentful paint | 8.9 s | 18.7 s | 16.8 s | 13.4 s | 13.2 s |
+| Layout shift (CLS) | 0.016 | 0.000 | 0.020 | 0.000 | 0.012 |
+| JS added, gzip | - | +7.5 kB | +9.6 kB | +11.3 kB | +8.2 kB |
+| CSS added, gzip | - | +5.6 kB | +6.7 kB | +6.4 kB | +5.2 kB |
+
+What the first-screen numbers say, honestly: after its recent trim the current site's first screen is no longer the outlier the first critique measured (it had 8 type styles and 62 words then; it has 7 and 52 now, and its phone first screen has the fewest type styles of all five). On these counts the options are not dramatically calmer. Where they clearly differ is the number of controls on the desktop first screen (6 to 10 against 12), the length of the phone page (7,474 to 9,072 px against 12,004 px), and what the numbers cannot show: the current first screen is a game title card, the options' first screens are a person's name and a button.
 
 How to read the load numbers:
 
 - Slow 3G is DevTools' preset (400 kbit/s, 2 s round trip) on a 375 px phone with an empty cache.
 - First contentful paint is the same for all five because it is the static boot card in `index.html`, which every URL gets.
+- A's and B's largest contentful paint comes later than "usable" because the largest element is late: in A the name waits for its serif font (196 kB of font files, the heaviest of the four), in B it is the Aside screenshot.
 - "Usable" is when the real page is on screen: for the current site the largest contentful paint, for an option the moment it has rendered (a `performance.mark`). The options are about 4 seconds slower here **because of how the prototypes are wired**, not because they are heavy: an option's chunk is requested only after the 113 kB main bundle of the current site has loaded and run. As the real entry point, an option would not load the current site's code at all, and would be prerendered like the current site is.
 - "JS added" is what an option adds on top of that main bundle (its own chunk plus the shared options code). The game and the chat are not in these numbers for any page: they load on demand, as they do today.
 
@@ -73,10 +92,10 @@ New dependencies: fonts only, self-hosted through Fontsource, each loaded only b
 
 | Package | Used by | Size on the wire | Why |
 |---|---|---|---|
-| `@fontsource-variable/newsreader` | A | about 80 kB (roman and italic, latin woff2) | The serif the whole option is set in; its optical-size axis keeps the 144 px name and 19 px text in one family |
-| `@fontsource-variable/inter` | A, C | about 48 kB | Labels in A, body in C |
-| `@fontsource-variable/geist`, `geist-mono` | B | about 60 kB together | The "developer tool" face and its mono |
-| `@fontsource-variable/bricolage-grotesque` | C | about 40 kB | Display face |
+| `@fontsource-variable/newsreader` | A | 196 kB (roman with the optical-size axis 132 kB, italic 64 kB) | The serif the whole option is set in; its optical-size axis keeps the 144 px name and 19 px text in one family |
+| `@fontsource-variable/inter` | A, C | 48 kB | Labels in A, body in C |
+| `@fontsource-variable/geist`, `geist-mono` | B | 52 kB together | The "developer tool" face and its mono |
+| `@fontsource-variable/bricolage-grotesque` | C | 41 kB | Display face |
 
 No JavaScript library was added. Considered and rejected: `three` (186 kB gzip) and `ogl` (34 kB) for C, because a full-screen shader needs about 150 lines of raw WebGL; `cmdk` (17 kB) for B, because a combobox over 15 commands is small to write; `lenis`, because native scrolling is better for accessibility; upgrading `framer-motion` 11 to `motion` 14, because nothing here needs it. D uses the two fonts the site already ships.
 
@@ -92,8 +111,8 @@ No JavaScript library was added. Considered and rejected: `three` (186 kB gzip) 
 
 Whole page: [desktop](screenshots/a-desktop-full.jpg), [phone](screenshots/a-phone-full.jpg). Tablet: [light](screenshots/a-tablet-light.jpg), [dark](screenshots/a-tablet-dark.jpg). Recordings: [desktop tour](recordings/a-tour-desktop.webm), [phone tour](recordings/a-tour-phone.webm). Critique: [docs/design-review/options/a/CRITIQUE.md](../design-review/options/a/CRITIQUE.md).
 
-- **Better than the current site:** the strongest first screen of the five (the critic: restraint 5 against 2); 6 interactive elements on the first screen against 12; the case studies are the best reading experience for the long project descriptions; the phone page is 35% shorter.
-- **Loses:** everything that makes the site Roy's. No game, no chat, no character. The right half of the desktop hero is empty, and the page is as long as the current one on desktop because all twelve projects are listed.
+- **Better than the current site:** the strongest first screen of the five (the critic: restraint 5 against 2); 6 interactive elements and 43 words on the desktop first screen against 12 and 52; the case studies are the best reading experience for the long project descriptions; the phone page is 35% shorter.
+- **Loses:** everything that makes the site Roy's. No game, no chat, no character. The right half of the desktop hero is empty, the page is 10% longer than the current one on desktop because all twelve projects are listed and the hero takes a full screen, and its serif fonts are the heaviest download of the four.
 - **Risk with a conservative recruiter:** none. This is the safest option. The risk is the opposite one: it could be anyone's.
 - **Fixed after the critique:** the hero now fills the first screen (the next section used to peek in half-faded), a case study ends with the resume and email actions, and Live/Source stay on one row on phones.
 - **Work to finish:** about 2 to 3 days. Make it the entry and prerender it (including one page per case study, which would be a real SEO gain), move the SEO tests, decide what happens to the game and the chat, write component tests.
@@ -124,7 +143,7 @@ Whole page: [desktop](screenshots/b-desktop-full.jpg), [phone](screenshots/b-pho
 
 Whole page: [desktop](screenshots/c-desktop-full.jpg), [phone](screenshots/c-phone-full.jpg). Tablet: [light](screenshots/c-tablet-light.jpg), [dark](screenshots/c-tablet-dark.jpg). Recordings: [desktop tour](recordings/c-tour-desktop.webm), [phone tour](recordings/c-tour-phone.webm). Critique: [docs/design-review/options/c/CRITIQUE.md](../design-review/options/c/CRITIQUE.md).
 
-- **Better than the current site:** the fewest type styles and words on the first screen; the canvas is the only decoration and it says something true about the degree; it has a pause button, a single still frame under reduced motion and a static fallback.
+- **Better than the current site:** 6 type styles and 8 interactive elements on the desktop first screen; the canvas is the only decoration and it says something true about the degree; it has a pause button, a single still frame under reduced motion and a static fallback.
 - **Loses:** the canvas takes the top of the phone screen, so the name starts a third of the way down. The light theme's canvas is washed out. It still reads as "dark developer portfolio with a glowing thing".
 - **Risk with a conservative recruiter:** low to medium. It is framed and pausable, but it is the option most likely to be read as showing off.
 - **Not measured:** real frame rate. Headless Chromium draws WebGL in software (about 67 ms a frame at reduced resolution here). The shader steps its resolution down and finally freezes to a still if frames stay slow, but it must be tried on a mid-range Android phone before any decision. In the recordings the canvas looks softer than it will on a GPU.

@@ -1,0 +1,320 @@
+{
+  "a": {
+    "slow3g": {
+      "fcpMs": 6000,
+      "lcpMs": 18716,
+      "readyMs": 13219,
+      "cls": 0.0002
+    },
+    "jsGzip": 120786,
+    "cssGzip": 21662,
+    "scripts": [
+      "/assets/index-C4wMWJI8.js",
+      "/assets/OptionsRoot-w2WmNgXw.js",
+      "/assets/OptionA-heB6E1LH.js",
+      "/assets/icons-6z_8xw56.js"
+    ],
+    "desktop": {
+      "words": 43,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "Inter Variable 14px 400",
+        "Inter Variable 15px 500",
+        "Newsreader Variable 144px 380",
+        "Newsreader Variable 20px 400",
+        "Newsreader Variable 20px 500",
+        "Newsreader Variable 22px 400",
+        "Newsreader Variable 36px 400"
+      ],
+      "interactive": 6,
+      "pageHeight": 6606,
+      "overflowX": -10
+    },
+    "tablet": {
+      "words": 45,
+      "typeStyles": 8,
+      "typeStyleList": [
+        "Inter Variable 13px 600",
+        "Inter Variable 14px 400",
+        "Inter Variable 15px 500",
+        "Newsreader Variable 103.68px 380",
+        "Newsreader Variable 19px 400",
+        "Newsreader Variable 20px 400",
+        "Newsreader Variable 20px 500",
+        "Newsreader Variable 26.112px 400"
+      ],
+      "interactive": 6,
+      "pageHeight": 6938,
+      "overflowX": 0
+    },
+    "phone": {
+      "words": 43,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "Inter Variable 14px 400",
+        "Inter Variable 15px 500",
+        "Newsreader Variable 19px 400",
+        "Newsreader Variable 20px 400",
+        "Newsreader Variable 20px 500",
+        "Newsreader Variable 24px 400",
+        "Newsreader Variable 56px 380"
+      ],
+      "interactive": 6,
+      "pageHeight": 7858,
+      "overflowX": 0
+    }
+  },
+  "b": {
+    "slow3g": {
+      "fcpMs": 6012,
+      "lcpMs": 16832,
+      "readyMs": 13251,
+      "cls": 0.0196
+    },
+    "jsGzip": 122937,
+    "cssGzip": 22728,
+    "scripts": [
+      "/assets/index-C4wMWJI8.js",
+      "/assets/OptionsRoot-w2WmNgXw.js",
+      "/assets/icons-6z_8xw56.js",
+      "/assets/OptionB-Bchs1VVH.js"
+    ],
+    "desktop": {
+      "words": 128,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "Geist Mono Variable 13px 500",
+        "Geist Variable 15px 500",
+        "Geist Variable 16px 400",
+        "Geist Variable 18px 400",
+        "Geist Variable 24px 600",
+        "Geist Variable 30px 600",
+        "Geist Variable 76px 600"
+      ],
+      "interactive": 10,
+      "pageHeight": 4419,
+      "overflowX": -10
+    },
+    "tablet": {
+      "words": 107,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "Geist Mono Variable 13px 500",
+        "Geist Variable 15px 500",
+        "Geist Variable 16px 400",
+        "Geist Variable 18px 400",
+        "Geist Variable 24px 600",
+        "Geist Variable 30px 600",
+        "Geist Variable 65.536px 600"
+      ],
+      "interactive": 10,
+      "pageHeight": 5342,
+      "overflowX": 0
+    },
+    "phone": {
+      "words": 73,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "Geist Mono Variable 13px 500",
+        "Geist Variable 15px 500",
+        "Geist Variable 16px 400",
+        "Geist Variable 18px 400",
+        "Geist Variable 24px 600",
+        "Geist Variable 30px 600",
+        "Geist Variable 45.1px 600"
+      ],
+      "interactive": 7,
+      "pageHeight": 7474,
+      "overflowX": 0
+    }
+  },
+  "c": {
+    "slow3g": {
+      "fcpMs": 6004,
+      "lcpMs": 13356,
+      "readyMs": 13340,
+      "cls": 0.0002
+    },
+    "jsGzip": 124603,
+    "cssGzip": 22442,
+    "scripts": [
+      "/assets/index-C4wMWJI8.js",
+      "/assets/OptionsRoot-w2WmNgXw.js",
+      "/assets/icons-6z_8xw56.js",
+      "/assets/OptionC-Cre_nY59.js"
+    ],
+    "desktop": {
+      "words": 52,
+      "typeStyles": 6,
+      "typeStyleList": [
+        "Bricolage Grotesque Variable 100px 620",
+        "Bricolage Grotesque Variable 16px 600",
+        "Bricolage Grotesque Variable 28px 500",
+        "Inter Variable 16px 500",
+        "Inter Variable 16px 600",
+        "Inter Variable 20px 400"
+      ],
+      "interactive": 8,
+      "pageHeight": 6001,
+      "overflowX": -10
+    },
+    "tablet": {
+      "words": 57,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "Bricolage Grotesque Variable 16px 600",
+        "Bricolage Grotesque Variable 20.8px 500",
+        "Bricolage Grotesque Variable 35.328px 600",
+        "Bricolage Grotesque Variable 99.84px 620",
+        "Inter Variable 16px 500",
+        "Inter Variable 16px 600",
+        "Inter Variable 17px 400"
+      ],
+      "interactive": 8,
+      "pageHeight": 8226,
+      "overflowX": 0
+    },
+    "phone": {
+      "words": 47,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "Bricolage Grotesque Variable 16px 600",
+        "Bricolage Grotesque Variable 20.8px 500",
+        "Bricolage Grotesque Variable 30.4px 600",
+        "Bricolage Grotesque Variable 48.75px 620",
+        "Inter Variable 16px 500",
+        "Inter Variable 16px 600",
+        "Inter Variable 17px 400"
+      ],
+      "interactive": 8,
+      "pageHeight": 9072,
+      "overflowX": 0
+    }
+  },
+  "d": {
+    "slow3g": {
+      "fcpMs": 6016,
+      "lcpMs": 13232,
+      "readyMs": 13219,
+      "cls": 0.0119
+    },
+    "jsGzip": 121455,
+    "cssGzip": 21247,
+    "scripts": [
+      "/assets/index-C4wMWJI8.js",
+      "/assets/OptionsRoot-w2WmNgXw.js",
+      "/assets/OptionD-btWYAN6D.js",
+      "/assets/icons-6z_8xw56.js"
+    ],
+    "desktop": {
+      "words": 68,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "IBM Plex Mono 13px 500",
+        "IBM Plex Sans 16px 400",
+        "IBM Plex Sans 16px 600",
+        "IBM Plex Sans 19px 400",
+        "IBM Plex Sans 24px 600",
+        "IBM Plex Sans 72px 600",
+        "Press Start 2P 12px 400"
+      ],
+      "interactive": 10,
+      "pageHeight": 5392,
+      "overflowX": -10
+    },
+    "tablet": {
+      "words": 70,
+      "typeStyles": 8,
+      "typeStyleList": [
+        "IBM Plex Mono 13px 500",
+        "IBM Plex Sans 16px 400",
+        "IBM Plex Sans 16px 600",
+        "IBM Plex Sans 19px 400",
+        "IBM Plex Sans 19px 600",
+        "IBM Plex Sans 30.72px 600",
+        "IBM Plex Sans 72px 600",
+        "Press Start 2P 12px 400"
+      ],
+      "interactive": 10,
+      "pageHeight": 7783,
+      "overflowX": 0
+    },
+    "phone": {
+      "words": 49,
+      "typeStyles": 6,
+      "typeStyleList": [
+        "IBM Plex Mono 13px 500",
+        "IBM Plex Sans 16px 600",
+        "IBM Plex Sans 17px 400",
+        "IBM Plex Sans 19px 600",
+        "IBM Plex Sans 40px 600",
+        "Press Start 2P 12px 400"
+      ],
+      "interactive": 6,
+      "pageHeight": 8445,
+      "overflowX": 0
+    }
+  },
+  "current": {
+    "slow3g": {
+      "fcpMs": 6008,
+      "lcpMs": 8900,
+      "readyMs": null,
+      "cls": 0.0157
+    },
+    "jsGzip": 113302,
+    "cssGzip": 16045,
+    "scripts": [
+      "/assets/index-C4wMWJI8.js",
+      "/_vercel/insights/script.js"
+    ],
+    "desktop": {
+      "words": 52,
+      "typeStyles": 7,
+      "typeStyleList": [
+        "IBM Plex Mono 13px 500",
+        "IBM Plex Mono 14px 600",
+        "IBM Plex Sans 18px 400",
+        "IBM Plex Sans 18px 600",
+        "Press Start 2P 12px 400",
+        "Press Start 2P 16px 400",
+        "Press Start 2P 40px 400"
+      ],
+      "interactive": 12,
+      "pageHeight": 6019,
+      "overflowX": -8
+    },
+    "tablet": {
+      "words": 73,
+      "typeStyles": 9,
+      "typeStyleList": [
+        "IBM Plex Mono 13px 500",
+        "IBM Plex Mono 14px 600",
+        "IBM Plex Sans 16px 400",
+        "IBM Plex Sans 18px 400",
+        "IBM Plex Sans 18px 600",
+        "Press Start 2P 12px 400",
+        "Press Start 2P 16px 400",
+        "Press Start 2P 24px 400",
+        "Press Start 2P 40px 400"
+      ],
+      "interactive": 12,
+      "pageHeight": 9466,
+      "overflowX": 0
+    },
+    "phone": {
+      "words": 41,
+      "typeStyles": 5,
+      "typeStyleList": [
+        "IBM Plex Mono 13px 500",
+        "IBM Plex Sans 17px 400",
+        "IBM Plex Sans 17px 600",
+        "Press Start 2P 12px 400",
+        "Press Start 2P 32px 400"
+      ],
+      "interactive": 6,
+      "pageHeight": 12004,
+      "overflowX": 0
+    }
+  }
+}
