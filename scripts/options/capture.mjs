@@ -67,6 +67,21 @@ async function settle(page) {
   await page.waitForTimeout(900);
 }
 
+/** Lazy images load only near the viewport: walk the page once so a full-page still has them all. */
+async function loadAllImages(page) {
+  await page.evaluate(async () => {
+    const root = document.scrollingElement;
+    document.documentElement.style.scrollBehavior = 'auto';
+    for (let y = 0; y < root.scrollHeight; y += innerHeight) {
+      root.scrollTop = y;
+      await new Promise(r => setTimeout(r, 120));
+    }
+    await Promise.all([...document.images].map(img => (img.complete ? null : img.decode().catch(() => null))));
+    root.scrollTop = 0;
+  });
+  await page.waitForTimeout(500);
+}
+
 async function shots(browser, target) {
   const dir = path.join(OUT, 'screenshots');
   fs.mkdirSync(dir, { recursive: true });
@@ -94,6 +109,7 @@ async function shots(browser, target) {
     const page = await context.newPage();
     await page.goto(urlFor(target), { waitUntil: 'load' });
     await settle(page);
+    await loadAllImages(page);
     await page.screenshot({
       path: path.join(dir, `${target}-${viewportName}-full.jpg`),
       type: 'jpeg',
