@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { useModalDialog } from '../shared/hooks';
 import { Search } from '../shared/icons';
 
@@ -73,9 +74,10 @@ export function CommandPalette({ open, onClose, commands }: CommandPaletteProps)
 
   const run = (command: Command | undefined) => {
     if (!command) return;
-    onClose();
-    // After the palette has closed: a command may open another modal dialog or move focus,
-    // and two modals fighting over focus restoration leaves it on <body>.
+    // Close for real first (flushSync runs the dialog hook's effect now): closing a modal
+    // restores focus to the opener, which would undo a command that moves focus or opens
+    // another dialog if it ran before that.
+    flushSync(onClose);
     window.setTimeout(command.run, 0);
   };
 
