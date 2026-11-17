@@ -25,8 +25,11 @@ import {
   type Project,
 } from '../shared/content';
 import { useCopyEmail, useModalDialog, usePrefersReducedMotion } from '../shared/hooks';
-import { ArrowRight, ArrowUpRight, ArrowDown, Check, Close, Copy, Download, Mail, Play } from '../shared/icons';
+import { ArrowRight, ArrowUpRight, ArrowDown, Chat, Check, Close, Copy, Download, Mail, Play } from '../shared/icons';
 import Arcade from '../d/Arcade';
+import { CHAT_ENABLED } from '../../components/Chat/ChatLauncher';
+import { AskRoy } from './AskRoy';
+import { chatPersona } from '../../data/chatPersona';
 import type { VoxelWorld } from './engine';
 import { useAmbience, type Ambience, type SkyMode } from './ambience';
 import { AmbienceLine } from './AmbienceLine';
@@ -302,6 +305,10 @@ export default function OptionF() {
   const reduced = usePrefersReducedMotion();
   const closeDialog = useCallback(() => setOpen(null), []);
   const quit = useCallback(() => setPlaying(false), []);
+  const [asking, setAsking] = useState(false);
+  const stopAsking = useCallback(() => setAsking(false), []);
+  // When Pixel Roy answers in the chat, the scene's Roy jumps: one character, two places.
+  const royAnswers = useCallback(() => world.current?.jump(), []);
 
   // The interface follows the sky: dark panels once the sun is down, where the visitor is or
   // in the sky they chose. `data-theme` is the attribute the option's tokens key on.
@@ -354,6 +361,18 @@ export default function OptionF() {
                 </a>
               </div>
               <p className="of-meta">{bio.resume.meta}</p>
+              {CHAT_ENABLED && (
+                <button type="button" className="of-ask-cta" onClick={() => setAsking(true)}>
+                  <span className="of-ask-cta__face" aria-hidden="true">
+                    <img src="/assets/sprites/wave-2.png" width={68} height={92} alt="" />
+                  </span>
+                  <span>
+                    <strong>Questions? Ask {chatPersona.name}</strong>
+                    <span className="of-ask-cta__sub">My AI twin answers about my work, in English or Hebrew</span>
+                  </span>
+                  <ArrowRight />
+                </button>
+              )}
             </div>
           </section>
 
@@ -447,6 +466,12 @@ export default function OptionF() {
                 </button>
               </>
             )}
+            {CHAT_ENABLED && (
+              <button type="button" className="of-chip of-chip--ask" onClick={() => setAsking(true)}>
+                <Chat />
+                <span className="of-chip__label">Ask {chatPersona.name}</span>
+              </button>
+            )}
             <button type="button" className="of-chip of-chip--play" onClick={() => setPlaying(true)}>
               <Play />
               <span className="of-chip__label">Play Roy Runner</span>
@@ -456,6 +481,7 @@ export default function OptionF() {
       </div>
       <ProjectDialog project={open} onClose={closeDialog} />
       <Arcade open={playing} onClose={quit} />
+      {CHAT_ENABLED && <AskRoy open={asking} onClose={stopAsking} onAnswer={royAnswers} />}
     </OptionShell>
   );
 }
