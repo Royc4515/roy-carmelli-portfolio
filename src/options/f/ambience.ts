@@ -37,10 +37,16 @@ export type SkyMode = 'live' | 'day' | 'night';
 
 export interface AmbienceInfo {
   ambience: Ambience;
-  /** For the page's line of text. */
+  /** For the page's ambience card. */
   city: string | null;
   time: string;
+  /** "Tuesday, 17 November" and, where the browser has the calendar, "7 Kislev 5787". */
+  date: string;
+  hebrewDate: string | null;
   phase: string;
+  /** "06:11" and "16:39": only with live weather (the defaults would be invented times). */
+  sunrise: string | null;
+  sunset: string | null;
   weather: LiveWeather | null;
   festive: FestiveDay | null;
   /** True when the sun is down in the drawn sky: the interface then uses its dark tokens. */
@@ -56,8 +62,10 @@ const num = (value: unknown): number | null => (typeof value === 'number' && Num
 /** The API answer, re-checked on the client: a bad field drops the weather, never the page. */
 export function parseWeatherResponse(body: unknown): { city: string | null; weather: LiveWeather | null } {
   if (typeof body !== 'object' || body === null) return { city: null, weather: null };
-  const { city, weather } = body as { city?: unknown; weather?: unknown };
-  const place = typeof city === 'string' && city.trim() ? city.trim().slice(0, 60) : null;
+  const { city, country, weather } = body as { city?: unknown; country?: unknown; weather?: unknown };
+  const name = typeof city === 'string' && city.trim() ? city.trim().slice(0, 60) : null;
+  // "Tel Aviv, IL": the country code only as a suffix to a known city.
+  const place = name && typeof country === 'string' && /^[A-Z]{2}$/.test(country) ? `${name}, ${country}` : name;
   if (typeof weather !== 'object' || weather === null) return { city: place, weather: null };
   const w = weather as Record<string, unknown>;
   const tempC = num(w.tempC);
@@ -108,6 +116,31 @@ function previewHour(): number | null {
   return Number.isFinite(hour) && hour >= 0 && hour < 24 ? hour : null;
 }
 
+const weekdayName = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
+const dayAndMonth = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' });
+/** "Tuesday, 17 November": built from parts, because locales disagree about the comma. */
+const dateLine = { format: (date: Date) => `${weekdayName.format(date)}, ${dayAndMonth.format(date)}` };
+
+let hebrewFormat: Intl.DateTimeFormat | null | undefined;
+/** "7 Kislev 5787", or null where the runtime has no Hebrew calendar. */
+function hebrewLine(date: Date): string | null {
+  if (hebrewFormat === undefined) {
+    try {
+      hebrewFormat = new Intl.DateTimeFormat('en-GB-u-ca-hebrew', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (hebrewFormat.resolvedOptions().calendar !== 'hebrew') hebrewFormat = null;
+    } catch {
+      hebrewFormat = null;
+    }
+  }
+  return hebrewFormat ? hebrewFormat.format(date) : null;
+}
+
+/** 16.65 -> "16:39". */
+function clockOf(hours: number): string {
+  const total = Math.round(hours * 60);
+  return `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
 const PREVIEW_LABELS: Record<Festive, string> = {
   hanukkah: 'Hanukkah',
   purim: 'Purim',
@@ -149,6 +182,10 @@ export function buildAmbience(now: Date, mode: SkyMode, city: string | null, wea
       festiveCount: festive?.count ?? 0,
     },
     city,
+    date: dateLine.format(now),
+    hebrewDate: hebrewLine(now),
+    sunrise: weather ? clockOf(weather.sunrise) : null,
+    sunset: weather ? clockOf(weather.sunset) : null,
     time: previewHour() === null ? clock.format(now) : clock.format(new Date(2000, 0, 1, Math.floor(liveHour), Math.round((liveHour % 1) * 60))),
     phase: dayPhase(liveHour, sunrise, sunset),
     weather,

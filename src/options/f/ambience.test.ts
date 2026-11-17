@@ -5,7 +5,8 @@ const weather = { tempC: 14, condition: 'rain', label: 'Light rain', cloud: 0.9,
 
 describe('parseWeatherResponse', () => {
   it('accepts a complete answer', () => {
-    expect(parseWeatherResponse({ city: ' Tel Aviv ', country: 'IL', weather })).toEqual({ city: 'Tel Aviv', weather });
+    expect(parseWeatherResponse({ city: ' Tel Aviv ', country: 'IL', weather })).toEqual({ city: 'Tel Aviv, IL', weather });
+    expect(parseWeatherResponse({ city: 'Tel Aviv', country: '<x>', weather }).city).toBe('Tel Aviv');
   });
 
   it('drops the weather, not the city, when a field is wrong', () => {
@@ -54,6 +55,15 @@ describe('buildAmbience', () => {
     expect(info.ambience).toMatchObject({ condition: 'rain', cloud: 0.9, wind: 22, sunset: 16.65 });
     expect(info.dark).toBe(true);
     expect(info.phase).toBe('Evening');
+  });
+
+  it('gives the card its date lines and the real sun times only', () => {
+    const live = buildAmbience(afternoon, 'live', 'Tel Aviv, IL', weather as never);
+    expect(live.date).toBe('Tuesday, 17 November');
+    expect(live.hebrewDate).toMatch(/^7 Kislev 5787$/);
+    expect(live.sunrise).toBe('06:12');
+    expect(live.sunset).toBe('16:39');
+    expect(buildAmbience(afternoon, 'live', null, null)).toMatchObject({ sunrise: null, sunset: null });
   });
 
   it('lets the visitor force day or night without changing the reported time', () => {
