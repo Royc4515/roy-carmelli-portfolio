@@ -411,7 +411,7 @@ export function buildTotemPool(
   // Before the first totem the cubes rest on the hero island as golden motes.
   const rest: number[][] = Array.from({ length: count }, () => {
     const [x, y, z] = restAt(rand);
-    const big = rand() < 0.22;
+    const big = rand() < 0.1;
     return [x, y, z, big ? 1.6 : 0, 0.98, 0.84, 0.42, rand()];
   });
   return { shapes: [new Float32Array(rest.flat()), ...models.map(pad)], count };

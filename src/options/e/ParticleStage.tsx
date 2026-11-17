@@ -165,6 +165,15 @@ export function ParticleStage({ dark, motion, reduced, onReady, onScene }: Stage
       pointer.ty = world.y;
       pointer.target = 1;
     };
+    const gyro = { on: false, x: 0, y: 0 };
+    const onOrient = (event: DeviceOrientationEvent) => {
+      if (event.gamma === null || event.beta === null) return;
+      gyro.on = true;
+      const clampTo = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
+      // gamma: left/right tilt. beta: front/back, about 45 degrees when held in the hand.
+      gyro.x = clampTo(event.gamma / 45, 1) * 0.45;
+      gyro.y = clampTo((event.beta - 45) / 45, 1) * 0.3;
+    };
     const onLeave = () => {
       pointer.target = 0;
     };
@@ -215,9 +224,21 @@ export function ParticleStage({ dark, motion, reduced, onReady, onScene }: Stage
       pointer.x += (pointer.tx - pointer.x) * 0.18;
       pointer.y += (pointer.ty - pointer.y) * 0.18;
       pointer.on += (pointer.target - pointer.on) * 0.1;
-      const tiltOn = still || !wide ? 0 : 1;
-      tilt.x += (((pointer.tx / Math.max(aspect, 0.01)) * 0.22) * tiltOn - tilt.x) * 0.06;
-      tilt.y += ((-pointer.ty * 0.14) * tiltOn - tilt.y) * 0.06;
+      // The cloud leans with the pointer on a desktop, and with the device itself on a phone
+      // that reports its orientation.
+      let leanX = 0;
+      let leanY = 0;
+      if (!still) {
+        if (gyro.on) {
+          leanX = gyro.x;
+          leanY = gyro.y;
+        } else if (wide) {
+          leanX = (pointer.tx / Math.max(aspect, 0.01)) * 0.22;
+          leanY = -pointer.ty * 0.14;
+        }
+      }
+      tilt.x += (leanX - tilt.x) * 0.06;
+      tilt.y += (leanY - tilt.y) * 0.06;
 
       const time = clock();
       field.render(state, {
@@ -302,6 +323,9 @@ export function ParticleStage({ dark, motion, reduced, onReady, onScene }: Stage
     window.addEventListener('pointerdown', onDown, { passive: true });
     document.documentElement.addEventListener('pointerleave', onLeave);
     document.addEventListener('visibilitychange', sync);
+    // Android reports this without asking; iOS needs a permission prompt, which is not worth
+    // interrupting a visitor for, so there the cloud simply does not lean.
+    window.addEventListener('deviceorientation', onOrient, { passive: true });
     canvas.addEventListener('webglcontextlost', onLost);
     // The loop re-reads `live` every frame, but starting and stopping it needs a nudge.
     const settingsTimer = window.setInterval(sync, 400);
@@ -317,6 +341,7 @@ export function ParticleStage({ dark, motion, reduced, onReady, onScene }: Stage
       window.removeEventListener('pointerdown', onDown);
       document.documentElement.removeEventListener('pointerleave', onLeave);
       document.removeEventListener('visibilitychange', sync);
+      window.removeEventListener('deviceorientation', onOrient);
       canvas.removeEventListener('webglcontextlost', onLost);
       field.destroy();
       fieldRef.current = null;

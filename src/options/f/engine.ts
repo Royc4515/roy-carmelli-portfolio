@@ -186,8 +186,10 @@ void main() {
   vec2 cell = floor(px / 3.0);
   float star = step(0.9965, hash(cell)) * (0.55 + 0.45 * sin(uTime * 1.5 + hash(cell + 7.0) * 30.0));
   c += vec3(star) * uNight * smoothstep(0.25, 0.9, vUv.y);
-  float d = distance(px, uOrbAt * uRes) / uRes.y;
-  c += uOrb * (smoothstep(0.052, 0.048, d) + 0.25 * smoothstep(0.3, 0.0, d));
+  // A square sun and moon: this is a world of cubes.
+  vec2 o = abs(px - uOrbAt * uRes) / uRes.y;
+  float d = max(o.x, o.y);
+  c += uOrb * (step(d, 0.034) + 0.22 * smoothstep(0.26, 0.0, length(o)));
   frag = vec4(c, 1.0);
 }`;
 
@@ -568,7 +570,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     camX += (targetX - camX) * (opts.reducedMotion ? 1 : Math.min(1, dt * 6));
     const aspect = canvas.width / Math.max(1, canvas.height);
     const wide = aspect > 1.05;
-    const radius = wide ? 430 : 300 / Math.max(0.35, aspect) ;
+    const radius = wide ? 540 : 300 / Math.max(0.35, aspect);
     const yaw = (animate ? Math.sin(clock * 0.17) * 0.05 : 0) + look.x * 0.32 - 0.12;
     const pitch = 0.3 - look.y * 0.1;
     const target: V3 = [camX, 44 + royY * 0.25, 0];
@@ -579,7 +581,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     ];
     const viewProj = mul(perspective(0.52, aspect, 20, 3000), lookAt(eye, target));
     // Desktop: the scene sits in the right half, beside the text. Phones: in the top part.
-    const shift: [number, number] = wide ? [0.4, -0.04] : [0, 0.42];
+    const shift: [number, number] = wide ? [0.36, 0.02] : [0, 0.42];
 
     const lightEye: V3 = [camX + LIGHT_DIR[0] * 600, LIGHT_DIR[1] * 600, LIGHT_DIR[2] * 600];
     const lightVP = mul(ortho(250, 50, 1300), lookAt(lightEye, [camX, 0, 0]));
@@ -664,7 +666,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     gl.useProgram(sky.p);
     gl.uniform3fv(sky.u('uTop'), theme.top);
     gl.uniform3fv(sky.u('uBottom'), theme.bottom);
-    gl.uniform3fv(sky.u('uOrb'), theme.orb.map(v => v * lerp(0.55, 0.9, nightMix)));
+    gl.uniform3fv(sky.u('uOrb'), theme.orb.map(v => v * lerp(0.32, 0.8, nightMix)));
     gl.uniform2f(sky.u('uOrbAt'), wide ? 0.9 - look.x * 0.01 : 0.8, wide ? 0.82 : 0.9);
     gl.uniform2f(sky.u('uRes'), canvas.width, canvas.height);
     gl.uniform1f(sky.u('uNight'), nightMix);

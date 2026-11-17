@@ -521,6 +521,7 @@ main,
     padding: 34vh clamp(1.5rem, 5vw, 5rem) 34vh;
   }
   .of-stage--hero {
+    align-items: flex-start;
     justify-content: center;
     padding-top: 6rem;
     padding-bottom: 2rem;
