@@ -1,4 +1,4 @@
-import { useCallback, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useState, type MouseEvent } from 'react';
 import { bio, MAILTO } from '../shared/content';
 import { useModalDialog } from '../shared/hooks';
 import { ArrowRight, Close, Download, Mail, Play } from '../shared/icons';
@@ -21,6 +21,9 @@ interface MobileBarProps {
   reducedMotion: boolean;
 }
 
+/** Must match the `@media (max-width: 59.99rem)` that shows the bar and the sheet in f.css. */
+export const PHONE_QUERY = '(max-width: 59.99rem)';
+
 /** Three short lines: the universal "menu" mark, drawn like the option's other icons. */
 function MenuGlyph() {
   return (
@@ -40,6 +43,19 @@ export function MobileBar({ sections, onAsk, onPlay, pause, reducedMotion }: Mob
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
   const ref = useModalDialog(open, close);
+
+  // don't touch / the sheet exists only below this width (f.css). Rotating a tablet past it
+  // would hide an open modal and leave the page inert with nothing to close, so it closes.
+  useEffect(() => {
+    if (!open || typeof window.matchMedia !== 'function') return;
+    const phone = window.matchMedia(PHONE_QUERY);
+    const onChange = () => {
+      if (!phone.matches) setOpen(false);
+    };
+    onChange();
+    phone.addEventListener('change', onChange);
+    return () => phone.removeEventListener('change', onChange);
+  }, [open]);
 
   const go = (e: MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
