@@ -607,7 +607,6 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
   }
 
   const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-  const mix3 = (a: number[], b: number[], t: number) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
 
   function frame(now: number) {
     raf = 0;
