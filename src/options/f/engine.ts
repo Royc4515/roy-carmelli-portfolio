@@ -708,7 +708,8 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     ];
     const viewProj = mul(perspective(0.52, aspect, 20, 3000), lookAt(eye, target));
     // Desktop: the scene sits in the right half, beside the text. Phones: in the top part.
-    const shift: [number, number] = wide ? [0.36, 0.02] : [0, 0.48];
+    // Phones: the scene sits in the top part, a little low so Roy's head clears the top bar.
+    const shift: [number, number] = wide ? [0.36, 0.02] : [0, 0.38];
 
     // ── Sky, light and weather ────────────────────────────────────────────────────────
     const wanted = lookFor(ambience, wide);

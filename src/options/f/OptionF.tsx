@@ -30,6 +30,7 @@ import Arcade from '../d/Arcade';
 import { CHAT_ENABLED } from '../../components/Chat/ChatLauncher';
 import { AskRoy, Portrait } from './AskRoy';
 import { frameSection } from './frame';
+import { MobileBar } from './MobileBar';
 import { chatPersona } from '../../data/chatPersona';
 import type { VoxelWorld } from './engine';
 import { useAmbience, type Ambience, type SkyMode } from './ambience';
@@ -502,6 +503,19 @@ export default function OptionF({ live = false }: { live?: boolean }) {
           </div>
         </div>
       </div>
+      <MobileBar
+        sections={[
+          { id: `project-${mainProjects[0].id}`, label: 'Work' },
+          { id: 'more', label: 'More things I built' },
+          { id: 'about', label: 'About' },
+          { id: 'skills', label: 'Skills' },
+          { id: 'contact', label: 'Contact' },
+        ]}
+        onAsk={CHAT_ENABLED ? () => setAsking(true) : undefined}
+        onPlay={() => setPlaying(true)}
+        pause={scene === 'on' && !reduced ? { paused, toggle: () => setPaused(p => !p) } : undefined}
+        reducedMotion={reduced}
+      />
       <ProjectDialog project={open} onClose={closeDialog} />
       <Arcade open={playing} onClose={quit} />
       {CHAT_ENABLED && <AskRoy open={asking} onClose={stopAsking} onAnswer={royAnswers} />}
