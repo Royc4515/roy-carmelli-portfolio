@@ -357,7 +357,7 @@ function brain(g: Grid): void {
     if (d > 9.6) return null;
     return Math.sin(x * 0.9 + y * 1.7 + z * 0.8) > 0.35 ? C.rose : C.pink;
   });
-  g.fill(4, 5, 8, (x, y, z) => (Math.hypot(x, z - 3) < 2.4 ? C.rose : null)); // brain stem
+  g.fill(4, 5, 8, (x, _y, z) => (Math.hypot(x, z - 3) < 2.4 ? C.rose : null)); // brain stem
   g.box(-1, 1, -1, 1, 5, 1, C.steel); g.box(-6, 0, -4, 6, 0, 4, C.ink);
 }
 
