@@ -28,7 +28,7 @@ import { useCopyEmail, useModalDialog, usePrefersReducedMotion } from '../shared
 import { ArrowRight, ArrowUpRight, ArrowDown, Chat, Check, Close, Copy, Download, Mail, Play } from '../shared/icons';
 import Arcade from '../d/Arcade';
 import { CHAT_ENABLED } from '../../components/Chat/ChatLauncher';
-import { AskRoy } from './AskRoy';
+import { AskRoy, Portrait } from './AskRoy';
 import { chatPersona } from '../../data/chatPersona';
 import type { VoxelWorld } from './engine';
 import { useAmbience, type Ambience, type SkyMode } from './ambience';
@@ -363,8 +363,9 @@ export default function OptionF() {
               <p className="of-meta">{bio.resume.meta}</p>
               {CHAT_ENABLED && (
                 <button type="button" className="of-ask-cta" onClick={() => setAsking(true)}>
-                  <span className="of-ask-cta__face" aria-hidden="true">
-                    <img src="/assets/sprites/wave-2.png" width={68} height={92} alt="" />
+                  <span className="of-ask-cta__me">
+                    <Portrait />
+                    <span className="of-ask__online" aria-hidden="true" />
                   </span>
                   <span>
                     <strong>Questions? Ask {chatPersona.name}</strong>

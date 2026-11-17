@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { MAX_QUESTION_CHARS, type ChatSource } from '../../lib/chatApi';
 import { chatPersona } from '../../data/chatPersona';
+import { useTypewriter } from '../../hooks/useTypewriter';
 import { useModalDialog } from '../shared/hooks';
-import { ArrowUpRight, Close } from '../shared/icons';
+import { ArrowRight, ArrowUpRight, Close } from '../shared/icons';
 
 /**
  * Pixel Roy, the site's AI chat, in option F's own glass. Only the look is new: the behaviour,
@@ -11,12 +12,27 @@ import { ArrowUpRight, Close } from '../shared/icons';
  * copy comes from `chatPersona`, exactly as in the pixel site's panel.
  */
 
-/** Roy's face from the wave frame, for the assistant's lines. */
-function Avatar() {
+/**
+ * Roy's drawn portrait (52x56). Shown at 1x or exactly 0.5x: any other scale smears the pixels,
+ * which is what made the first version's face look broken.
+ */
+export function Portrait({ size = 'md' }: { size?: 'sm' | 'md' }) {
   return (
-    <span className="of-ask__avatar" aria-hidden="true">
-      <img src="/assets/sprites/wave-2.png" width={68} height={92} alt="" />
+    <span className="of-portrait" data-size={size} aria-hidden="true">
+      <img src="/assets/sprites/portrait.png" width={52} height={56} alt="" />
     </span>
+  );
+}
+
+/** An answer types itself in; the full text stays in the DOM for screen readers and search. */
+function Typed({ text }: { text: string }) {
+  const { shown, done } = useTypewriter(text, true);
+  if (done) return <>{text}</>;
+  return (
+    <>
+      <span aria-hidden="true">{shown}</span>
+      <span className="opt-sr">{text}</span>
+    </>
   );
 }
 
@@ -75,13 +91,16 @@ export function AskRoy({ open, onClose, onAnswer }: { open: boolean; onClose: ()
   return (
     <dialog ref={ref} className="of-ask" aria-labelledby="of-ask-title">
       <header className="of-ask__head">
-        <Avatar />
+        <span className="of-ask__me">
+          <Portrait />
+          <span className="of-ask__online" aria-hidden="true" />
+        </span>
         <div>
           <h2 className="of-ask__title" id="of-ask-title">
             {chatPersona.name}
             <span className="of-ask__badge">{chatPersona.badge}</span>
           </h2>
-          <p className="of-ask__sub">An AI version of Roy</p>
+          <p className="of-ask__sub">Roy's AI twin, in English or Hebrew</p>
         </div>
         <button type="button" className="of-icon-btn of-ask__close" onClick={onClose} aria-label={chatPersona.closeLabel}>
           <Close />
@@ -90,26 +109,34 @@ export function AskRoy({ open, onClose, onAnswer }: { open: boolean; onClose: ()
 
       <div className="of-ask__log" ref={log} aria-live="polite">
         <div className="of-ask__line" data-role="assistant">
+          <Portrait size="sm" />
           <p className="of-ask__bubble">{chatPersona.greeting}</p>
         </div>
         {messages.length === 0 && (
           <ul className="of-ask__suggest" aria-label="Suggested questions">
             {chatPersona.suggestions.map(q => (
               <li key={q}>
-                <button type="button" onClick={() => send(q)} disabled={sending}>{q}</button>
+                <button type="button" onClick={() => send(q)} disabled={sending}>
+                  {q}
+                  <ArrowRight aria-hidden="true" />
+                </button>
               </li>
             ))}
           </ul>
         )}
         {messages.map(m => (
           <div key={m.id} className="of-ask__line" data-role={m.role}>
-            <p className="of-ask__who opt-sr">{m.role === 'user' ? chatPersona.you : chatPersona.name}:</p>
-            <p className="of-ask__bubble">{m.content}</p>
-            {m.sources && <Sources sources={m.sources} />}
+            {m.role === 'assistant' && <Portrait size="sm" />}
+            <div className="of-ask__msg">
+              <p className="opt-sr">{m.role === 'user' ? chatPersona.you : chatPersona.name}:</p>
+              <p className="of-ask__bubble">{m.role === 'assistant' ? <Typed text={m.content} /> : m.content}</p>
+              {m.sources && <Sources sources={m.sources} />}
+            </div>
           </div>
         ))}
         {sending && (
           <div className="of-ask__line" data-role="assistant">
+            <Portrait size="sm" />
             <p className="of-ask__bubble of-ask__typing">
               <span aria-hidden="true"><i /><i /><i /></span>
               <span className="opt-sr">{chatPersona.thinking}</span>
@@ -144,8 +171,8 @@ export function AskRoy({ open, onClose, onAnswer }: { open: boolean; onClose: ()
             }
           }}
         />
-        <button type="submit" className="of-btn of-btn--primary" disabled={sending || !draft.trim()}>
-          {chatPersona.send}
+        <button type="submit" className="of-ask__send" disabled={sending || !draft.trim()} aria-label={chatPersona.send}>
+          <ArrowRight />
         </button>
       </form>
       <p className="of-ask__note">
