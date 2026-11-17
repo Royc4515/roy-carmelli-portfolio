@@ -4,7 +4,7 @@
  * dates to maintain. To add a day, add a rule to `festiveFor`.
  */
 
-export type Festive = 'hanukkah' | 'purim' | 'sukkot' | 'independence' | 'shabbat';
+export type Festive = 'hanukkah' | 'purim' | 'sukkot' | 'independence' | 'shabbat' | 'birthday';
 
 export interface FestiveDay {
   key: Festive;
@@ -78,8 +78,20 @@ function isShabbat(date: Date, sunsetHour: number): boolean {
 }
 
 /**
+ * Roy's birthday is kept on the civil date, 29 July. The Hebrew date he was born on is 9 Av,
+ * a fast day, so there is nothing to celebrate then: if 29 July itself falls on the fast (9 Av,
+ * or 10 Av on a Sunday when the fast is put off from Shabbat), the scene stays plain.
+ */
+function isBirthday(date: Date, hebrew: HebrewDate | null): boolean {
+  if (date.getMonth() !== 6 || date.getDate() !== 29) return false;
+  const fast = is(hebrew, 'Av', 9) || (is(hebrew, 'Av', 10) && date.getDay() === 0);
+  return !fast;
+}
+
+/**
  * What the scene celebrates at `date` (the visitor's local time), or null on an ordinary day.
- * A holiday wins over Shabbat when both apply.
+ * A holiday wins over Shabbat when both apply; Shabbat wins over the birthday (its candles
+ * are a cake's, and those wait until after Shabbat).
  */
 export function festiveFor(date: Date, sunsetHour = 18): FestiveDay | null {
   // Noon of the same civil day: the Hebrew date must not flip with the clock's time zone edge.
@@ -92,5 +104,6 @@ export function festiveFor(date: Date, sunsetHour = 18): FestiveDay | null {
   if (hebrew?.month === 'Tishri' && hebrew.day >= 15 && hebrew.day <= 21) return { key: 'sukkot', label: 'Sukkot', count: 0 };
   if (isIndependenceDay(noon)) return { key: 'independence', label: 'Independence Day', count: 0 };
   if (isShabbat(date, sunsetHour)) return { key: 'shabbat', label: 'Shabbat', count: 0 };
+  if (isBirthday(noon, hebrew)) return { key: 'birthday', label: "Roy's birthday", count: 0 };
   return null;
 }

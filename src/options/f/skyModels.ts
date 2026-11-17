@@ -105,6 +105,28 @@ export function buildFestive(rand: () => number): FestiveModels {
     }
   });
 
+  // Birthday: a two-tier cake with five candles, and a balloon on a string at each side.
+  model('birthday', (s, f) => {
+    s.box(-5, 0, -5, 5, 0, 5, COL.silver, 0.9); // the plate
+    s.box(-4, 1, -4, 4, 3, 4, COL.cream);
+    s.box(-4, 4, -4, 4, 4, 4, COL.pink);
+    // Icing running down the lower tier.
+    for (const [x, z] of [[-4, -2], [-4, 3], [4, -3], [4, 1], [-1, 4], [3, 4], [-3, -4], [2, -4]]) s.box(x, 3, z, x, 3, z, COL.pink);
+    s.box(-2, 5, -2, 2, 6, 2, COL.white);
+    s.box(-2, 7, -2, 2, 7, 2, COL.pink);
+    const candles: Array<[number, number, Rgb]> = [[-2, -2, COL.red], [2, -2, COL.teal], [0, 0, COL.yellow], [-2, 2, COL.blue], [2, 2, COL.purple]];
+    for (const [x, z, c] of candles) {
+      s.box(x, 8, z, x, 9, z, c);
+      f.flame(x, 10, z);
+    }
+    const balloons: Array<[number, Rgb, number]> = [[-10, COL.red, 15], [10, COL.blue, 17]];
+    for (const [x, c, top] of balloons) {
+      s.box(x, 0, 0, x, top - 4, 0, COL.woodDark, 0.8);
+      s.box(x - 1, top - 3, -1, x + 1, top, 1, c);
+      s.box(x, top + 1, 0, x, top + 1, 0, c, 1.1);
+    }
+  });
+
   // Sukkah: three low walls, an open front, a roof of branches with gaps (you see the sky
   // through it), and decorations hanging inside.
   model('sukkot', s => {

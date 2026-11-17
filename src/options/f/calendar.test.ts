@@ -50,6 +50,16 @@ describe('festiveFor', () => {
     expect(festiveFor(at(2026, 11, 21, 17, 30), 16.65)).toBeNull();
   });
 
+  it('keeps the birthday on 29 July, but never on the fast of Av or over Shabbat', () => {
+    expect(festiveFor(at(2027, 7, 29))).toEqual({ key: 'birthday', label: "Roy's birthday", count: 0 });
+    expect(festiveFor(at(2027, 7, 28))).toBeNull();
+    // 29 July 2031 is 9 Av itself: nothing to celebrate.
+    expect(festiveFor(at(2031, 7, 29))).toBeNull();
+    // 29 July 2028 is a Saturday: Shabbat wins by day, the birthday shows once it is out.
+    expect(festiveFor(at(2028, 7, 29, 11))?.key).toBe('shabbat');
+    expect(festiveFor(at(2028, 7, 29, 21), 19.7)?.key).toBe('birthday');
+  });
+
   it('is null on an ordinary weekday', () => {
     expect(festiveFor(at(2026, 11, 17))).toBeNull();
   });

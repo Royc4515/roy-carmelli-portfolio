@@ -850,7 +850,8 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
         const dayGlow = 0.25 + 0.75 * (1 - L.night);
         fall(Math.round((300 + 1400 * L.rain) * L.rain * qualityScale), 0, 330, 0.12 + L.wind * 0.55, 0, [0.42, 12, 0.42], [0.72, 0.8, 0.95], 0.5 * dayGlow + 0.12);
         fall(Math.round(900 * L.snow * qualityScale), 0, 30, L.wind * 0.9, 7, [2.1, 2.1, 2.1], [1, 1, 1], 0.45 * dayGlow + 0.2);
-        if (festShown === 'purim' && heroNear) {
+        // Confetti for Purim, and for the birthday.
+        if ((festShown === 'purim' || festShown === 'birthday') && heroNear) {
           tint([1, 1, 1], 0);
           const count = Math.round(precip.confetti.count * festAmt * qualityScale);
           if (count > 0) {

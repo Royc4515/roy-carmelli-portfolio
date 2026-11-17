@@ -5,7 +5,7 @@
  */
 
 export type Condition = 'clear' | 'partly' | 'cloudy' | 'fog' | 'rain' | 'snow' | 'storm';
-export type Festive = 'hanukkah' | 'purim' | 'sukkot' | 'independence' | 'shabbat';
+export type Festive = 'hanukkah' | 'purim' | 'sukkot' | 'independence' | 'shabbat' | 'birthday';
 
 export interface Ambience {
   /** Local time of day in hours, 0 to 24 (e.g. 21.7). */
@@ -253,7 +253,7 @@ export function cloneLook(look: Look): Look {
 }
 
 const CONDITIONS: Condition[] = ['clear', 'partly', 'cloudy', 'fog', 'rain', 'snow', 'storm'];
-const FESTIVE: Festive[] = ['hanukkah', 'purim', 'sukkot', 'independence', 'shabbat'];
+const FESTIVE: Festive[] = ['hanukkah', 'purim', 'sukkot', 'independence', 'shabbat', 'birthday'];
 
 /** Before the page tells us anything: a clear sky at the device's own hour. */
 export function defaultAmbience(now = new Date()): Ambience {

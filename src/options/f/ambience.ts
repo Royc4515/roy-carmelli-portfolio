@@ -108,6 +108,25 @@ function previewHour(): number | null {
   return Number.isFinite(hour) && hour >= 0 && hour < 24 ? hour : null;
 }
 
+const PREVIEW_LABELS: Record<Festive, string> = {
+  hanukkah: 'Hanukkah',
+  purim: 'Purim',
+  sukkot: 'Sukkot',
+  independence: 'Independence Day',
+  shabbat: 'Shabbat',
+  birthday: "Roy's birthday",
+};
+
+/** `?fest=purim` previews a special day in the scene; the line of text names it too. */
+function previewFestive(): FestiveDay | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const key = params.get('fest') as Festive | null;
+  if (!key || !(key in PREVIEW_LABELS)) return null;
+  const count = key === 'hanukkah' ? Math.min(8, Math.max(1, Math.round(Number(params.get('festn')) || 4))) : 0;
+  return { key, label: count ? `Hanukkah, day ${count}` : PREVIEW_LABELS[key], count };
+}
+
 const clock = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
 
 /** Everything the scene and the info line need, assembled for one moment. */
@@ -117,7 +136,7 @@ export function buildAmbience(now: Date, mode: SkyMode, city: string | null, wea
   const liveHour = previewHour() ?? now.getHours() + now.getMinutes() / 60;
   // A manual choice shows the middle of the day, or deep night, whatever the clock says.
   const hour = mode === 'day' ? (sunrise + sunset) / 2 : mode === 'night' ? 23.5 : liveHour;
-  const festive = festiveFor(now, sunset);
+  const festive = previewFestive() ?? festiveFor(now, sunset);
   return {
     ambience: {
       hour,
