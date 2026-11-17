@@ -1,17 +1,23 @@
-/* Option F, "Voxel Roy". The canvas is the world; every piece of text sits on a solid panel
-   drawn like the game's own menus (hard border, hard shadow). Tokens are OKLCH. */
+/* Option F, "Voxel Roy". The canvas is the world. The interface floats over it as glass:
+   translucent, blurred panels with soft corners, so the scene keeps showing through and the
+   page reads as a game's HUD, not as boxes placed on top of a picture. Tokens are OKLCH. */
 
 html[data-option='f'] {
   --of-sky-top: oklch(64% 0.13 250);
   --of-sky-bottom: oklch(91% 0.04 230);
-  --of-panel: oklch(97% 0.018 90);
-  --of-ink: oklch(24% 0.03 150);
-  --of-soft: oklch(41% 0.03 150); /* 7.5:1 on the panel */
-  --of-line: oklch(24% 0.03 150);
-  --of-rule: oklch(86% 0.02 90);
-  --of-accent: oklch(43% 0.12 150); /* forest green, 7:1 on the panel */
-  --of-accent-ink: oklch(98% 0.02 90);
-  --of-shadow: oklch(24% 0.03 150 / 0.9);
+  /* Glass: mostly opaque, so text contrast never depends on what the scene draws behind it. */
+  --of-panel: oklch(98.5% 0.012 95 / 0.8);
+  --of-panel-solid: oklch(98.5% 0.012 95);
+  --of-ink: oklch(22% 0.035 255);
+  --of-soft: oklch(38% 0.035 255);
+  --of-edge: oklch(100% 0 0 / 0.7);
+  --of-rule: oklch(22% 0.035 255 / 0.13);
+  --of-accent: oklch(44% 0.13 152); /* forest green, 6.6:1 on the panel */
+  --of-accent-ink: oklch(99% 0.01 95);
+  --of-glow: oklch(70% 0.17 150 / 0.35);
+  --of-shadow: 0 24px 60px -28px oklch(25% 0.08 255 / 0.55), 0 2px 6px oklch(25% 0.08 255 / 0.08);
+  --of-display: 'Bricolage Grotesque Variable', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --of-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --o-bg: var(--of-sky-bottom);
   --o-fg: var(--of-ink);
@@ -24,14 +30,16 @@ html[data-option='f'] {
 html[data-option='f'][data-theme='night'] {
   --of-sky-top: oklch(17% 0.05 265);
   --of-sky-bottom: oklch(27% 0.07 265);
-  --of-panel: oklch(21% 0.035 265);
-  --of-ink: oklch(94% 0.03 90);
-  --of-soft: oklch(79% 0.03 90); /* 8.6:1 on the panel */
-  --of-line: oklch(84% 0.12 85);
-  --of-rule: oklch(34% 0.04 265);
-  --of-accent: oklch(84% 0.13 85); /* the site's gold, 10:1 on the panel */
-  --of-accent-ink: oklch(21% 0.035 265);
-  --of-shadow: oklch(8% 0.03 265 / 0.9);
+  --of-panel: oklch(19% 0.04 265 / 0.78);
+  --of-panel-solid: oklch(19% 0.04 265);
+  --of-ink: oklch(96% 0.02 90);
+  --of-soft: oklch(82% 0.03 255);
+  --of-edge: oklch(100% 0 0 / 0.14);
+  --of-rule: oklch(100% 0 0 / 0.14);
+  --of-accent: oklch(86% 0.14 88); /* the site's gold */
+  --of-accent-ink: oklch(19% 0.04 265);
+  --of-glow: oklch(86% 0.14 88 / 0.3);
+  --of-shadow: 0 24px 60px -24px oklch(5% 0.03 265 / 0.8), 0 2px 6px oklch(5% 0.03 265 / 0.3);
 }
 
 .of-root {
@@ -39,6 +47,8 @@ html[data-option='f'][data-theme='night'] {
   min-height: 100vh;
   /* The page's own sky: what you see before the first frame, and all you see without WebGL. */
   background: linear-gradient(var(--of-sky-top), var(--of-sky-bottom)) fixed;
+  font-size: 1.0625rem;
+  line-height: 1.6;
 }
 
 .of-canvas {
@@ -76,40 +86,42 @@ main,
   z-index: 1;
 }
 
-/* ── Panels ───────────────────────────────────────────────────────────────── */
+/* ── Glass ────────────────────────────────────────────────────────────────── */
+.of-card,
+.of-nav__bar,
+.of-dock,
+.of-footer {
+  background: var(--of-panel);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid var(--of-edge);
+  box-shadow: var(--of-shadow);
+  color: var(--of-ink);
+}
 
+/* ── Stations ─────────────────────────────────────────────────────────────── */
 .of-stage {
   display: flex;
-  align-items: flex-end;
-  /* Room above each panel: while it crosses the screen, Roy runs to the next island. */
-  padding: 62vh 1rem 12vh;
+  padding: 0 1rem;
 }
-.of-stage--hero {
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-end;
-  min-height: 100svh;
-  padding: 36svh 1rem 1.25rem;
-  margin-top: -4rem; /* the nav floats over the scene */
-}
-.of-root[data-scene='off'] .of-stage {
-  padding-top: 3rem;
-}
-.of-root[data-scene='off'] .of-stage--hero {
-  padding-top: 5rem;
-  justify-content: center;
-}
-
 .of-card {
+  position: relative;
   width: 100%;
-  max-width: 34rem;
-  padding: 1.25rem;
-  background: var(--of-panel);
-  border: 3px solid var(--of-line);
-  box-shadow: 6px 6px 0 var(--of-shadow);
+  max-width: 29rem;
+  padding: 1.375rem 1.25rem 1.25rem;
+  border-radius: 26px;
+  overflow: hidden;
+}
+/* A lit top edge: the one piece of "game" on the panel. */
+.of-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--of-accent), transparent 70%);
 }
 .of-card[data-wide] {
-  max-width: 40rem;
+  max-width: 36rem;
 }
 
 .of-kicker,
@@ -118,59 +130,71 @@ main,
 .of-status,
 .of-row__kind,
 .of-facts dt {
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--of-mono);
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.04em;
+  line-height: 1.4;
   color: var(--of-soft);
 }
 .of-kicker,
 .of-label {
   text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--of-accent);
 }
 .of-label {
-  margin: 1.5rem 0 0.25rem;
+  margin-top: 1.5rem;
 }
 .of-status {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--of-rule);
 }
 .of-dot {
-  width: 0.625rem;
-  height: 0.625rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
   background: var(--of-accent);
+  box-shadow: 0 0 0 4px var(--of-glow);
 }
-
 .of-name {
-  margin-top: 0.75rem;
-  font-family: var(--font-pixel);
-  /* The pixel face is wide: 12 letters must fit one line of a 375px phone's panel. */
-  font-size: clamp(1.125rem, 6vw, 2.5rem);
-  white-space: nowrap;
-  line-height: 1.25;
-  letter-spacing: 0;
+  margin-top: 0.875rem;
+  font-family: var(--of-display);
+  font-size: clamp(2.75rem, 12vw, 5rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-variation-settings: 'wdth' 92;
 }
 .of-role {
-  margin-top: 0.5rem;
-  font-size: 1.25rem;
-  font-weight: 600;
+  margin-top: 0.75rem;
+  font-family: var(--of-display);
+  font-size: clamp(1.25rem, 3.2vw, 1.625rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   color: var(--of-accent);
 }
 .of-title {
-  margin-top: 0.375rem;
-  font-size: clamp(1.625rem, 5vw, 2rem);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  margin-top: 0.4rem;
+  font-family: var(--of-display);
+  font-size: clamp(1.875rem, 4.4vw, 2.5rem);
+  font-weight: 760;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
 }
 .of-title__sub {
   display: block;
-  margin-top: 0.125rem;
+  margin-top: 0.3rem;
+  font-family: var(--o-font);
   font-size: 1.0625rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0;
+  line-height: 1.3;
   color: var(--of-soft);
 }
 .of-lede {
@@ -179,9 +203,8 @@ main,
   line-height: 1.55;
 }
 .of-meta {
-  margin-top: 0.625rem;
+  margin-top: 0.75rem;
 }
-
 .of-points {
   margin-top: 1rem;
   display: grid;
@@ -190,145 +213,169 @@ main,
 .of-points li {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.625rem;
-  font-size: 1rem;
+  gap: 0.6rem;
   line-height: 1.45;
+  color: var(--of-soft);
 }
 .of-points__icon {
-  margin-top: 0.2rem;
-  font-size: 1.125rem;
+  margin-top: 0.2em;
+  font-size: 1.05rem;
   color: var(--of-accent);
 }
-
 .of-actions {
-  margin-top: 1rem;
+  margin-top: 1.125rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.625rem 1rem;
+  gap: 0.5rem 0.75rem;
 }
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
 .of-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   min-height: 48px;
-  padding: 0 1rem;
-  background: var(--of-panel);
-  border: 2px solid var(--of-line);
-  box-shadow: 3px 3px 0 var(--of-shadow);
+  padding: 0 1.125rem;
+  border-radius: 14px;
+  border: 1px solid var(--of-rule);
+  background: color-mix(in oklab, var(--of-panel-solid) 70%, transparent);
   font-size: 1rem;
   font-weight: 600;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  white-space: nowrap;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .of-btn--primary {
   background: var(--of-accent);
+  border-color: var(--of-accent);
   color: var(--of-accent-ink) !important;
+  box-shadow: 0 8px 22px -8px var(--of-glow);
 }
 .of-btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 var(--of-shadow);
+  transform: translateY(-2px);
+  border-color: var(--of-accent);
+}
+.of-btn--primary:hover {
+  box-shadow: 0 14px 28px -8px var(--of-glow);
 }
 .of-btn:active {
-  transform: translate(3px, 3px);
-  box-shadow: 0 0 0 var(--of-shadow);
+  transform: translateY(0) scale(0.98);
 }
 .of-btn svg {
-  font-size: 1.125rem;
+  flex: none;
+  font-size: 1.0625rem;
 }
-
 .of-link {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   min-height: 44px;
+  padding: 0 0.25rem;
   font-weight: 600;
   color: var(--of-accent) !important;
-  text-decoration: underline !important;
-  text-underline-offset: 3px;
-  overflow-wrap: anywhere;
+  background: linear-gradient(currentColor, currentColor) 0.25rem calc(100% - 0.6rem) / calc(100% - 1.6rem) 1.5px no-repeat;
 }
 .of-link__icon {
-  flex: none;
+  font-size: 0.95em;
+  transition: transform 0.2s ease;
 }
-
+.of-link:hover .of-link__icon {
+  transform: translate(2px, -2px);
+}
 .of-icon-btn {
-  display: grid;
+  display: inline-grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  background: var(--of-panel);
-  border: 2px solid var(--of-line);
-  box-shadow: 3px 3px 0 var(--of-shadow);
-  font-size: 1.25rem;
+  border-radius: 999px;
+  font-size: 1.125rem;
+  transition: background-color 0.15s ease;
+}
+.of-icon-btn:hover {
+  background: var(--of-rule);
 }
 
-/* ── Nav ──────────────────────────────────────────────────────────────────── */
-
+/* ── Top bar: one glass pill ──────────────────────────────────────────────── */
 .of-nav {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  position: fixed;
+  inset: 0.75rem 0 auto 0;
+  z-index: 20;
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.75rem;
-  height: 4rem;
-  padding: 0 1rem;
-  pointer-events: none; /* the bar itself is air: only its controls take clicks */
+  justify-content: center;
+  padding: 0 0.75rem;
+  pointer-events: none;
 }
-.of-nav > * {
+.of-nav__bar {
   pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.375rem 0.25rem 1rem;
+  border-radius: 999px;
+}
+.of-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-right: 0.5rem;
+  font-family: var(--of-display);
+  font-size: 1.0625rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 .of-nav__links {
   display: none;
-  background: var(--of-panel);
-  border: 2px solid var(--of-line);
-  box-shadow: 3px 3px 0 var(--of-shadow);
 }
 .of-nav__links a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 0.875rem;
-  font-weight: 600;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  color: var(--of-soft);
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 .of-nav__links a:hover {
-  color: var(--of-accent);
+  color: var(--of-ink);
+  background: var(--of-rule);
 }
 
-/* ── Lists ────────────────────────────────────────────────────────────────── */
-
+/* ── Lists and facts ──────────────────────────────────────────────────────── */
 .of-rows {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 .of-row {
   display: grid;
-  gap: 0 1rem;
-  padding: 0.75rem 0 0.25rem;
+  gap: 0.125rem 1rem;
+  padding: 0.75rem 0 0.375rem;
   border-top: 1px solid var(--of-rule);
 }
 .of-row__name {
   font-size: 1.0625rem;
-  font-weight: 600;
+  font-weight: 650;
 }
 .of-row__text {
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
   font-size: 1rem;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--of-soft);
 }
 .of-row__links {
   display: flex;
-  gap: 1.25rem;
+  gap: 0.75rem;
 }
-
 .of-prose {
-  margin-top: 0.75rem;
+  margin-top: 0.875rem;
   display: grid;
   gap: 0.875rem;
-  font-size: 1rem;
-  line-height: 1.6;
+  color: var(--of-soft);
+}
+.of-prose p:first-child {
+  color: var(--of-ink);
 }
 .of-facts {
   margin-top: 1.25rem;
@@ -340,7 +387,6 @@ main,
   border-top: 1px solid var(--of-rule);
 }
 .of-facts dd {
-  font-size: 1rem;
   line-height: 1.45;
 }
 .of-facts dd span {
@@ -348,119 +394,123 @@ main,
   font-size: 0.875rem;
   color: var(--of-soft);
 }
-
 .of-email a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   margin-top: 0.5rem;
-  font-size: clamp(1.125rem, 5.2vw, 1.5rem);
-  font-weight: 600;
+  font-family: var(--of-display);
+  font-size: clamp(1.25rem, 5.4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--of-accent);
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 
 .of-footer {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0 1rem;
-  padding: 0.75rem 1rem;
-  /* Above the fixed controls and the review chip. */
-  margin-bottom: 9rem;
-  background: var(--of-panel);
-  border: 2px solid var(--of-line);
+  margin: 0 1rem 6.5rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: 18px;
   font-size: 0.875rem;
   color: var(--of-soft);
 }
 
-/* ── Scene controls ───────────────────────────────────────────────────────── */
-
-/* Phones: a row at the top left, over the sky, so the controls never cover a panel. */
+/* ── The dock: the scene's own controls, in one glass bar ─────────────────── */
 .of-controls {
   position: fixed;
-  left: 0.75rem;
-  top: 0.625rem;
-  z-index: 6;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 20;
+}
+.of-dock {
   display: flex;
-  flex-direction: row-reverse;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-.of-card--hero .of-actions {
-  flex-wrap: nowrap;
-  gap: 0.5rem;
-}
-.of-card--hero .of-btn {
-  padding: 0 0.625rem;
-  font-size: 0.9375rem;
-  white-space: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
 }
 .of-chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   min-height: 44px;
-  padding: 0 0.75rem;
-  background: var(--of-panel);
-  border: 2px solid var(--of-line);
-  box-shadow: 3px 3px 0 var(--of-shadow);
-  font-size: 0.875rem;
+  min-width: 44px;
+  padding: 0 0.875rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
   font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.of-chip:hover {
+  background: var(--of-rule);
+}
+.of-chip:active {
+  transform: scale(0.96);
 }
 .of-chip:disabled {
-  opacity: 0.55;
+  opacity: 0.45;
   cursor: default;
 }
 .of-chip--play {
   background: var(--of-accent);
   color: var(--of-accent-ink);
 }
-/* Phones: the jump toy would cover the panels (tapping Roy does the same); pause stays. */
+.of-chip--play:hover {
+  background: var(--of-accent);
+  transform: translateY(-1px);
+}
 .of-chip--toy {
   display: none;
 }
 
 /* ── Project dialog ───────────────────────────────────────────────────────── */
-
 .of-dialog {
-  width: min(48rem, calc(100vw - 1.5rem));
-  max-height: calc(100dvh - 1.5rem);
+  width: min(54rem, 100vw - 1.5rem);
+  max-width: none;
+  max-height: min(88dvh, 58rem);
   margin: auto;
   padding: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--of-panel);
+  border: 1px solid var(--of-edge);
+  border-radius: 28px;
+  background: var(--of-panel-solid);
   color: var(--of-ink);
-  border: 3px solid var(--of-line);
-  box-shadow: 8px 8px 0 var(--of-shadow);
-  font-family: var(--o-font);
+  box-shadow: var(--of-shadow);
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 .of-dialog::backdrop {
-  background: oklch(15% 0.03 265 / 0.72);
+  background: oklch(15% 0.05 260 / 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 .of-dialog__body {
-  position: relative;
-  padding: 1.25rem;
+  padding: clamp(1.25rem, 4vw, 2.75rem);
 }
 .of-dialog__close {
   position: sticky;
-  top: 0.75rem;
+  top: 0.5rem;
   float: right;
-  margin-left: 0.75rem;
+  margin: -0.5rem -0.5rem 0 1rem;
+  background: var(--of-panel-solid);
+  border: 1px solid var(--of-rule);
 }
 .of-dialog__image {
   display: block;
   width: 100%;
   margin-top: 1.25rem;
-  border: 2px solid var(--of-line);
+  border-radius: 16px;
+  border: 1px solid var(--of-rule);
 }
 .of-dialog__text {
   margin-top: 0.875rem;
   max-width: 40rem;
   font-size: 1rem;
   line-height: 1.6;
+  color: var(--of-soft);
 }
 
 /* ── Play mode (the real game, from option D's Arcade component) ───────────── */
@@ -524,8 +574,69 @@ main,
   color: var(--color-fg-muted);
 }
 
-/* ── Wider screens: text on the left, the world on the right ──────────────── */
+/* ── Phones: the world keeps the top of the screen, panels rise from the bottom ── */
+@media (max-width: 59.99rem) {
+  /* The scene is drawn in the upper part only and fades into the page's sky, so a panel at
+     rest never sits on top of Roy. */
+  .of-canvas {
+    height: 62lvh;
+    -webkit-mask-image: linear-gradient(#000 78%, transparent);
+    mask-image: linear-gradient(#000 78%, transparent);
+  }
+  .of-stage {
+    /* The distance between panels is the stretch where Roy travels to the next island. */
+    padding-top: 62svh;
+    padding-bottom: 8svh;
+  }
+  .of-stage--hero {
+    padding-top: 46svh;
+  }
+  .of-root[data-scene='off'] .of-stage {
+    padding-top: 2rem;
+  }
+  .of-root[data-scene='off'] .of-stage--hero {
+    padding-top: 5.5rem;
+    flex-direction: column;
+  }
+  .of-card {
+    max-width: none;
+  }
+  .of-card--hero .of-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .of-card--hero .of-btn {
+    padding: 0 0.5rem;
+    font-size: 0.9375rem;
+  }
+  .of-chip__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .of-chip--play .of-chip__label {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+}
+/* A panel comes to rest with its top just under the scene. Proximity, not mandatory: a long
+   panel still scrolls freely. */
+@media (max-width: 59.99rem) and (prefers-reduced-motion: no-preference) {
+  html[data-option='f'] {
+    scroll-snap-type: y proximity;
+  }
+  .of-card[data-station] {
+    scroll-snap-align: start;
+    scroll-margin-top: 54svh;
+  }
+}
 
+/* ── Wider screens: panels on the left, the world on the right ────────────── */
 @media (min-width: 60rem) {
   .of-stage {
     align-items: center;
@@ -533,19 +644,28 @@ main,
     padding: 34vh clamp(1.5rem, 5vw, 5rem) 34vh;
   }
   .of-stage--hero {
-    align-items: flex-start;
-    justify-content: center;
     padding-top: 6rem;
     padding-bottom: 2rem;
   }
+  .of-root[data-scene='off'] .of-stage {
+    min-height: 0;
+    padding-block: 3rem;
+  }
+  .of-root[data-scene='off'] .of-stage--hero {
+    padding-top: 7rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
   .of-card {
-    padding: 1.75rem;
+    padding: 1.75rem 1.75rem 1.5rem;
   }
   .of-card--hero {
-    max-width: 36rem;
-    padding: 2.25rem;
+    max-width: 34rem;
+    padding: 2.25rem 2.25rem 2rem;
+    border-radius: 32px;
   }
   .of-nav {
+    justify-content: flex-start;
     padding: 0 clamp(1.5rem, 5vw, 5rem);
   }
   .of-nav__links {
@@ -560,26 +680,48 @@ main,
     gap: 1rem;
   }
   .of-footer {
-    max-width: 40rem;
-    margin-left: clamp(1.5rem, 5vw, 5rem);
-    margin-bottom: 2rem;
+    max-width: 36rem;
+    margin: 0 0 2rem clamp(1.5rem, 5vw, 5rem);
   }
   .of-controls {
-    left: auto;
-    top: auto;
     right: 1.25rem;
     bottom: 1.25rem;
-    flex-direction: column;
-  }
-  .of-card--hero .of-btn {
-    padding: 0 1rem;
-    font-size: 1rem;
   }
   .of-chip--toy {
     display: inline-flex;
   }
 }
 
+/* ── Motion ───────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* The hero panel arrives after the camera's opening move. */
+  .of-root[data-scene='on'] .of-card--hero {
+    animation: of-arrive 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both;
+  }
+  @keyframes of-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.97);
+    }
+  }
+  /* Later panels rise into place as they scroll in (where view timelines exist). */
+  @supports (animation-timeline: view()) {
+    .of-stage:not(.of-stage--hero) .of-card {
+      animation: of-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+    @keyframes of-rise {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+      }
+    }
+  }
+  .of-dialog[open] {
+    animation: of-arrive 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .opt-f *,
   .opt-f *::before,
@@ -587,4 +729,10 @@ main,
     transition: none !important;
     animation: none !important;
   }
+}
+
+.of-pause {
+  width: 12px;
+  height: 14px;
+  border-inline: 4px solid currentColor;
 }

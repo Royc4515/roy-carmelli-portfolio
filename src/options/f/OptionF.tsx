@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import '@fontsource-variable/bricolage-grotesque/wdth.css';
 import { useTheme } from '../../hooks/useTheme';
 import { OptionShell } from '../shared/OptionShell';
 import {
@@ -25,7 +26,7 @@ import {
   type Project,
 } from '../shared/content';
 import { useCopyEmail, useModalDialog, usePrefersReducedMotion } from '../shared/hooks';
-import { ArrowRight, ArrowUpRight, Check, Close, Copy, Download, Mail, Moon, Play, Sun } from '../shared/icons';
+import { ArrowRight, ArrowUpRight, ArrowDown, Check, Close, Copy, Download, Mail, Moon, Play, Sun } from '../shared/icons';
 import Arcade from '../d/Arcade';
 import type { VoxelWorld } from './engine';
 import './f.css';
@@ -105,7 +106,7 @@ function Station({ id, label, children, wide }: { id: string; label: string; chi
 function ProjectStation({ project, index, onOpen }: { project: Project; index: number; onOpen: (p: Project) => void }) {
   const { name, descriptor } = splitTitle(project.title);
   return (
-    <Station id={`project-${project.id}`} label={`Quest ${index + 1} of ${mainProjects.length} / ${project.kind}`}>
+    <Station id={`project-${project.id}`} label={`${String(index + 1).padStart(2, '0')} / ${project.kind} / ${project.year}`}>
       <h2 className="of-title" id={`project-${project.id}-title`}>
         {name}
         {descriptor && <span className="of-title__sub">{descriptor}</span>}
@@ -212,17 +213,22 @@ export default function OptionF() {
       <div className="of-root" data-scene={scene}>
         <Scene theme={theme} paused={paused} onState={setScene} worldRef={world} />
 
-        <header className="of-nav" data-solid="">
-          <nav aria-label="Page">
-            <ul className="of-nav__links">
-              <li><a href={`#project-${mainProjects[0].id}`}>Work</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </nav>
-          <button type="button" className="of-icon-btn" onClick={toggleTheme} aria-pressed={theme === 'night'} aria-label="Night theme">
-            {theme === 'night' ? <Sun /> : <Moon />}
-          </button>
+        <header className="of-nav">
+          <div className="of-nav__bar" data-solid="">
+            <a className="of-nav__brand" href="#main">
+              {bio.name}
+            </a>
+            <nav aria-label="Page">
+              <ul className="of-nav__links">
+                <li><a href={`#project-${mainProjects[0].id}`}>Work</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+              </ul>
+            </nav>
+            <button type="button" className="of-icon-btn" onClick={toggleTheme} aria-pressed={theme === 'night'} aria-label="Night theme">
+              {theme === 'night' ? <Sun /> : <Moon />}
+            </button>
+          </div>
         </header>
 
         <main id="main">
@@ -255,8 +261,8 @@ export default function OptionF() {
             <ProjectStation key={project.id} project={project} index={i} onOpen={setOpen} />
           ))}
 
-          <Station id="more" label="Side quests" wide>
-            <h2 className="of-title" id="more-title">More work</h2>
+          <Station id="more" label="More work" wide>
+            <h2 className="of-title" id="more-title">Side projects</h2>
             <ul className="of-rows">
               {sideProjects.map(project => <Row key={project.id} project={project} />)}
             </ul>
@@ -325,21 +331,25 @@ export default function OptionF() {
         </footer>
 
         {/* The scene's own controls: stop the motion, poke Roy, or play the real game. */}
-        <div className="of-controls" data-solid="">
-          {scene === 'on' && !reduced && (
-            <>
-              <button type="button" className="of-chip" onClick={() => setPaused(p => !p)} aria-pressed={paused}>
-                {paused ? 'Resume scene' : 'Pause scene'}
-              </button>
-              <button type="button" className="of-chip of-chip--toy" onClick={() => world.current?.jump()} disabled={paused}>
-                Make Roy jump
-              </button>
-            </>
-          )}
-          <button type="button" className="of-chip of-chip--play" onClick={() => setPlaying(true)}>
-            <Play />
-            Play Roy Runner
-          </button>
+        <div className="of-controls">
+          <div className="of-dock" data-solid="">
+            {scene === 'on' && !reduced && (
+              <>
+                <button type="button" className="of-chip" onClick={() => setPaused(p => !p)} aria-pressed={paused}>
+                  {paused ? <Play /> : <span className="of-pause" aria-hidden="true" />}
+                  <span className="of-chip__label">{paused ? 'Resume scene' : 'Pause scene'}</span>
+                </button>
+                <button type="button" className="of-chip of-chip--toy" onClick={() => world.current?.jump()} disabled={paused}>
+                  <ArrowDown style={{ rotate: '180deg' }} />
+                  <span className="of-chip__label">Make Roy jump</span>
+                </button>
+              </>
+            )}
+            <button type="button" className="of-chip of-chip--play" onClick={() => setPlaying(true)}>
+              <Play />
+              <span className="of-chip__label">Play Roy Runner</span>
+            </button>
+          </div>
         </div>
       </div>
       <ProjectDialog project={open} onClose={closeDialog} />
