@@ -6,7 +6,7 @@ export const bio = {
   title: "CS & Neuroscience · Bar-Ilan University",
   role: "Full-Stack & AI Developer",
   availability: "Student & intern roles · Israel",
-  contactBlurb: "I'm looking for a student or intern role in full-stack, frontend or AI development in Israel. Email works best.",
+  contactBlurb: "I'm looking for a student position in full-stack or AI development in Israel, part-time at first alongside my studies. Email works best.",
   resume: {
     href: "/Roy_Carmelli_CV.pdf",
     fileName: "Roy_Carmelli_CV.pdf",
@@ -16,11 +16,13 @@ export const bio = {
   location: "Israel",
   /** "Bar-\u2060Ilan": a word joiner after the hyphen, so the name never breaks across lines. */
   tagline: "Third-year CS & Neuroscience student at Bar-\u2060Ilan. I build web apps, Chrome extensions and AI tools, and I ship them.",
-  about: `I'm a third-year student at Bar-Ilan University, doing a dual major in Computer Science and Neuroscience. Most of my building happens on the CS side. The neuroscience side is where I learned to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children.
+  about: `I'm a third-year student at Bar-Ilan University, doing a dual major in Computer Science and Neuroscience in the honors program. Most of my building happens on the CS side. The neuroscience side is where I learned to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children.
 
 I build things I end up using. Aside puts six AI providers in a sidebar next to whatever I'm reading, and a Telegram bot keeps track of my wine cellar. I work with AI coding tools every day: I make the architecture calls, review what they write, and debug it myself.
 
-Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division: regular service from 2021, and an active reservist since August 2024. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people, ran coordination and logistics in the division's war room, and handled triage and evacuation in mass-casualty events. What I took from it: stay calm and make the call.`,
+Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division: regular service from 2021, and an active reservist since August 2024, with 400+ days of reserve duty alongside full-time studies. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people, running a regional clinic and several teams at once, ran coordination and logistics in the division's war room, and handled triage and evacuation in mass-casualty events. I also trained medics and soldiers to give medical care in the field. What I took from it: stay calm and make the call.
+
+Outside code and the army, I've taught, tutored and run trainings in Israel and abroad, led people and projects through StandWithUs, and I'm a native speaker of both English and Hebrew.`,
   email: "Roy.y.carmelli@gmail.com",
   github: "https://github.com/Royc4515",
   linkedin: "https://linkedin.com/in/roy-carmelli",
@@ -30,7 +32,7 @@ Alongside the degree, I'm an IDF battalion medic and medical coordinator in the 
 
 /** `slot` is the equipment-screen slot each category maps to. */
 export const skills = [
-  { slot: "Weapons", category: "Languages",          items: ["Java 17", "Python", "C", "C++", "JavaScript", "x86 Assembly"] },
+  { slot: "Weapons", category: "Languages",          items: ["Java 17", "Python", "C", "C++", "JavaScript", "TypeScript", "x86 Assembly"] },
   { slot: "Armor", category: "Web & Full-Stack",     items: ["React", "Node.js", "Express", "MongoDB", "React Native", "Tailwind CSS", "Vite"] },
   { slot: "Magic", category: "AI & Agents",          items: ["Claude API", "Gemini API", "OpenAI API", "Groq API", "MCP", "Claude Code", "Telegram Bot API"] },
   { slot: "Potions", category: "Data & Analysis",    items: ["NumPy", "Pandas", "SciPy", "Matplotlib", "Jupyter"] },

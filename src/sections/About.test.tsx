@@ -25,7 +25,7 @@ describe('About', () => {
   it('renders every bio paragraph, split on blank lines', () => {
     render(<About />);
     const paragraphs = bio.about.split(/\n\s*\n/).map(p => p.trim());
-    expect(paragraphs).toHaveLength(3);
+    expect(paragraphs).toHaveLength(4);
     for (const text of paragraphs) {
       expect(screen.getByText(text)).toBeInTheDocument();
     }
