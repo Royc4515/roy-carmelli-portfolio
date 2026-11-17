@@ -409,7 +409,7 @@ export default function OptionF() {
           </Station>
 
           <Station id="about" label="About" wide fit>
-            <h2 className="of-title" id="about-title">{DEGREE}</h2>
+            <h2 className="of-title" id="about-title">Student, builder, medic</h2>
             <div className="of-prose">
               {aboutParagraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
             </div>
@@ -444,7 +444,7 @@ export default function OptionF() {
           </Station>
 
           <Station id="contact" label="Contact">
-            <h2 className="of-title" id="contact-title">Get in touch</h2>
+            <h2 className="of-title" id="contact-title">Hiring a student developer?</h2>
             <p className="of-lede">{bio.contactBlurb}</p>
             <p className="of-email">
               <a href={MAILTO}>{EMAIL_SHOWN}</a>

@@ -5,7 +5,7 @@ export const bio = {
   nameHe: "רועי כרמלי",
   title: "CS & Neuroscience · Bar-Ilan University",
   role: "Full-Stack & AI Developer",
-  availability: "Student & intern roles · Israel",
+  availability: "Open to student roles · Part-time · Israel",
   contactBlurb: "I'm looking for a student position in full-stack or AI development in Israel, part-time at first alongside my studies. Email works best.",
   resume: {
     href: "/Roy_Carmelli_CV.pdf",
@@ -15,14 +15,14 @@ export const bio = {
   institution: "Bar-Ilan University",
   location: "Israel",
   /** "Bar-\u2060Ilan": a word joiner after the hyphen, so the name never breaks across lines. */
-  tagline: "Third-year CS & Neuroscience student at Bar-\u2060Ilan. I build web apps, Chrome extensions and AI tools, and I ship them.",
-  about: `I'm a third-year student at Bar-Ilan University, doing a dual major in Computer Science and Neuroscience in the honors program. Most of my building happens on the CS side. The neuroscience side is where I learned to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children.
+  tagline: "Third-year CS & Neuroscience honors student at Bar-\u2060Ilan. I build AI agents and full-stack apps, and I ship them tested and live.",
+  about: `I'm a third-year honors student at Bar-Ilan University, in a dual major in Computer Science and Neuroscience. Most of my building happens on the CS side. Neuroscience taught me to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children.
 
-I build things I end up using. Aside puts six AI providers in a sidebar next to whatever I'm reading, and a Telegram bot keeps track of my wine cellar. I work with AI coding tools every day: I make the architecture calls, review what they write, and debug it myself.
+I build tools I actually use, and I ship them tested and deployed, not as demos. I work with AI coding agents every day: I make the architecture calls, review what they write, and debug it myself.
 
-Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division: regular service from 2021, and an active reservist since August 2024, with 400+ days of reserve duty alongside full-time studies. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people, running a regional clinic and several teams at once, ran coordination and logistics in the division's war room, and handled triage and evacuation in mass-casualty events. I also trained medics and soldiers to give medical care in the field. What I took from it: stay calm and make the call.
+Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division: regular service from 2021, then 400+ days of reserve duty since August 2024, alongside full-time studies. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people and ran a regional clinic, coordinated medical logistics in the division's war room, made triage and evacuation calls in mass-casualty events, and trained medics and soldiers. What I took from it: stay calm and make the call.
 
-Outside code and the army, I've taught, tutored and run trainings in Israel and abroad, led people and projects through StandWithUs, and I'm a native speaker of both English and Hebrew.`,
+I've also taught, tutored and run trainings in Israel and abroad, led people and projects through StandWithUs, and I'm a native speaker of both English and Hebrew.`,
   email: "Roy.y.carmelli@gmail.com",
   github: "https://github.com/Royc4515",
   linkedin: "https://linkedin.com/in/roy-carmelli",

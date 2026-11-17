@@ -1475,3 +1475,9 @@ main,
     inset: auto 1.25rem 1.25rem auto;
   }
 }
+
+/* Nav jumps move focus to the panel's heading (frame.ts) so keyboard and screen-reader users
+   land there too. The heading is not a control, so it shows no focus ring. */
+.of-card :is(h1, h2)[tabindex='-1']:focus {
+  outline: none;
+}

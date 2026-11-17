@@ -25,7 +25,7 @@ export const projects: Project[] = [
     tier: "main",
     tagline: "A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine.",
     highlights: [
-      "271 visitors and 792 page views in its busiest week",
+      "Two faculty sites on one engine: 34 guides, 215 courses",
       "Bit and Byte chat: Prompt Guard, Neon rate limits, Groq fallback",
       "Run by 9 AI agents: QA, security, UX, simulated students",
     ],
