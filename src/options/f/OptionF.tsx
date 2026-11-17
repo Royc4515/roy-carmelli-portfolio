@@ -29,6 +29,7 @@ import { ArrowRight, ArrowUpRight, ArrowDown, Chat, Check, Close, Copy, Download
 import Arcade from '../d/Arcade';
 import { CHAT_ENABLED } from '../../components/Chat/ChatLauncher';
 import { AskRoy, Portrait } from './AskRoy';
+import { frameSection } from './frame';
 import { chatPersona } from '../../data/chatPersona';
 import type { VoxelWorld } from './engine';
 import { useAmbience, type Ambience, type SkyMode } from './ambience';
@@ -100,10 +101,10 @@ function External({ href, children, className = 'of-link' }: { href: string; chi
 }
 
 /** One station of the world: the panel is solid, the scene shows beside and between panels. */
-function Station({ id, label, children, wide }: { id: string; label: string; children: ReactNode; wide?: boolean }) {
+function Station({ id, label, children, wide, fit }: { id: string; label: string; children: ReactNode; wide?: boolean; fit?: boolean }) {
   return (
     <section className="of-stage" id={id} aria-labelledby={`${id}-title`}>
-      <div className="of-card" data-station="" data-solid="" data-wide={wide ? '' : undefined}>
+      <div className="of-card" data-station="" data-solid="" data-wide={wide ? '' : undefined} data-fit={fit ? '' : undefined}>
         <p className="of-kicker">{label}</p>
         {children}
       </div>
@@ -310,6 +311,27 @@ export default function OptionF() {
   // When Pixel Roy answers in the chat, the scene's Roy jumps: one character, two places.
   const royAnswers = useCallback(() => world.current?.jump(), []);
 
+  // In-page links frame their panel on screen (frame.ts), on click and when the page opens
+  // with a hash such as #skills.
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = (e.target as Element | null)?.closest?.('a[href^="#"]');
+      const id = link?.getAttribute('href')?.slice(1);
+      if (!id || !frameSection(id, !reduced)) return;
+      e.preventDefault();
+      history.replaceState(null, '', `#${id}`);
+    };
+    document.addEventListener('click', onClick);
+    const id = window.location.hash.slice(1);
+    // After fonts and layout settle, or the panel's position is measured too early.
+    const timer = id ? window.setTimeout(() => frameSection(id, false), 350) : 0;
+    return () => {
+      document.removeEventListener('click', onClick);
+      window.clearTimeout(timer);
+    };
+  }, [reduced]);
+
   // The interface follows the sky: dark panels once the sun is down, where the visitor is or
   // in the sky they chose. `data-theme` is the attribute the option's tokens key on.
   useEffect(() => {
@@ -386,7 +408,7 @@ export default function OptionF() {
             <MoreWork />
           </Station>
 
-          <Station id="about" label="About" wide>
+          <Station id="about" label="About" wide fit>
             <h2 className="of-title" id="about-title">{DEGREE}</h2>
             <div className="of-prose">
               {aboutParagraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}

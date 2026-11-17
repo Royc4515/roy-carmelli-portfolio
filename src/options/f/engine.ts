@@ -571,6 +571,10 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
   let jumpAt = new URLSearchParams(window.location.search).has('jump') ? -0.35 : -10;
   let lastPos = 0, facing = 1, lastRoyX = royRestX(0);
   let dirty = true;
+  // The story position the scene shows. It eases toward the scroll position instead of copying
+  // it: a mouse wheel scrolls in ~100px steps and a flick in bursts, and copied directly that made
+  // Roy and the cubes move in jumps. null until the first frame reads the page.
+  let shownPos: number | null = null;
   let royScreen = { x: 0, y: 0, r: 0 };
 
   function resize(): boolean {
@@ -633,7 +637,15 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     }
     const resized = resize();
 
-    const pos = storyPosition();
+    const scrollPos = storyPosition();
+    if (shownPos === null || opts.reducedMotion) shownPos = scrollPos;
+    else {
+      // Frame-rate independent easing (about 0.25s to settle), so 60Hz and 120Hz screens match.
+      shownPos += (scrollPos - shownPos) * (1 - Math.exp(-dt * 11));
+      if (Math.abs(scrollPos - shownPos) < 0.0005) shownPos = scrollPos;
+    }
+    const pos = shownPos;
+    const easing = pos !== scrollPos;
     const i = Math.min(STATIONS - 2, Math.floor(pos));
     const q = Math.min(1, pos - i); // 0..1 between station i and i + 1
 
@@ -982,7 +994,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
       opts.onReady();
     }
     // Still scenes (paused, reduced motion) redraw only when something changed.
-    dirty = resized || lookMoving || Math.abs(targetX - camX) > 0.05;
+    dirty = resized || lookMoving || easing || Math.abs(targetX - camX) > 0.05;
     if (animate || dirty) schedule();
   }
   let ready = false;

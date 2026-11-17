@@ -731,17 +731,8 @@ main,
     clip-path: none;
   }
 }
-/* A panel comes to rest with its top just under the scene. Proximity, not mandatory: a long
-   panel still scrolls freely. */
-@media (max-width: 59.99rem) and (prefers-reduced-motion: no-preference) {
-  html[data-option='f'] {
-    scroll-snap-type: y proximity;
-  }
-  .of-card[data-station] {
-    scroll-snap-align: start;
-    scroll-margin-top: 54svh;
-  }
-}
+/* No scroll snapping: on phones it pulled the page against the finger, which read as jerky.
+   The scene eases on its own (engine.ts), so free scrolling stays smooth. */
 
 /* ── Wider screens: panels on the left, the world on the right ────────────── */
 @media (min-width: 60rem) {
@@ -777,6 +768,27 @@ main,
   }
   .of-nav__links {
     display: flex;
+  }
+  /* About is the longest panel: on a laptop it is tightened to fit one screen (frame.ts). */
+  .of-card[data-fit] {
+    max-width: 40rem;
+  }
+  .of-card[data-fit] .of-title {
+    font-size: 2.125rem;
+  }
+  .of-card[data-fit] .of-prose {
+    gap: 0.625rem;
+    font-size: 0.96875rem;
+    line-height: 1.55;
+  }
+  .of-card[data-fit] .of-facts--pair {
+    margin-top: 0.875rem;
+  }
+  .of-card[data-fit] .of-facts > div {
+    padding: 0.5rem 0;
+  }
+  .of-card[data-fit] .of-facts dd {
+    font-size: 0.9375rem;
   }
   .of-facts--pair {
     display: grid;
