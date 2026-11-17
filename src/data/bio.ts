@@ -15,7 +15,7 @@ export const bio = {
   institution: "Bar-Ilan University",
   location: "Israel",
   /** "Bar-\u2060Ilan": a word joiner after the hyphen, so the name never breaks across lines. */
-  tagline: "Third-year CS & Neuroscience honors student at Bar-\u2060Ilan. I build AI agents and full-stack apps, and I ship them tested and live.",
+  tagline: "Third-year CS & Neuroscience honors student at Bar-\u2060Ilan. I build AI agents and full-stack apps in React, TypeScript, Node.js and Python, and I ship them tested and live.",
   about: `I'm a third-year honors student at Bar-Ilan University, in a dual major in Computer Science and Neuroscience. Most of my building happens on the CS side. Neuroscience taught me to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children.
 
 I build tools I actually use, and I ship them tested and deployed, not as demos. I work with AI coding agents every day: I make the architecture calls, review what they write, and debug it myself.

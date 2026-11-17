@@ -19,7 +19,7 @@ export const SITE_TITLE = `${bio.name} (${bio.nameHe}) - ${bio.role}`;
  */
 export const SITE_DESCRIPTION =
   `Third-year Computer Science & Neuroscience student at ${bio.institution}. ` +
-  'I build web apps, Chrome extensions and AI tools. Open to student and intern roles in Israel.';
+  'I build AI agents and full-stack web apps. Open to part-time student positions in Israel.';
 
 /** 1200x630 share card in public/. */
 export const OG_IMAGE = {

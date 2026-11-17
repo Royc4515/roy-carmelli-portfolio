@@ -8,8 +8,8 @@ export const projects: Project[] = [
     tier: "main",
     tagline: "Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally.",
     highlights: [
-      "Six AI providers behind one Factory + Strategy layer",
-      "Streaming answers (SSE / NDJSON) and a two-model compare mode",
+      "One interface for 6 AI providers (Claude, Gemini, OpenAI, Grok, Groq, Ollama), swappable at runtime",
+      "Live streaming answers, plus a mode that compares two models side by side",
       "Live demo backend with daily caps, 35 tests and 3 CI workflows",
     ],
     title: "Aside - AI Sidebar",
@@ -25,9 +25,9 @@ export const projects: Project[] = [
     tier: "main",
     tagline: "A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine.",
     highlights: [
+      "Real users: 271 visitors in its busiest week (Oct 2026)",
       "Two faculty sites on one engine: 34 guides, 215 courses",
-      "Bit and Byte chat: Prompt Guard, Neon rate limits, Groq fallback",
-      "Run by 9 AI agents: QA, security, UX, simulated students",
+      "I direct 9 Claude Code agents (QA, security, UX) and review their work",
     ],
     title: "Nechita Raka - First-Year Student Hub",
     description: "Nechita Raka (Hebrew for 'soft landing') is a student hub for first-year students at Bar-Ilan University, now for Computer Science and Neuroscience, that I built as a mentor in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 16 step-by-step guides (registration, exams, reserve duty, the shuttle), each with its own URL to share; links and FAQ answers; and the academic calendar as a timeline of the current week, with an .ics download. A course browser covers all 155 courses in the department's catalog, across 515 course groups (hours, lecturers, exam dates), and can have ChatGPT, Claude or Gemini build your schedule, then export it as .ics. The content lives in plain data files that any mentor can edit from a phone on GitHub, and the build prerenders it with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Conversations are not stored. It has an English version and an admin dashboard with anonymous counters (no cookies). The code is a multi-faculty engine: a second site for Neuroscience (brain sciences) students now runs on it, with its own 18 guides and a browser for its 60 courses. On Shabbat both sites close from candle lighting to havdalah, and the chat answers in character without calling the model. I run the project with 9 Claude Code agents with separate roles (content owners, engineer, designer, QA, security, UX, social, a simulated student): they keep memory in files, log decisions, and a /board command runs a management review from the traffic reports. QA grades simulated students against the chat and flags invented facts. 230 tests cover the API. In its busiest week the CS site drew 271 visitors and 792 page views (the site's own anonymous counters, October 2026). An independent project, not an official university site.",
