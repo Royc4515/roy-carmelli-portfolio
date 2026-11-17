@@ -1,0 +1,671 @@
+/* Option E, "Particles". The canvas is a fixed layer behind the page; everything here is the
+   ordinary HTML on top of it. Scoped to html[data-option='e'] and .oe- classes. */
+
+html[data-option='e'] {
+  /* don't touch / --oe-bg must equal LIGHT_BG / DARK_BG in ParticleStage.tsx: the canvas is
+     opaque and clears to that colour, so a mismatch shows as a seam at the page edges. */
+  --oe-bg: #f6f7fb;
+  --oe-fg: #0b1020;
+  --oe-soft: #454d63;
+  --oe-line: rgb(11 16 32 / 0.14);
+  --oe-card: rgb(255 255 255 / 0.74);
+  --oe-on-accent: #fff;
+  --oe-c0: #2450c8;
+  --oe-c1: #b23f18;
+  --oe-c2: #1553c0;
+  --oe-c3: #a3174a;
+  --oe-c4: #0b6e4f;
+  --oe-c5: #5a2bc4;
+  --oe-c6: #7a5200;
+  --oe-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --o-bg: var(--oe-bg);
+  --o-fg: var(--oe-fg);
+  --o-font: var(--oe-sans);
+  --o-focus: var(--oe-fg);
+  --o-select-bg: var(--oe-fg);
+  --o-select-fg: var(--oe-bg);
+  --o-scroll-pad: 0px;
+}
+html[data-option='e'][data-theme='night'] {
+  --oe-bg: #05070e;
+  --oe-fg: #f1f4fb;
+  --oe-soft: #b3bbcf;
+  --oe-line: rgb(255 255 255 / 0.16);
+  --oe-card: rgb(10 14 26 / 0.68);
+  --oe-on-accent: #05070e;
+  --oe-c0: #9cc7ff;
+  --oe-c1: #ff9a6b;
+  --oe-c2: #86c0ff;
+  --oe-c3: #ff8fae;
+  --oe-c4: #5fe0b0;
+  --oe-c5: #c7a2ff;
+  --oe-c6: #ffc94d;
+}
+
+.oe-page {
+  position: relative;
+  font-family: var(--oe-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  --oe-pad: clamp(1.25rem, 6vw, 6rem);
+}
+.oe-stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+[data-gl='on'] .oe-stage {
+  opacity: 1;
+}
+/* A soft vignette over the canvas keeps the screen edges quiet. */
+.oe-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, color-mix(in oklab, var(--oe-bg) 78%, transparent) 100%);
+}
+.oe-page > :not(.oe-stage, .oe-veil) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Top bar ──────────────────────────────────────────────────────────── */
+.oe-nav {
+  position: fixed !important;
+  inset: 0 0 auto 0;
+  z-index: 20 !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem var(--oe-pad);
+}
+/* Cards scroll under the bar: fade them out behind it instead of colliding with the name. */
+.oe-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 -1.5rem 0;
+  z-index: -1;
+  background: linear-gradient(var(--oe-bg) 35%, transparent);
+  pointer-events: none;
+}
+.oe-nav__name {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.oe-nav__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.oe-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 1.125rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.oe-icon-btn:hover {
+  background: var(--oe-card);
+  border-color: var(--oe-line);
+}
+.oe-pause {
+  width: 12px;
+  height: 14px;
+  border-inline: 4px solid currentColor;
+}
+
+/* ── Buttons and links ────────────────────────────────────────────────── */
+.oe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--oe-line);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s ease, border-color 0.2s ease, color 0.3s ease;
+}
+.oe-btn svg {
+  flex: none;
+  font-size: 1.0625rem;
+}
+.oe-btn:hover {
+  transform: translateY(-2px);
+}
+.oe-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.oe-btn--accent {
+  background: var(--oe-accent);
+  border-color: var(--oe-accent);
+  color: var(--oe-on-accent) !important;
+}
+.oe-btn--ghost {
+  background: var(--oe-card);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.oe-btn--ghost:hover {
+  border-color: var(--oe-accent);
+}
+.oe-btn--small {
+  min-height: 44px;
+  padding: 0 1rem;
+  font-size: 0.9375rem;
+  background: var(--oe-card);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.oe-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0 0.25rem;
+  font-weight: 600;
+  color: var(--oe-soft);
+  transition: color 0.15s ease;
+}
+.oe-link:hover {
+  color: var(--oe-fg);
+}
+.oe-link__icon {
+  font-size: 0.95em;
+  transition: transform 0.2s ease;
+}
+:is(.oe-link, .oe-btn):hover .oe-link__icon {
+  transform: translate(2px, -2px);
+}
+.oe-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem 0.875rem;
+  margin-top: 1.5rem;
+}
+.oe-row--center {
+  justify-content: center;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.oe-hero {
+  min-height: 100svh;
+  display: grid;
+  align-content: end;
+  justify-items: center;
+  padding: 5rem var(--oe-pad) clamp(3.5rem, 9svh, 6rem);
+  text-align: center;
+}
+/* The name: drawn by the particles when the canvas runs, plain text when it cannot. */
+.oe-hero__name {
+  font-size: clamp(3rem, 13vw, 9rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin-bottom: 4svh;
+}
+[data-gl='wait'] .oe-hero__name {
+  visibility: hidden;
+}
+[data-gl='on'] .oe-hero__name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.oe-hero__text {
+  max-width: 40rem;
+}
+.oe-hero__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  color: var(--oe-soft);
+}
+.oe-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--oe-accent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--oe-accent) 25%, transparent);
+}
+.oe-hero__role {
+  margin-top: 0.5rem;
+  font-size: clamp(1.625rem, 4.4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+.oe-hero__pitch {
+  margin-top: 0.75rem;
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  color: var(--oe-soft);
+}
+.oe-hero__meta {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--oe-soft);
+}
+.oe-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  translate: -50% 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--oe-soft);
+  opacity: 0.8;
+}
+
+/* ── Scenes: a card on one side, the particles on the other ───────────── */
+.oe-scene {
+  min-height: 135vh;
+  display: grid;
+  align-items: center;
+  padding: 0 var(--oe-pad);
+}
+.oe-scene--last {
+  min-height: 115vh;
+}
+.oe-card {
+  width: min(100%, 31rem);
+  padding: clamp(1.25rem, 2.4vw, 2rem);
+  border-radius: 24px;
+  border: 1px solid var(--oe-line);
+  background: var(--oe-card);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: 0 30px 80px -40px rgb(0 0 0 / 0.5);
+}
+.oe-card--wide {
+  width: min(100%, 38rem);
+}
+/* The shape is on `data-side`; the card takes the other half. */
+.oe-scene[data-side='left'] .oe-card {
+  justify-self: end;
+}
+.oe-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--oe-accent);
+  transition: color 0.4s ease;
+}
+.oe-kicker__no {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+.oe-card__title {
+  margin-top: 0.5rem;
+  font-size: clamp(1.875rem, 3.6vw, 2.75rem);
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+.oe-card__title span {
+  color: var(--oe-soft);
+  font-weight: 550;
+}
+.oe-card__title--big {
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.oe-card__lede {
+  margin-top: 0.875rem;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+.oe-card__p {
+  margin-top: 0.875rem;
+  color: var(--oe-soft);
+}
+.oe-card__p:first-of-type {
+  color: var(--oe-fg);
+}
+.oe-points {
+  margin-top: 1.125rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.oe-points li {
+  position: relative;
+  padding-left: 1.25rem;
+  color: var(--oe-soft);
+  line-height: 1.45;
+}
+.oe-points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--oe-accent);
+  transition: background-color 0.4s ease;
+}
+
+/* More work */
+.oe-works {
+  margin-top: 1rem;
+}
+.oe-work {
+  display: grid;
+  gap: 0.125rem 1rem;
+  padding: 0.75rem 0 0.25rem;
+  border-top: 1px solid var(--oe-line);
+}
+.oe-work__name {
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.oe-work__kind {
+  font-size: 0.875rem;
+  color: var(--oe-soft);
+}
+.oe-work__text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--oe-soft);
+}
+.oe-work__links {
+  display: flex;
+  gap: 1rem;
+}
+@media (min-width: 40rem) {
+  .oe-work {
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+  }
+  .oe-work__links {
+    grid-column: 2;
+  }
+}
+
+/* About facts */
+.oe-facts {
+  margin-top: 1.25rem;
+}
+.oe-facts > div {
+  display: grid;
+  gap: 0.125rem 1rem;
+  padding: 0.625rem 0;
+  border-top: 1px solid var(--oe-line);
+}
+.oe-facts dt {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--oe-soft);
+}
+.oe-facts dd span {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--oe-soft);
+}
+@media (min-width: 40rem) {
+  .oe-facts > div {
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+  }
+}
+
+/* ── Section dots ─────────────────────────────────────────────────────── */
+.oe-dots {
+  display: none;
+}
+@media (min-width: 64rem) and (pointer: fine) {
+  .oe-dots {
+    display: block;
+    position: fixed !important;
+    right: 1rem;
+    top: 50%;
+    translate: 0 -50%;
+    z-index: 15 !important;
+  }
+  .oe-dots a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    height: 28px;
+    padding: 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+  .oe-dots__label {
+    opacity: 0;
+    translate: 6px 0;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    background: var(--oe-card);
+    transition: opacity 0.15s ease, translate 0.15s ease;
+    pointer-events: none;
+  }
+  .oe-dots a:hover .oe-dots__label,
+  .oe-dots a:focus-visible .oe-dots__label {
+    opacity: 1;
+    translate: 0;
+  }
+  .oe-dots__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--oe-soft);
+    transition: scale 0.25s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .oe-dots a[aria-current] .oe-dots__dot {
+    scale: 1.5;
+    background: var(--oe-accent);
+    border-color: var(--oe-accent);
+  }
+}
+
+/* ── Phones: the shape sits in the upper part, the card scrolls over it ── */
+@media (max-width: 47.99rem) {
+  .oe-hero {
+    padding-top: 0;
+    /* The two-line name takes the top 45% of the screen. */
+    align-content: start;
+  }
+  .oe-hero__text {
+    margin-top: 47svh;
+  }
+  [data-gl='off'] .oe-hero__text {
+    margin-top: 1rem;
+  }
+  [data-gl='off'] .oe-hero {
+    padding-top: 6rem;
+  }
+  .oe-scene {
+    min-height: 0;
+    align-items: start;
+    padding-top: 64svh;
+    padding-bottom: 28svh;
+  }
+  .oe-scene--last {
+    padding-bottom: 6rem;
+  }
+  .oe-card {
+    background: color-mix(in oklab, var(--oe-bg) 86%, transparent);
+  }
+  .oe-btn {
+    padding: 0 1rem;
+  }
+  .oe-hero .oe-btn {
+    width: 100%;
+  }
+  .oe-hint {
+    display: none;
+  }
+}
+
+.oe-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem var(--oe-pad) 5rem;
+  font-size: 0.875rem;
+  color: var(--oe-soft);
+}
+
+/* ── Project dialog ───────────────────────────────────────────────────── */
+.oe-dialog {
+  width: min(56rem, 100vw - 2rem);
+  max-width: none;
+  max-height: min(88dvh, 60rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--oe-line);
+  border-radius: 24px;
+  background: var(--oe-bg);
+  color: var(--oe-fg);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.oe-dialog::backdrop {
+  background: rgb(2 4 10 / 0.7);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.oe-dialog__body {
+  position: relative;
+  padding: clamp(1.25rem, 4vw, 3rem);
+}
+.oe-dialog__close {
+  position: sticky;
+  top: 0.75rem;
+  float: right;
+  margin: -0.5rem -0.5rem 0 1rem;
+  background: var(--oe-card);
+  border-color: var(--oe-line);
+}
+.oe-dialog__title {
+  margin-top: 0.5rem;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.oe-dialog__title span {
+  color: var(--oe-soft);
+  font-weight: 550;
+}
+.oe-dialog__lead {
+  margin-top: 1rem;
+  max-width: 44rem;
+  font-size: clamp(1.125rem, 2.2vw, 1.375rem);
+  line-height: 1.45;
+}
+.oe-dialog__image {
+  display: block;
+  width: 100%;
+  margin-top: 1.5rem;
+  border-radius: 14px;
+  border: 1px solid var(--oe-line);
+}
+.oe-dialog__p {
+  margin-top: 1rem;
+  max-width: 44rem;
+  color: var(--oe-soft);
+}
+.oe-dialog__tech {
+  margin-top: 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  color: var(--oe-accent);
+}
+@media (max-width: 40rem) {
+  .oe-dialog {
+    width: 100vw;
+    max-height: 92dvh;
+    margin: auto 0 0;
+    border-radius: 24px 24px 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .oe-dialog[open] {
+    animation: oe-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes oe-pop {
+    from {
+      opacity: 0;
+      transform: translateY(24px) scale(0.98);
+    }
+  }
+  .oe-hero__text > * {
+    animation: oe-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: 1.5s; /* after the particles have formed the name */
+  }
+  .oe-hero__text > :nth-child(2) { animation-delay: 1.6s; }
+  .oe-hero__text > :nth-child(3) { animation-delay: 1.7s; }
+  .oe-hero__text > :nth-child(4) { animation-delay: 1.8s; }
+  .oe-hero__text > :nth-child(5) { animation-delay: 1.9s; }
+  [data-gl='off'] .oe-hero__text > * {
+    animation-delay: 0s;
+  }
+  @keyframes oe-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .opt-e *,
+  .opt-e *::before {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* The hero text leaves as the name starts to break apart, so words never sit inside the
+   brightest part of the cloud. Scroll-driven where supported; otherwise it simply scrolls away. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    [data-gl='on'] .oe-hero__text,
+    [data-gl='on'] .oe-hint {
+      animation: oe-leave linear both;
+      animation-timeline: scroll(root);
+      animation-range: 4vh 34vh;
+    }
+    @keyframes oe-leave {
+      to {
+        opacity: 0;
+        transform: translateY(-2rem) scale(0.97);
+        filter: blur(6px);
+      }
+    }
+    /* The entrance animation above targets the children, this one the block: both run. */
+  }
+}

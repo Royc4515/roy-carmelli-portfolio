@@ -9,8 +9,10 @@ import OptionA from './a/OptionA';
 import OptionB from './b/OptionB';
 import OptionC from './c/OptionC';
 import OptionD from './d/OptionD';
+import OptionE from './e/OptionE';
+import OptionF from './f/OptionF';
 
-const components = { a: OptionA, b: OptionB, c: OptionC, d: OptionD } as const;
+const components = { a: OptionA, b: OptionB, c: OptionC, d: OptionD, e: OptionE, f: OptionF } as const;
 
 describe('option routing', () => {
   it('leaves the normal site alone', () => {

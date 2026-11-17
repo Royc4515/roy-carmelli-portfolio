@@ -1,0 +1,570 @@
+/* Option F, "Voxel Roy". The canvas is the world; every piece of text sits on a solid panel
+   drawn like the game's own menus (hard border, hard shadow). Tokens are OKLCH. */
+
+html[data-option='f'] {
+  --of-sky-top: oklch(64% 0.13 250);
+  --of-sky-bottom: oklch(91% 0.04 230);
+  --of-panel: oklch(97% 0.018 90);
+  --of-ink: oklch(24% 0.03 150);
+  --of-soft: oklch(41% 0.03 150); /* 7.5:1 on the panel */
+  --of-line: oklch(24% 0.03 150);
+  --of-rule: oklch(86% 0.02 90);
+  --of-accent: oklch(43% 0.12 150); /* forest green, 7:1 on the panel */
+  --of-accent-ink: oklch(98% 0.02 90);
+  --of-shadow: oklch(24% 0.03 150 / 0.9);
+
+  --o-bg: var(--of-sky-bottom);
+  --o-fg: var(--of-ink);
+  --o-font: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --o-focus: var(--of-accent);
+  --o-select-bg: var(--of-accent);
+  --o-select-fg: var(--of-accent-ink);
+  --o-scroll-pad: 96px;
+}
+html[data-option='f'][data-theme='night'] {
+  --of-sky-top: oklch(17% 0.05 265);
+  --of-sky-bottom: oklch(27% 0.07 265);
+  --of-panel: oklch(21% 0.035 265);
+  --of-ink: oklch(94% 0.03 90);
+  --of-soft: oklch(79% 0.03 90); /* 8.6:1 on the panel */
+  --of-line: oklch(84% 0.12 85);
+  --of-rule: oklch(34% 0.04 265);
+  --of-accent: oklch(84% 0.13 85); /* the site's gold, 10:1 on the panel */
+  --of-accent-ink: oklch(21% 0.035 265);
+  --of-shadow: oklch(8% 0.03 265 / 0.9);
+}
+
+.of-root {
+  position: relative;
+  min-height: 100vh;
+  /* The page's own sky: what you see before the first frame, and all you see without WebGL. */
+  background: linear-gradient(var(--of-sky-top), var(--of-sky-bottom)) fixed;
+}
+
+.of-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100lvh; /* the large viewport: the mobile URL bar must not resize the world mid-scroll */
+  display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.of-root[data-scene='on'] .of-canvas {
+  opacity: 1;
+}
+.of-root[data-scene='off'] .of-canvas {
+  display: none;
+}
+
+/* The still Roy: only when there is no scene. */
+.of-still {
+  display: none;
+  image-rendering: pixelated;
+  width: 136px;
+  height: 184px;
+  margin: 0 auto 1rem;
+}
+.of-root[data-scene='off'] .of-still {
+  display: block;
+}
+
+.of-nav,
+main,
+.of-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────────── */
+
+.of-stage {
+  display: flex;
+  align-items: flex-end;
+  /* Room above each panel: while it crosses the screen, Roy runs to the next island. */
+  padding: 62vh 1rem 12vh;
+}
+.of-stage--hero {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  min-height: 100svh;
+  padding: 44svh 1rem 1.25rem;
+  margin-top: -4rem; /* the nav floats over the scene */
+}
+.of-root[data-scene='off'] .of-stage {
+  padding-top: 3rem;
+}
+.of-root[data-scene='off'] .of-stage--hero {
+  padding-top: 5rem;
+  justify-content: center;
+}
+
+.of-card {
+  width: 100%;
+  max-width: 34rem;
+  padding: 1.25rem;
+  background: var(--of-panel);
+  border: 3px solid var(--of-line);
+  box-shadow: 6px 6px 0 var(--of-shadow);
+}
+.of-card[data-wide] {
+  max-width: 40rem;
+}
+
+.of-kicker,
+.of-label,
+.of-meta,
+.of-status,
+.of-row__kind,
+.of-facts dt {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--of-soft);
+}
+.of-kicker,
+.of-label {
+  text-transform: uppercase;
+  color: var(--of-accent);
+}
+.of-label {
+  margin: 1.5rem 0 0.25rem;
+}
+.of-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.of-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  background: var(--of-accent);
+}
+
+.of-name {
+  margin-top: 0.75rem;
+  font-family: var(--font-pixel);
+  font-size: clamp(1.5rem, 7.2vw, 2.5rem);
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+.of-role {
+  margin-top: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--of-accent);
+}
+.of-title {
+  margin-top: 0.375rem;
+  font-size: clamp(1.625rem, 5vw, 2rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.of-title__sub {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--of-soft);
+}
+.of-lede {
+  margin-top: 0.75rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+.of-meta {
+  margin-top: 0.625rem;
+}
+
+.of-points {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.of-points li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.625rem;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.of-points__icon {
+  margin-top: 0.2rem;
+  font-size: 1.125rem;
+  color: var(--of-accent);
+}
+
+.of-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem 1rem;
+}
+.of-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1rem;
+  background: var(--of-panel);
+  border: 2px solid var(--of-line);
+  box-shadow: 3px 3px 0 var(--of-shadow);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.of-btn--primary {
+  background: var(--of-accent);
+  color: var(--of-accent-ink) !important;
+}
+.of-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--of-shadow);
+}
+.of-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--of-shadow);
+}
+.of-btn svg {
+  font-size: 1.125rem;
+}
+
+.of-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--of-accent) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.of-link__icon {
+  flex: none;
+}
+
+.of-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: var(--of-panel);
+  border: 2px solid var(--of-line);
+  box-shadow: 3px 3px 0 var(--of-shadow);
+  font-size: 1.25rem;
+}
+
+/* ── Nav ──────────────────────────────────────────────────────────────────── */
+
+.of-nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  height: 4rem;
+  padding: 0 1rem;
+  pointer-events: none; /* the bar itself is air: only its controls take clicks */
+}
+.of-nav > * {
+  pointer-events: auto;
+}
+.of-nav__links {
+  display: none;
+  background: var(--of-panel);
+  border: 2px solid var(--of-line);
+  box-shadow: 3px 3px 0 var(--of-shadow);
+}
+.of-nav__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.875rem;
+  font-weight: 600;
+}
+.of-nav__links a:hover {
+  color: var(--of-accent);
+}
+
+/* ── Lists ────────────────────────────────────────────────────────────────── */
+
+.of-rows {
+  margin-top: 0.5rem;
+}
+.of-row {
+  display: grid;
+  gap: 0 1rem;
+  padding: 0.75rem 0 0.25rem;
+  border-top: 1px solid var(--of-rule);
+}
+.of-row__name {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+.of-row__text {
+  margin-top: 0.25rem;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--of-soft);
+}
+.of-row__links {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.of-prose {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.875rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.of-facts {
+  margin-top: 1.25rem;
+}
+.of-facts > div {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.625rem 0;
+  border-top: 1px solid var(--of-rule);
+}
+.of-facts dd {
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.of-facts dd span {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--of-soft);
+}
+
+.of-email a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 0.5rem;
+  font-size: clamp(1.125rem, 5.2vw, 1.5rem);
+  font-weight: 600;
+  color: var(--of-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.of-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 1rem;
+  padding: 0.75rem 1rem;
+  /* Above the fixed controls and the review chip. */
+  margin-bottom: 9rem;
+  background: var(--of-panel);
+  border: 2px solid var(--of-line);
+  font-size: 0.875rem;
+  color: var(--of-soft);
+}
+
+/* ── Scene controls ───────────────────────────────────────────────────────── */
+
+.of-controls {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.of-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  background: var(--of-panel);
+  border: 2px solid var(--of-line);
+  box-shadow: 3px 3px 0 var(--of-shadow);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.of-chip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.of-chip--play {
+  background: var(--of-accent);
+  color: var(--of-accent-ink);
+}
+/* Phones: the jump toy would cover the panels (tapping Roy does the same); pause stays. */
+.of-chip--toy {
+  display: none;
+}
+
+/* ── Project dialog ───────────────────────────────────────────────────────── */
+
+.of-dialog {
+  width: min(48rem, calc(100vw - 1.5rem));
+  max-height: calc(100dvh - 1.5rem);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--of-panel);
+  color: var(--of-ink);
+  border: 3px solid var(--of-line);
+  box-shadow: 8px 8px 0 var(--of-shadow);
+  font-family: var(--o-font);
+}
+.of-dialog::backdrop {
+  background: oklch(15% 0.03 265 / 0.72);
+}
+.of-dialog__body {
+  position: relative;
+  padding: 1.25rem;
+}
+.of-dialog__close {
+  position: sticky;
+  top: 0.75rem;
+  float: right;
+  margin-left: 0.75rem;
+}
+.of-dialog__image {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  border: 2px solid var(--of-line);
+}
+.of-dialog__text {
+  margin-top: 0.875rem;
+  max-width: 40rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ── Play mode (the real game, from option D's Arcade component) ───────────── */
+
+.od-arcade {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+.od-arcade::backdrop {
+  background: var(--color-bg);
+}
+.od-arcade__layer {
+  position: absolute;
+  inset: 0;
+}
+.od-arcade__stage {
+  position: relative;
+  /* don't touch / an inline-size container: the game's screen box sizes itself in cqw. */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  outline: none;
+}
+.od-arcade__stage[data-mode='touch'] {
+  display: block;
+  padding: 0;
+  container-type: normal;
+}
+.od-arcade__title {
+  color: var(--color-accent-fg);
+}
+.od-arcade__controls {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 24px;
+}
+.od-arcade__hint {
+  flex-basis: 100%;
+  text-align: center;
+  color: var(--color-fg-muted);
+}
+
+/* ── Wider screens: text on the left, the world on the right ──────────────── */
+
+@media (min-width: 60rem) {
+  .of-stage {
+    align-items: center;
+    min-height: 100vh;
+    padding: 34vh clamp(1.5rem, 5vw, 5rem) 34vh;
+  }
+  .of-stage--hero {
+    justify-content: center;
+    padding-top: 6rem;
+    padding-bottom: 2rem;
+  }
+  .of-card {
+    padding: 1.75rem;
+  }
+  .of-card--hero {
+    max-width: 36rem;
+    padding: 2.25rem;
+  }
+  .of-nav {
+    padding: 0 clamp(1.5rem, 5vw, 5rem);
+  }
+  .of-nav__links {
+    display: flex;
+  }
+  .of-row {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+  .of-facts > div {
+    grid-template-columns: 10rem 1fr;
+    gap: 1rem;
+  }
+  .of-footer {
+    max-width: 40rem;
+    margin-left: clamp(1.5rem, 5vw, 5rem);
+    margin-bottom: 2rem;
+  }
+  .of-controls {
+    right: 1.25rem;
+    bottom: 1.25rem;
+  }
+  .of-chip--toy {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opt-f *,
+  .opt-f *::before,
+  .opt-f *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

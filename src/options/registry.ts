@@ -35,6 +35,18 @@ export const OPTIONS: readonly OptionMeta[] = [
     summary: 'A clean professional shell that keeps Pixel Roy: Roy Runner and the chat are an optional play mode.',
     techniques: 'Reuses the real game and chat, lazy-loaded on demand; View Transitions',
   },
+  {
+    key: 'e',
+    name: 'Particles',
+    summary: 'Showpiece: tens of thousands of GPU particles form the name, then re-form into each project as you scroll.',
+    techniques: 'Raw WebGL2 point cloud morphing in the vertex shader, scroll-scrubbed, pointer and tap reactive',
+  },
+  {
+    key: 'f',
+    name: 'Voxel Roy',
+    summary: 'Showpiece: pixel Roy rebuilt in 3D, one cube per pixel, in a forest diorama you can tilt.',
+    techniques: 'Raw WebGL2 instanced cubes from the real sprite, lighting, explode and reassemble on scroll',
+  },
 ];
 
 /** One chunk per option, fetched only when its URL is opened. */
@@ -43,4 +55,6 @@ export const OPTION_COMPONENTS: Record<OptionKey, LazyExoticComponent<ComponentT
   b: lazy(() => import('./b/OptionB')),
   c: lazy(() => import('./c/OptionC')),
   d: lazy(() => import('./d/OptionD')),
+  e: lazy(() => import('./e/OptionE')),
+  f: lazy(() => import('./f/OptionF')),
 };

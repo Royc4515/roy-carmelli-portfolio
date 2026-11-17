@@ -11,7 +11,7 @@ export default function Chooser() {
     <div className="opt chooser">
       <main className="chooser__main">
         <p className="chooser__eyebrow">{bio.name} - portfolio</p>
-        <h1 className="chooser__title">Four design options</h1>
+        <h1 className="chooser__title">Design options</h1>
         <p className="chooser__lede">
           Each one is a working page built from the same content as the current site. Open them on a
           laptop and on a phone, in light and dark, then compare with the current design.

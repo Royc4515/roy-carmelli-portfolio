@@ -3,7 +3,7 @@
  * normal site at "/" is untouched: "/?options" is the chooser, "/?option=a" one option.
  * This file is the only part of them in the main bundle; everything else is lazy-loaded.
  */
-export const OPTION_KEYS = ['a', 'b', 'c', 'd'] as const;
+export const OPTION_KEYS = ['a', 'b', 'c', 'd', 'e', 'f'] as const;
 export type OptionKey = (typeof OPTION_KEYS)[number];
 
 export type OptionRoute = { kind: 'chooser' } | { kind: 'option'; key: OptionKey };
