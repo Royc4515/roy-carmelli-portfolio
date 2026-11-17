@@ -97,13 +97,24 @@ export function dayPhase(hour: number, sunrise: number, sunset: number): string 
 /** Dark interface once the sun is a little under the horizon. */
 export const isDarkSky = (hour: number, sunrise: number, sunset: number) => hour < sunrise - 0.2 || hour > sunset + 0.25;
 
+/**
+ * `?hour=18.5` previews the sky at another time of day (the engine reads the same flag), so
+ * the line of text and the interface's dark tokens must follow it too.
+ */
+function previewHour(): number | null {
+  if (typeof window === 'undefined') return null;
+  const raw = new URLSearchParams(window.location.search).get('hour');
+  const hour = raw === null ? NaN : Number(raw);
+  return Number.isFinite(hour) && hour >= 0 && hour < 24 ? hour : null;
+}
+
 const clock = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
 
 /** Everything the scene and the info line need, assembled for one moment. */
 export function buildAmbience(now: Date, mode: SkyMode, city: string | null, weather: LiveWeather | null): AmbienceInfo {
   const sunrise = weather?.sunrise ?? DEFAULT_SUNRISE;
   const sunset = weather?.sunset ?? DEFAULT_SUNSET;
-  const liveHour = now.getHours() + now.getMinutes() / 60;
+  const liveHour = previewHour() ?? now.getHours() + now.getMinutes() / 60;
   // A manual choice shows the middle of the day, or deep night, whatever the clock says.
   const hour = mode === 'day' ? (sunrise + sunset) / 2 : mode === 'night' ? 23.5 : liveHour;
   const festive = festiveFor(now, sunset);
@@ -119,7 +130,7 @@ export function buildAmbience(now: Date, mode: SkyMode, city: string | null, wea
       festiveCount: festive?.count ?? 0,
     },
     city,
-    time: clock.format(now),
+    time: previewHour() === null ? clock.format(now) : clock.format(new Date(2000, 0, 1, Math.floor(liveHour), Math.round((liveHour % 1) * 60))),
     phase: dayPhase(liveHour, sunrise, sunset),
     weather,
     festive,

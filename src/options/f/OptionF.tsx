@@ -34,11 +34,6 @@ import './f.css';
 
 type SceneState = 'loading' | 'on' | 'off';
 
-/** Hand the ambience to the engine. Tolerant of an engine build without the live sky. */
-function applyAmbience(world: VoxelWorld | null, ambience: Ambience): void {
-  (world as (VoxelWorld & { setAmbience?: (a: Ambience) => void }) | null)?.setAmbience?.(ambience);
-}
-
 /**
  * The canvas behind the page. The engine (and its shaders) loads in an effect, so nothing
  * touches WebGL while the page renders in a test or in the build-time prerender. Without
@@ -75,7 +70,7 @@ function Scene({ ambience, paused, onState, worldRef }: {
         world = created;
         worldRef.current = created;
         if (!created) onState('off');
-        applyAmbience(created, latest.current);
+        created?.setAmbience(latest.current);
       })
       .catch(() => !cancelled && onState('off'));
     return () => {
@@ -85,7 +80,7 @@ function Scene({ ambience, paused, onState, worldRef }: {
     };
   }, [reduced, onState, worldRef]);
 
-  useEffect(() => applyAmbience(worldRef.current, ambience), [ambience, worldRef]);
+  useEffect(() => worldRef.current?.setAmbience(ambience), [ambience, worldRef]);
   useEffect(() => worldRef.current?.setPaused(paused), [paused, worldRef]);
 
   return <canvas ref={canvas} className="of-canvas" aria-hidden="true" />;

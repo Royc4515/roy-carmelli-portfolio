@@ -141,8 +141,8 @@ export function lookFor(a: Ambience, wide: boolean): Look {
   // Dawn is pinker than dusk: the same orange would make sunrise and sunset one picture.
   const twilight = 1 - smooth(0.02, 0.3, Math.abs(e));
   if (morning) {
-    k.glow = mix(k.glow, [k.glow[0], k.glow[1] * 0.85, k.glow[2] + 0.35 * luma(k.glow)], twilight);
-    k.bottom = mix(k.bottom, [k.bottom[0], k.bottom[1] * 0.93, Math.min(1, k.bottom[2] * 1.25 + 0.04)], twilight);
+    k.glow = mix(k.glow, [k.glow[0], k.glow[1] * 0.92, k.glow[2] + 0.16 * luma(k.glow)], twilight);
+    k.bottom = mix(k.bottom, [k.bottom[0], k.bottom[1] * 0.97, Math.min(1, k.bottom[2] * 1.1 + 0.02)], twilight);
   }
 
   // Where the sun and the moon are on screen: an arc from one side to the other. On desktop
@@ -170,7 +170,12 @@ export function lookFor(a: Ambience, wide: boolean): Look {
   const o = Math.max(OVERCAST[a.condition], a.condition === 'clear' || a.condition === 'partly' ? clamp01(a.cloud) * 0.45 : 0);
   // Overcast: the sky loses saturation towards a blue-grey of its own brightness, the key light
   // flattens and cools, the ambient lifts a little (cloud is a big soft light).
-  const grey = (c: V3): V3 => scale([0.86, 0.9, 0.97], luma(c) * (isDay ? 1.02 : 0.9) + (isDay ? 0.03 : 0));
+  // At night a lid of cloud is slate blue, not black: it still catches a little light.
+  const floor: V3 = isDay ? [0.03, 0.03, 0.03] : [0.045, 0.06, 0.1];
+  const grey = (c: V3): V3 => {
+    const g = scale([0.86, 0.9, 0.97], luma(c));
+    return [g[0] + floor[0], g[1] + floor[1], g[2] + floor[2]];
+  };
   const top = mix(k.top, grey(k.top), o * 0.8);
   const bottom = mix(k.bottom, grey(k.bottom), o * 0.85);
   key = mix(key, scale([0.92, 0.96, 1.05], luma(key)), o * 0.7);
@@ -181,8 +186,11 @@ export function lookFor(a: Ambience, wide: boolean): Look {
   const rain = a.condition === 'rain' ? 0.6 : a.condition === 'storm' ? 1 : 0;
   const snow = a.condition === 'snow' ? 1 : 0;
   const mist = a.condition === 'fog' ? 1 : 0;
-  const fogNear = mist ? 90 : rain ? lerp(380, 250, rain) : snow ? 300 : 520;
-  const fogFar = mist ? 560 : rain ? lerp(1250, 900, rain) : snow ? 1000 : 1500;
+  // The camera is about 540 units from Roy: mist veils him lightly and swallows the islands behind.
+  // don't touch / fogNear stays near or beyond that distance outside real fog: in rain and
+  // snow Roy and his island must stay crisp, and only the islands behind fade.
+  const fogNear = mist ? 300 : rain ? lerp(520, 470, rain) : snow ? 500 : 640;
+  const fogFar = mist ? 1050 : rain ? lerp(1500, 1250, rain) : snow ? 1350 : 1750;
   const cloudAmount =
     a.condition === 'clear' ? clamp01(a.cloud) * 0.25
     : a.condition === 'partly' ? 0.3 + clamp01(a.cloud) * 0.3
@@ -201,7 +209,8 @@ export function lookFor(a: Ambience, wide: boolean): Look {
     light,
     sun, sunCol: mix([1, 0.5, 0.2], [1, 0.96, 0.78], smooth(0, 0.3, e)),
     sunVis: smooth(-0.12, 0.02, isDay ? e : e * 4) * (1 - o * 0.88),
-    moon, moonVis: smooth(0.02, 0.2, moonE) * (1 - o * 0.85),
+    // The moon does not shine through cloud the way the sun does: under a lid it is simply gone.
+    moon, moonVis: smooth(0.02, 0.2, moonE) * clamp01(1 - o * 1.2),
     stars: k.stars * (1 - o),
     night,
     cloud: cloudAmount,

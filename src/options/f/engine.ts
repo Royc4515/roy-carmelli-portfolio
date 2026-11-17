@@ -145,7 +145,7 @@ precision highp sampler2DShadow;
 in vec3 vColor, vNormal, vLocal, vWorld;
 in vec4 vShadow;
 uniform vec3 uLightDir, uKey, uSkyAmb, uGroundAmb, uFog, uCam, uLamp, uLampPos, uTint;
-uniform float uEmissive, uShadowOn, uFogNear, uFogFar, uSnow;
+uniform float uEmissive, uShadowOn, uFogNear, uFogFar, uSnow, uFogScale;
 uniform sampler2DShadow uShadow;
 out vec4 frag;
 
@@ -175,7 +175,9 @@ void main() {
   float lampFall = max(0.0, 1.0 - length(toLamp) / 190.0);
   vec3 lamp = uLamp * lampFall * lampFall * (0.35 + 0.65 * max(dot(n, normalize(toLamp)), 0.0));
   vec3 c = base * (ambient + uKey * ndl * lit + lamp) * bevel + base * uEmissive;
-  float fog = smoothstep(uFogNear, uFogFar, distance(vWorld, uCam));
+  // Clouds are far behind the islands on purpose: they take only part of the fog, or the
+  // distance that makes them sky would also erase them.
+  float fog = smoothstep(uFogNear, uFogFar, distance(vWorld, uCam)) * uFogScale;
   c = mix(c, uFog, fog);
   c = 1.0 - exp(-c * 1.35);        // gentle filmic shoulder
   frag = vec4(pow(c, vec3(1.0 / 2.2)), 1.0);
@@ -426,22 +428,25 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     buildCloud(clouds, 0, 0, 0, rand);
     cloudShapes.push({ start, count: clouds.count - start });
   }
-  const CLOUD_SPAN = 1700;
+  const CLOUD_SPAN = 2800;
   const cloudPool = Array.from({ length: 26 }, (_, n) => {
-    const layer = n % 3; // 0 far, 1 middle, 2 high overhead
+    // don't touch / the camera looks DOWN at the island (its top edge is barely below level),
+    // so the "sky" behind Roy is geometrically far behind and below him. Clouds placed up
+    // high are simply out of frame, or hang over the lens as giant slabs.
+    const layer = n % 3; // 0 far, 1 middle, 2 nearer
     return {
       shape: n % cloudShapes.length,
-      x: (n * 0.618 * CLOUD_SPAN + rand() * 160) % CLOUD_SPAN,
-      y: layer === 2 ? 250 + rand() * 50 : 120 + rand() * 120,
-      z: layer === 0 ? -430 + rand() * 140 : layer === 1 ? -240 + rand() * 90 : -90 + rand() * 120,
-      size: (layer === 2 ? 1.25 : 0.9) + rand() * 0.6,
-      speed: 0.7 + rand() * 0.6,
+      x: (n * 0.618 * CLOUD_SPAN + rand() * 200) % CLOUD_SPAN,
+      y: layer === 0 ? -520 + rand() * 620 : layer === 1 ? -380 + rand() * 480 : -300 + rand() * 390,
+      z: layer === 0 ? -980 + rand() * 300 : layer === 1 ? -640 + rand() * 200 : -450 + rand() * 90,
+      size: (layer === 0 ? 1.6 : layer === 1 ? 1.2 : 0.9) + rand() * 0.5,
+      speed: (layer === 0 ? 0.5 : layer === 1 ? 0.75 : 1) * (0.8 + rand() * 0.4),
     };
   });
   // Mist: the same shapes, flattened and laid near the ground behind and beside the island.
   const mistPool = Array.from({ length: 7 }, (_, n) => ({
     shape: n % cloudShapes.length, x: (n * 0.44 * CLOUD_SPAN + rand() * 120) % CLOUD_SPAN,
-    y: 4 + rand() * 26, z: -150 + rand() * 120, size: 1.5 + rand() * 0.8, speed: 0.25 + rand() * 0.2,
+    y: -34 + rand() * 26, z: -230 + rand() * 260, size: 1.1 + rand() * 0.6, speed: 0.25 + rand() * 0.2,
   }));
 
   const festive = buildFestive(rand);
@@ -749,10 +754,11 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
         gl.uniform1f(prog.u('uProgress'), progress);
       };
       const emissive = (v: number) => !forShadow && gl.uniform1f(prog.u('uEmissive'), v);
-      const tint = (c: number[], snow: number) => {
+      const tint = (c: number[], snow: number, fog = 1) => {
         if (forShadow) return;
         gl.uniform3f(prog.u('uTint'), c[0], c[1], c[2]);
         gl.uniform1f(prog.u('uSnow'), snow);
+        gl.uniform1f(prog.u('uFogScale'), fog);
       };
       emissive(DEBUG_SHADOW ? -1 : 0);
       tint(L.tint, L.snow);
@@ -805,7 +811,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
         gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, shape.count);
       };
       if (cloudsOut > 0) {
-        tint(L.cloudTint, 0);
+        tint(L.cloudTint, 0, 0.45);
         emissive(0.5 * (1 - L.night) + 0.05);
         for (let n = 0; n < cloudsOut; n++) placeCloud(cloudPool[n], L.cloudScale, 1);
       }
@@ -813,7 +819,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
         tint(L.bottom.map(v => 0.55 + v * 0.5), 0);
         emissive(0.35 * (1 - L.night) + 0.04);
         const wisps = Math.round(mistPool.length * Math.min(1, L.mist));
-        for (let n = 0; n < wisps; n++) placeCloud(mistPool[n], 1, 0.3);
+        for (let n = 0; n < wisps; n++) placeCloud(mistPool[n], 1, 0.22);
       }
 
       if (quality < 3 && L.rain + L.snow < 0.6) {
