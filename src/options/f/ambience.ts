@@ -42,6 +42,8 @@ export interface AmbienceInfo {
   time: string;
   /** "Tuesday, 17 November" and, where the browser has the calendar, "7 Kislev 5787". */
   date: string;
+  /** "Tue 17 Nov", for the collapsed bar. */
+  dateShort: string;
   hebrewDate: string | null;
   phase: string;
   /** "06:11" and "16:39": only with live weather (the defaults would be invented times). */
@@ -116,6 +118,7 @@ function previewHour(): number | null {
   return Number.isFinite(hour) && hour >= 0 && hour < 24 ? hour : null;
 }
 
+const shortDate = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 const weekdayName = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
 const dayAndMonth = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' });
 /** "Tuesday, 17 November": built from parts, because locales disagree about the comma. */
@@ -183,6 +186,7 @@ export function buildAmbience(now: Date, mode: SkyMode, city: string | null, wea
     },
     city,
     date: dateLine.format(now),
+    dateShort: shortDate.format(now).replace(',', ''),
     hebrewDate: hebrewLine(now),
     sunrise: weather ? clockOf(weather.sunrise) : null,
     sunset: weather ? clockOf(weather.sunset) : null,

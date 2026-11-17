@@ -61,21 +61,26 @@ const CHEVRON = 'm6 9 6 6 6-6';
 
 const MODES: readonly SkyMode[] = ['live', 'day', 'night'];
 const MODE_LABEL: Record<SkyMode, string> = { live: 'Live', day: 'Day', night: 'Night' };
-const WIDE = '(min-width: 60rem)';
 
 /**
  * The ambience card: what the sky is showing, in words. The visitor's local time and date
  * (Gregorian and Hebrew), their city, the part of the day, the weather with sunrise and
- * sunset, and a switch between the live sky and a fixed day or night. It is a summary bar
- * that opens into the full card: open by default on wide screens, closed on phones, where it
- * would cover the scene.
+ * sunset, and a switch between the live sky and a fixed day or night. It is one slim bar
+ * (time, date, place, temperature) that opens into the full card on request, so it never
+ * covers the scene unasked.
  */
 export function AmbienceLine({ info, mode, onMode }: { info: AmbienceInfo; mode: SkyMode; onMode: (mode: SkyMode) => void }) {
   const { weather } = info;
   const id = useId();
+  // Closed until asked: the bar already says the essentials, and the scene stays in view.
   const [open, setOpen] = useState(false);
-  // After mount, so the server render and the first client render agree.
-  useEffect(() => setOpen(!!window.matchMedia?.(WIDE).matches), []);
+  // Esc closes it, like any popover.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
 
   return (
     <aside className="of-ambience" data-solid="" data-open={open ? '' : undefined} aria-label="Sky, time and weather">
@@ -88,6 +93,8 @@ export function AmbienceLine({ info, mode, onMode }: { info: AmbienceInfo; mode:
       >
         <SkyIcon className="of-ambience__icon" condition={weather?.condition ?? 'clear'} dark={info.dark} />
         <span className="of-ambience__time">{info.time}</span>
+        <span className="of-ambience__more">{info.dateShort}</span>
+        {info.city && <span className="of-ambience__more">{info.city.split(',')[0]}</span>}
         {weather && <span className="of-ambience__temp">{weather.tempC}&deg;</span>}
         <span className="of-ambience__live" data-mode={mode}>
           <span className="of-ambience__dot" aria-hidden="true" />
