@@ -377,7 +377,25 @@ function mailbox(g: Grid): void {
   g.box(-4, 20, 6, -4, 28, 6, C.red); g.box(-4, 26, 6, 0, 28, 6, C.red); // the flag
 }
 
-export const TOTEM_BUILDERS = [browser, parachute, wine, codeMark, brain, mailbox];
+/** Toolbox (skills): an open red toolbox with a wrench and a screwdriver standing in it. */
+function toolbox(g: Grid): void {
+  g.box(-11, 0, -5, 11, 9, 5, C.red); // the box
+  g.box(-11, 8, -5, 11, 9, 5, C.wine); // the rim, a shade darker
+  g.box(-12, 4, -6, 12, 5, 6, C.wine); // a band round the middle
+  g.box(-2, 5, 6, 2, 6, 6, C.gold); // the latch
+  g.box(-1, 2, -2, 1, 7, 2, C.ink); // shadow in the open top reads as depth
+  g.box(-7, 10, -1, -6, 15, 0, C.steel); g.box(6, 10, -1, 7, 15, 0, C.steel); // handle posts
+  g.box(-7, 15, -1, 7, 16, 0, C.steel); // handle bar
+  // A wrench leaning out on the left: shaft and an open jaw.
+  for (let n = 0; n <= 12; n++) g.box(-9 + Math.round(n * -0.25), 10 + n, 2, -8 + Math.round(n * -0.25), 10 + n, 3, C.grey);
+  g.box(-15, 23, 1, -10, 25, 4, C.grey); g.box(-13, 25, 1, -12, 26, 4, C.ink);
+  // A screwdriver on the right: yellow handle, steel shaft.
+  g.box(8, 10, 1, 9, 19, 2, C.steel);
+  g.box(7, 20, 0, 10, 26, 3, C.yellow); g.box(7, 23, 0, 10, 23, 3, C.orange);
+}
+
+/** One model per station after the hero, in page order. The engine builds one island per entry plus the hero's. */
+export const TOTEM_BUILDERS = [browser, parachute, wine, codeMark, brain, toolbox, mailbox];
 
 /**
  * All totems share one pool of `count` cubes, so the same cubes can fly from one model to the

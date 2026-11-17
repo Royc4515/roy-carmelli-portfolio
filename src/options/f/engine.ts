@@ -6,6 +6,7 @@ import {
   buildTotemPool,
   buildTree,
   mulberry,
+  TOTEM_BUILDERS,
   samplePalette,
   spriteVoxels,
   type Bitmap,
@@ -43,7 +44,8 @@ export interface VoxelWorldOptions {
 
 const SPACING = 300;
 const ISLAND_R = 100;
-const STATIONS = 7;
+// don't touch / one island per totem plus the hero's: the page's [data-station] panels must match
+const STATIONS = TOTEM_BUILDERS.length + 1;
 const ROY_Z = 24;
 const stationX = (i: number) => i * SPACING;
 const royRestX = (i: number) => stationX(i) - (i === 0 ? 8 : 40);

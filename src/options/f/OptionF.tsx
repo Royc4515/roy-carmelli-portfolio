@@ -108,6 +108,18 @@ function Station({ id, label, children, wide }: { id: string; label: string; chi
   );
 }
 
+/** The stack at a glance. The data lists the core tools first, so the first few say the most. */
+function Tags({ items, limit, label = 'Built with' }: { items: string[]; limit?: number; label?: string }) {
+  const shown = limit ? items.slice(0, limit) : items;
+  const rest = items.length - shown.length;
+  return (
+    <ul className="of-tags" aria-label={label}>
+      {shown.map(item => <li key={item}>{item}</li>)}
+      {rest > 0 && <li className="of-tags__more">+{rest}</li>}
+    </ul>
+  );
+}
+
 function ProjectStation({ project, index, onOpen }: { project: Project; index: number; onOpen: (p: Project) => void }) {
   const { name, descriptor } = splitTitle(project.title);
   return (
@@ -127,6 +139,7 @@ function ProjectStation({ project, index, onOpen }: { project: Project; index: n
           ))}
         </ul>
       )}
+      <Tags items={project.tech} limit={5} />
       <div className="of-actions">
         <button type="button" className="of-btn" data-project-open={project.id} onClick={() => onOpen(project)}>
           Full story
@@ -156,22 +169,40 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
             <Close />
           </button>
           <p className="of-kicker">{p.kind} / {p.year}</p>
-          <h2 className="of-title" id="of-dialog-title">{splitTitle(p.title).name}</h2>
+          <h2 className="of-title" id="of-dialog-title">
+            {splitTitle(p.title).name}
+            {splitTitle(p.title).descriptor && <span className="of-title__sub">{splitTitle(p.title).descriptor}</span>}
+          </h2>
           <p className="of-lede">{story.lead}</p>
-          {image && (
-            <img className="of-dialog__image" src={image.src} srcSet={image.srcSet} sizes="(min-width: 48rem) 44rem, 92vw"
-              width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async" />
-          )}
-          {story.body.map(paragraph => (
-            <p key={paragraph} className="of-dialog__text">{paragraph}</p>
-          ))}
-          <h3 className="of-label">Built with</h3>
-          <p className="of-dialog__text">{p.tech.join(', ')}</p>
           <div className="of-actions">
             {projectLinks(p).map(link => (
               <External key={link.href} href={link.href}>{link.label}</External>
             ))}
           </div>
+          {/* Rendered only while open, so lazy loading would only delay it. */}
+          {image && (
+            <img className="of-dialog__image" src={image.src} srcSet={image.srcSet} sizes="(min-width: 48rem) 44rem, 92vw"
+              width={image.width} height={image.height} alt={image.alt} decoding="async" />
+          )}
+          {p.highlights && (
+            <>
+              <h3 className="of-label">Highlights</h3>
+              <ul className="of-points">
+                {p.highlights.map(h => (
+                  <li key={h}>
+                    <Check className="of-points__icon" />
+                    {h}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <h3 className="of-label">The full story</h3>
+          {story.body.map(paragraph => (
+            <p key={paragraph} className="of-dialog__text">{paragraph}</p>
+          ))}
+          <h3 className="of-label">Built with</h3>
+          <Tags items={p.tech} />
         </div>
       )}
     </dialog>
@@ -182,16 +213,74 @@ function Row({ project }: { project: Project }) {
   const { name } = splitTitle(project.title);
   return (
     <li className="of-row">
-      <div>
-        <h3 className="of-row__name">{name}</h3>
-        <p className="of-row__kind">{project.kind}{project.status === 'in-development' ? ', in development' : ''}</p>
-        <p className="of-row__text">{project.tagline}</p>
-      </div>
+      <h3 className="of-row__head">
+        <span className="of-row__name">{name}</span>
+        <span className="of-row__kind">{project.kind}</span>
+        {project.status === 'in-development' && <span className="of-row__badge">In development</span>}
+      </h3>
       <div className="of-row__links">
         {project.live && <External href={project.live}>Live<span className="opt-sr">: {name}</span></External>}
         {project.github && <External href={project.github}>Source<span className="opt-sr">: {name}</span></External>}
       </div>
+      <p className="of-row__text">{project.tagline}</p>
     </li>
+  );
+}
+
+const SHELVES = [
+  { key: 'side', label: 'Side projects', items: sideProjects },
+  { key: 'course', label: 'Coursework', items: courseworkProjects },
+] as const;
+
+/**
+ * Side projects and coursework on two tabs, so the panel fits one screen and the island stays
+ * beside it. Arrow keys move between tabs, as the ARIA tabs pattern expects.
+ */
+function MoreWork() {
+  const [active, setActive] = useState(0);
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const onKey = (e: React.KeyboardEvent) => {
+    const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const next = (active + step + SHELVES.length) % SHELVES.length;
+    setActive(next);
+    tabs.current[next]?.focus();
+  };
+  return (
+    <>
+      <div className="of-tabs" role="tablist" aria-label="More work" onKeyDown={onKey}>
+        {SHELVES.map((shelf, n) => (
+          <button
+            key={shelf.key}
+            ref={el => { tabs.current[n] = el; }}
+            type="button"
+            role="tab"
+            id={`of-tab-${shelf.key}`}
+            aria-controls={`of-shelf-${shelf.key}`}
+            aria-selected={active === n}
+            tabIndex={active === n ? 0 : -1}
+            className="of-tab"
+            onClick={() => setActive(n)}
+          >
+            {shelf.label}
+            <span className="of-tab__count">{shelf.items.length}</span>
+          </button>
+        ))}
+      </div>
+      {SHELVES.map((shelf, n) => (
+        <ul
+          key={shelf.key}
+          id={`of-shelf-${shelf.key}`}
+          role="tabpanel"
+          aria-labelledby={`of-tab-${shelf.key}`}
+          className="of-rows"
+          hidden={active !== n}
+        >
+          {shelf.items.map(project => <Row key={project.id} project={project} />)}
+        </ul>
+      ))}
+    </>
   );
 }
 
@@ -234,6 +323,7 @@ export default function OptionF() {
               <ul className="of-nav__links">
                 <li><a href={`#project-${mainProjects[0].id}`}>Work</a></li>
                 <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
                 <li><a href="#contact">Contact</a></li>
               </ul>
             </nav>
@@ -272,14 +362,8 @@ export default function OptionF() {
           ))}
 
           <Station id="more" label="More work" wide>
-            <h2 className="of-title" id="more-title">Side projects</h2>
-            <ul className="of-rows">
-              {sideProjects.map(project => <Row key={project.id} project={project} />)}
-            </ul>
-            <h3 className="of-label">Coursework</h3>
-            <ul className="of-rows">
-              {courseworkProjects.map(project => <Row key={project.id} project={project} />)}
-            </ul>
+            <h2 className="of-title" id="more-title">More things I built</h2>
+            <MoreWork />
           </Station>
 
           <Station id="about" label="About" wide>
@@ -287,7 +371,7 @@ export default function OptionF() {
             <div className="of-prose">
               {aboutParagraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
             </div>
-            <dl className="of-facts">
+            <dl className="of-facts of-facts--pair">
               <div>
                 <dt>Education</dt>
                 <dd>B.Sc., {DEGREE}, {bio.institution}<span>{EDUCATION_PERIOD}</span></dd>
@@ -296,17 +380,25 @@ export default function OptionF() {
                 <dt>Service</dt>
                 <dd>{SERVICE_ORG}: {SERVICE_ROLE}<span>{SERVICE_PERIOD}</span></dd>
               </div>
+            </dl>
+          </Station>
+
+          <Station id="skills" label="Skills" wide>
+            <h2 className="of-title" id="skills-title">Toolbox</h2>
+            <div className="of-shelf">
               {skillGroups.map(group => (
-                <div key={group.category}>
-                  <dt>{group.category}</dt>
-                  <dd>{group.items.join(', ')}</dd>
+                <div key={group.category} className="of-shelf__group">
+                  <h3 className="of-shelf__name">{group.category}</h3>
+                  <Tags items={group.items} label={group.category} />
                 </div>
               ))}
-              <div>
-                <dt>Certifications</dt>
-                <dd>{certifications.join(', ')}</dd>
-              </div>
-            </dl>
+              {certifications.length > 0 && (
+                <div className="of-shelf__group">
+                  <h3 className="of-shelf__name">Certifications</h3>
+                  <Tags items={certifications} label="Certifications" />
+                </div>
+              )}
+            </div>
           </Station>
 
           <Station id="contact" label="Contact">
