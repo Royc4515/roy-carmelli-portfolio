@@ -1,6 +1,6 @@
 import { bio } from '../data/bio';
 import { OPTIONS } from './registry';
-import { optionHref } from './route';
+import { optionHref, CLASSIC_HREF } from './route';
 import { useOptionReady } from './shared/ready';
 import './chooser.css';
 
@@ -39,10 +39,10 @@ export default function Chooser() {
           ))}
         </ol>
         <p className="chooser__foot">
-          <a className="chooser__current" href="/">
-            Open the current site (pixel RPG)
+          <a className="chooser__current" href={CLASSIC_HREF}>
+            Open the classic site (pixel RPG)
           </a>
-          <span>These pages are previews: not indexed, and nothing on the live site changes.</span>
+          <span>The live site at / is option F. These previews are not indexed.</span>
         </p>
       </main>
     </div>

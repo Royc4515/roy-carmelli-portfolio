@@ -41,7 +41,7 @@ describe('option routing', () => {
       const link = screen.getByRole('link', { name: new RegExp(`Option ${option.key.toUpperCase()}`) });
       expect(link).toHaveAttribute('href', `/?option=${option.key}`);
     }
-    expect(screen.getByRole('link', { name: /current site/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /classic site/i })).toHaveAttribute('href', '/?classic');
   });
 });
 
