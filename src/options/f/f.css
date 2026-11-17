@@ -736,3 +736,133 @@ main,
   height: 14px;
   border-inline: 4px solid currentColor;
 }
+
+/* ── The ambience line: where and when the sky is, in words ───────────────── */
+.of-ambience {
+  position: fixed;
+  top: 4.5rem;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 19;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: calc(100vw - 1.5rem);
+  padding: 0.2rem 0.25rem 0.2rem 0.75rem;
+  border-radius: 999px;
+  background: var(--of-panel);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid var(--of-edge);
+  box-shadow: var(--of-shadow);
+  color: var(--of-ink);
+}
+.of-ambience__line {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem 0.625rem;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.of-ambience__line > span + span::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-right: 0.625rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.45;
+  vertical-align: middle;
+}
+.of-ambience__icon {
+  flex: none;
+  font-size: 1.125rem;
+  color: var(--of-accent);
+}
+.of-ambience__place {
+  font-weight: 650;
+}
+.of-ambience__time {
+  font-family: var(--of-mono);
+  font-variant-numeric: tabular-nums;
+}
+.of-ambience__festive {
+  color: var(--of-accent);
+  font-weight: 650;
+}
+.of-ambience__mode {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.875rem;
+  border-radius: 999px;
+  font-family: var(--of-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background-color 0.15s ease;
+}
+.of-ambience__mode:hover {
+  background: var(--of-rule);
+}
+.of-ambience__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--of-soft);
+}
+.of-ambience__mode[data-mode='live'] .of-ambience__dot {
+  background: oklch(62% 0.2 25);
+  box-shadow: 0 0 0 4px oklch(62% 0.2 25 / 0.25);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .of-ambience__mode[data-mode='live'] .of-ambience__dot {
+    animation: of-live 2.4s ease-in-out infinite;
+  }
+  @keyframes of-live {
+    50% {
+      box-shadow: 0 0 0 7px oklch(62% 0.2 25 / 0);
+    }
+  }
+}
+/* Phones: the bar is short (icon, time, temperature); the city, the part of the day and the
+   weather's name stay in the page for screen readers and return on wider screens. */
+@media (max-width: 59.99rem) {
+  .of-nav {
+    justify-content: flex-start;
+  }
+  .of-ambience {
+    top: 0.75rem;
+    left: auto;
+    right: 0.75rem;
+    translate: none;
+    padding-block: 0.25rem;
+  }
+  .of-ambience__wide {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .of-ambience__mode {
+    padding: 0 0.625rem;
+  }
+}
+@media (min-width: 60rem) {
+  .of-ambience {
+    top: 0.75rem;
+    left: auto;
+    right: clamp(1.5rem, 5vw, 5rem);
+    translate: none;
+    padding-block: 0.25rem;
+  }
+}

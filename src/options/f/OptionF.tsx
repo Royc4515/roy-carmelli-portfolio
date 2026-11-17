@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import '@fontsource-variable/bricolage-grotesque/wdth.css';
-import { useTheme } from '../../hooks/useTheme';
 import { OptionShell } from '../shared/OptionShell';
 import {
   bio,
@@ -26,26 +25,36 @@ import {
   type Project,
 } from '../shared/content';
 import { useCopyEmail, useModalDialog, usePrefersReducedMotion } from '../shared/hooks';
-import { ArrowRight, ArrowUpRight, ArrowDown, Check, Close, Copy, Download, Mail, Moon, Play, Sun } from '../shared/icons';
+import { ArrowRight, ArrowUpRight, ArrowDown, Check, Close, Copy, Download, Mail, Play } from '../shared/icons';
 import Arcade from '../d/Arcade';
 import type { VoxelWorld } from './engine';
+import { useAmbience, type Ambience, type SkyMode } from './ambience';
+import { AmbienceLine } from './AmbienceLine';
 import './f.css';
 
 type SceneState = 'loading' | 'on' | 'off';
+
+/** Hand the ambience to the engine. Tolerant of an engine build without the live sky. */
+function applyAmbience(world: VoxelWorld | null, ambience: Ambience): void {
+  (world as (VoxelWorld & { setAmbience?: (a: Ambience) => void }) | null)?.setAmbience?.(ambience);
+}
 
 /**
  * The canvas behind the page. The engine (and its shaders) loads in an effect, so nothing
  * touches WebGL while the page renders in a test or in the build-time prerender. Without
  * WebGL2, or after a lost context, `state` is "off" and the page shows its still image.
  */
-function Scene({ theme, paused, onState, worldRef }: {
-  theme: 'day' | 'night';
+function Scene({ ambience, paused, onState, worldRef }: {
+  ambience: Ambience;
   paused: boolean;
   onState: (s: SceneState) => void;
   worldRef: React.MutableRefObject<VoxelWorld | null>;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const reduced = usePrefersReducedMotion();
+  // The engine loads asynchronously: it takes the latest ambience when it is ready.
+  const latest = useRef(ambience);
+  latest.current = ambience;
 
   useEffect(() => {
     const el = canvas.current;
@@ -66,6 +75,7 @@ function Scene({ theme, paused, onState, worldRef }: {
         world = created;
         worldRef.current = created;
         if (!created) onState('off');
+        applyAmbience(created, latest.current);
       })
       .catch(() => !cancelled && onState('off'));
     return () => {
@@ -75,7 +85,7 @@ function Scene({ theme, paused, onState, worldRef }: {
     };
   }, [reduced, onState, worldRef]);
 
-  useEffect(() => worldRef.current?.setTheme(theme), [theme, worldRef]);
+  useEffect(() => applyAmbience(worldRef.current, ambience), [ambience, worldRef]);
   useEffect(() => worldRef.current?.setPaused(paused), [paused, worldRef]);
 
   return <canvas ref={canvas} className="of-canvas" aria-hidden="true" />;
@@ -197,7 +207,8 @@ function Row({ project }: { project: Project }) {
  * solid panels; the scene is decoration and is hidden from assistive technology.
  */
 export default function OptionF() {
-  const [theme, toggleTheme] = useTheme();
+  const [mode, setMode] = useState<SkyMode>('live');
+  const info = useAmbience(mode);
   const [scene, setScene] = useState<SceneState>('loading');
   const [paused, setPaused] = useState(false);
   const [open, setOpen] = useState<Project | null>(null);
@@ -208,10 +219,16 @@ export default function OptionF() {
   const closeDialog = useCallback(() => setOpen(null), []);
   const quit = useCallback(() => setPlaying(false), []);
 
+  // The interface follows the sky: dark panels once the sun is down, where the visitor is or
+  // in the sky they chose. `data-theme` is the attribute the option's tokens key on.
+  useEffect(() => {
+    document.documentElement.dataset.theme = info.dark ? 'night' : 'day';
+  }, [info.dark]);
+
   return (
     <OptionShell optionKey="f">
       <div className="of-root" data-scene={scene}>
-        <Scene theme={theme} paused={paused} onState={setScene} worldRef={world} />
+        <Scene ambience={info.ambience} paused={paused} onState={setScene} worldRef={world} />
 
         <header className="of-nav">
           <div className="of-nav__bar" data-solid="">
@@ -225,11 +242,9 @@ export default function OptionF() {
                 <li><a href="#contact">Contact</a></li>
               </ul>
             </nav>
-            <button type="button" className="of-icon-btn" onClick={toggleTheme} aria-pressed={theme === 'night'} aria-label="Night theme">
-              {theme === 'night' ? <Sun /> : <Moon />}
-            </button>
           </div>
         </header>
+        <AmbienceLine info={info} mode={mode} onMode={setMode} />
 
         <main id="main">
           <section className="of-stage of-stage--hero" aria-labelledby="hero-title">

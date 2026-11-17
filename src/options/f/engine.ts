@@ -10,6 +10,10 @@ import {
   spriteVoxels,
   type Bitmap,
 } from './voxels';
+import { cloneLook, defaultAmbience, easeLook, lookFor, withOverrides, type Ambience } from './sky';
+import { FIREWORK_COLOURS, PRECIP_BOX, buildFestive, buildFirework, buildPrecip } from './skyModels';
+
+export type { Ambience, Condition, Festive } from './sky';
 
 /**
  * The voxel diorama: raw WebGL2, no library. Every cube is one instance of a single cube mesh;
@@ -20,6 +24,9 @@ import {
  */
 
 export interface VoxelWorld {
+  /** The hour, the sun's times, the weather and the day's decoration. Eased, never popped. */
+  setAmbience(ambience: Ambience): void;
+  /** Kept for callers that only know day and night: noon or late evening, clear sky. */
   setTheme(theme: 'day' | 'night'): void;
   setPaused(paused: boolean): void;
   jump(): void;
@@ -62,8 +69,9 @@ layout(location=4) in vec4 aTo;
 layout(location=5) in vec4 aToCol;
 uniform mat4 uViewProj, uModel, uLightVP;
 uniform vec2 uShift;
-uniform float uProgress, uTime, uBurst;
-uniform int uMode; // 0 still, 1 morph from->to, 2 drifting motes, 3 burst
+uniform float uProgress, uTime, uBurst, uFall, uSlant, uSway;
+uniform vec3 uStretch, uBox;
+uniform int uMode; // 0 still, 1 morph from->to, 2 drifting motes, 3 burst, 4 rain and snow, 5 flame
 out vec3 vColor, vNormal, vLocal, vWorld;
 out vec4 vShadow;
 
@@ -106,6 +114,18 @@ void main() {
     size *= max(0.0, 1.0 - uBurst * 1.25);
     mat3 r = spin(normalize(v + 0.01), uBurst * 9.0);
     local = r * local; n = r * n;
+  } else if (uMode == 4) {
+    // Rain, snow, confetti: fall, wrap inside a box that travels with the camera, lean with
+    // the wind. The cube is stretched along its path, so a raindrop is a streak.
+    float speed = uFall * (0.75 + seed * 0.5);
+    float y = mod(aFrom.y - uTime * speed, uBox.y);
+    float x = mod(aFrom.x + uTime * speed * uSlant, uBox.x) - uBox.x * 0.5;
+    centre = vec3(x + sin(uTime * 1.3 + seed * 60.0) * uSway, y, aFrom.z + cos(uTime * 1.1 + seed * 40.0) * uSway);
+    local *= uStretch;
+    local.x -= local.y * uSlant;
+  } else if (uMode == 5) {
+    size *= 0.78 + 0.3 * sin(uTime * 11.0 + seed * 50.0);
+    centre.y += sin(uTime * 7.0 + seed * 30.0) * 0.35;
   }
 
   vec4 world = uModel * vec4(centre + local * size, 1.0);
@@ -124,8 +144,8 @@ precision highp float;
 precision highp sampler2DShadow;
 in vec3 vColor, vNormal, vLocal, vWorld;
 in vec4 vShadow;
-uniform vec3 uLightDir, uKey, uSkyAmb, uGroundAmb, uFog, uCam, uLamp, uLampPos;
-uniform float uEmissive, uShadowOn, uFogNear, uFogFar;
+uniform vec3 uLightDir, uKey, uSkyAmb, uGroundAmb, uFog, uCam, uLamp, uLampPos, uTint;
+uniform float uEmissive, uShadowOn, uFogNear, uFogFar, uSnow;
 uniform sampler2DShadow uShadow;
 out vec4 frag;
 
@@ -141,7 +161,9 @@ float shadow() {
 
 void main() {
   vec3 n = normalize(vNormal);
-  vec3 base = pow(vColor, vec3(2.2));
+  vec3 base = pow(vColor, vec3(2.2)) * uTint;
+  // Snow settles on whatever faces the sky.
+  base = mix(base, vec3(0.8, 0.86, 0.95), uSnow * smoothstep(0.55, 0.95, n.y));
   float ndl = max(dot(n, uLightDir), 0.0);
   float lit = uShadowOn > 0.5 ? mix(1.0, shadow(), step(0.001, ndl)) : 1.0;
   vec3 ambient = mix(uGroundAmb, uSkyAmb, n.y * 0.5 + 0.5);
@@ -175,23 +197,64 @@ void main() {
 const SKY_FRAG = `#version 300 es
 precision highp float;
 in vec2 vUv;
-uniform vec3 uTop, uBottom, uOrb;
-uniform vec2 uOrbAt, uRes;
-uniform float uNight, uTime;
+uniform vec3 uTop, uBottom, uGlow, uSunCol;
+uniform vec2 uSun, uMoon, uRes;
+uniform float uSunVis, uMoonVis, uStars, uTime, uFlash;
 out vec4 frag;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+}
 void main() {
-  vec3 c = mix(uBottom, uTop, smoothstep(0.0, 1.0, vUv.y));
+  float aspect = uRes.x / uRes.y;
+  vec3 c = mix(uBottom, uTop, smoothstep(0.0, 1.0, pow(vUv.y, 0.85)));
   vec2 px = vUv * uRes;
-  // Stars on a coarse grid, so each is a small square: pixel-art stars.
-  vec2 cell = floor(px / 3.0);
-  float star = step(0.9965, hash(cell)) * (0.55 + 0.45 * sin(uTime * 1.5 + hash(cell + 7.0) * 30.0));
-  c += vec3(star) * uNight * smoothstep(0.25, 0.9, vUv.y);
-  // A square sun and moon: this is a world of cubes.
-  vec2 o = abs(px - uOrbAt * uRes) / uRes.y;
-  float d = max(o.x, o.y);
-  c += uOrb * 0.2 * smoothstep(0.3, 0.0, length(o));
-  c = mix(c, uOrb, step(d, 0.03));
+
+  // The horizon burns under the sun: a wide ellipse low in the sky plus a faint band across.
+  vec2 g = vec2((vUv.x - uSun.x) * aspect, vUv.y - 0.3);
+  c += uGlow * (0.62 * exp(-(g.x * g.x * 1.2 + g.y * g.y * 6.5)) + 0.2 * exp(-g.y * g.y * 16.0));
+
+  // Stars on a coarse grid, so each is a small square: pixel-art stars. A faint band of
+  // crowded dim ones crosses the sky.
+  float grain = max(2.0, floor(uRes.y / 300.0));
+  vec2 cell = floor(px / grain);
+  float h = hash(cell);
+  float band = exp(-pow((vUv.y - 0.6 - (vUv.x - 0.5) * 0.3) / 0.13, 2.0));
+  float star = step(0.9965 - band * 0.006, h) * (0.5 + 0.5 * sin(uTime * 1.5 + hash(cell + 7.0) * 30.0));
+  star *= 0.45 + 0.55 * hash(cell + 3.0);
+  c += vec3(0.9, 0.93, 1.0) * star * uStars * smoothstep(0.2, 0.75, vUv.y);
+  c += vec3(0.3, 0.36, 0.6) * band * vnoise(px / (grain * 14.0)) * 0.16 * uStars;
+
+  // Sun and moon are round, but drawn on a grid of blocks: a ball built from cubes.
+  {
+    float R = 0.05 * uRes.y, s = R / 5.5;
+    vec2 d = px - uSun * uRes;
+    vec2 q = floor(d / s + 0.5);
+    float r = length(q) * s / R;
+    float far = length(d) / uRes.y;
+    c += uSunCol * uSunVis * (0.5 * exp(-far * far / 0.0045) + 0.22 * exp(-far * far / 0.06));
+    vec2 f = abs(fract(d / s + 0.5) - 0.5);
+    vec3 body = uSunCol * (1.0 + 0.1 * step(r, 0.6)) * (1.0 - 0.06 * smoothstep(0.4, 0.5, max(f.x, f.y)));
+    c = mix(c, body, step(r, 1.0) * uSunVis);
+  }
+  {
+    float R = 0.042 * uRes.y, s = R / 5.5;
+    vec2 d = px - uMoon * uRes;
+    vec2 q = floor(d / s + 0.5);
+    float r = length(q) * s / R;
+    float far = length(d) / uRes.y;
+    c += vec3(0.5, 0.6, 0.95) * uMoonVis * (0.22 * exp(-far * far / 0.004) + 0.1 * exp(-far * far / 0.05));
+    float maria = step(0.66, vnoise(q * 0.45 + 4.0)) * step(r, 0.86);
+    // The unlit limb: a waning gibbous moon, the terminator running down its left side.
+    float dark = step(q.x * 0.95 + q.y * 0.3, -2.6);
+    vec2 f = abs(fract(d / s + 0.5) - 0.5);
+    vec3 body = vec3(0.9, 0.93, 1.0) * (1.0 - 0.2 * maria) * (1.0 - 0.07 * smoothstep(0.4, 0.5, max(f.x, f.y)));
+    body = mix(body, c + 0.03, dark * 0.9);
+    c = mix(c, body, step(r, 1.0) * uMoonVis);
+  }
+  c += vec3(0.62, 0.68, 0.9) * uFlash;
   frag = vec4(c, 1.0);
 }`;
 
@@ -274,16 +337,6 @@ interface Range {
   count: number;
 }
 
-const DAY = {
-  top: [0.3, 0.56, 0.9], bottom: [0.78, 0.9, 0.97], key: [1.55, 1.42, 1.18], sky: [0.27, 0.35, 0.5],
-  ground: [0.13, 0.12, 0.1], orb: [1.0, 0.95, 0.7], lamp: [0, 0, 0], emissive: 0.35,
-};
-const NIGHT = {
-  top: [0.02, 0.035, 0.1], bottom: [0.09, 0.13, 0.27], key: [0.42, 0.5, 0.8], sky: [0.12, 0.16, 0.32],
-  ground: [0.05, 0.05, 0.09], orb: [0.82, 0.86, 1.0], lamp: [1.5, 0.95, 0.45], emissive: 3.0,
-};
-const LIGHT_DIR = norm([0.5, 0.82, 0.55]);
-
 const DEBUG_SHADOW = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('dbg');
 const forcedLog = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('q');
 
@@ -363,8 +416,38 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     worldRanges.push({ start, count: world.count - start });
   }
 
+  // Clouds: a few shapes, placed many times. Each placement drifts with the wind and wraps
+  // around the camera, so the sky is never empty and never runs out. The first entries are
+  // the ones a nearly clear sky shows, so the list goes far and high first, then closer.
   const clouds = new Voxels(rand);
-  for (let n = 0; n < 9; n++) buildCloud(clouds, -200 + n * 290 + rand() * 80, 150 + rand() * 90, -260 - rand() * 180, rand);
+  const cloudShapes: Range[] = [];
+  for (let n = 0; n < 4; n++) {
+    const start = clouds.count;
+    buildCloud(clouds, 0, 0, 0, rand);
+    cloudShapes.push({ start, count: clouds.count - start });
+  }
+  const CLOUD_SPAN = 1700;
+  const cloudPool = Array.from({ length: 26 }, (_, n) => {
+    const layer = n % 3; // 0 far, 1 middle, 2 high overhead
+    return {
+      shape: n % cloudShapes.length,
+      x: (n * 0.618 * CLOUD_SPAN + rand() * 160) % CLOUD_SPAN,
+      y: layer === 2 ? 250 + rand() * 50 : 120 + rand() * 120,
+      z: layer === 0 ? -430 + rand() * 140 : layer === 1 ? -240 + rand() * 90 : -90 + rand() * 120,
+      size: (layer === 2 ? 1.25 : 0.9) + rand() * 0.6,
+      speed: 0.7 + rand() * 0.6,
+    };
+  });
+  // Mist: the same shapes, flattened and laid near the ground behind and beside the island.
+  const mistPool = Array.from({ length: 7 }, (_, n) => ({
+    shape: n % cloudShapes.length, x: (n * 0.44 * CLOUD_SPAN + rand() * 120) % CLOUD_SPAN,
+    y: 4 + rand() * 26, z: -150 + rand() * 120, size: 1.5 + rand() * 0.8, speed: 0.25 + rand() * 0.2,
+  }));
+
+  const festive = buildFestive(rand);
+  const precip = buildPrecip(1700, rand);
+  const FIREWORK = 96;
+  const fireworks = FIREWORK_COLOURS.map(colours => buildFirework(FIREWORK, colours, rand));
 
   // Motes: fireflies at night, pollen by day. A handful per island.
   const motes = new Voxels(rand);
@@ -432,6 +515,8 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     world: makeBuffer(world.toArray()), clouds: makeBuffer(clouds.toArray()), motes: makeBuffer(motes.toArray()),
     roy: makeBuffer(roy.toArray()), totems: makeBuffer(totemData), burst: makeBuffer(burst),
     bird: makeBuffer(birdVox.toArray()),
+    festive: makeBuffer(festive.statics.toArray()), flames: makeBuffer(festive.flames.toArray()),
+    precip: makeBuffer(precip.data), fireworks: fireworks.map(makeBuffer),
   };
 
   const SHADOW = 2048;
@@ -456,15 +541,24 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
   /** 0 full, 1 lower resolution, 2 no shadows, 3 no motes or clouds. `?q=0` pins it (captures). */
   let quality = forced !== null ? Number(forced) || 0 : window.innerWidth < 700 ? 1 : 0;
   let slowFrames = 0;
-  let nightMix = document.documentElement.dataset.theme === 'night' ? 1 : 0;
-  let nightTarget = nightMix;
+  const search = window.location.search;
+  let ambience = withOverrides(defaultAmbience(), search);
+  let hostSetAmbience = false;
+  /** The look on screen. It chases the look the ambience asks for; null until the first frame. */
+  let look: ReturnType<typeof lookFor> | null = null;
+  let lookMoving = false;
+  /** The decoration on show and how far it has grown in (0..1): one shrinks before the next grows. */
+  let festShown = ambience.festive;
+  let festCount = ambience.festiveCount;
+  let festAmt = festShown ? 1 : 0;
+  let flashAt = -10, nextFlash = 3;
   /** `?still` starts paused: one frame per change, for captures on machines without a GPU. */
   let paused = new URLSearchParams(window.location.search).has('still');
   let destroyed = false;
   let raf = 0;
   let last = performance.now();
   let clock = 0;
-  let pointer = { x: 0, y: 0 }, look = { x: 0, y: 0 };
+  let pointer = { x: 0, y: 0 }, gaze = { x: 0, y: 0 };
   let camX = royRestX(0) + 30;
   // `?jump` with `?still` freezes Roy mid-jump, to check the pose and the burst in a capture.
   let jumpAt = new URLSearchParams(window.location.search).has('jump') ? -0.35 : -10;
@@ -573,9 +667,8 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     lastRoyX = royX;
 
     // ── Camera ────────────────────────────────────────────────────────────────────────
-    look.x += (pointer.x - look.x) * Math.min(1, dt * 4);
-    look.y += (pointer.y - look.y) * Math.min(1, dt * 4);
-    nightMix += (nightTarget - nightMix) * Math.min(1, dt * 3);
+    gaze.x += (pointer.x - gaze.x) * Math.min(1, dt * 4);
+    gaze.y += (pointer.y - gaze.y) * Math.min(1, dt * 4);
     const targetX = royX + (travelling ? 20 : i === 0 && q < 0.5 ? 6 : 44);
     camX += (targetX - camX) * (opts.reducedMotion ? 1 : Math.min(1, dt * 6));
     const aspect = canvas.width / Math.max(1, canvas.height);
@@ -587,8 +680,8 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     const zoom = lerp(0.86, 1, Math.min(1, pos * 2));
     const radius = (wide ? 540 : 350 / Math.max(0.35, aspect)) * zoom;
     const dolly = radius * (1 + swoop * 0.9);
-    const yaw = (animate ? Math.sin(clock * 0.17) * 0.05 : 0) + look.x * 0.32 - 0.12 + swoop * 1.1;
-    const pitch = 0.3 - look.y * 0.1 + swoop * 0.35;
+    const yaw = (animate ? Math.sin(clock * 0.17) * 0.05 : 0) + gaze.x * 0.32 - 0.12 + swoop * 1.1;
+    const pitch = 0.3 - gaze.y * 0.1 + swoop * 0.35;
     const target: V3 = [camX, 44 + royY * 0.25, 0];
     const eye: V3 = [
       target[0] + Math.sin(yaw) * Math.cos(pitch) * dolly,
@@ -599,15 +692,56 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     // Desktop: the scene sits in the right half, beside the text. Phones: in the top part.
     const shift: [number, number] = wide ? [0.36, 0.02] : [0, 0.48];
 
+    // ── Sky, light and weather ────────────────────────────────────────────────────────
+    const wanted = lookFor(ambience, wide);
+    if (!look) look = cloneLook(wanted);
+    // About 1.5 s to settle. Reduced motion: the new look is simply there.
+    const moved = easeLook(look, wanted, opts.reducedMotion ? 1 : Math.min(1, dt * 2.6));
+    lookMoving = moved > 0.003;
+    const L = look;
+    if (festShown !== ambience.festive) {
+      festAmt = opts.reducedMotion ? 0 : Math.max(0, festAmt - dt * 2.5);
+      if (festAmt <= 0.01) {
+        festShown = ambience.festive;
+        festCount = ambience.festiveCount;
+      }
+      lookMoving = true;
+    } else if (festShown && festAmt < 1) {
+      festAmt = opts.reducedMotion ? 1 : Math.min(1, festAmt + dt * 2.5);
+      festCount = ambience.festiveCount;
+      lookMoving = festAmt < 1;
+    } else festCount = ambience.festiveCount;
+    // Lightning: one double flash every several seconds, and only while things move. Never a
+    // strobe, and never for a visitor who asked for less motion.
+    let flash = 0;
+    if (L.storm > 0.5 && animate) {
+      if (clock > nextFlash) {
+        flashAt = clock;
+        nextFlash = clock + 6.5 + ((clock * 7.31) % 1) * 6;
+      }
+      const t = clock - flashAt;
+      flash = t < 0 ? 0 : t < 0.07 ? 1 : t < 0.15 ? 0.15 : t < 0.22 ? 0.75 : Math.max(0, 0.75 - (t - 0.22) * 2.2);
+    }
+    const LIGHT_DIR = norm(L.light as V3);
     const lightEye: V3 = [camX + LIGHT_DIR[0] * 600, LIGHT_DIR[1] * 600, LIGHT_DIR[2] * 600];
     const lightVP = mul(ortho(250, 50, 1300), lookAt(lightEye, [camX, 0, 0]));
 
     const royRange = royRanges.get(frameName) ?? royRanges.get('stand-1')!;
-    const bodyYaw = travelling ? (facing > 0 ? 0 : Math.PI) : look.x * 0.4;
+    const bodyYaw = travelling ? (facing > 0 ? 0 : Math.PI) : gaze.x * 0.4;
     const royModel = trs(royX, royY, ROY_Z, bodyYaw, 1 / Math.sqrt(squash), squash);
     const none = ident();
     const near = [i - 1, i, i + 1].filter(n => n >= 0 && n < STATIONS);
     const shadows = quality < 2;
+
+    const heroNear = near.includes(0);
+    const festRange = festShown ? festive.staticRanges[festShown] : null;
+    const flameRange = festShown ? festive.flameRanges[festShown] : null;
+    // Grown from its own foot: scale about the point where the decoration stands.
+    const festModel = trs(festive.at[0] * (1 - festAmt), 0, festive.at[2] * (1 - festAmt), 0, festAmt, festAmt);
+    const flameCubes = !flameRange ? 0 : festShown === 'hanukkah' ? Math.min(flameRange.count, 2 * (1 + festCount)) : flameRange.count;
+    const qualityScale = [1, 0.65, 0.42, 0.25][quality];
+    const cloudsOut = Math.round(cloudPool.length * Math.min(1, L.cloud) * (quality < 3 ? 1 : 0.5));
+    const cloudDrift = clock * (5 + L.wind * 46);
 
     const drawScene = (prog: typeof main, forShadow: boolean) => {
       const set = (mode: number, model: Mat, progress = 0) => {
@@ -616,43 +750,137 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
         gl.uniform1f(prog.u('uProgress'), progress);
       };
       const emissive = (v: number) => !forShadow && gl.uniform1f(prog.u('uEmissive'), v);
+      const tint = (c: number[], snow: number) => {
+        if (forShadow) return;
+        gl.uniform3f(prog.u('uTint'), c[0], c[1], c[2]);
+        gl.uniform1f(prog.u('uSnow'), snow);
+      };
       emissive(DEBUG_SHADOW ? -1 : 0);
+      tint(L.tint, L.snow);
       set(0, none);
       for (const n of near) {
         bind(buffers.world, worldRanges[n].start, worldRanges[n].start);
         gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, worldRanges[n].count);
       }
+      if (festRange && heroNear && festAmt > 0.01) {
+        set(0, festModel);
+        bind(buffers.festive, festRange.start, festRange.start);
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, festRange.count);
+      }
+      tint(L.tint, L.snow * 0.5); // a dusting on Roy's hair and shoulders, not a snowman
       set(0, royModel);
       bind(buffers.roy, royRange.start, royRange.start);
       gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, royRange.count);
       // The totem pool: from the model of station i to the model of station i + 1.
+      tint(L.tint, L.snow * 0.6);
       set(1, none, q);
       bind(buffers.totems, i * totems.count, (i + 1) * totems.count);
       gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, totems.count);
-      if (birdVox.count > 0) {
+      if (birdVox.count > 0 && L.rain + L.snow < 0.5) {
         // Clockwise around the island Roy is on; the sprite faces left, so it flies tail-first
-        // unless it is turned to follow the circle.
+        // unless it is turned to follow the circle. It sits out rain and snow.
         const a = clock * 0.45;
         const home = camX - 30; // follows the camera, so it never pops from island to island
+        tint(L.tint, 0);
         set(0, trs(home + Math.cos(a) * 118, 132 + Math.sin(a * 2.3) * 10, Math.sin(a) * 70 - 24, a, 1, 1));
         bind(buffers.bird, 0, 0);
         gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, birdVox.count);
       }
       if (forShadow) return;
-      if (quality < 3) {
-        set(0, none);
-        emissive(lerp(0.75, 0.06, nightMix));
-        bind(buffers.clouds, 0, 0);
-        gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, clouds.count);
+
+      // Flames: small, bright, flickering. They read by day and glow at night.
+      if (flameCubes > 0 && heroNear && festAmt > 0.5) {
+        tint([1, 1, 1], 0);
+        emissive(1.6 + L.night * 2.2);
+        set(5, festModel);
+        bind(buffers.flames, flameRange!.start, flameRange!.start);
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, flameCubes);
+      }
+
+      // Clouds: each placement is the same few shapes under its own matrix.
+      const placeCloud = (c: (typeof cloudPool)[number], size: number, flat: number) => {
+        const rel = ((((c.x + cloudDrift * c.speed - camX * 0.45) % CLOUD_SPAN) + CLOUD_SPAN) % CLOUD_SPAN) - CLOUD_SPAN / 2;
+        set(0, trs(camX + rel, c.y, c.z, 0, c.size * size, c.size * size * flat));
+        const shape = cloudShapes[c.shape];
+        bind(buffers.clouds, shape.start, shape.start);
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, shape.count);
+      };
+      if (cloudsOut > 0) {
+        tint(L.cloudTint, 0);
+        emissive(0.5 * (1 - L.night) + 0.05);
+        for (let n = 0; n < cloudsOut; n++) placeCloud(cloudPool[n], L.cloudScale, 1);
+      }
+      if (L.mist > 0.04 && quality < 3) {
+        tint(L.bottom.map(v => 0.55 + v * 0.5), 0);
+        emissive(0.35 * (1 - L.night) + 0.04);
+        const wisps = Math.round(mistPool.length * Math.min(1, L.mist));
+        for (let n = 0; n < wisps; n++) placeCloud(mistPool[n], 1, 0.3);
+      }
+
+      if (quality < 3 && L.rain + L.snow < 0.6) {
+        tint([1, 1, 1], 0);
         set(2, none);
-        emissive(lerp(DAY.emissive, NIGHT.emissive, nightMix));
+        emissive(lerp(0.35, 3.0, L.night));
         for (const n of near) {
           bind(buffers.motes, moteRanges[n].start, moteRanges[n].start);
           gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, moteRanges[n].count);
         }
       }
+
+      // Rain, snow and confetti need the clock: frozen streaks in the air would look broken.
+      if (animate) {
+        const fall = (count: number, start: number, speed: number, slant: number, sway: number, stretch: V3, colour: number[], glow: number) => {
+          if (count < 1) return;
+          tint(colour, 0);
+          emissive(glow);
+          gl.uniform1f(prog.u('uFall'), speed);
+          gl.uniform1f(prog.u('uSlant'), slant);
+          gl.uniform1f(prog.u('uSway'), sway);
+          gl.uniform3f(prog.u('uStretch'), stretch[0], stretch[1], stretch[2]);
+          gl.uniform3f(prog.u('uBox'), PRECIP_BOX[0], PRECIP_BOX[1], PRECIP_BOX[2]);
+          set(4, trs(camX, 0, 30, 0, 1, 1));
+          bind(buffers.precip, start, start);
+          gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, Math.min(count, precip.count));
+        };
+        const dayGlow = 0.25 + 0.75 * (1 - L.night);
+        fall(Math.round((300 + 1400 * L.rain) * L.rain * qualityScale), 0, 330, 0.12 + L.wind * 0.55, 0, [0.42, 12, 0.42], [0.72, 0.8, 0.95], 0.5 * dayGlow + 0.12);
+        fall(Math.round(900 * L.snow * qualityScale), 0, 30, L.wind * 0.9, 7, [2.1, 2.1, 2.1], [1, 1, 1], 0.45 * dayGlow + 0.2);
+        if (festShown === 'purim' && heroNear) {
+          tint([1, 1, 1], 0);
+          const count = Math.round(precip.confetti.count * festAmt * qualityScale);
+          if (count > 0) {
+            emissive(0.5);
+            gl.uniform1f(prog.u('uFall'), 22);
+            gl.uniform1f(prog.u('uSlant'), 0.25);
+            gl.uniform1f(prog.u('uSway'), 12);
+            gl.uniform3f(prog.u('uStretch'), 2.6, 0.7, 2.2);
+            gl.uniform3f(prog.u('uBox'), 300, 210, PRECIP_BOX[2]);
+            set(4, trs(festive.at[0] - 30, 0, 10, 0, 1, 1));
+            bind(buffers.precip, precip.confetti.start, precip.confetti.start);
+            gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, count);
+          }
+        }
+        // Fireworks on Independence Day, after dark: two bursts taking turns.
+        if (festShown === 'independence' && L.night > 0.5 && quality < 3) {
+          tint([1, 1, 1], 0);
+          emissive(3.2);
+          fireworks.forEach((_, k) => {
+            const cycle = (clock + k * 1.45) / 2.9;
+            const p = cycle % 1;
+            if (p > 0.72) return;
+            const round = Math.floor(cycle);
+            const wander = ((round * 0.618 + k * 0.37) % 1) - 0.5;
+            gl.uniform1f(prog.u('uBurst'), p / 0.9);
+            set(3, trs(camX + 30 + wander * 240, 210 + (k ? 28 : 0) + wander * 30, -170, 0, 1, 1));
+            bind(buffers.fireworks[k], 0, FIREWORK);
+            gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, FIREWORK);
+          });
+        }
+      }
+
       const b = (clock - jumpAt) / 0.9;
       if (b > 0 && b < 1) {
+        tint([1, 1, 1], 0);
         gl.uniform1f(prog.u('uBurst'), b);
         set(3, trs(lastRoyX, 0, ROY_Z, 0, 1, 1));
         emissive(1.2);
@@ -679,22 +907,22 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     }
 
     gl.viewport(0, 0, canvas.width, canvas.height);
-    const theme = {
-      top: mix3(DAY.top, NIGHT.top, nightMix), bottom: mix3(DAY.bottom, NIGHT.bottom, nightMix),
-      key: mix3(DAY.key, NIGHT.key, nightMix), sky: mix3(DAY.sky, NIGHT.sky, nightMix),
-      ground: mix3(DAY.ground, NIGHT.ground, nightMix), orb: mix3(DAY.orb, NIGHT.orb, nightMix),
-      lamp: mix3(DAY.lamp, NIGHT.lamp, nightMix),
-    };
-    // Sky first, with depth off: a gradient, the sun or the moon, and stars at night.
+    // Sky first, with depth off: the gradient, the horizon's glow, stars, sun and moon.
     gl.disable(gl.DEPTH_TEST);
     gl.bindVertexArray(null); // the sky is one triangle made from gl_VertexID: no attributes
     gl.useProgram(sky.p);
-    gl.uniform3fv(sky.u('uTop'), theme.top);
-    gl.uniform3fv(sky.u('uBottom'), theme.bottom);
-    gl.uniform3fv(sky.u('uOrb'), theme.orb);
-    gl.uniform2f(sky.u('uOrbAt'), wide ? 0.9 - look.x * 0.01 : 0.8, wide ? 0.82 : 0.9);
+    gl.uniform3fv(sky.u('uTop'), L.top);
+    gl.uniform3fv(sky.u('uBottom'), L.bottom);
+    gl.uniform3fv(sky.u('uGlow'), L.glow);
+    gl.uniform3fv(sky.u('uSunCol'), L.sunCol);
+    // A touch of parallax against the pointer, so the sky is not painted on the glass.
+    gl.uniform2f(sky.u('uSun'), L.sun[0] - gaze.x * 0.012, L.sun[1]);
+    gl.uniform2f(sky.u('uMoon'), L.moon[0] - gaze.x * 0.012, L.moon[1]);
+    gl.uniform1f(sky.u('uSunVis'), L.sunVis);
+    gl.uniform1f(sky.u('uMoonVis'), L.moonVis);
+    gl.uniform1f(sky.u('uStars'), L.stars);
+    gl.uniform1f(sky.u('uFlash'), flash * 0.5);
     gl.uniform2f(sky.u('uRes'), canvas.width, canvas.height);
-    gl.uniform1f(sky.u('uNight'), nightMix);
     gl.uniform1f(sky.u('uTime'), clock);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindVertexArray(vao);
@@ -707,15 +935,23 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     gl.uniform2f(main.u('uShift'), shift[0], shift[1]);
     gl.uniform1f(main.u('uTime'), clock);
     gl.uniform3fv(main.u('uLightDir'), LIGHT_DIR);
-    gl.uniform3fv(main.u('uKey'), theme.key);
-    gl.uniform3fv(main.u('uSkyAmb'), theme.sky);
-    gl.uniform3fv(main.u('uGroundAmb'), theme.ground);
-    gl.uniform3fv(main.u('uFog'), theme.bottom.map(v => Math.pow(v, 2.2)));
+    gl.uniform3f(main.u('uKey'), L.key[0] + flash * 1.3, L.key[1] + flash * 1.4, L.key[2] + flash * 1.7);
+    gl.uniform3f(main.u('uSkyAmb'), L.skyAmb[0] + flash * 0.25, L.skyAmb[1] + flash * 0.27, L.skyAmb[2] + flash * 0.35);
+    gl.uniform3fv(main.u('uGroundAmb'), L.groundAmb);
+    // Fog is the colour of the sky at the horizon, so far islands melt into it.
+    gl.uniform3fv(main.u('uFog'), L.bottom.map(v => Math.pow(Math.min(1, v + flash * 0.2), 2.2)));
     gl.uniform3fv(main.u('uCam'), eye);
-    gl.uniform3fv(main.u('uLamp'), theme.lamp);
-    gl.uniform3f(main.u('uLampPos'), royX + 26, 58 + royY, ROY_Z + 46);
-    gl.uniform1f(main.u('uFogNear'), 520);
-    gl.uniform1f(main.u('uFogFar'), 1500);
+    // Roy carries a warm lamp at night. When candles burn beside him on the hero island, the
+    // light moves between them and is on (faintly) even by day.
+    const candle = flameCubes > 0 && heroNear ? festAmt * Math.max(0, 1 - pos * 1.6) : 0;
+    const glowUp = candle * (0.3 + 0.9 * L.night);
+    gl.uniform3f(main.u('uLamp'), L.lamp[0] + 1.5 * glowUp, L.lamp[1] + 0.9 * glowUp, L.lamp[2] + 0.4 * glowUp);
+    gl.uniform3f(
+      main.u('uLampPos'),
+      lerp(royX + 26, festive.at[0] - 6, candle * 0.7), lerp(58 + royY, 50, candle * 0.7), lerp(ROY_Z + 46, festive.at[2] + 34, candle * 0.7),
+    );
+    gl.uniform1f(main.u('uFogNear'), L.fogNear);
+    gl.uniform1f(main.u('uFogFar'), L.fogFar);
     gl.uniform1f(main.u('uShadowOn'), shadows ? 1 : 0);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, shadowTex);
@@ -738,7 +974,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
       opts.onReady();
     }
     // Still scenes (paused, reduced motion) redraw only when something changed.
-    dirty = resized || Math.abs(nightTarget - nightMix) > 0.002 || Math.abs(targetX - camX) > 0.05;
+    dirty = resized || lookMoving || Math.abs(targetX - camX) > 0.05;
     if (animate || dirty) schedule();
   }
   let ready = false;
@@ -780,9 +1016,16 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
   schedule();
 
   return {
+    setAmbience(next) {
+      hostSetAmbience = true;
+      // don't touch / the capture flags (?hour, ?wx, ...) are applied last, so they win.
+      ambience = withOverrides({ ...next }, search);
+      schedule();
+    },
     setTheme(theme) {
-      nightTarget = theme === 'night' ? 1 : 0;
-      if (opts.reducedMotion) nightMix = nightTarget;
+      // Only for a caller that never sends an ambience: real data must not be overruled.
+      if (hostSetAmbience) return;
+      ambience = withOverrides({ ...ambience, hour: theme === 'night' ? 22.5 : 13 }, search);
       schedule();
     },
     setPaused(value) {
