@@ -5,8 +5,8 @@ export const bio = {
   nameHe: "רועי כרמלי",
   title: "CS & Neuroscience · Bar-Ilan University",
   role: "Full-Stack & AI Developer",
-  availability: "Open to student roles · Part-time · Israel",
-  contactBlurb: "I'm looking for a student position in full-stack or AI development in Israel, part-time at first alongside my studies. Email works best.",
+  availability: "Open to student roles · 2-3 days a week · Israel",
+  contactBlurb: "I'm looking for a student position in full-stack or AI development in Israel, part-time at first (2-3 days a week) alongside my studies. Email works best.",
   resume: {
     href: "/Roy_Carmelli_CV.pdf",
     fileName: "Roy_Carmelli_CV.pdf",
