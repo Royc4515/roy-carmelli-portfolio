@@ -1,18 +1,18 @@
 import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
-import App from './App';
+import LiveSite from './options/f/LiveSite';
 import { AppProviders } from './AppProviders';
 
 /**
  * Build-time entry (scripts/seo/prerender.mjs): renders the page to static HTML so crawlers
  * that never run JavaScript (Bing's first pass, GPTBot, ClaudeBot, PerplexityBot) read the
- * same content visitors do. Same tree as main.tsx, minus the analytics beacon.
+ * same content visitors do. Same tree as main.tsx at "/" (option F), minus the analytics beacon.
  */
 export function render(): string {
   return renderToString(
     <StrictMode>
       <AppProviders>
-        <App />
+        <LiveSite />
       </AppProviders>
     </StrictMode>,
   );

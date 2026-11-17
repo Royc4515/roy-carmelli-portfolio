@@ -202,13 +202,14 @@ describe('prerender entry', () => {
     window.matchMedia = realMatchMedia;
   });
 
+  // The live page is option F (src/options/f): a stop per main project, then the rest.
   it('renders the whole page to static HTML: one h1, every section and project', async () => {
     const { render } = await import('../entry-server');
     const html = render();
     expect(html.match(/<h1[ >]/g)).toHaveLength(1);
-    for (const id of ['hero', 'projects', 'about', 'skills', 'resume', 'contact']) expect(html).toContain(`id="${id}"`);
+    for (const id of ['main', 'more', 'about', 'skills', 'contact']) expect(html).toContain(`id="${id}"`);
     for (const p of projects) {
-      expect(html).toContain(`id="quest-${p.id}-title"`);
+      if (p.tier === 'main') expect(html).toContain(`id="project-${p.id}"`);
       expect(html).toContain(splitTitle(p.title).name.replace(/&/g, '&amp;'));
     }
   });

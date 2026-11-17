@@ -1,0 +1,898 @@
+/* Option C "Signal": one WebGL moment in the hero, then calm, fast content.
+   Everything is scoped to html[data-option='c'] / .opt-c; class names are prefixed `oc-`
+   (never Tailwind utility names: Tailwind scans src/ and would grow the main stylesheet). */
+
+html[data-option='c'] {
+  --oc-bg: oklch(98.2% 0.006 255);
+  --oc-surface: oklch(100% 0 0);
+  --oc-sunken: oklch(95.2% 0.012 258);
+  --oc-fg: oklch(22% 0.03 265);
+  --oc-muted: oklch(44% 0.03 265);
+  --oc-line: oklch(88% 0.014 260);
+  --oc-accent: oklch(46% 0.1 185);
+  --oc-accent-soft: oklch(46% 0.1 185 / 0.12);
+  --oc-on-fg: oklch(98.2% 0.006 255);
+  /* The field card: same values as FIELD_COLORS in NeuralFieldCard.tsx. */
+  --oc-field-bg: rgb(236 240 248);
+  --oc-field-glow: rgb(0 133 120 / 0.28);
+  --oc-shadow: 0 1px 2px oklch(22% 0.03 265 / 0.06), 0 18px 48px -18px oklch(22% 0.03 265 / 0.22);
+
+  --oc-display: 'Bricolage Grotesque Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --oc-gutter: clamp(1.25rem, 4vw, 3rem);
+  --oc-max: 76rem;
+
+  /* Tokens shared/base.css reads. */
+  --o-bg: var(--oc-bg);
+  --o-fg: var(--oc-fg);
+  --o-font: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --o-focus: var(--oc-accent);
+  --o-select-bg: var(--oc-fg);
+  --o-select-fg: var(--oc-bg);
+  --o-scroll-pad: 24px;
+}
+
+html[data-option='c'][data-theme='night'] {
+  --oc-bg: oklch(15.5% 0.022 265);
+  --oc-surface: oklch(19.5% 0.026 265);
+  --oc-sunken: oklch(12.5% 0.02 265);
+  --oc-fg: oklch(95.5% 0.008 255);
+  --oc-muted: oklch(75% 0.022 260);
+  --oc-line: oklch(29% 0.028 265);
+  --oc-accent: oklch(84% 0.14 170);
+  --oc-accent-soft: oklch(84% 0.14 170 / 0.14);
+  --oc-on-fg: oklch(15.5% 0.022 265);
+  --oc-field-bg: rgb(9 13 24);
+  --oc-field-glow: rgb(77 242 184 / 0.3);
+  --oc-shadow: 0 1px 0 oklch(100% 0 0 / 0.04) inset, 0 24px 60px -24px oklch(0% 0 0 / 0.7);
+}
+
+.opt-c {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-feature-settings: 'cv11', 'ss03';
+}
+
+/* ---------- scroll progress ---------- */
+
+.oc-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .oc-progress {
+      display: block;
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 2px;
+      z-index: 50;
+      background: var(--oc-accent);
+      transform-origin: 0 50%;
+      animation: oc-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+@keyframes oc-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* ---------- header ---------- */
+
+.oc-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: var(--oc-max);
+  margin: 0 auto;
+  padding: 0.75rem var(--oc-gutter) 0;
+}
+.oc-header nav {
+  margin-left: auto;
+}
+.oc-header__mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--oc-line);
+  font: 600 1rem/1 var(--oc-display);
+  letter-spacing: 0.02em;
+}
+.oc-nav {
+  display: flex;
+}
+.oc-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--oc-muted);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.oc-nav a:hover {
+  color: var(--oc-fg);
+  background: var(--oc-accent-soft);
+}
+.oc-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--oc-line);
+  background: transparent;
+  font-size: 1.125rem;
+  transition: background-color 0.15s ease;
+}
+.oc-icon-btn:hover {
+  background: var(--oc-accent-soft);
+}
+
+/* ---------- hero ---------- */
+
+.oc-hero {
+  display: grid;
+  gap: 1.5rem;
+  max-width: var(--oc-max);
+  margin: 0 auto;
+  padding: 1rem var(--oc-gutter) 3rem;
+}
+/* Phones: the field is a band on top, the text sits below it on solid ground. */
+.oc-hero__text {
+  order: 2;
+}
+.oc-hero__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--oc-muted);
+}
+.oc-hero__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--oc-accent);
+  box-shadow: 0 0 0 4px var(--oc-accent-soft);
+}
+.oc-hero__name {
+  margin-top: 0.5rem;
+  font-family: var(--oc-display);
+  font-size: clamp(2.9rem, 13vw, 6.25rem);
+  font-weight: 620;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+.oc-hero__role {
+  margin-top: 0.9rem;
+  font-family: var(--oc-display);
+  font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--oc-accent);
+}
+.oc-hero__pitch {
+  margin-top: 0.9rem;
+  max-width: 34rem;
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--oc-muted);
+}
+.oc-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 39.99rem) {
+  /* Both actions on one row at 375px: CV and contact stay side by side above the fold. */
+  .oc-hero__actions {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+  .oc-hero__actions .oc-btn {
+    padding: 0 0.8rem;
+  }
+  .oc-hero__actions .oc-btn--primary {
+    flex: 1;
+  }
+}
+.oc-hero__meta {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--oc-muted);
+}
+
+@media (min-width: 60rem) {
+  .oc-hero {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center;
+    gap: clamp(2rem, 4vw, 4rem);
+    /* Fill the first screen under the header without pushing the buttons below the fold. */
+    min-height: min(calc(100svh - 60px), 52rem);
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+  }
+  .oc-hero__text {
+    order: 0;
+  }
+}
+
+/* ---------- buttons and links ---------- */
+
+.oc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 48px;
+  padding: 0 1.15rem;
+  border-radius: 12px;
+  border: 1px solid var(--oc-line);
+  background: var(--oc-surface);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+.oc-btn svg {
+  font-size: 1.15em;
+  flex: none;
+}
+.oc-btn:hover {
+  border-color: var(--oc-fg);
+}
+.oc-btn:active {
+  transform: scale(0.98);
+}
+.opt-c .oc-btn--primary {
+  background: var(--oc-fg);
+  border-color: var(--oc-fg);
+  color: var(--oc-on-fg);
+}
+.opt-c .oc-btn--primary:hover {
+  background: color-mix(in oklab, var(--oc-fg) 88%, var(--oc-accent));
+}
+.oc-btn--quiet {
+  background: transparent;
+}
+.oc-btn__chevron {
+  transition: transform 0.3s ease;
+}
+.oc-btn__chevron[data-open] {
+  transform: rotate(180deg);
+}
+.oc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: underline !important;
+  text-decoration-color: var(--oc-line) !important;
+  text-decoration-thickness: 1.5px !important;
+  text-underline-offset: 5px;
+  transition: text-decoration-color 0.15s ease;
+}
+.oc-link:hover {
+  text-decoration-color: var(--oc-accent) !important;
+}
+.oc-link svg {
+  font-size: 1.05em;
+  color: var(--oc-muted);
+  transition: transform 0.15s ease;
+}
+.oc-link:hover svg {
+  transform: translate(2px, -2px);
+}
+
+/* ---------- the field card ---------- */
+
+.oc-field {
+  position: relative;
+  /* A band on phones; `svh` so the browser bars do not resize it mid-scroll. */
+  height: clamp(168px, 25svh, 240px);
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--oc-field-bg);
+  border: 1px solid var(--oc-line);
+  box-shadow: var(--oc-shadow);
+  /* don't touch / isolates the canvas layer so the rounded clip holds in Safari. */
+  isolation: isolate;
+}
+@media (min-width: 40rem) {
+  .oc-field {
+    height: clamp(260px, 36svh, 380px);
+  }
+}
+@media (min-width: 60rem) {
+  .oc-field {
+    height: min(calc(100svh - 150px), 42rem);
+    min-height: 26rem;
+    border-radius: 28px;
+  }
+}
+/* Static stand-in: a few "cells" drawn with gradients. It is what stays without WebGL. */
+.oc-field__poster {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 30%, var(--oc-field-glow), transparent 16%),
+    radial-gradient(circle at 68% 58%, var(--oc-field-glow), transparent 20%),
+    radial-gradient(circle at 44% 80%, var(--oc-field-glow), transparent 12%),
+    radial-gradient(circle at 84% 20%, var(--oc-field-glow), transparent 10%),
+    var(--oc-field-bg);
+}
+.oc-field__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.oc-field[data-ready] .oc-field__canvas {
+  opacity: 1;
+}
+.oc-field__caption,
+.oc-field__pause {
+  position: absolute;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  /* Solid chips: the text never sits on the moving field. */
+  background: var(--oc-surface);
+  border: 1px solid var(--oc-line);
+  color: var(--oc-fg);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.oc-field__caption {
+  left: 10px;
+  /* The pause chip is 44px tall; keep the caption clear of it on narrow cards. */
+  max-width: calc(100% - 76px);
+  min-height: 44px;
+  padding: 0.4rem 0.9rem;
+  /* Phones: the caption would crowd a 170px band; the pause control alone stays. */
+  display: none;
+}
+@media (min-width: 40rem) {
+  .oc-field__caption {
+    display: inline-flex;
+    max-width: calc(100% - 220px);
+  }
+}
+.oc-field__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--oc-accent);
+}
+.oc-field__pause {
+  right: 10px;
+  min-height: 44px;
+  padding: 0 0.95rem;
+}
+.oc-field__pause:hover {
+  border-color: var(--oc-fg);
+}
+/* Two bars (pause) or a triangle (play), drawn in CSS so there is no icon swap flash. */
+.oc-field__pause-icon {
+  width: 10px;
+  height: 12px;
+  border-inline: 3px solid currentColor;
+}
+.oc-field__pause-icon[data-paused] {
+  width: 0;
+  height: 0;
+  border-block: 6px solid transparent;
+  border-inline: 10px solid currentColor;
+  border-inline-end-width: 0;
+}
+@media (max-width: 39.99rem) {
+  /* Icon-only on phones; the label stays in the accessibility tree (clipped, not removed). */
+  .oc-field__pause {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+  .oc-field__pause-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ---------- sections ---------- */
+
+.oc-section {
+  max-width: var(--oc-max);
+  margin: 0 auto;
+  padding: clamp(3.5rem, 9vw, 7rem) var(--oc-gutter) 0;
+}
+.oc-section__head {
+  max-width: 44rem;
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+.oc-eyebrow {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--oc-accent);
+}
+.oc-h2 {
+  margin-top: 0.6rem;
+  font-family: var(--oc-display);
+  font-size: clamp(1.9rem, 4.6vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+.oc-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--oc-muted);
+}
+.oc-meta span:first-child {
+  font-family: var(--oc-display);
+  font-weight: 600;
+  color: var(--oc-accent);
+}
+
+/* ---------- features ---------- */
+
+.oc-features {
+  display: grid;
+  gap: clamp(3.5rem, 8vw, 6.5rem);
+}
+.oc-feature {
+  display: grid;
+  gap: 1.5rem;
+}
+.oc-feature__visual {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--oc-line);
+  background: var(--oc-sunken);
+  box-shadow: var(--oc-shadow);
+}
+.oc-feature__shot {
+  display: block;
+  width: 100%;
+  /* The intrinsic 16:10 box is reserved before the image loads: no layout shift. */
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.oc-feature:hover .oc-feature__shot {
+  transform: scale(1.015);
+}
+.oc-feature__type {
+  display: grid;
+  align-content: center;
+  gap: 0;
+  min-height: 100%;
+  aspect-ratio: 16 / 10;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background:
+    radial-gradient(circle at 88% 12%, var(--oc-accent-soft), transparent 45%),
+    var(--oc-sunken);
+}
+.oc-feature__type li {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  align-items: baseline;
+  padding: 0.85rem 0;
+  font-family: var(--oc-display);
+  font-size: clamp(1.1rem, 2.1vw, 1.6rem);
+  font-weight: 500;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+}
+.oc-feature__type li + li {
+  border-top: 1px solid var(--oc-line);
+}
+.oc-feature__type span {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--oc-accent);
+}
+@media (max-width: 39.99rem) {
+  /* Three lines of display type need more than a 16:10 box at 340px wide. */
+  .oc-feature__type {
+    aspect-ratio: auto;
+  }
+}
+.oc-feature__title {
+  margin-top: 0.5rem;
+  font-family: var(--oc-display);
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+.oc-feature__descriptor {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--o-font);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: var(--oc-muted);
+}
+.oc-feature__tagline {
+  margin-top: 1rem;
+  max-width: 34rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+.oc-feature__points {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.45rem;
+  max-width: 34rem;
+  color: var(--oc-muted);
+}
+.oc-feature__points li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+.oc-feature__points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 7px;
+  height: 1.5px;
+  background: var(--oc-accent);
+}
+.oc-feature__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.1rem;
+  margin-top: 1.4rem;
+}
+
+@media (min-width: 60rem) {
+  .oc-feature {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    column-gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+  }
+  /* Explicit cells: with `order` alone the flipped visual would land after the story row. */
+  .oc-feature__visual {
+    grid-area: 1 / 1;
+  }
+  .oc-feature__text {
+    grid-area: 1 / 2;
+  }
+  .oc-feature[data-flip] {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+  .oc-feature[data-flip] .oc-feature__visual {
+    grid-area: 1 / 2;
+  }
+  .oc-feature[data-flip] .oc-feature__text {
+    grid-area: 1 / 1;
+  }
+  .oc-story {
+    grid-area: 2 / 1 / 3 / -1;
+  }
+}
+
+/* The story: closed it takes no height and cannot be reached by Tab or a screen reader. */
+.oc-story {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.oc-story[data-open] {
+  grid-template-rows: 1fr;
+}
+.oc-story__clip {
+  overflow: hidden;
+  min-height: 0;
+  visibility: hidden;
+  /* don't touch / visibility flips only after the close animation, so the text does not vanish mid-slide. */
+  transition: visibility 0s linear 0.45s;
+}
+.oc-story[data-open] .oc-story__clip {
+  visibility: visible;
+  transition-delay: 0s;
+}
+.oc-story__inner {
+  margin-top: 0.5rem;
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  border-radius: 20px;
+  border: 1px solid var(--oc-line);
+  background: var(--oc-surface);
+}
+.oc-story__lead {
+  max-width: 50rem;
+  font-family: var(--oc-display);
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+}
+.oc-story__body {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 1rem;
+  color: var(--oc-muted);
+}
+@media (min-width: 60rem) {
+  .oc-story__body {
+    display: block;
+    columns: 2;
+    column-gap: 3rem;
+  }
+  .oc-story__body p {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+}
+.oc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+}
+.oc-chips li {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--oc-line);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--oc-muted);
+}
+
+/* ---------- more work ---------- */
+
+.oc-more {
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 4rem);
+  margin-top: clamp(4rem, 9vw, 7rem);
+}
+.oc-rows__title {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--oc-fg);
+  font-family: var(--oc-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.oc-row {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--oc-line);
+}
+.oc-row__name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.oc-row__kind {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--oc-muted);
+}
+.oc-row__tagline {
+  color: var(--oc-muted);
+}
+.oc-row__links {
+  display: flex;
+  gap: 1rem;
+}
+@media (min-width: 60rem) {
+  .oc-row {
+    grid-template-columns: 15rem minmax(0, 1fr) auto;
+    column-gap: 2.5rem;
+    align-items: start;
+  }
+  .oc-row__links {
+    justify-content: flex-end;
+    min-width: 8.5rem;
+  }
+}
+
+/* ---------- about ---------- */
+
+.oc-about__grid {
+  display: grid;
+  gap: 2.5rem;
+}
+.oc-prose {
+  display: grid;
+  gap: 1.15rem;
+  max-width: 40rem;
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+.oc-facts {
+  display: grid;
+  gap: 0;
+  align-content: start;
+}
+.oc-facts > div {
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--oc-line);
+}
+.oc-facts > div:last-child {
+  border-bottom: 1px solid var(--oc-line);
+}
+.oc-facts dt,
+.oc-skills dt {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--oc-accent);
+}
+.oc-facts dd {
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+.oc-facts dd span,
+.oc-facts__list li {
+  display: block;
+  font-weight: 400;
+  color: var(--oc-muted);
+}
+@media (min-width: 60rem) {
+  .oc-about__grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: clamp(3rem, 7vw, 6rem);
+  }
+}
+
+/* ---------- skills ---------- */
+
+.oc-skills {
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  column-gap: 2.5rem;
+}
+.oc-skills > div {
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--oc-line);
+}
+.oc-skills dd {
+  margin-top: 0.35rem;
+  line-height: 1.6;
+}
+
+/* ---------- contact ---------- */
+
+.oc-contact {
+  padding-bottom: clamp(3rem, 7vw, 5rem);
+}
+.oc-contact__card {
+  padding: clamp(1.5rem, 5vw, 4rem);
+  border-radius: 28px;
+  border: 1px solid var(--oc-line);
+  background:
+    radial-gradient(circle at 100% 0%, var(--oc-accent-soft), transparent 50%),
+    var(--oc-surface);
+  box-shadow: var(--oc-shadow);
+}
+.oc-contact .oc-h2 {
+  max-width: 46rem;
+  font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.oc-contact__mail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-top: 1.75rem;
+}
+.oc-contact__address {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  font-family: var(--oc-display);
+  /* Sized so the address fits one line at 375px inside the card. */
+  font-size: clamp(1.2rem, 5.2vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: underline !important;
+  text-decoration-color: var(--oc-accent) !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 7px;
+  overflow-wrap: anywhere;
+}
+.oc-contact__note {
+  margin-top: 0.5rem;
+  color: var(--oc-muted);
+}
+.oc-contact__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+/* ---------- footer ---------- */
+
+.oc-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  /* Inset by the gutter with a margin, not padding, so the rule lines up with the content. */
+  width: min(100% - 2 * var(--oc-gutter), var(--oc-max) - 2 * var(--oc-gutter));
+  margin: 0 auto;
+  /* Room for the review chip, so it never covers the last line. */
+  padding: 1.5rem 0 5rem;
+  border-top: 1px solid var(--oc-line);
+  font-size: 1rem;
+  color: var(--oc-muted);
+}
+.oc-footer [lang='he'] {
+  margin-left: 0.75rem;
+}
+
+/* ---------- scroll-driven reveals ----------
+   Content is visible by default. Only browsers with view timelines, and only visitors who have
+   not asked for less motion, get the entrance: no JS, nothing to wait for. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .oc-reveal {
+      animation: oc-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+@keyframes oc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opt-c *,
+  .opt-c *::before,
+  .opt-c *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}

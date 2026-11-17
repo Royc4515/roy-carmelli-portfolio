@@ -1,0 +1,721 @@
+/* Option A, "Editorial". Tokens in OKLCH; one accent. Every selector is scoped to
+   html[data-option='a'] or an .oa- class, so nothing leaks into the pixel site. */
+
+html[data-option='a'] {
+  --oa-paper: oklch(98.2% 0.006 85);
+  --oa-ink: oklch(21% 0.012 60);
+  --oa-soft: oklch(43% 0.012 60); /* 7.6:1 on paper */
+  --oa-line: oklch(86% 0.01 80);
+  --oa-accent: oklch(47% 0.16 30); /* brick red, 6.5:1 on paper */
+  --oa-serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --oa-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --o-bg: var(--oa-paper);
+  --o-fg: var(--oa-ink);
+  --o-font: var(--oa-serif);
+  --o-focus: var(--oa-accent);
+  --o-select-bg: var(--oa-ink);
+  --o-select-fg: var(--oa-paper);
+  --o-scroll-pad: 32px;
+}
+html[data-option='a'][data-theme='night'] {
+  --oa-paper: oklch(17% 0.006 70);
+  --oa-ink: oklch(93% 0.012 85);
+  --oa-soft: oklch(72% 0.012 80); /* 7.4:1 on the dark paper */
+  --oa-line: oklch(31% 0.008 70);
+  --oa-accent: oklch(76% 0.13 45); /* warm apricot, 9:1 */
+}
+
+.opt-a {
+  font-family: var(--oa-serif);
+  font-optical-sizing: auto;
+  font-size: 1.1875rem; /* 19px: a serif reads smaller than a sans at the same size */
+  line-height: 1.55;
+  font-variant-numeric: oldstyle-nums;
+}
+
+.oa-page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+@media (min-width: 48rem) {
+  .oa-page {
+    padding: 0 2.5rem;
+  }
+}
+
+/* ── Sans labels: everything small and structural ─────────────────────── */
+.oa-nav,
+.oa-hero__eyebrow,
+.oa-section__label,
+.oa-work__meta,
+.oa-cta__meta,
+.oa-index__kind,
+.oa-facts dt,
+.oa-facts__sub,
+.oa-link,
+.oa-more,
+.oa-back,
+.oa-copy,
+.oa-case__meta,
+.oa-case__aside h2,
+.oa-next__label,
+.oa-footer,
+.oa-subhead {
+  font-family: var(--oa-sans);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ── Top line ─────────────────────────────────────────────────────────── */
+.oa-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--oa-soft);
+}
+.oa-nav__links {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: -0.75rem;
+}
+.oa-nav a,
+.oa-nav button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+.oa-nav__home {
+  margin-left: -0.75rem;
+  color: var(--oa-ink);
+}
+.oa-nav__theme {
+  margin-right: -0.75rem;
+}
+.oa-nav a:hover,
+.oa-nav button:hover {
+  color: var(--oa-ink);
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.oa-hero {
+  /* The first screen is the hero alone (the top line is 4rem): the next section must not
+     peek in half-revealed at the fold. Capped so a tall monitor does not get a void. */
+  min-height: min(calc(100svh - 4rem), 56rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vh, 4rem) 0 clamp(3rem, 12vh, 8rem);
+}
+.oa-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--oa-soft);
+}
+.oa-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--oa-accent);
+}
+.oa-hero__name {
+  margin-top: 1.25rem;
+  font-size: clamp(3.5rem, 13.5vw, 9rem);
+  font-weight: 380;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  /* The name is two words: never let a narrow phone orphan a syllable. */
+  text-wrap: balance;
+}
+.oa-hero__role {
+  margin-top: clamp(0.75rem, 2vw, 1.25rem);
+  font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--oa-accent);
+}
+.oa-hero__pitch {
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+  max-width: 34rem;
+  font-size: clamp(1.1875rem, 2vw, 1.375rem);
+  line-height: 1.5;
+}
+.oa-hero__actions {
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+}
+
+/* A call to action is a line of type with a rule under it, not a box. */
+.oa-cta {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 44px;
+  padding: 0.25rem 0;
+}
+.oa-cta__icon {
+  flex: none;
+  margin-top: 0.3rem;
+  font-size: 1.125rem;
+  color: var(--oa-accent);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.oa-cta__label {
+  display: block;
+  width: fit-content;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+  transition: background-size 0.25s ease, color 0.15s ease;
+}
+.oa-cta--quiet .oa-cta__label {
+  font-weight: 400;
+}
+.oa-cta__meta {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.875rem;
+  color: var(--oa-soft);
+}
+.oa-cta:hover .oa-cta__label {
+  color: var(--oa-accent);
+}
+.oa-cta:hover .oa-cta__icon {
+  transform: translateY(3px);
+}
+.oa-cta--quiet:hover .oa-cta__icon {
+  transform: translateX(3px);
+}
+
+/* ── Sections: label in the margin, content in the measure ───────────── */
+.oa-section {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(2.5rem, 7vw, 4.5rem) 0;
+  border-top: 1px solid var(--oa-line);
+}
+.oa-section__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--oa-soft);
+}
+@media (min-width: 64rem) {
+  .oa-section {
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 2rem;
+  }
+  .oa-section__label {
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+    padding-top: 0.6rem;
+  }
+}
+
+/* ── Featured work ────────────────────────────────────────────────────── */
+.oa-works {
+  display: grid;
+  gap: clamp(3rem, 8vw, 5.5rem);
+}
+.oa-work__meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--oa-soft);
+}
+.oa-work__no {
+  color: var(--oa-accent);
+}
+.oa-work__title {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.875rem;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+.oa-work__title > span:first-child,
+.oa-case__title > span:first-child {
+  /* A view-transition-name needs a box of its own to be captured. */
+  display: inline-block;
+}
+.oa-work__descriptor,
+.oa-case__descriptor {
+  font-size: 0.5em;
+  font-style: italic;
+  letter-spacing: -0.005em;
+  color: var(--oa-soft);
+}
+.oa-work__tagline {
+  margin-top: 0.875rem;
+  max-width: 38rem;
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+.oa-work__image,
+.oa-case__image {
+  display: block;
+  width: 100%;
+  margin-top: 1.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--oa-line);
+  background: var(--oa-line);
+}
+.oa-work__image {
+  max-width: 42rem;
+}
+.oa-work__highlights {
+  margin-top: 1.5rem;
+  max-width: 42rem;
+  border-top: 1px solid var(--oa-line);
+}
+.oa-work__highlights li {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--oa-line);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+.oa-work__actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 1.75rem;
+}
+
+.oa-more,
+.oa-link,
+.oa-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+.oa-more {
+  color: var(--oa-accent);
+  font-weight: 600;
+}
+.oa-more__icon,
+.oa-link__icon,
+.oa-back__icon,
+.oa-next__icon {
+  flex: none;
+  font-size: 1em;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.oa-more:hover .oa-more__icon {
+  transform: translateX(4px);
+}
+.oa-link {
+  color: var(--oa-soft);
+}
+.oa-link:hover {
+  color: var(--oa-ink);
+}
+.oa-link:hover .oa-link__icon {
+  transform: translate(2px, -2px);
+}
+
+/* ── Index of smaller work ────────────────────────────────────────────── */
+.oa-index {
+  border-top: 1px solid var(--oa-line);
+}
+.oa-index__row {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.125rem 0 0.5rem;
+  border-bottom: 1px solid var(--oa-line);
+}
+.oa-index__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.125rem 0.875rem;
+}
+.oa-index__name {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+.oa-index__kind {
+  font-size: 0.875rem;
+  color: var(--oa-soft);
+}
+.oa-index__tagline {
+  max-width: 40rem;
+  font-size: 1.0625rem;
+  color: var(--oa-soft);
+}
+.oa-index__links {
+  display: flex;
+  gap: 1.5rem;
+}
+.oa-subhead {
+  margin: 2.75rem 0 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--oa-soft);
+}
+
+/* ── About, facts, skills ─────────────────────────────────────────────── */
+.oa-prose {
+  max-width: 38rem;
+  display: grid;
+  gap: 1.25rem;
+}
+.oa-prose p:first-child {
+  font-size: clamp(1.375rem, 2.6vw, 1.625rem);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.oa-facts {
+  margin-top: 2.5rem;
+  max-width: 42rem;
+  border-top: 1px solid var(--oa-line);
+}
+.oa-facts--skills {
+  margin-top: 0;
+}
+.oa-facts > div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--oa-line);
+}
+.oa-facts dt {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--oa-soft);
+}
+.oa-facts dd {
+  font-size: 1.125rem;
+  line-height: 1.45;
+}
+.oa-facts__sub {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.875rem;
+  color: var(--oa-soft);
+}
+@media (min-width: 40rem) {
+  .oa-facts > div {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: baseline;
+  }
+}
+
+/* ── Contact ──────────────────────────────────────────────────────────── */
+.oa-contact__blurb {
+  max-width: 36rem;
+  font-size: clamp(1.375rem, 2.6vw, 1.625rem);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.oa-contact__email {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.25rem;
+}
+.oa-contact__email a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  /* Long address, narrow phone: scale with the viewport instead of breaking mid-word. */
+  font-size: clamp(1.3125rem, 5.6vw, 2.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--oa-accent);
+  background: linear-gradient(currentColor, currentColor) 0 92% / 0 1px no-repeat;
+  transition: background-size 0.3s ease;
+}
+.oa-contact__email a:hover {
+  background-size: 100% 1px;
+}
+.oa-copy {
+  min-height: 44px;
+  min-width: 4.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--oa-soft);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.oa-copy:hover {
+  background: var(--oa-ink);
+  color: var(--oa-paper);
+}
+.oa-contact__list {
+  margin-top: 2rem;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+.oa-link--row {
+  font-size: 1.0625rem;
+  font-weight: 400;
+  color: var(--oa-ink);
+}
+.oa-link__k {
+  min-width: 5rem;
+  font-weight: 500;
+  color: var(--oa-soft);
+}
+
+.oa-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 0 5rem; /* room for the review chip */
+  border-top: 1px solid var(--oa-line);
+  font-size: 0.875rem;
+  color: var(--oa-soft);
+}
+
+/* ── Case study ───────────────────────────────────────────────────────── */
+.oa-case {
+  padding: clamp(1rem, 4vh, 3rem) 0 clamp(3rem, 8vw, 5rem);
+}
+.oa-back {
+  color: var(--oa-soft);
+}
+.oa-back__icon {
+  transform: rotate(180deg);
+}
+.oa-back:hover {
+  color: var(--oa-ink);
+}
+.oa-back:hover .oa-back__icon {
+  transform: rotate(180deg) translateX(4px);
+}
+.oa-case__meta {
+  margin-top: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--oa-soft);
+}
+.oa-case__title {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  font-size: clamp(3rem, 11vw, 6.5rem);
+  font-weight: 380;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+.oa-case__title:focus-visible {
+  outline: none; /* focused by script for announcement, not by the keyboard */
+}
+.oa-case__descriptor {
+  font-size: 0.36em;
+}
+.oa-case__lead {
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+  max-width: 46rem;
+  font-size: clamp(1.375rem, 2.8vw, 1.75rem);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.oa-case__image {
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+}
+.oa-case__grid {
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+  display: grid;
+  gap: 2.5rem;
+}
+.oa-case__story {
+  max-width: 38rem;
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+.oa-case__aside {
+  align-self: start;
+  border-top: 1px solid var(--oa-line);
+}
+.oa-case__aside h2 {
+  margin-top: 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--oa-soft);
+}
+.oa-case__list li,
+.oa-case__tech {
+  margin-top: 0.5rem;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+.oa-case__links {
+  margin-top: 0.25rem;
+}
+@media (min-width: 64rem) {
+  .oa-case__grid {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    gap: 4.5rem;
+  }
+}
+.oa-next {
+  margin-top: clamp(3rem, 8vw, 5rem);
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0 1rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--oa-line);
+  border-bottom: 1px solid var(--oa-line);
+  text-align: left;
+}
+.oa-next__label {
+  grid-column: 1 / -1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--oa-soft);
+}
+.oa-next__name {
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+.oa-next__icon {
+  font-size: 1.75rem;
+  color: var(--oa-accent);
+}
+.oa-next:hover .oa-next__icon {
+  transform: translateX(8px);
+}
+.oa-next:hover .oa-next__name {
+  color: var(--oa-accent);
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────── */
+/* Reveals are scroll-driven and progressive: content is visible by default, and only
+   browsers with view timelines (and visitors who accept motion) get the rise. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .oa-reveal {
+      animation: oa-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+  @keyframes oa-rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+  }
+
+  /* First paint: the hero settles in line by line. */
+  .oa-hero > * {
+    animation: oa-settle 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .oa-hero > :nth-child(2) { animation-delay: 0.05s; }
+  .oa-hero > :nth-child(3) { animation-delay: 0.12s; }
+  .oa-hero > :nth-child(4) { animation-delay: 0.18s; }
+  .oa-hero > :nth-child(5) { animation-delay: 0.24s; }
+  @keyframes oa-settle {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+  }
+}
+
+/* View transition between the list and a case study: the page cross-fades while the
+   project's title and screenshot travel to their new place. */
+html[data-option='a']::view-transition-old(root),
+html[data-option='a']::view-transition-new(root) {
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[data-option='a']::view-transition-group(*) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opt-a *,
+  .opt-a *::before,
+  .opt-a *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Wide screens: an index row is one line of a table (name, what it is, links), which keeps
+   nine smaller projects from adding a screen and a half of scrolling. */
+@media (min-width: 64rem) {
+  .oa-index__row {
+    grid-template-columns: 13rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0 2rem;
+    padding: 0.875rem 0;
+  }
+  .oa-index__head {
+    display: grid;
+    gap: 0.125rem;
+  }
+  .oa-index__links {
+    justify-content: flex-end;
+    min-width: 9.5rem;
+  }
+  .oa-index .oa-link {
+    min-height: 2rem;
+  }
+}
+
+.oa-case__cta {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+}
+.oa-case__cta + .oa-next {
+  margin-top: clamp(2rem, 5vw, 3rem);
+}
+
+/* Phones: the case-study button takes its own row, so Live and Source stay side by side
+   instead of one of them wrapping alone. */
+@media (max-width: 30rem) {
+  .oa-more {
+    flex-basis: 100%;
+  }
+  .oa-work__actions {
+    gap: 0 1.5rem;
+  }
+}

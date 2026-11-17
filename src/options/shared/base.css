@@ -1,0 +1,137 @@
+/* Shared ground for the design options. Unlayered on purpose: the pixel site's base styles
+   live in `@layer base` (src/index.css), so these win without !important. Every rule is
+   scoped to `html[data-option]` or `.opt`, so the normal site never sees them. */
+
+html[data-option] {
+  /* don't touch / the pixel site reserves 72px for its fixed nav; options set their own. */
+  scroll-padding-top: var(--o-scroll-pad, 24px);
+  color-scheme: light;
+}
+html[data-option][data-theme='night'] {
+  color-scheme: dark;
+}
+
+/* don't touch / `:root` raises the specificity above index.html's inline
+   `:root[data-theme="night"] body` rule, which otherwise keeps the pixel site's night ground. */
+html:root[data-option] body {
+  background-color: var(--o-bg, #fff);
+  color: var(--o-fg, #111);
+  font-family: var(--o-font, system-ui, sans-serif);
+  line-height: 1.6;
+  /* clip, not hidden: `hidden` would make body a scroll container and break position: sticky. */
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-option] ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+html[data-option] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+html[data-option] ::-webkit-scrollbar-thumb {
+  background: var(--o-scroll-thumb, rgb(128 128 128 / 0.45));
+  border: 2px solid var(--o-bg, #fff);
+  border-radius: 999px;
+}
+html[data-option] ::-webkit-scrollbar-thumb:hover {
+  background: var(--o-scroll-thumb, rgb(128 128 128 / 0.7));
+}
+
+:where(.opt) :is(h1, h2, h3, h4) {
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-wrap: balance;
+}
+:where(.opt) p {
+  text-wrap: pretty;
+}
+:where(.opt) a {
+  color: inherit;
+  text-decoration: none;
+}
+:where(.opt) a:hover {
+  text-decoration: none;
+}
+:where(.opt) :focus-visible {
+  outline: 2px solid var(--o-focus, currentColor);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+:where(.opt) ::selection {
+  background-color: var(--o-select-bg, #111);
+  color: var(--o-select-fg, #fff);
+}
+:where(.opt) button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+:where(.opt) img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Screen-reader only. */
+.opt-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Skip link: first focusable element, parked above the viewport until it takes focus. */
+.opt-skip {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 1000;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--o-fg, #111);
+  color: var(--o-bg, #fff) !important;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+.opt-skip:focus {
+  transform: none;
+}
+
+/* Review chip: only while Roy compares the options; it would not ship. */
+.opt-review {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgb(128 128 128 / 0.35);
+  background: color-mix(in oklab, var(--o-bg, #fff) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--o-fg, #111);
+  font: 500 0.8125rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+  opacity: 0.72;
+  transition: opacity 0.15s ease;
+}
+.opt-review:hover,
+.opt-review:focus-visible {
+  opacity: 1;
+}
+@media print {
+  .opt-review {
+    display: none;
+  }
+}

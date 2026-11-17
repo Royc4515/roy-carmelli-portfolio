@@ -7,7 +7,7 @@ import { projects } from '../data/projects';
 
 describe('byTier', () => {
   it('keeps data order within a tier', () => {
-    expect(byTier(projects, 'main').map(p => p.id)).toEqual(['ai-sidebar', 'nechita-raka', 'sommelier-bot']);
+    expect(byTier(projects, 'main').map(p => p.id)).toEqual(['nechita-raka', 'ai-sidebar', 'sommelier-bot']);
     expect(byTier(projects, 'side').map(p => p.id)).toEqual(['groupie', 'wolt-clone', 'portfolio', 'career-predictor', 'clr']);
     expect(byTier(projects, 'research').map(p => p.id)).toEqual([
       'cognitive-correlation',
@@ -49,8 +49,8 @@ describe('<Projects>', () => {
         .getAllByRole('heading', { level: 4 })
         .map(h => h.textContent);
     expect(titlesIn('Main quests')).toEqual([
-      'Aside - AI Sidebar',
       'Nechita Raka - First-Year Student Hub',
+      'Aside - AI Sidebar',
       'Wine Sommelier Bot',
     ]);
     expect(titlesIn('Side quests')).toEqual([
@@ -85,8 +85,8 @@ describe('<Projects>', () => {
     render(<Projects />);
     const main = screen.getByRole('list', { name: 'Main quests' });
     const first = within(main).getAllByRole('article')[0];
-    expect(first).toHaveAccessibleName('Aside - AI Sidebar');
-    expect(within(first).getByRole('img')).toHaveAttribute('src', '/assets/projects/aside-1280.webp');
+    expect(first).toHaveAccessibleName('Nechita Raka - First-Year Student Hub');
+    expect(within(first).getByRole('img')).toHaveAttribute('src', '/assets/projects/nechita-raka-1280.webp');
   });
 
   it('renders fixtures when given them, and skips empty tiers', () => {

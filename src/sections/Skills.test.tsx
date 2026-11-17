@@ -90,8 +90,8 @@ describe('Skills (equipment screen)', () => {
     expect(within(tip).getByText('Languages')).toBeInTheDocument();
     expect(tip).toHaveTextContent(/Used in/i);
     const used = within(tip).getAllByRole('listitem').map(li => li.textContent);
-    expect(used).toEqual(['Aside,', 'Nechita Raka,', 'Groupie,', 'White Matter Tracts Game']);
-    expect(js).toHaveAccessibleDescription(/Used in: Aside, Nechita Raka, Groupie, White Matter Tracts Game/);
+    expect(used).toEqual(['Nechita Raka,', 'Aside,', 'Groupie,', 'White Matter Tracts Game']);
+    expect(js).toHaveAccessibleDescription(/Used in: Nechita Raka, Aside, Groupie, White Matter Tracts Game/);
 
     // Keyboard focus leaving the grid takes its description with it.
     act(() => js.blur());

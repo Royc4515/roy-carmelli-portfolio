@@ -1,0 +1,1483 @@
+/* Option F, "Voxel Roy". The canvas is the world. The interface floats over it as glass:
+   translucent, blurred panels with soft corners, so the scene keeps showing through and the
+   page reads as a game's HUD, not as boxes placed on top of a picture. Tokens are OKLCH. */
+
+html[data-option='f'] {
+  --of-sky-top: oklch(64% 0.13 250);
+  --of-sky-bottom: oklch(91% 0.04 230);
+  /* Glass: mostly opaque, so text contrast never depends on what the scene draws behind it. */
+  --of-panel: oklch(98.5% 0.012 95 / 0.8);
+  --of-panel-solid: oklch(98.5% 0.012 95);
+  --of-ink: oklch(22% 0.035 255);
+  --of-soft: oklch(38% 0.035 255);
+  --of-edge: oklch(100% 0 0 / 0.7);
+  --of-rule: oklch(22% 0.035 255 / 0.13);
+  --of-accent: oklch(44% 0.13 152); /* forest green, 6.6:1 on the panel */
+  --of-accent-ink: oklch(99% 0.01 95);
+  --of-glow: oklch(70% 0.17 150 / 0.35);
+  --of-shadow: 0 24px 60px -28px oklch(25% 0.08 255 / 0.55), 0 2px 6px oklch(25% 0.08 255 / 0.08);
+  --of-display: 'Bricolage Grotesque Variable', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --of-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --o-bg: var(--of-sky-bottom);
+  --o-fg: var(--of-ink);
+  --o-font: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --o-focus: var(--of-accent);
+  --o-select-bg: var(--of-accent);
+  --o-select-fg: var(--of-accent-ink);
+  --o-scroll-pad: 96px;
+}
+html[data-option='f'][data-theme='night'] {
+  --of-sky-top: oklch(17% 0.05 265);
+  --of-sky-bottom: oklch(27% 0.07 265);
+  --of-panel: oklch(19% 0.04 265 / 0.78);
+  --of-panel-solid: oklch(19% 0.04 265);
+  --of-ink: oklch(96% 0.02 90);
+  --of-soft: oklch(82% 0.03 255);
+  --of-edge: oklch(100% 0 0 / 0.14);
+  --of-rule: oklch(100% 0 0 / 0.14);
+  --of-accent: oklch(86% 0.14 88); /* the site's gold */
+  --of-accent-ink: oklch(19% 0.04 265);
+  --of-glow: oklch(86% 0.14 88 / 0.3);
+  --of-shadow: 0 24px 60px -24px oklch(5% 0.03 265 / 0.8), 0 2px 6px oklch(5% 0.03 265 / 0.3);
+}
+
+.of-root {
+  position: relative;
+  min-height: 100vh;
+  /* The page's own sky: what you see before the first frame, and all you see without WebGL. */
+  background: linear-gradient(var(--of-sky-top), var(--of-sky-bottom)) fixed;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.of-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100lvh; /* the large viewport: the mobile URL bar must not resize the world mid-scroll */
+  display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.of-root[data-scene='on'] .of-canvas {
+  opacity: 1;
+}
+.of-root[data-scene='off'] .of-canvas {
+  display: none;
+}
+
+/* The still Roy: only when there is no scene. */
+.of-still {
+  display: none;
+  image-rendering: pixelated;
+  width: 136px;
+  height: 184px;
+  margin: 0 auto 1rem;
+}
+.of-root[data-scene='off'] .of-still {
+  display: block;
+}
+
+.of-nav,
+main,
+.of-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Glass ────────────────────────────────────────────────────────────────── */
+.of-card,
+.of-nav__bar,
+.of-dock,
+.of-footer {
+  background: var(--of-panel);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid var(--of-edge);
+  box-shadow: var(--of-shadow);
+  color: var(--of-ink);
+}
+
+/* ── Stations ─────────────────────────────────────────────────────────────── */
+.of-stage {
+  display: flex;
+  padding: 0 1rem;
+}
+.of-card {
+  position: relative;
+  width: 100%;
+  max-width: 29rem;
+  padding: 1.375rem 1.25rem 1.25rem;
+  border-radius: 26px;
+  overflow: hidden;
+}
+/* A lit top edge: the one piece of "game" on the panel. */
+.of-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--of-accent), transparent 70%);
+}
+.of-card[data-wide] {
+  max-width: 36rem;
+}
+
+.of-kicker,
+.of-label,
+.of-meta,
+.of-status,
+.of-row__kind,
+.of-facts dt {
+  font-family: var(--of-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  color: var(--of-soft);
+}
+.of-kicker,
+.of-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--of-accent);
+}
+.of-label {
+  margin-top: 1.5rem;
+}
+.of-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--of-rule);
+}
+.of-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--of-accent);
+  box-shadow: 0 0 0 4px var(--of-glow);
+}
+.of-name {
+  margin-top: 0.875rem;
+  font-family: var(--of-display);
+  font-size: clamp(2.75rem, 12vw, 5rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-variation-settings: 'wdth' 92;
+}
+.of-role {
+  margin-top: 0.75rem;
+  font-family: var(--of-display);
+  font-size: clamp(1.25rem, 3.2vw, 1.625rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--of-accent);
+}
+.of-title {
+  margin-top: 0.4rem;
+  font-family: var(--of-display);
+  font-size: clamp(1.875rem, 4.4vw, 2.5rem);
+  font-weight: 760;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+.of-title__sub {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--o-font);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.3;
+  color: var(--of-soft);
+}
+.of-lede {
+  margin-top: 0.75rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+.of-meta {
+  margin-top: 0.75rem;
+}
+.of-points {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.of-points li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem;
+  line-height: 1.45;
+  color: var(--of-soft);
+}
+.of-points__icon {
+  margin-top: 0.2em;
+  font-size: 1.05rem;
+  color: var(--of-accent);
+}
+.of-actions {
+  margin-top: 1.125rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.of-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.125rem;
+  border-radius: 14px;
+  border: 1px solid var(--of-rule);
+  background: color-mix(in oklab, var(--of-panel-solid) 70%, transparent);
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.of-btn--primary {
+  background: var(--of-accent);
+  border-color: var(--of-accent);
+  color: var(--of-accent-ink) !important;
+  box-shadow: 0 8px 22px -8px var(--of-glow);
+}
+.of-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--of-accent);
+}
+.of-btn--primary:hover {
+  box-shadow: 0 14px 28px -8px var(--of-glow);
+}
+.of-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.of-btn svg {
+  flex: none;
+  font-size: 1.0625rem;
+}
+.of-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0 0.25rem;
+  font-weight: 600;
+  color: var(--of-accent) !important;
+  background: linear-gradient(currentColor, currentColor) 0.25rem calc(100% - 0.6rem) / calc(100% - 1.6rem) 1.5px no-repeat;
+}
+.of-link__icon {
+  font-size: 0.95em;
+  transition: transform 0.2s ease;
+}
+.of-link:hover .of-link__icon {
+  transform: translate(2px, -2px);
+}
+.of-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  font-size: 1.125rem;
+  transition: background-color 0.15s ease;
+}
+.of-icon-btn:hover {
+  background: var(--of-rule);
+}
+
+/* ── Top bar: one glass pill ──────────────────────────────────────────────── */
+.of-nav {
+  position: fixed;
+  inset: 0.75rem 0 auto 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding: 0 0.75rem;
+  pointer-events: none;
+}
+.of-nav__bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.375rem 0.25rem 1rem;
+  border-radius: 999px;
+}
+.of-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-right: 0.5rem;
+  font-family: var(--of-display);
+  font-size: 1.0625rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.of-nav__links {
+  display: none;
+}
+.of-nav__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  color: var(--of-soft);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.of-nav__links a:hover {
+  color: var(--of-ink);
+  background: var(--of-rule);
+}
+
+/* ── Lists and facts ──────────────────────────────────────────────────────── */
+.of-rows {
+  margin-top: 0.75rem;
+}
+.of-row {
+  display: grid;
+  gap: 0.125rem 1rem;
+  padding: 0.625rem 0 0.25rem;
+  border-top: 1px solid var(--of-rule);
+}
+.of-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.625rem;
+}
+.of-row__name {
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+.of-row__badge {
+  font-family: var(--of-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--of-glow);
+  color: var(--of-accent);
+}
+.of-row__text {
+  margin-top: 0.2rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--of-soft);
+}
+
+/* ── Tags: the stack at a glance ──────────────────────────────────────────── */
+.of-tags {
+  margin-top: 0.875rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.of-tags li {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid var(--of-rule);
+  background: color-mix(in oklch, var(--of-panel-solid) 55%, transparent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--of-ink);
+}
+.of-tags .of-tags__more {
+  border-style: dashed;
+  color: var(--of-soft);
+}
+
+/* ── Tabs: side projects and coursework ───────────────────────────────────── */
+.of-tabs {
+  margin-top: 1rem;
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: var(--of-rule);
+}
+.of-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--of-soft);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.of-tab:hover {
+  color: var(--of-ink);
+}
+.of-tab[aria-selected='true'] {
+  background: var(--of-panel-solid);
+  color: var(--of-ink);
+  box-shadow: 0 1px 3px oklch(20% 0.03 255 / 0.18);
+}
+.of-tab__count {
+  font-family: var(--of-mono);
+  font-size: 0.75rem;
+  color: var(--of-accent);
+}
+
+/* ── Toolbox: skill groups ────────────────────────────────────────────────── */
+.of-shelf {
+  margin-top: 0.5rem;
+}
+.of-shelf__group {
+  padding: 0.875rem 0 0.25rem;
+  border-top: 1px solid var(--of-rule);
+  margin-top: 0.75rem;
+}
+.of-shelf__name {
+  font-family: var(--of-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--of-soft);
+}
+.of-shelf__group .of-tags {
+  margin-top: 0.5rem;
+}
+.of-row__links {
+  display: flex;
+  gap: 0.75rem;
+}
+/* Name and links share the first line; the text takes the full width under them. */
+.of-row {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+.of-row__text {
+  grid-column: 1 / -1;
+}
+.of-prose {
+  margin-top: 0.875rem;
+  display: grid;
+  gap: 0.875rem;
+  color: var(--of-soft);
+}
+.of-prose p:first-child {
+  color: var(--of-ink);
+}
+.of-facts {
+  margin-top: 1.25rem;
+}
+.of-facts > div {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.625rem 0;
+  border-top: 1px solid var(--of-rule);
+}
+.of-facts dd {
+  line-height: 1.45;
+}
+.of-facts dd span {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--of-soft);
+}
+.of-email a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 0.5rem;
+  font-family: var(--of-display);
+  font-size: clamp(1.25rem, 5.4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--of-accent);
+}
+
+.of-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 1rem 6.5rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: 18px;
+  font-size: 0.875rem;
+  color: var(--of-soft);
+}
+
+/* ── The dock: the scene's own controls, in one glass bar ─────────────────── */
+.of-controls {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 20;
+}
+.of-dock {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+}
+.of-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.875rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.of-chip:hover {
+  background: var(--of-rule);
+}
+.of-chip:active {
+  transform: scale(0.96);
+}
+.of-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.of-chip--play {
+  background: var(--of-accent);
+  color: var(--of-accent-ink);
+}
+.of-chip--play:hover {
+  background: var(--of-accent);
+  transform: translateY(-1px);
+}
+.of-chip--toy {
+  display: none;
+}
+
+/* ── Project dialog ───────────────────────────────────────────────────────── */
+.of-dialog {
+  width: min(54rem, 100vw - 1.5rem);
+  max-width: none;
+  max-height: min(88dvh, 58rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--of-edge);
+  border-radius: 28px;
+  background: var(--of-panel-solid);
+  color: var(--of-ink);
+  box-shadow: var(--of-shadow);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.of-dialog::backdrop {
+  background: oklch(15% 0.05 260 / 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.of-dialog__body {
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+}
+.of-dialog__close {
+  position: sticky;
+  top: 0.5rem;
+  float: right;
+  margin: -0.5rem -0.5rem 0 1rem;
+  background: var(--of-panel-solid);
+  border: 1px solid var(--of-rule);
+}
+.of-dialog__image {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  border-radius: 16px;
+  border: 1px solid var(--of-rule);
+}
+.of-dialog__text {
+  margin-top: 0.875rem;
+  max-width: 40rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--of-soft);
+}
+
+/* ── Play mode (the real game, from option D's Arcade component) ───────────── */
+
+.od-arcade {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+.od-arcade::backdrop {
+  background: var(--color-bg);
+}
+.od-arcade__layer {
+  position: absolute;
+  inset: 0;
+}
+.od-arcade__stage {
+  position: relative;
+  /* don't touch / an inline-size container: the game's screen box sizes itself in cqw. */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  outline: none;
+}
+.od-arcade__stage[data-mode='touch'] {
+  display: block;
+  padding: 0;
+  container-type: normal;
+}
+.od-arcade__title {
+  color: var(--color-accent-fg);
+}
+.od-arcade__controls {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 24px;
+}
+.od-arcade__hint {
+  flex-basis: 100%;
+  text-align: center;
+  color: var(--color-fg-muted);
+}
+
+/* ── Phones: the world keeps the top of the screen, panels rise from the bottom ── */
+@media (max-width: 59.99rem) {
+  /* The scene is drawn in the upper part only and fades into the page's sky, so a panel at
+     rest never sits on top of Roy. */
+  .of-canvas {
+    height: 62lvh;
+    -webkit-mask-image: linear-gradient(#000 78%, transparent);
+    mask-image: linear-gradient(#000 78%, transparent);
+  }
+  .of-stage {
+    /* The distance between panels is the stretch where Roy travels to the next island. */
+    padding-top: 62svh;
+    padding-bottom: 8svh;
+  }
+  .of-stage--hero {
+    padding-top: 46svh;
+  }
+  .of-root[data-scene='off'] .of-stage {
+    padding-top: 2rem;
+  }
+  .of-root[data-scene='off'] .of-stage--hero {
+    padding-top: 5.5rem;
+    flex-direction: column;
+  }
+  .of-card {
+    max-width: none;
+  }
+  /* On a phone the links would squeeze the name: they move under the text. */
+  .of-row {
+    grid-template-columns: 1fr;
+  }
+  .of-row__links {
+    order: 1;
+  }
+  .of-card--hero .of-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .of-card--hero .of-btn {
+    padding: 0 0.5rem;
+    font-size: 0.9375rem;
+  }
+  .of-chip__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .of-chip--play .of-chip__label {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+}
+/* No scroll snapping: on phones it pulled the page against the finger, which read as jerky.
+   The scene eases on its own (engine.ts), so free scrolling stays smooth. */
+
+/* ── Wider screens: panels on the left, the world on the right ────────────── */
+@media (min-width: 60rem) {
+  .of-stage {
+    align-items: center;
+    min-height: 100vh;
+    padding: 34vh clamp(1.5rem, 5vw, 5rem) 34vh;
+  }
+  .of-stage--hero {
+    padding-top: 6rem;
+    padding-bottom: 2rem;
+  }
+  .of-root[data-scene='off'] .of-stage {
+    min-height: 0;
+    padding-block: 3rem;
+  }
+  .of-root[data-scene='off'] .of-stage--hero {
+    padding-top: 7rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .of-card {
+    padding: 1.75rem 1.75rem 1.5rem;
+  }
+  .of-card--hero {
+    max-width: 34rem;
+    padding: 2.25rem 2.25rem 2rem;
+    border-radius: 32px;
+  }
+  .of-nav {
+    justify-content: flex-start;
+    padding: 0 clamp(1.5rem, 5vw, 5rem);
+  }
+  .of-nav__links {
+    display: flex;
+  }
+  /* About is the longest panel: on a laptop it is tightened to fit one screen (frame.ts). */
+  .of-card[data-fit] {
+    max-width: 40rem;
+  }
+  .of-card[data-fit] .of-title {
+    font-size: 2.125rem;
+  }
+  .of-card[data-fit] .of-prose {
+    gap: 0.625rem;
+    font-size: 0.96875rem;
+    line-height: 1.55;
+  }
+  .of-card[data-fit] .of-facts--pair {
+    margin-top: 0.875rem;
+  }
+  .of-card[data-fit] .of-facts > div {
+    padding: 0.5rem 0;
+  }
+  .of-card[data-fit] .of-facts dd {
+    font-size: 0.9375rem;
+  }
+  .of-facts--pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1.5rem;
+  }
+  .of-facts.of-facts--pair > div {
+    grid-template-columns: 1fr;
+    align-content: start; /* don't touch / the pair stretches both cells to one height; without this the shorter one spreads its rows apart */
+    gap: 0.25rem;
+  }
+  .of-shelf__group {
+    display: grid;
+    grid-template-columns: 9.5rem 1fr;
+    gap: 1rem;
+    align-items: baseline;
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .of-shelf__group .of-tags {
+    margin-top: 0;
+  }
+  .of-facts > div {
+    grid-template-columns: 10rem 1fr;
+    gap: 1rem;
+  }
+  .of-footer {
+    max-width: 36rem;
+    margin: 0 0 2rem clamp(1.5rem, 5vw, 5rem);
+  }
+  .of-controls {
+    right: 1.25rem;
+    bottom: 1.25rem;
+  }
+  .of-chip--toy {
+    display: inline-flex;
+  }
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* The hero panel arrives after the camera's opening move. */
+  .of-root[data-scene='on'] .of-card--hero {
+    animation: of-arrive 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both;
+  }
+  @keyframes of-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.97);
+    }
+  }
+  /* Later panels rise into place as they scroll in (where view timelines exist). */
+  @supports (animation-timeline: view()) {
+    .of-stage:not(.of-stage--hero) .of-card {
+      animation: of-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+    @keyframes of-rise {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+      }
+    }
+  }
+  .of-dialog[open] {
+    animation: of-arrive 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .opt-f *,
+  .opt-f *::before,
+  .opt-f *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.of-pause {
+  width: 12px;
+  height: 14px;
+  border-inline: 4px solid currentColor;
+}
+
+/* ── The ambience card: where and when the sky is, in words ───────────────── */
+.of-ambience {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 19;
+  width: max-content;
+  max-width: calc(100vw - 1.5rem);
+  border-radius: 26px;
+  background: var(--of-panel);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid var(--of-edge);
+  box-shadow: var(--of-shadow);
+  color: var(--of-ink);
+  overflow: hidden;
+}
+.of-ambience[data-open] {
+  min-width: 17.5rem;
+}
+/* Date and city in the bar: wide screens only (a phone keeps time and temperature). */
+.of-ambience__more {
+  display: none;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  color: var(--of-soft);
+  white-space: nowrap;
+}
+.of-ambience__more::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-right: 0.625rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  vertical-align: middle;
+}
+@media (min-width: 60rem) {
+  .of-ambience__more {
+    display: inline;
+  }
+}
+/* The bar: the time large, the temperature, and whether the sky is live. */
+.of-ambience__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 0.75rem 0 0.875rem;
+  text-align: left;
+}
+.of-ambience__icon {
+  flex: none;
+  font-size: 1.25rem;
+  color: var(--of-accent);
+}
+.of-ambience__time {
+  font-family: var(--of-display);
+  font-size: 1.25rem;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.of-ambience__temp {
+  font-family: var(--of-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--of-soft);
+  line-height: 1;
+}
+.of-ambience__live {
+  margin-left: auto;
+  padding-left: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--of-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--of-soft);
+}
+.of-ambience__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--of-soft);
+}
+.of-ambience__live[data-mode='live'] .of-ambience__dot {
+  background: oklch(62% 0.2 25);
+  box-shadow: 0 0 0 4px oklch(62% 0.2 25 / 0.25);
+}
+.of-ambience__chevron {
+  flex: none;
+  font-size: 1rem;
+  color: var(--of-soft);
+  transition: rotate 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.of-ambience[data-open] .of-ambience__chevron {
+  rotate: 180deg;
+}
+.of-ambience__panel {
+  padding: 0 0.875rem 0.75rem;
+}
+.of-ambience__date {
+  padding-top: 0.125rem;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.of-ambience__date span {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--of-soft);
+}
+.of-ambience__festive {
+  width: fit-content;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0.625rem;
+  border-radius: 999px;
+  background: var(--of-accent);
+  color: var(--of-accent-ink);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+.of-ambience__facts {
+  margin-top: 0.625rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--of-rule);
+  display: grid;
+  gap: 0.375rem;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+.of-ambience__facts > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.of-ambience__facts dt {
+  display: inline-flex;
+  font-size: 1.0625rem;
+  color: var(--of-accent);
+}
+.of-ambience__sun dd {
+  margin-right: 0.625rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Live, Day, Night: a segmented switch. */
+.of-ambience__modes {
+  margin-top: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border-radius: 14px;
+  background: var(--of-rule);
+}
+.of-ambience__modes button {
+  min-height: 44px;
+  border-radius: 11px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--of-soft);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.of-ambience__modes button[aria-pressed='true'] {
+  background: var(--of-panel-solid);
+  color: var(--of-ink);
+  box-shadow: 0 1px 3px oklch(20% 0.03 255 / 0.18);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .of-ambience__live[data-mode='live'] .of-ambience__dot {
+    animation: of-live 2.4s ease-in-out infinite;
+  }
+  @keyframes of-live {
+    50% {
+      box-shadow: 0 0 0 7px oklch(62% 0.2 25 / 0);
+    }
+  }
+  .of-ambience__panel:not([hidden]) {
+    animation: of-unfold 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes of-unfold {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+}
+@media (max-width: 59.99rem) {
+  .of-nav {
+    justify-content: flex-start;
+  }
+  /* On a phone the open card is wider than the gap beside the name pill, so it
+     opens as a full-width sheet over the pill instead of sliding half under it. */
+  .of-ambience[data-open] {
+    left: 0.75rem;
+    width: auto;
+    z-index: 21;
+  }
+}
+@media (min-width: 60rem) {
+  .of-ambience {
+    right: clamp(1.5rem, 5vw, 5rem);
+  }
+}
+
+/* ── Ask Pixel Roy: the AI chat in the option's glass ─────────────────────── */
+
+/* Roy's drawn portrait, at 1x (52x56) or exactly 0.5x: other scales smear the pixel art. */
+.of-portrait {
+  display: inline-grid;
+  place-items: end center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--of-glow), color-mix(in oklch, var(--of-accent) 22%, var(--of-panel-solid)));
+  box-shadow: inset 0 0 0 1px var(--of-rule);
+}
+.of-portrait img {
+  display: block;
+  width: 52px;
+  height: 56px;
+  max-width: none;
+  margin-bottom: -4px; /* the bust sits on the frame's lower edge */
+  image-rendering: pixelated;
+}
+.of-portrait[data-size='sm'] {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+}
+.of-portrait[data-size='sm'] img {
+  width: 26px;
+  height: 28px;
+  margin-bottom: 0;
+}
+.of-ask__me,
+.of-ask-cta__me {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+/* A small "here" light: the chat is a live thing, not a contact form. */
+.of-ask__online {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: oklch(72% 0.19 150);
+  box-shadow: 0 0 0 3px var(--of-panel-solid);
+}
+
+/* The hero's way in. */
+.of-ask-cta {
+  margin-top: 1.25rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.625rem 1rem 0.625rem 0.625rem;
+  border-radius: 20px;
+  border: 1px solid var(--of-rule);
+  background: color-mix(in oklch, var(--of-panel-solid) 60%, transparent);
+  text-align: left;
+  color: var(--of-ink);
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+.of-ask-cta:hover {
+  border-color: color-mix(in oklch, var(--of-accent) 60%, transparent);
+  background: var(--of-panel-solid);
+}
+.of-ask-cta:hover > svg {
+  transform: translateX(3px);
+}
+.of-ask-cta > svg {
+  color: var(--of-accent);
+  transition: transform 0.2s ease;
+}
+.of-ask-cta strong {
+  display: block;
+  font-weight: 650;
+}
+.of-ask-cta__sub {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--of-soft);
+}
+.of-dock .of-chip--ask {
+  color: var(--of-accent);
+}
+
+/* The panel: the same glass and lit edge as the content cards. */
+.of-ask {
+  position: fixed;
+  inset: auto 0.75rem 0.75rem auto;
+  width: min(27rem, 100vw - 1.5rem);
+  height: min(42rem, 100dvh - 1.5rem);
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--of-edge);
+  border-radius: 28px;
+  background: var(--of-panel);
+  -webkit-backdrop-filter: blur(26px) saturate(1.5);
+  backdrop-filter: blur(26px) saturate(1.5);
+  color: var(--of-ink);
+  box-shadow: var(--of-shadow);
+  overflow: hidden;
+}
+.of-ask::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--of-accent), transparent 70%);
+}
+.of-ask[open] {
+  display: flex;
+  flex-direction: column;
+}
+.of-ask::backdrop {
+  background: oklch(15% 0.05 260 / 0.3);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.of-ask__head {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.125rem 1rem 1rem 1.25rem;
+  border-bottom: 1px solid var(--of-rule);
+}
+.of-ask__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--of-display);
+  font-size: 1.375rem;
+  font-weight: 760;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+.of-ask__badge {
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  font-family: var(--of-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  background: var(--of-accent);
+  color: var(--of-panel-solid);
+}
+.of-ask__sub {
+  margin-top: 0.2rem;
+  font-size: 0.875rem;
+  color: var(--of-soft);
+}
+.of-ask__close {
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+/* Only the log scrolls: the header and the composer always stay on screen. */
+.of-ask__log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.125rem 1.125rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+.of-ask__line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  max-width: 92%;
+}
+.of-ask__line[data-role='user'] {
+  align-self: flex-end;
+  max-width: 82%;
+}
+.of-ask__line .of-portrait {
+  margin-top: 0.125rem;
+}
+.of-ask__msg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+.of-ask__line[data-role='user'] .of-ask__msg {
+  align-items: flex-end;
+}
+/* Roy's lines read like the content cards: light, bordered, quiet. */
+.of-ask__bubble {
+  padding: 0.75rem 0.95rem;
+  border-radius: 6px 18px 18px 18px;
+  border: 1px solid var(--of-rule);
+  background: color-mix(in oklch, var(--of-panel-solid) 82%, transparent);
+  font-size: 1rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.of-ask__line[data-role='user'] .of-ask__bubble {
+  border-radius: 18px 18px 6px 18px;
+  border-color: transparent;
+  background: var(--of-accent);
+  color: var(--of-panel-solid);
+}
+.of-ask__suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-left: calc(28px + 0.625rem); /* under Roy's line, past his portrait */
+}
+.of-ask__suggest button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 44px;
+  padding: 0.5rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid var(--of-rule);
+  background: color-mix(in oklch, var(--of-panel-solid) 55%, transparent);
+  font-size: 0.9375rem;
+  font-weight: 560;
+  color: var(--of-ink);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.of-ask__suggest button svg {
+  color: var(--of-accent);
+  font-size: 0.95em;
+}
+.of-ask__suggest button:hover {
+  border-color: var(--of-accent);
+  background: var(--of-panel-solid);
+}
+.of-ask__sources {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.of-ask__sources a,
+.of-ask__sources span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--of-rule);
+  font-size: 0.8125rem;
+  color: var(--of-soft);
+}
+.of-ask__sources a:hover {
+  color: var(--of-accent);
+  border-color: var(--of-accent);
+}
+.of-ask__typing span[aria-hidden] {
+  display: inline-flex;
+  gap: 0.3rem;
+  padding: 0.35rem 0.1rem;
+}
+.of-ask__typing i {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--of-accent);
+  opacity: 0.4;
+}
+.of-ask__error {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+  margin-left: calc(28px + 0.625rem);
+  padding: 0.75rem 0.875rem;
+  border-radius: 14px;
+  border: 1px dashed var(--of-rule);
+  font-size: 0.9375rem;
+  color: var(--of-soft);
+}
+
+/* One pill for the question and its send button. */
+.of-ask__form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+  margin: 0.25rem 0.875rem 0.5rem;
+  padding: 0.3rem 0.3rem 0.3rem 0.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--of-rule);
+  background: var(--of-panel-solid);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.of-ask__form:focus-within {
+  border-color: var(--of-accent);
+  box-shadow: 0 0 0 4px var(--of-glow);
+}
+.of-ask__form textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 8rem;
+  padding: 0.65rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--of-ink);
+  font: inherit;
+  font-size: 1rem; /* don't touch / under 16px, iPhone Safari zooms into the field on focus */
+  line-height: 1.4;
+  resize: none;
+  outline: none;
+  field-sizing: content;
+}
+.of-ask__send {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--of-accent);
+  color: var(--of-panel-solid);
+  font-size: 1.15rem;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.of-ask__send svg {
+  rotate: -90deg;
+}
+.of-ask__send:disabled {
+  opacity: 0.35;
+}
+.of-ask__send:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+.of-ask__note {
+  padding: 0 1rem 0.875rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--of-soft);
+}
+.of-ask__note a {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .of-ask__typing i {
+    animation: of-typing 1s ease-in-out infinite;
+  }
+  .of-ask__typing i:nth-child(2) { animation-delay: 0.15s; }
+  .of-ask__typing i:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes of-typing {
+    50% { opacity: 1; transform: translateY(-3px); }
+  }
+  .of-ask[open] {
+    animation: of-ask-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes of-ask-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.98);
+    }
+  }
+  .of-ask__line {
+    animation: of-unfold 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* Phones: a sheet over most of the screen. */
+@media (max-width: 47.99rem) {
+  .of-ask {
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 90dvh;
+    border-radius: 28px 28px 0 0;
+    border-bottom: 0;
+  }
+}
+@media (min-width: 60rem) {
+  .of-ask {
+    inset: auto 1.25rem 1.25rem auto;
+  }
+}
+
+/* Nav jumps move focus to the panel's heading (frame.ts) so keyboard and screen-reader users
+   land there too. The heading is not a control, so it shows no focus ring. */
+.of-card :is(h1, h2)[tabindex='-1']:focus {
+  outline: none;
+}

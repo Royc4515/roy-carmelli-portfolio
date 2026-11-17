@@ -1,0 +1,876 @@
+/* Option D "Two modes": a quiet professional shell; the pixel world is one framed window and
+   an optional play mode. Colours are OKLCH and come from the pixel site's forest and gold, so
+   Roy and his forest belong on the page. Everything is scoped to html[data-option='d']. */
+
+html[data-option='d'] {
+  --od-bg: oklch(97.6% 0.012 95);
+  --od-surface: oklch(99.4% 0.006 95);
+  --od-sunken: oklch(94.8% 0.016 95);
+  --od-fg: oklch(23% 0.025 150);
+  --od-muted: oklch(43% 0.025 145);
+  --od-line: oklch(87% 0.02 100);
+  --od-line-strong: oklch(76% 0.03 110);
+  /* Forest green: 7.9:1 on the paper, so it also carries small text. */
+  --od-accent: oklch(40% 0.095 148);
+  --od-accent-hover: oklch(34% 0.09 148);
+  --od-on-accent: oklch(98.5% 0.012 95);
+  /* Gold is decoration only (dots, rules): too light for text on paper. */
+  --od-gold: oklch(74% 0.13 85);
+  --od-shadow: 0 1px 2px oklch(30% 0.03 140 / 0.06), 0 12px 32px -12px oklch(30% 0.03 140 / 0.18);
+
+  --o-bg: var(--od-bg);
+  --o-fg: var(--od-fg);
+  --o-font: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --o-focus: var(--od-accent);
+  --o-select-bg: var(--od-accent);
+  --o-select-fg: var(--od-on-accent);
+  --o-scroll-pad: 80px;
+  --od-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html[data-option='d'][data-theme='night'] {
+  --od-bg: oklch(17.5% 0.028 262);
+  --od-surface: oklch(21.5% 0.032 262);
+  --od-sunken: oklch(14.5% 0.026 262);
+  --od-fg: oklch(94% 0.022 92);
+  --od-muted: oklch(76% 0.03 255);
+  --od-line: oklch(30% 0.035 262);
+  --od-line-strong: oklch(42% 0.04 262);
+  /* The night theme's gold takes the accent role: 10:1 on the ink. */
+  --od-accent: oklch(84% 0.13 88);
+  --od-accent-hover: oklch(89% 0.11 90);
+  --od-on-accent: oklch(17.5% 0.028 262);
+  --od-gold: oklch(84% 0.13 88);
+  --od-shadow: 0 1px 2px oklch(0% 0 0 / 0.3), 0 16px 40px -16px oklch(0% 0 0 / 0.6);
+}
+
+.opt-d {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+.od-wrap {
+  width: min(100% - 2.5rem, 70rem);
+  margin-inline: auto;
+}
+
+/* ── Small parts ─────────────────────────────────────────────────────────── */
+
+.od-label {
+  font: 500 0.8125rem/1.4 var(--od-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--od-muted);
+}
+
+.od-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.125rem;
+  border: 1px solid var(--od-line-strong);
+  border-radius: 10px;
+  background: var(--od-surface);
+  color: var(--od-fg);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.od-btn svg {
+  flex: none;
+  font-size: 1.125rem;
+}
+.od-btn:hover {
+  border-color: var(--od-accent);
+}
+.od-btn:active {
+  transform: translateY(1px);
+}
+.opt-d .od-btn--primary {
+  border-color: var(--od-accent);
+  background: var(--od-accent);
+  color: var(--od-on-accent);
+}
+.opt-d .od-btn--primary:hover {
+  border-color: var(--od-accent-hover);
+  background: var(--od-accent-hover);
+}
+.od-btn--quiet {
+  background: transparent;
+}
+
+.od-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--od-accent) !important;
+  text-decoration: underline !important;
+  text-decoration-color: color-mix(in oklab, var(--od-accent) 35%, transparent) !important;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s ease;
+}
+.od-link:hover {
+  text-decoration-color: var(--od-accent) !important;
+}
+.od-link svg {
+  font-size: 1rem;
+}
+
+.od-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  font-size: 1.25rem;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.od-icon-btn:hover {
+  border-color: var(--od-line-strong);
+  background: var(--od-surface);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.od-header {
+  position: sticky;
+  top: 0;
+  /* Above the chat launcher (z 90), below its open phone sheet (z 150). */
+  z-index: 100;
+  border-bottom: 1px solid color-mix(in oklab, var(--od-line) 70%, transparent);
+  background: color-mix(in oklab, var(--od-bg) 86%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  backdrop-filter: saturate(1.4) blur(12px);
+}
+.od-header__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 60px;
+}
+.od-wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-right: auto;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.od-nav {
+  display: none;
+}
+.od-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.875rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--od-muted);
+  transition: color 0.15s ease;
+}
+.od-nav a:hover {
+  color: var(--od-fg);
+}
+@media (min-width: 48rem) {
+  .od-nav {
+    display: flex;
+  }
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+
+.od-hero {
+  /* don't touch / on phones the hero fills the first screen: the chat launcher stays docked
+     beside Roy (a speech bubble in the window) while this section still reaches the bottom
+     corner, instead of standing on the email button. */
+  min-height: min(calc(100svh - 61px), 46rem);
+  padding-block: 1.25rem 3rem;
+}
+.od-hero__grid {
+  display: grid;
+  gap: 1.5rem;
+}
+/* Phones: the window comes first, so Roy greets and the text sits right under him. */
+.od-stage {
+  order: -1;
+}
+.od-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 500 0.8125rem/1.4 var(--od-mono);
+  letter-spacing: 0.04em;
+  color: var(--od-muted);
+}
+.od-status__dot {
+  width: 8px;
+  height: 8px;
+  margin-inline: 4px 2px;
+  border-radius: 50%;
+  background: var(--od-accent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--od-accent) 18%, transparent);
+}
+.od-name {
+  margin-top: 0.5rem;
+  font-size: clamp(2.5rem, 9.5vw, 4.5rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+.od-role {
+  margin-top: 0.75rem;
+  font-size: clamp(1.1875rem, 2.2vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--od-accent);
+}
+.od-pitch {
+  margin-top: 0.75rem;
+  max-width: 34rem;
+  font-size: 1.0625rem;
+  color: var(--od-muted);
+}
+.od-cta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+.od-cta .od-btn {
+  padding-inline: 0.5rem;
+}
+.od-meta {
+  margin-top: 0.625rem;
+  font: 500 0.8125rem/1.4 var(--od-mono);
+  letter-spacing: 0.02em;
+  color: var(--od-muted);
+}
+
+/* The stage: the pixel window with a caption bar, one card. */
+.od-stage {
+  overflow: hidden;
+  border: 1px solid var(--od-line-strong);
+  border-radius: 14px;
+  background: var(--od-surface);
+  box-shadow: var(--od-shadow);
+}
+.od-window {
+  position: relative;
+  overflow: hidden;
+  /* The forest's own sky, for the frame before the image decodes. */
+  background: #1a2e10;
+}
+.od-window__forest {
+  position: absolute;
+  bottom: 0;
+  max-width: none !important;
+  image-rendering: pixelated;
+  user-select: none;
+}
+.od-window__roy {
+  position: absolute;
+}
+/* Night: a moonlight wash over the forest; Roy is above it, so he stays lit. */
+.od-window__night {
+  position: absolute;
+  inset: 0;
+  background: oklch(24% 0.09 268 / 0.62);
+  mix-blend-mode: multiply;
+  opacity: 0;
+}
+html[data-option='d'][data-theme='night'] .od-window__night {
+  opacity: 1;
+}
+.od-stage__bar {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border-top: 1px solid var(--od-line);
+}
+.od-stage__caption {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--od-muted);
+}
+.od-stage__tag {
+  display: block;
+  margin-bottom: 0.375rem;
+  /* The one pixel-font label on the page: it names the mode the window opens. */
+  font: 400 12px/16px 'Press Start 2P', ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--od-fg);
+}
+.od-btn--play {
+  border-color: var(--od-line-strong);
+}
+/* Phones: the caption waits below the fold of attention; the button alone is enough. */
+@media (max-width: 47.99rem) {
+  .od-stage__caption {
+    display: none;
+  }
+  .od-stage__bar {
+    padding: 0.625rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .od-hero {
+    min-height: 0;
+    padding-block: 3rem 5rem;
+  }
+  .od-cta {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .od-cta .od-btn {
+    padding-inline: 1.25rem;
+  }
+  .od-pitch {
+    font-size: 1.1875rem;
+  }
+  .od-stage__bar {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 1rem 1.125rem;
+  }
+}
+@media (min-width: 62rem) {
+  .od-hero {
+    /* The first screen under the header, so the hero reads as one composed view. */
+    display: grid;
+    align-items: center;
+    min-height: min(calc(100svh - 61px), 52rem);
+    padding-block: 2.5rem 4rem;
+  }
+  .od-hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+    align-items: center;
+    gap: 4rem;
+  }
+  .od-stage {
+    order: 0;
+  }
+}
+
+/* ── Sections ────────────────────────────────────────────────────────────── */
+
+.od-section {
+  padding-block: 3.5rem;
+  border-top: 1px solid var(--od-line);
+}
+.od-section__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.875rem;
+  margin-bottom: 2rem;
+}
+.od-section__head h2 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+@media (min-width: 48rem) {
+  .od-section {
+    padding-block: 5.5rem;
+  }
+  .od-section__head {
+    margin-bottom: 3rem;
+  }
+}
+
+/* ── Main projects ───────────────────────────────────────────────────────── */
+
+.od-projects {
+  display: grid;
+  gap: 3rem;
+}
+.od-project {
+  display: grid;
+  gap: 1.25rem;
+}
+.od-shot {
+  overflow: hidden;
+  border: 1px solid var(--od-line-strong);
+  border-radius: 12px;
+  background: var(--od-sunken);
+  box-shadow: var(--od-shadow);
+  aspect-ratio: 16 / 10;
+}
+.od-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.od-shot--type {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1rem, 4vw, 1.75rem);
+  aspect-ratio: auto;
+  min-height: 100%;
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--od-gold) 22%, transparent), transparent 60%),
+    var(--od-sunken);
+}
+.od-shot--type ol {
+  display: grid;
+  gap: 0.75rem;
+}
+.od-shot--type li {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+.od-shot--type li span {
+  font: 500 0.8125rem/1.75 var(--od-mono);
+  color: var(--od-muted);
+}
+.od-project__title {
+  margin-top: 0.375rem;
+  font-size: clamp(1.5rem, 3.2vw, 2rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.od-project__descriptor {
+  font-weight: 400;
+  color: var(--od-muted);
+}
+.od-project__tagline {
+  margin-top: 0.625rem;
+  max-width: 36rem;
+}
+.od-highlights {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 1rem;
+  color: var(--od-muted);
+}
+.od-highlights li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.od-highlights li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 6px;
+  height: 6px;
+  /* A square, not a dot: the smallest nod to the pixel grid. */
+  background: var(--od-gold);
+}
+.od-project__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.25rem;
+  margin-top: 1.25rem;
+}
+.od-chevron {
+  width: 8px;
+  height: 8px;
+  margin: -3px 2px 0 4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+.od-chevron[data-open] {
+  transform: translateY(3px) rotate(-135deg);
+}
+
+/* Details open by animating a grid row from 0fr to 1fr (height: auto cannot transition
+   everywhere yet). Closed, `visibility: hidden` takes the text out of the tab order and
+   the accessibility tree. */
+.od-details {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 0.35s;
+}
+.od-details[data-open] {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition-delay: 0s;
+}
+.od-details__clip {
+  min-height: 0;
+  overflow: hidden;
+}
+.od-details__body {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--od-line);
+  border-radius: 12px;
+  background: var(--od-surface);
+}
+.od-details__story {
+  display: grid;
+  gap: 0.875rem;
+  max-width: 42rem;
+}
+.od-details__lead {
+  font-weight: 600;
+}
+.od-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+}
+.od-tags li {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--od-line);
+  border-radius: 6px;
+  font: 500 0.8125rem/1.5 var(--od-mono);
+  color: var(--od-muted);
+}
+
+@media (min-width: 60rem) {
+  .od-projects {
+    gap: 4.5rem;
+  }
+  .od-project {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    column-gap: 3.5rem;
+    row-gap: 0;
+    align-items: center;
+  }
+  .od-details {
+    grid-column: 1 / -1;
+  }
+  .od-details[data-open] {
+    margin-top: 2rem;
+  }
+  .od-details__body {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    gap: 3rem;
+    padding: 2rem;
+  }
+  .od-shot--type {
+    aspect-ratio: 16 / 10;
+    min-height: 0;
+  }
+  .od-shot--type li {
+    font-size: 1.1875rem;
+  }
+}
+
+/* ── More work ───────────────────────────────────────────────────────────── */
+
+.od-more {
+  margin-top: 4rem;
+}
+.od-more__title {
+  margin-top: 2.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--od-line-strong);
+  font: 500 0.8125rem/1.4 var(--od-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--od-muted);
+}
+.od-row {
+  display: grid;
+  gap: 0.375rem;
+  padding-block: 1.125rem;
+  border-bottom: 1px solid var(--od-line);
+}
+.od-row__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.od-row__head .od-label {
+  margin-top: 0.125rem;
+}
+.od-row__tagline {
+  color: var(--od-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.od-row__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+}
+@media (min-width: 60rem) {
+  .od-row {
+    grid-template-columns: 17rem minmax(0, 1fr) auto;
+    column-gap: 2.5rem;
+    align-items: start;
+  }
+  .od-row__links {
+    justify-content: flex-end;
+    min-width: 13rem;
+    margin-top: -0.5rem;
+  }
+}
+
+/* ── About ───────────────────────────────────────────────────────────────── */
+
+.od-about {
+  display: grid;
+  gap: 2.5rem;
+}
+.od-prose {
+  display: grid;
+  gap: 1.125rem;
+  max-width: 40rem;
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+.od-facts {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+}
+.od-facts > div {
+  padding-top: 1rem;
+  border-top: 1px solid var(--od-line-strong);
+}
+.od-facts dd {
+  display: grid;
+  gap: 0.125rem;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--od-muted);
+}
+.od-facts dd strong {
+  font-weight: 600;
+  color: var(--od-fg);
+}
+@media (min-width: 60rem) {
+  .od-about {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: 5rem;
+  }
+}
+
+/* ── Skills ──────────────────────────────────────────────────────────────── */
+
+.od-skills > div {
+  display: grid;
+  gap: 0.25rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--od-line);
+}
+.od-skills > div:last-child {
+  border-bottom: 1px solid var(--od-line);
+}
+.od-skills dt {
+  font-weight: 600;
+}
+.od-skills dd {
+  color: var(--od-muted);
+}
+@media (min-width: 48rem) {
+  .od-skills > div {
+    grid-template-columns: 17rem minmax(0, 1fr);
+    column-gap: 2.5rem;
+  }
+}
+
+/* ── Contact and footer ──────────────────────────────────────────────────── */
+
+.od-contact__blurb {
+  max-width: 40rem;
+  font-size: clamp(1.25rem, 2.6vw, 1.625rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+.od-contact__email {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1.75rem;
+}
+.od-email {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  font-size: clamp(1.125rem, 4.6vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--od-accent) !important;
+  text-decoration: underline !important;
+  text-decoration-color: color-mix(in oklab, var(--od-accent) 35%, transparent) !important;
+  text-underline-offset: 6px;
+  overflow-wrap: anywhere;
+}
+.od-email:hover {
+  text-decoration-color: var(--od-accent) !important;
+}
+.od-contact__links {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 1.75rem;
+}
+@media (min-width: 48rem) {
+  .od-contact__links {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+.od-footer {
+  /* Room for the review chip (left) and the chat figure (right) in the corners. */
+  padding-block: 1.5rem 6.5rem;
+  border-top: 1px solid var(--od-line);
+  color: var(--od-muted);
+  font-size: 1rem;
+}
+.od-footer__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+}
+
+/* ── Play mode (portalled to <body>, so it keeps the pixel site's own look) ─ */
+
+.od-arcade {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+.od-arcade::backdrop {
+  background: var(--color-bg);
+}
+.od-arcade__layer {
+  position: absolute;
+  inset: 0;
+}
+.od-arcade__stage {
+  position: relative;
+  /* An inline-size container: the game's screen box sizes itself in cqw (MiniGame.css). */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  outline: none;
+}
+/* Touch play: the game fills the screen and draws its own controls. */
+.od-arcade__stage[data-mode='touch'] {
+  display: block;
+  padding: 0;
+  container-type: normal;
+}
+.od-arcade__title {
+  color: var(--color-accent-fg);
+}
+.od-arcade__controls {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 24px;
+}
+.od-arcade__hint {
+  flex-basis: 100%;
+  text-align: center;
+  color: var(--color-fg-muted);
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The arcade fades in from the page (browsers without @starting-style just show it). */
+  .od-arcade {
+    opacity: 1;
+    transition: opacity 0.25s ease, display 0.25s allow-discrete, overlay 0.25s allow-discrete;
+  }
+  @starting-style {
+    .od-arcade[open] {
+      opacity: 0;
+    }
+  }
+
+  /* Sections ease in as they enter the viewport, driven by scroll position: no JavaScript,
+     and without scroll-driven animations the content is simply there. */
+  @supports (animation-timeline: view()) {
+    .od-project,
+    .od-section__head,
+    .od-row {
+      animation: od-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 32%;
+    }
+  }
+}
+@keyframes od-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .od-btn,
+  .od-link,
+  .od-icon-btn,
+  .od-chevron,
+  .od-details,
+  .od-nav a {
+    transition: none;
+  }
+}
+
+/* The review chip sits under the chat (launcher z 90, phone sheet z 150): on a phone the open
+   chat is a full-screen sheet and the chip would lie on its input. */
+.opt-d .opt-review {
+  z-index: 80;
+}
