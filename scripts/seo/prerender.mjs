@@ -119,6 +119,9 @@ async function main() {
 
   const indexPath = resolve(DIST, 'index.html');
   let html = await readFile(indexPath, 'utf8');
+  // The live page is option F, whose styles are scoped under html[data-option] (src/main.tsx
+  // removes it again on every other page).
+  html = replaceOnce(html, '<html lang="en">', '<html lang="en" data-option="f">', '<html>');
   html = replaceOnce(html, '<div id="root"></div>', `<div id="root" ${attr}>${appHtml}</div>`, 'empty #root');
   html = replaceOnce(html, '</head>', `  ${headExtra}\n  </head>`, '</head>');
   await writeFile(indexPath, html);

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, type ComponentType } from 'react';
+import { lazy, Suspense, useEffect, useRef, type ComponentType, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ArcadeFallback from '../../components/ArcadeFallback';
 import GameLoadFailed from '../../components/GameLoadFailed';
@@ -46,7 +46,11 @@ export default function Arcade({ open, onClose }: ArcadeProps) {
     if (open) stageRef.current?.focus({ preventScroll: true });
   }, [open]);
 
-  if (typeof document === 'undefined') return null;
+  // don't touch / the server renderer (the build-time prerender of the live page) rejects
+  // portals, so the dialog exists only after the client has mounted.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || typeof document === 'undefined') return null;
 
   return createPortal(
     <dialog ref={dialogRef} className="od-arcade" aria-label="Roy Runner">

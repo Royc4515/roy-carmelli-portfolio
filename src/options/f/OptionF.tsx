@@ -294,7 +294,7 @@ function MoreWork() {
  * of cubes flies ahead and builds the next project's model. All text is ordinary HTML on
  * solid panels; the scene is decoration and is hidden from assistive technology.
  */
-export default function OptionF() {
+export default function OptionF({ live = false }: { live?: boolean }) {
   const [mode, setMode] = useState<SkyMode>('live');
   const info = useAmbience(mode);
   const [scene, setScene] = useState<SceneState>('loading');
@@ -339,7 +339,7 @@ export default function OptionF() {
   }, [info.dark]);
 
   return (
-    <OptionShell optionKey="f">
+    <OptionShell optionKey="f" review={!live}>
       <div className="of-root" data-scene={scene}>
         <Scene ambience={info.ambience} paused={paused} onState={setScene} worldRef={world} />
 
