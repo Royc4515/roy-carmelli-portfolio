@@ -3,14 +3,14 @@
 import type { Knowledge } from './types.js';
 
 export const KNOWLEDGE: Knowledge = {
-  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student position in full-stack or AI development in Israel, part-time at first alongside my studies. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, TypeScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Nechita Raka - First-Year Student Hub [main quest, Site + AI chat] - A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Groupie - WhatsApp Year in Review [side quest, Privacy-first web app] - A year-in-review for WhatsApp group chats: story cards, awards and a poster, all computed in your browser. No message leaves the device. | Wolt Clone - Food-Delivery App [side quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, and land on a magazine cover as one of 40 made-up futures. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: sampling and aliasing, smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
+  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student position in full-stack or AI development in Israel, part-time at first alongside my studies. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, TypeScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Nechita Raka - First-Year Student Hub [main quest, Site + AI chat] - A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine. | Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Groupie - WhatsApp Year in Review [side quest, Privacy-first web app] - A year-in-review for WhatsApp group chats: story cards, awards and a poster, all computed in your browser. No message leaves the device. | Wolt Clone - Food-Delivery App [side quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, and land on a magazine cover as one of 40 made-up futures. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: sampling and aliasing, smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
   "chunks": [
     {
       "id": "site:about",
       "source": "site",
       "title": "About Roy",
       "url": "https://roy-carmelli-portfolio.vercel.app/#about",
-      "text": "I'm a third-year honors student at Bar-Ilan University, in a dual major in Computer Science and Neuroscience. Most of my building happens on the CS side. Neuroscience taught me to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children. I build tools I actually use, and I ship them tested and deployed, not as demos. I work with AI coding agents every day: I make the architecture calls, review what they write, and debug it myself. Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division: regular service from 2021, then 400+ days of reserve duty since August 2024, alongside full-time studies. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people and ran a regional clinic, coordinated medical logistics in the division's war room, made triage and evacuation calls in mass-casualty events, and trained medics and soldiers. What I took from it: stay calm and make the call. I've also taught, tutored and run trainings in Israel and abroad, led people and projects through StandWithUs, and I'm a native speaker of both English and Hebrew.",
+      "text": "I'm a third-year honors student at Bar-Ilan University, in a dual major in Computer Science and Neuroscience. Most of my building happens on the CS side. Neuroscience taught me to work with messy real data, from voltage-imaging recordings to an OpenNeuro study of 56 children. I build tools I actually use, and I ship them tested and deployed, not as demos. I work with AI coding agents every day: I make the architecture calls, review what they write, and debug it myself. Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division, an operational support role: regular service from 2021, then 400+ days of reserve duty since August 2024 alongside full-time studies. I led a medical unit as it grew from 12 to 30+ people and coordinated medical logistics from the division's war room. What I took from it: stay calm and make the call. I've also taught, tutored and run trainings in Israel and abroad, led people and projects through StandWithUs, and I'm a native speaker of both English and Hebrew.",
       "keywords": [
         "about",
         "background",
@@ -23,6 +23,42 @@ export const KNOWLEDGE: Knowledge = {
         "reserve",
         "reservist",
         "leadership"
+      ]
+    },
+    {
+      "id": "site:project:nechita-raka",
+      "source": "site",
+      "title": "Nechita Raka - First-Year Student Hub",
+      "url": "https://nechita-raka.vercel.app/",
+      "text": "Nechita Raka - First-Year Student Hub (Site + AI chat, 2026).\nNechita Raka (Hebrew for 'soft landing') is a student hub for first-year students at Bar-Ilan University, now for Computer Science and Neuroscience, that I built as a mentor in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 16 step-by-step guides (registration, exams, reserve duty, the shuttle), each with its own URL to share; links and FAQ answers; and the academic calendar as a timeline of the current week, with an .ics download. A course browser covers all 155 courses in the department's catalog, across 515 course groups (hours, lecturers, exam dates), and can have ChatGPT, Claude or Gemini build your schedule, then export it as .ics. The content lives in plain data files that any mentor can edit from a phone on GitHub, and the build prerenders it with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Conversations are not stored. It has an English version and an admin dashboard with anonymous counters (no cookies). The code is a multi-faculty engine: a second site for Neuroscience (brain sciences) students now runs on it, with its own 18 guides and a browser for its 60 courses. On Shabbat both sites close from candle lighting to havdalah, and the chat answers in character without calling the model. I run the project with 9 Claude Code agents with separate roles (content owners, engineer, designer, QA, security, UX, social, a simulated student): they keep memory in files, log decisions, and a /board command runs a management review from the traffic reports. QA grades simulated students against the chat and flags invented facts. 230 tests cover the API. In its busiest week the CS site drew 271 visitors and 792 page views (the site's own anonymous counters, October 2026). An independent project, not an official university site.\nHighlights: Real users: 271 visitors in its busiest week (Oct 2026); Two faculty sites on one engine: 34 guides, 215 courses; I direct 9 Claude Code agents (QA, security, UX) and review their work.\nTech: JavaScript, Node.js, Groq API, Serverless Functions, Neon Postgres, Vercel, GitHub Actions, SEO / JSON-LD, Hebrew / RTL.\nCode: https://github.com/Royc4515/nechita-raka\nLive: https://nechita-raka.vercel.app/\nGitHub repo nechita-raka: JavaScript, last push 2026-10-22.",
+      "keywords": [
+        "nechita-raka",
+        "nechita",
+        "raka",
+        "first",
+        "year",
+        "student",
+        "hub",
+        "site",
+        "ai",
+        "chat",
+        "javascript",
+        "node",
+        "js",
+        "groq",
+        "api",
+        "serverless",
+        "functions",
+        "neon",
+        "postgres",
+        "vercel",
+        "github",
+        "actions",
+        "seo",
+        "json",
+        "ld",
+        "hebrew",
+        "rtl"
       ]
     },
     {
@@ -62,42 +98,6 @@ export const KNOWLEDGE: Knowledge = {
         "actions",
         "upstash",
         "redis"
-      ]
-    },
-    {
-      "id": "site:project:nechita-raka",
-      "source": "site",
-      "title": "Nechita Raka - First-Year Student Hub",
-      "url": "https://nechita-raka.vercel.app/",
-      "text": "Nechita Raka - First-Year Student Hub (Site + AI chat, 2026).\nNechita Raka (Hebrew for 'soft landing') is a student hub for first-year students at Bar-Ilan University, now for Computer Science and Neuroscience, that I built as a mentor in plain HTML, CSS and JavaScript, with an AI chat on a Vercel Function. The questions of the first weeks are answered on one page: 16 step-by-step guides (registration, exams, reserve duty, the shuttle), each with its own URL to share; links and FAQ answers; and the academic calendar as a timeline of the current week, with an .ics download. A course browser covers all 155 courses in the department's catalog, across 515 course groups (hours, lecturers, exam dates), and can have ChatGPT, Claude or Gemini build your schedule, then export it as .ics. The content lives in plain data files that any mentor can edit from a phone on GitHub, and the build prerenders it with a page per guide, a sitemap, JSON-LD and an llms.txt, so Google and AI crawlers read it without JavaScript. Bit and Byte, the two mascots, run a chat that only knows the site's data: a Vercel Function rate-limits by a salted hash of the visitor (no IP address stored, counters in Neon Postgres), screens each message with Prompt Guard 2, retrieves the relevant chunks, asks a Groq model with a fallback to a second one, and checks the answer before it goes out. Conversations are not stored. It has an English version and an admin dashboard with anonymous counters (no cookies). The code is a multi-faculty engine: a second site for Neuroscience (brain sciences) students now runs on it, with its own 18 guides and a browser for its 60 courses. On Shabbat both sites close from candle lighting to havdalah, and the chat answers in character without calling the model. I run the project with 9 Claude Code agents with separate roles (content owners, engineer, designer, QA, security, UX, social, a simulated student): they keep memory in files, log decisions, and a /board command runs a management review from the traffic reports. QA grades simulated students against the chat and flags invented facts. 230 tests cover the API. In its busiest week the CS site drew 271 visitors and 792 page views (the site's own anonymous counters, October 2026). An independent project, not an official university site.\nHighlights: Real users: 271 visitors in its busiest week (Oct 2026); Two faculty sites on one engine: 34 guides, 215 courses; I direct 9 Claude Code agents (QA, security, UX) and review their work.\nTech: JavaScript, Node.js, Groq API, Serverless Functions, Neon Postgres, Vercel, GitHub Actions, SEO / JSON-LD, Hebrew / RTL.\nCode: https://github.com/Royc4515/nechita-raka\nLive: https://nechita-raka.vercel.app/\nGitHub repo nechita-raka: JavaScript, last push 2026-10-22.",
-      "keywords": [
-        "nechita-raka",
-        "nechita",
-        "raka",
-        "first",
-        "year",
-        "student",
-        "hub",
-        "site",
-        "ai",
-        "chat",
-        "javascript",
-        "node",
-        "js",
-        "groq",
-        "api",
-        "serverless",
-        "functions",
-        "neon",
-        "postgres",
-        "vercel",
-        "github",
-        "actions",
-        "seo",
-        "json",
-        "ld",
-        "hebrew",
-        "rtl"
       ]
     },
     {
@@ -505,8 +505,8 @@ export const KNOWLEDGE: Knowledge = {
     "https://github.com/Royc4515",
     "https://linkedin.com/in/roy-carmelli",
     "https://www.linkedin.com/in/roy-carmelli",
-    "https://royc4515.github.io/Aside",
     "https://nechita-raka.vercel.app",
+    "https://royc4515.github.io/Aside",
     "https://groupie-three.vercel.app",
     "https://career-predictor-cnvg.onrender.com",
     "https://royc4515.github.io/white-matter-tracts-game",

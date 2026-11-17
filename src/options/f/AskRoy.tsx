@@ -100,7 +100,7 @@ export function AskRoy({ open, onClose, onAnswer }: { open: boolean; onClose: ()
             {chatPersona.name}
             <span className="of-ask__badge">{chatPersona.badge}</span>
           </h2>
-          <p className="of-ask__sub">Roy's AI twin, in English or Hebrew</p>
+          <p className="of-ask__sub">An AI version of Roy, in English or Hebrew</p>
         </div>
         <button type="button" className="of-icon-btn of-ask__close" onClick={onClose} aria-label={chatPersona.closeLabel}>
           <Close />

@@ -3,23 +3,6 @@ import type { Project } from '../types/index';
 
 export const projects: Project[] = [
   {
-    id: "ai-sidebar",
-    kind: "Chrome extension",
-    tier: "main",
-    tagline: "Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally.",
-    highlights: [
-      "One interface for 6 AI providers (Claude, Gemini, OpenAI, Grok, Groq, Ollama), swappable at runtime",
-      "Live streaming answers, plus a mode that compares two models side by side",
-      "Live demo backend with daily caps, 35 tests and 3 CI workflows",
-    ],
-    title: "Aside - AI Sidebar",
-    description: "Aside is a Chrome extension (Manifest V3, plain JavaScript, no build step) that opens an AI assistant from six providers in a sidebar next to any web page you're reading. Press Alt+A and the page's main text is already extracted as context; it goes out only with a message you send, and one toggle turns it off. Six providers sit behind one interface: Claude, Gemini, OpenAI, Grok, Groq and local Ollama, each with its own model list and a Custom option for new model IDs. Answers stream in (SSE, or NDJSON for Ollama), and compare mode sends one prompt to two models so you can keep the better answer. One-tap actions summarize the page, pull its data into a table, and explain, translate or rewrite a selection. API keys and chat history stay in chrome.storage.local and are never synced. Under the hood, a ProviderFactory picks the provider at runtime, each provider is a swappable strategy on a shared BaseProvider, and OpenAI, Grok and Groq share one OpenAI-compatible parent class. The sidebar talks to the page through a nonce-checked postMessage bridge and renders Markdown with its own parser. A strict CSP lets it talk only to the six provider hosts. The GitHub Pages landing site has a live demo on a Vercel Function with per-visitor and site-wide daily caps (35 tests), and three GitHub Actions workflows check, deploy and release it, including a monthly check that every listed model is still served. The UI is in English and Hebrew with RTL.",
-    tech: ["JavaScript", "Chrome MV3", "OOP", "i18n / RTL", "Streaming / SSE", "Service Worker", "Factory Pattern", "Strategy Pattern", "Claude API", "Gemini API", "OpenAI API", "Grok API", "Groq API", "Ollama", "GitHub Pages", "GitHub Actions", "Upstash Redis"],
-    github: "https://github.com/Royc4515/Aside",
-    live: "https://royc4515.github.io/Aside/",
-    year: 2026,
-  },
-  {
     id: "nechita-raka",
     kind: "Site + AI chat",
     tier: "main",
@@ -34,6 +17,23 @@ export const projects: Project[] = [
     tech: ["JavaScript", "Node.js", "Groq API", "Serverless Functions", "Neon Postgres", "Vercel", "GitHub Actions", "SEO / JSON-LD", "Hebrew / RTL"],
     github: "https://github.com/Royc4515/nechita-raka",
     live: "https://nechita-raka.vercel.app/",
+    year: 2026,
+  },
+  {
+    id: "ai-sidebar",
+    kind: "Chrome extension",
+    tier: "main",
+    tagline: "Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally.",
+    highlights: [
+      "One interface for 6 AI providers (Claude, Gemini, OpenAI, Grok, Groq, Ollama), swappable at runtime",
+      "Live streaming answers, plus a mode that compares two models side by side",
+      "Live demo backend with daily caps, 35 tests and 3 CI workflows",
+    ],
+    title: "Aside - AI Sidebar",
+    description: "Aside is a Chrome extension (Manifest V3, plain JavaScript, no build step) that opens an AI assistant from six providers in a sidebar next to any web page you're reading. Press Alt+A and the page's main text is already extracted as context; it goes out only with a message you send, and one toggle turns it off. Six providers sit behind one interface: Claude, Gemini, OpenAI, Grok, Groq and local Ollama, each with its own model list and a Custom option for new model IDs. Answers stream in (SSE, or NDJSON for Ollama), and compare mode sends one prompt to two models so you can keep the better answer. One-tap actions summarize the page, pull its data into a table, and explain, translate or rewrite a selection. API keys and chat history stay in chrome.storage.local and are never synced. Under the hood, a ProviderFactory picks the provider at runtime, each provider is a swappable strategy on a shared BaseProvider, and OpenAI, Grok and Groq share one OpenAI-compatible parent class. The sidebar talks to the page through a nonce-checked postMessage bridge and renders Markdown with its own parser. A strict CSP lets it talk only to the six provider hosts. The GitHub Pages landing site has a live demo on a Vercel Function with per-visitor and site-wide daily caps (35 tests), and three GitHub Actions workflows check, deploy and release it, including a monthly check that every listed model is still served. The UI is in English and Hebrew with RTL.",
+    tech: ["JavaScript", "Chrome MV3", "OOP", "i18n / RTL", "Streaming / SSE", "Service Worker", "Factory Pattern", "Strategy Pattern", "Claude API", "Gemini API", "OpenAI API", "Grok API", "Groq API", "Ollama", "GitHub Pages", "GitHub Actions", "Upstash Redis"],
+    github: "https://github.com/Royc4515/Aside",
+    live: "https://royc4515.github.io/Aside/",
     year: 2026,
   },
   {

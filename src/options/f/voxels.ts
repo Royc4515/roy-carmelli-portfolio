@@ -395,7 +395,7 @@ function toolbox(g: Grid): void {
 }
 
 /** One model per station after the hero, in page order. The engine builds one island per entry plus the hero's. */
-export const TOTEM_BUILDERS = [browser, parachute, wine, codeMark, brain, toolbox, mailbox];
+export const TOTEM_BUILDERS = [parachute, browser, wine, codeMark, brain, toolbox, mailbox];
 
 /**
  * All totems share one pool of `count` cubes, so the same cubes can fly from one model to the

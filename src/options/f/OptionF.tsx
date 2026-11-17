@@ -391,7 +391,7 @@ export default function OptionF() {
                   </span>
                   <span>
                     <strong>Questions? Ask {chatPersona.name}</strong>
-                    <span className="of-ask-cta__sub">My AI twin answers about my work, in English or Hebrew</span>
+                    <span className="of-ask-cta__sub">An AI chat that answers about my work, in English or Hebrew</span>
                   </span>
                   <ArrowRight />
                 </button>

@@ -86,7 +86,7 @@ describe('projectsUsing (real data)', () => {
       'signal-processing',
     ]);
     expect(ids('TypeScript')).toEqual(['portfolio', 'clr']);
-    expect(ids('JavaScript')).toEqual(['ai-sidebar', 'nechita-raka', 'groupie', 'white-matter-game']);
+    expect(ids('JavaScript')).toEqual(['nechita-raka', 'ai-sidebar', 'groupie', 'white-matter-game']);
   });
 
   it('normalizes versions: React 19 and Java 17', () => {
@@ -141,7 +141,7 @@ describe('skillDetail', () => {
       name: 'JavaScript',
       slot: 'Weapons',
       category: 'Languages',
-      usedIn: ['Aside', 'Nechita Raka', 'Groupie', 'White Matter Tracts Game'],
+      usedIn: ['Nechita Raka', 'Aside', 'Groupie', 'White Matter Tracts Game'],
       note: null,
     });
     expect(skillDetail('Design Patterns', group('CS Foundations'), projects).usedIn).toEqual([

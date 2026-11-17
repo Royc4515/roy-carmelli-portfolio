@@ -20,7 +20,7 @@ export const bio = {
 
 I build tools I actually use, and I ship them tested and deployed, not as demos. I work with AI coding agents every day: I make the architecture calls, review what they write, and debug it myself.
 
-Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division: regular service from 2021, then 400+ days of reserve duty since August 2024, alongside full-time studies. During high-intensity operations I led a medical unit as it grew from 12 to 30+ people and ran a regional clinic, coordinated medical logistics in the division's war room, made triage and evacuation calls in mass-casualty events, and trained medics and soldiers. What I took from it: stay calm and make the call.
+Alongside the degree, I'm an IDF battalion medic and medical coordinator in the Gaza Division, an operational support role: regular service from 2021, then 400+ days of reserve duty since August 2024 alongside full-time studies. I led a medical unit as it grew from 12 to 30+ people and coordinated medical logistics from the division's war room. What I took from it: stay calm and make the call.
 
 I've also taught, tutored and run trainings in Israel and abroad, led people and projects through StandWithUs, and I'm a native speaker of both English and Hebrew.`,
   email: "Roy.y.carmelli@gmail.com",
