@@ -98,7 +98,7 @@ export function AmbienceLine({ info, mode, onMode }: { info: AmbienceInfo; mode:
         {weather && <span className="of-ambience__temp">{weather.tempC}&deg;</span>}
         <span className="of-ambience__live" data-mode={mode}>
           <span className="of-ambience__dot" aria-hidden="true" />
-          {MODE_LABEL[mode]}
+          <span className="of-ambience__mode">{MODE_LABEL[mode]}</span>
         </span>
         <Glyph className="of-ambience__chevron" d={CHEVRON} />
         <span className="opt-sr">Sky details</span>

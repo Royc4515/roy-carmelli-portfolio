@@ -1481,3 +1481,161 @@ main,
 .of-card :is(h1, h2)[tabindex='-1']:focus {
   outline: none;
 }
+
+/* ── Phones: the bottom bar and the menu sheet (MobileBar.tsx) ──────────────── */
+.of-mbar,
+.of-sheet {
+  display: none;
+}
+@media (max-width: 59.99rem) {
+  /* The desktop dock covered the panels' last lines; its actions live in the bar and sheet. */
+  .of-controls {
+    display: none;
+  }
+  .of-mbar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--of-edge);
+    background: var(--of-panel);
+    -webkit-backdrop-filter: blur(22px) saturate(1.5);
+    backdrop-filter: blur(22px) saturate(1.5);
+    box-shadow: 0 -8px 24px oklch(20% 0.04 255 / 0.12);
+  }
+  .of-mbar__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 48px;
+    padding: 0 0.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--of-rule);
+    background: color-mix(in oklch, var(--of-panel-solid) 70%, transparent);
+    font-size: 0.9375rem;
+    font-weight: 650;
+    color: var(--of-ink);
+    white-space: nowrap;
+  }
+  .of-mbar__btn > svg {
+    font-size: 1.15rem;
+    flex: none;
+  }
+  .of-mbar__btn--primary {
+    border-color: transparent;
+    background: var(--of-accent);
+    color: var(--of-panel-solid);
+  }
+  /* The last panel and the footer stay clear of the bar. */
+  .of-footer {
+    margin-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+
+  .of-sheet[open] {
+    display: block;
+  }
+  .of-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: 88dvh;
+    margin: 0;
+    padding: 0.5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    border: 1px solid var(--of-edge);
+    border-bottom: 0;
+    border-radius: 28px 28px 0 0;
+    background: var(--of-panel-solid);
+    color: var(--of-ink);
+    box-shadow: var(--of-shadow);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .of-sheet::backdrop {
+    background: oklch(15% 0.05 260 / 0.4);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  .of-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0 0.75rem 0.25rem;
+  }
+  .of-sheet__title {
+    font-family: var(--of-display);
+    font-size: 1.375rem;
+    font-weight: 760;
+    letter-spacing: -0.025em;
+  }
+  .of-sheet__links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding: 0 0.25rem;
+    border-top: 1px solid var(--of-rule);
+    font-family: var(--of-display);
+    font-size: 1.25rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+  }
+  .of-sheet__links a svg {
+    color: var(--of-accent);
+  }
+  .of-sheet__extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--of-rule);
+  }
+
+  /* The top bar: the sky pill keeps the icon, time, temperature and the live dot only, so it
+     no longer runs into the name pill. */
+  .of-ambience:not([data-open]) .of-ambience__mode {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  /* A long availability line wraps as a soft tag, not a stretched pill. */
+  .of-status {
+    border-radius: 14px;
+    align-items: flex-start;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+  }
+  .of-status .of-dot {
+    margin-top: 0.3em;
+    flex: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 59.99rem) {
+  .of-sheet[open] {
+    animation: of-ask-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+/* Landscape phones (short screens): a slimmer, centred bar, so the page keeps its height. */
+@media (max-width: 59.99rem) and (max-height: 31.25rem) {
+  .of-mbar {
+    left: 50%;
+    right: auto;
+    width: min(32rem, 100% - 1.5rem);
+    translate: -50% 0;
+    bottom: 0.5rem;
+    padding: 0.3rem;
+    border: 1px solid var(--of-edge);
+    border-radius: 20px;
+  }
+  .of-mbar__btn {
+    min-height: 44px;
+    border-radius: 14px;
+  }
+}
