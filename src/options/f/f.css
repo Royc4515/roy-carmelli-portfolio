@@ -89,7 +89,7 @@ main,
   align-items: stretch;
   justify-content: flex-end;
   min-height: 100svh;
-  padding: 44svh 1rem 1.25rem;
+  padding: 36svh 1rem 1.25rem;
   margin-top: -4rem; /* the nav floats over the scene */
 }
 .of-root[data-scene='off'] .of-stage {
@@ -146,7 +146,9 @@ main,
 .of-name {
   margin-top: 0.75rem;
   font-family: var(--font-pixel);
-  font-size: clamp(1.5rem, 7.2vw, 2.5rem);
+  /* The pixel face is wide: 12 letters must fit one line of a 375px phone's panel. */
+  font-size: clamp(1.125rem, 6vw, 2.5rem);
+  white-space: nowrap;
   line-height: 1.25;
   letter-spacing: 0;
 }
@@ -375,15 +377,25 @@ main,
 
 /* ── Scene controls ───────────────────────────────────────────────────────── */
 
+/* Phones: a row at the top left, over the sky, so the controls never cover a panel. */
 .of-controls {
   position: fixed;
-  right: 0.75rem;
-  bottom: 0.75rem;
+  left: 0.75rem;
+  top: 0.625rem;
   z-index: 6;
   display: flex;
-  flex-direction: column;
+  flex-direction: row-reverse;
   align-items: flex-end;
   gap: 0.5rem;
+}
+.of-card--hero .of-actions {
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+.of-card--hero .of-btn {
+  padding: 0 0.625rem;
+  font-size: 0.9375rem;
+  white-space: nowrap;
 }
 .of-chip {
   display: inline-flex;
@@ -553,8 +565,15 @@ main,
     margin-bottom: 2rem;
   }
   .of-controls {
+    left: auto;
+    top: auto;
     right: 1.25rem;
     bottom: 1.25rem;
+    flex-direction: column;
+  }
+  .of-card--hero .of-btn {
+    padding: 0 1rem;
+    font-size: 1rem;
   }
   .of-chip--toy {
     display: inline-flex;

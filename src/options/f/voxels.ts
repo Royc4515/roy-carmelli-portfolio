@@ -221,18 +221,20 @@ export function buildTree(out: Voxels, x: number, z: number, height: number, pal
   }
 }
 
-/** A puffy cloud of large cubes. */
+/** A blocky cloud: a few overlapping slabs of large cubes, solid so no dark gaps show. */
 export function buildCloud(out: Voxels, x: number, y: number, z: number, rand: () => number): void {
-  const s = 9;
-  const puffs = Array.from({ length: 4 }, (_, n) => ({ x: n * 2.2 - 3.3, y: rand() * 0.8, r: 1.6 + rand() * 1.3 }));
-  for (let i = -7; i <= 7; i++) {
-    for (let j = 0; j <= 4; j++) {
-      for (let k = -2; k <= 2; k++) {
-        if (puffs.some(p => (i - p.x) ** 2 + ((j - p.y) * 1.5) ** 2 + (k * 1.4) ** 2 < p.r * p.r)) {
-          out.add(x + i * s, y + j * s, z + k * s, s, [1, 1, 1], 0.94 + rand() * 0.06);
-        }
-      }
-    }
+  const s = 10;
+  const slabs = [
+    { x0: -5, x1: 5, y0: 0, y1: 1, z0: -1, z1: 1 },
+    { x0: -3, x1: 2, y0: 2, y1: 2, z0: -1, z1: 1 },
+    { x0: 0 + Math.floor(rand() * 2), x1: 4, y0: 2, y1: 3, z0: 0, z1: 1 },
+  ];
+  const has = (i: number, j: number, k: number) =>
+    slabs.some(b => i >= b.x0 && i <= b.x1 && j >= b.y0 && j <= b.y1 && k >= b.z0 && k <= b.z1);
+  for (let i = -5; i <= 5; i++) for (let j = 0; j <= 3; j++) for (let k = -1; k <= 1; k++) {
+    if (!has(i, j, k)) continue;
+    if (has(i - 1, j, k) && has(i + 1, j, k) && has(i, j - 1, k) && has(i, j + 1, k) && has(i, j, k - 1) && has(i, j, k + 1)) continue;
+    out.add(x + i * s, y + j * s, z + k * s, s, [1, 1, 1]);
   }
 }
 

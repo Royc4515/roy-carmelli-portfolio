@@ -95,7 +95,7 @@ function Station({ id, label, children, wide }: { id: string; label: string; chi
   return (
     <section className="of-stage" id={id} aria-labelledby={`${id}-title`}>
       <div className="of-card" data-station="" data-solid="" data-wide={wide ? '' : undefined}>
-        <p className="of-kicker" aria-hidden="true">{label}</p>
+        <p className="of-kicker">{label}</p>
         {children}
       </div>
     </section>
@@ -329,7 +329,7 @@ export default function OptionF() {
           {scene === 'on' && !reduced && (
             <>
               <button type="button" className="of-chip" onClick={() => setPaused(p => !p)} aria-pressed={paused}>
-                {paused ? 'Play animation' : 'Pause animation'}
+                {paused ? 'Resume scene' : 'Pause scene'}
               </button>
               <button type="button" className="of-chip of-chip--toy" onClick={() => world.current?.jump()} disabled={paused}>
                 Make Roy jump

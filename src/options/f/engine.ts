@@ -157,6 +157,7 @@ void main() {
   c = mix(c, uFog, fog);
   c = 1.0 - exp(-c * 1.35);        // gentle filmic shoulder
   frag = vec4(pow(c, vec3(1.0 / 2.2)), 1.0);
+  if (uEmissive < -0.5) frag = vec4(vec3(shadow()), 1.0);
 }`;
 
 const DEPTH_FRAG = `#version 300 es
@@ -189,7 +190,8 @@ void main() {
   // A square sun and moon: this is a world of cubes.
   vec2 o = abs(px - uOrbAt * uRes) / uRes.y;
   float d = max(o.x, o.y);
-  c += uOrb * (step(d, 0.034) + 0.22 * smoothstep(0.26, 0.0, length(o)));
+  c += uOrb * 0.2 * smoothstep(0.3, 0.0, length(o));
+  c = mix(c, uOrb, step(d, 0.03));
   frag = vec4(c, 1.0);
 }`;
 
@@ -273,8 +275,8 @@ interface Range {
 }
 
 const DAY = {
-  top: [0.3, 0.56, 0.9], bottom: [0.78, 0.9, 0.97], key: [1.25, 1.16, 1.0], sky: [0.42, 0.52, 0.68],
-  ground: [0.2, 0.18, 0.15], orb: [1.0, 0.95, 0.75], lamp: [0, 0, 0], emissive: 0.35,
+  top: [0.3, 0.56, 0.9], bottom: [0.78, 0.9, 0.97], key: [1.55, 1.42, 1.18], sky: [0.27, 0.35, 0.5],
+  ground: [0.13, 0.12, 0.1], orb: [1.0, 0.95, 0.7], lamp: [0, 0, 0], emissive: 0.35,
 };
 const NIGHT = {
   top: [0.02, 0.035, 0.1], bottom: [0.09, 0.13, 0.27], key: [0.42, 0.5, 0.8], sky: [0.12, 0.16, 0.32],
@@ -282,6 +284,7 @@ const NIGHT = {
 };
 const LIGHT_DIR = norm([0.5, 0.82, 0.55]);
 
+const DEBUG_SHADOW = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('dbg');
 const forcedLog = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('q');
 
 export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWorldOptions): Promise<VoxelWorld | null> {
@@ -344,9 +347,11 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     // Trees stand at the back and the sides, never between the camera and Roy.
     const trees = 3 + Math.floor(rand() * 2);
     for (let t = 0; t < trees; t++) {
-      const a = Math.PI * (1.08 + (t / (trees - 1)) * 0.84) + (rand() - 0.5) * 0.2;
-      const r = ISLAND_R * (0.5 + rand() * 0.22);
-      buildTree(world, cx + Math.cos(a) * r, (Math.sin(a) * r) / 1.25, 9 + Math.floor(rand() * 5), palette, rand);
+      // Along the back rim, so they frame the totem instead of standing in front of it.
+      const x = -64 + (t / (trees - 1)) * 128 + (rand() - 0.5) * 14;
+      const rim = Math.sqrt(Math.max(0, (ISLAND_R * 0.8) ** 2 - x * x)) / 1.25;
+      const z = -Math.max(34, rim - 4 - rand() * 8);
+      buildTree(world, cx + x, z, 9 + Math.floor(rand() * 5), palette, rand);
     }
     // Two props from the game on each island, in front and to the sides of the path.
     for (let n = 0; n < 2; n++) {
@@ -369,9 +374,12 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     for (let n = 0; n < 34; n++) {
       motes.add(stationX(i) + (rand() - 0.5) * 220, 12 + rand() * 110, (rand() - 0.5) * 150, 1.5 + rand() * 1.2, [1, 0.92, 0.5]);
     }
-    if (bird && i % 2 === 1) spriteVoxels(motes, bird, { x: stationX(i) - 70, y: 118 + rand() * 20, z: -30, maxDepth: 3 });
     moteRanges.push({ start, count: motes.count - start });
   }
+
+  // The game's blue bird circles above the islands: one rigid model, moved by its matrix.
+  const birdVox = new Voxels(rand);
+  if (bird) spriteVoxels(birdVox, bird, { y: -17, maxDepth: 3 });
 
   const roy = new Voxels(rand);
   const royRanges = new Map<string, Range>();
@@ -423,6 +431,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
   const buffers = {
     world: makeBuffer(world.toArray()), clouds: makeBuffer(clouds.toArray()), motes: makeBuffer(motes.toArray()),
     roy: makeBuffer(roy.toArray()), totems: makeBuffer(totemData), burst: makeBuffer(burst),
+    bird: makeBuffer(birdVox.toArray()),
   };
 
   const SHADOW = 2048;
@@ -445,7 +454,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
   // ── State ─────────────────────────────────────────────────────────────────────────────
   const forced = new URLSearchParams(window.location.search).get('q');
   /** 0 full, 1 lower resolution, 2 no shadows, 3 no motes or clouds. `?q=0` pins it (captures). */
-  let quality = forced !== null ? Number(forced) || 0 : 0;
+  let quality = forced !== null ? Number(forced) || 0 : window.innerWidth < 700 ? 1 : 0;
   let slowFrames = 0;
   let nightMix = document.documentElement.dataset.theme === 'night' ? 1 : 0;
   let nightTarget = nightMix;
@@ -457,7 +466,8 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
   let clock = 0;
   let pointer = { x: 0, y: 0 }, look = { x: 0, y: 0 };
   let camX = royRestX(0) + 30;
-  let jumpAt = -10;
+  // `?jump` with `?still` freezes Roy mid-jump, to check the pose and the burst in a capture.
+  let jumpAt = new URLSearchParams(window.location.search).has('jump') ? -0.35 : -10;
   let lastPos = 0, facing = 1, lastRoyX = royRestX(0);
   let dirty = true;
   let royScreen = { x: 0, y: 0, r: 0 };
@@ -570,18 +580,24 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     camX += (targetX - camX) * (opts.reducedMotion ? 1 : Math.min(1, dt * 6));
     const aspect = canvas.width / Math.max(1, canvas.height);
     const wide = aspect > 1.05;
-    const radius = wide ? 540 : 300 / Math.max(0.35, aspect);
-    const yaw = (animate ? Math.sin(clock * 0.17) * 0.05 : 0) + look.x * 0.32 - 0.12;
-    const pitch = 0.3 - look.y * 0.1;
+    // Opening shot: the camera swings in from far and wide during the first two seconds.
+    const intro = animate ? 1 - Math.min(1, clock / 2.2) : 0;
+    const swoop = intro * intro * (3 - 2 * intro);
+    // The hero frames Roy alone, a little closer; a station has to fit Roy and its totem.
+    const zoom = lerp(0.86, 1, Math.min(1, pos * 2));
+    const radius = (wide ? 540 : 350 / Math.max(0.35, aspect)) * zoom;
+    const dolly = radius * (1 + swoop * 0.9);
+    const yaw = (animate ? Math.sin(clock * 0.17) * 0.05 : 0) + look.x * 0.32 - 0.12 + swoop * 1.1;
+    const pitch = 0.3 - look.y * 0.1 + swoop * 0.35;
     const target: V3 = [camX, 44 + royY * 0.25, 0];
     const eye: V3 = [
-      target[0] + Math.sin(yaw) * Math.cos(pitch) * radius,
-      target[1] + Math.sin(pitch) * radius,
-      target[2] + Math.cos(yaw) * Math.cos(pitch) * radius,
+      target[0] + Math.sin(yaw) * Math.cos(pitch) * dolly,
+      target[1] + Math.sin(pitch) * dolly,
+      target[2] + Math.cos(yaw) * Math.cos(pitch) * dolly,
     ];
     const viewProj = mul(perspective(0.52, aspect, 20, 3000), lookAt(eye, target));
     // Desktop: the scene sits in the right half, beside the text. Phones: in the top part.
-    const shift: [number, number] = wide ? [0.36, 0.02] : [0, 0.42];
+    const shift: [number, number] = wide ? [0.36, 0.02] : [0, 0.48];
 
     const lightEye: V3 = [camX + LIGHT_DIR[0] * 600, LIGHT_DIR[1] * 600, LIGHT_DIR[2] * 600];
     const lightVP = mul(ortho(250, 50, 1300), lookAt(lightEye, [camX, 0, 0]));
@@ -590,7 +606,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     const bodyYaw = travelling ? (facing > 0 ? 0 : Math.PI) : look.x * 0.4;
     const royModel = trs(royX, royY, ROY_Z, bodyYaw, 1 / Math.sqrt(squash), squash);
     const none = ident();
-    const near = [i - 1, i, i + 1, i + 2].filter(n => n >= 0 && n < STATIONS);
+    const near = [i - 1, i, i + 1].filter(n => n >= 0 && n < STATIONS);
     const shadows = quality < 2;
 
     const drawScene = (prog: typeof main, forShadow: boolean) => {
@@ -600,7 +616,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
         gl.uniform1f(prog.u('uProgress'), progress);
       };
       const emissive = (v: number) => !forShadow && gl.uniform1f(prog.u('uEmissive'), v);
-      emissive(0);
+      emissive(DEBUG_SHADOW ? -1 : 0);
       set(0, none);
       for (const n of near) {
         bind(buffers.world, worldRanges[n].start, worldRanges[n].start);
@@ -613,10 +629,19 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
       set(1, none, q);
       bind(buffers.totems, i * totems.count, (i + 1) * totems.count);
       gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, totems.count);
+      if (birdVox.count > 0) {
+        // Clockwise around the island Roy is on; the sprite faces left, so it flies tail-first
+        // unless it is turned to follow the circle.
+        const a = clock * 0.45;
+        const home = camX - 30; // follows the camera, so it never pops from island to island
+        set(0, trs(home + Math.cos(a) * 118, 132 + Math.sin(a * 2.3) * 10, Math.sin(a) * 70 - 24, a, 1, 1));
+        bind(buffers.bird, 0, 0);
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, birdVox.count);
+      }
       if (forShadow) return;
       if (quality < 3) {
         set(0, none);
-        emissive(lerp(0.25, 0.0, nightMix));
+        emissive(lerp(0.75, 0.06, nightMix));
         bind(buffers.clouds, 0, 0);
         gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, clouds.count);
         set(2, none);
@@ -666,7 +691,7 @@ export async function createVoxelWorld(canvas: HTMLCanvasElement, opts: VoxelWor
     gl.useProgram(sky.p);
     gl.uniform3fv(sky.u('uTop'), theme.top);
     gl.uniform3fv(sky.u('uBottom'), theme.bottom);
-    gl.uniform3fv(sky.u('uOrb'), theme.orb.map(v => v * lerp(0.32, 0.8, nightMix)));
+    gl.uniform3fv(sky.u('uOrb'), theme.orb);
     gl.uniform2f(sky.u('uOrbAt'), wide ? 0.9 - look.x * 0.01 : 0.8, wide ? 0.82 : 0.9);
     gl.uniform2f(sky.u('uRes'), canvas.width, canvas.height);
     gl.uniform1f(sky.u('uNight'), nightMix);

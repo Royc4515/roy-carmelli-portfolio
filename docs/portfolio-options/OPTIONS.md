@@ -23,6 +23,15 @@ Blunt version:
 
 If you decide to keep the current design, that is defensible: it is the most memorable of the five and you already trimmed it. In that case take the four fixes from the new critique of the current site (section 5): one proof line on the first screen, two resume entry points instead of four, stop the desktop chat bubble covering card text, and collapse the side quests.
 
+## 1b. Round two: two showpieces (added 2026-11-17)
+
+Roy's verdict on A to D: competent and unremarkable; only D is acceptable, because it is the current site made smaller. He asked for something that amazes. Two more options were built for that, with the opposite brief: spectacle first, still a complete and accessible page underneath. Both are raw WebGL2 with no library, and both fall back to a normal page without WebGL and to a still scene under `prefers-reduced-motion`.
+
+- **E - Particles** (`/?option=e`): 64,000 GPU particles (30,000 on phones) form the name, then break apart and re-form into a shape for each part of the page as you scroll: a browser with a sidebar (Aside), a parachute (Nechita Raka, "soft landing"), a bottle and a glass, `</>`, a brain, a paper plane. Every particle's path is computed in the vertex shader, so the morph is scrubbed by the scroll position. The pointer pushes and curls the cloud, a tap sends a shock ring, and the cloud leans with the pointer (or with the phone itself on Android). About 10 kB of JavaScript gzip.
+- **F - Voxel Roy** (`/?option=f`): pixel Roy rebuilt in 3D from the real sprite frames, one cube per pixel, on floating islands coloured from the game's background. As you scroll he runs and jumps between islands while a swarm of cubes assembles each project's model in front of him. Real shadow mapping, day and night, tap him and he jumps. "Play Roy Runner" opens the real game.
+
+What is not known yet: both were only ever rendered here in software (no GPU), where a frame takes far longer than on a real device. Their motion, frame rate and battery cost on a real laptop and a real phone are untested; both shed quality when frames are slow (E draws fewer particles, F lowers resolution, then shadows, then decoration). They are not in the measurement table or the critic runs below, which cover A to D. In F, the `</>` model is hard to read at its camera angle, and on phones the panels cover most of the scene, so the show happens between them.
+
 ## 2. Measurements
 
 All from the same production build. "First screen" is what is visible without scrolling. A type style is a distinct font family, size and weight. Interactive elements are links, buttons and inputs. The review chip ("Options", bottom left) is excluded.
