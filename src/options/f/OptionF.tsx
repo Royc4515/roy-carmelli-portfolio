@@ -25,7 +25,7 @@ import {
   type Project,
 } from '../shared/content';
 import { useCopyEmail, useModalDialog, usePrefersReducedMotion } from '../shared/hooks';
-import { ArrowRight, ArrowUpRight, ArrowDown, Chat, Check, Close, Copy, Download, Mail, Play } from '../shared/icons';
+import { ArrowRight, ArrowUpRight, ArrowDown, Chat, Check, Close, Copy, Download, Github, Globe, Linkedin, Mail, Play } from '../shared/icons';
 import Arcade from '../d/Arcade';
 import { CHAT_ENABLED } from '../../components/Chat/ChatLauncher';
 import { AskRoy, Portrait } from './AskRoy';
@@ -91,13 +91,37 @@ function Scene({ ambience, paused, onState, worldRef }: {
   return <canvas ref={canvas} className="of-canvas" aria-hidden="true" />;
 }
 
-function External({ href, children, className = 'of-link' }: { href: string; children: ReactNode; className?: string }) {
+function External({ href, children, className = 'of-link', icon }: { href: string; children: ReactNode; className?: string; icon?: ReactNode }) {
   return (
     <a className={className} href={href} target="_blank" rel="noopener noreferrer">
+      {icon && <span className="of-link__lead" aria-hidden="true">{icon}</span>}
       {children}
       <ArrowUpRight className="of-link__icon" />
       <span className="opt-sr"> (opens in a new tab)</span>
     </a>
+  );
+}
+
+/** This site's own public repo (the portfolio card links it too). */
+const SITE_REPO = 'https://github.com/Royc4515/roy-carmelli-portfolio';
+// The visitor's year; main.tsx replaces the prerendered page rather than hydrating it, so no mismatch.
+const FOOTER_YEAR = new Date().getFullYear();
+
+/** GitHub and LinkedIn as icon buttons, named for screen readers. */
+function Social({ className }: { className: string }) {
+  return (
+    <ul className={className} aria-label="Profiles">
+      <li>
+        <a href={bio.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub profile (opens in a new tab)">
+          <Github />
+        </a>
+      </li>
+      <li>
+        <a href={bio.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile (opens in a new tab)">
+          <Linkedin />
+        </a>
+      </li>
+    </ul>
   );
 }
 
@@ -151,8 +175,8 @@ function ProjectStation({ project, index, onOpen }: { project: Project; index: n
           <span className="opt-sr">: {name}</span>
           <ArrowRight />
         </button>
-        {project.live && <External href={project.live}>Live</External>}
-        {project.github && <External href={project.github}>Source</External>}
+        {project.live && <External href={project.live} icon={<Globe />}>Live</External>}
+        {project.github && <External href={project.github} icon={<Github />}>Source</External>}
       </div>
     </Station>
   );
@@ -181,7 +205,7 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
           <p className="of-lede">{story.lead}</p>
           <div className="of-actions">
             {projectLinks(p).map(link => (
-              <External key={link.href} href={link.href}>{link.label}</External>
+              <External key={link.href} href={link.href} icon={link.href.includes('github.com') ? <Github /> : <Globe />}>{link.label}</External>
             ))}
           </div>
           {/* Rendered only while open, so lazy loading would only delay it. */}
@@ -225,7 +249,7 @@ function Row({ project }: { project: Project }) {
       </h3>
       <div className="of-row__links">
         {project.live && <External href={project.live}>Live<span className="opt-sr">: {name}</span></External>}
-        {project.github && <External href={project.github}>Source<span className="opt-sr">: {name}</span></External>}
+        {project.github && <External href={project.github} icon={<Github />}>Source<span className="opt-sr">: {name}</span></External>}
       </div>
       <p className="of-row__text">{project.tagline}</p>
     </li>
@@ -337,6 +361,9 @@ export default function OptionF({ live = false }: { live?: boolean }) {
   // in the sky they chose. `data-theme` is the attribute the option's tokens key on.
   useEffect(() => {
     document.documentElement.dataset.theme = info.dark ? 'night' : 'day';
+    // The phone's browser bar follows too (index.html starts it on the day sky). A meta tag
+    // takes a colour string, not a CSS token, so the two skies are spelled out here.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', info.dark ? '#0f1a33' : '#3a84e6');
   }, [info.dark]);
 
   return (
@@ -357,6 +384,7 @@ export default function OptionF({ live = false }: { live?: boolean }) {
                 <li><a href="#contact">Contact</a></li>
               </ul>
             </nav>
+            <Social className="of-social of-social--nav" />
           </div>
         </header>
         <AmbienceLine info={info} mode={mode} onMode={setMode} />
@@ -383,7 +411,10 @@ export default function OptionF({ live = false }: { live?: boolean }) {
                   Email me
                 </a>
               </div>
-              <p className="of-meta">{bio.resume.meta}</p>
+              <div className="of-hero-foot">
+                <p className="of-meta">{bio.resume.meta}</p>
+                <Social className="of-social" />
+              </div>
               {CHAT_ENABLED && (
                 <button type="button" className="of-ask-cta" onClick={() => setAsking(true)}>
                   <span className="of-ask-cta__me">
@@ -463,16 +494,33 @@ export default function OptionF({ live = false }: { live?: boolean }) {
             <span className="opt-sr" role="status">
               {copyState === 'copied' ? 'Email address copied' : copyState === 'failed' ? 'Copy failed. Use the email link instead.' : ''}
             </span>
-            <div className="of-actions">
-              <External href={bio.github}>{GITHUB_HANDLE}</External>
-              <External href={bio.linkedin}>{LINKEDIN_HANDLE}</External>
-            </div>
+            <ul className="of-profiles">
+              <li>
+                <External href={bio.github} className="of-profile" icon={<Github />}>
+                  <span className="of-profile__site">GitHub</span>
+                  <span className="of-profile__handle">{GITHUB_HANDLE.replace(/^github\.com\//, '@')}</span>
+                </External>
+              </li>
+              <li>
+                <External href={bio.linkedin} className="of-profile" icon={<Linkedin />}>
+                  <span className="of-profile__site">LinkedIn</span>
+                  <span className="of-profile__handle">{LINKEDIN_HANDLE.replace(/^linkedin\.com\/in\//, '/in/')}</span>
+                </External>
+              </li>
+            </ul>
           </Station>
         </main>
 
         <footer className="of-footer" data-solid="">
-          <span>{bio.name}</span>
-          <span lang="he" dir="rtl">{bio.nameHe}</span>
+          <div className="of-footer__who">
+            <span>&copy; {FOOTER_YEAR} {bio.name}</span>
+            <span lang="he" dir="rtl">{bio.nameHe}</span>
+          </div>
+          <p className="of-footer__made">
+            Built with React, TypeScript and raw WebGL2.{' '}
+            <External href={SITE_REPO} icon={<Github />}>View the source</External>
+          </p>
+          <Social className="of-social" />
         </footer>
 
         {/* The scene's own controls: stop the motion, poke Roy, or play the real game. */}

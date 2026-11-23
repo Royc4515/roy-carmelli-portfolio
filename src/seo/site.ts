@@ -21,12 +21,14 @@ export const SITE_DESCRIPTION =
   `Third-year Computer Science & Neuroscience student at ${bio.institution}. ` +
   'I build AI agents and full-stack web apps. Open to part-time student positions in Israel.';
 
-/** 1200x630 share card in public/. */
+/** 1200x630 share card in public/: the live hero, rendered from the page itself. */
 export const OG_IMAGE = {
-  url: `${SITE_URL}/og-image.png`,
+  // A new file name, not a new file under the old one: WhatsApp, LinkedIn and X cache a share
+  // image by its URL, so only a new URL makes them show the current design.
+  url: `${SITE_URL}/og-card.jpg`,
   width: 1200,
   height: 630,
-  alt: `${bio.name}'s pixel-art portfolio title screen: ${bio.role}, standing in a forest`,
+  alt: `${bio.name}, ${bio.role}: his voxel figure waving on a floating island beside his name`,
 } as const;
 
 /** Absolute URL for a site path ("/" or "/Roy_Carmelli_CV.pdf"). */
