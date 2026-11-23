@@ -1639,3 +1639,150 @@ main,
     border-radius: 14px;
   }
 }
+
+/* ── The small things: brand marks, profiles, footer ──────────────────────── */
+/* A leading mark (GitHub, globe) before a link's text. The underline starts after it, so it
+   reads as one link with a label, not an underlined icon. */
+.of-link__lead {
+  display: inline-grid;
+  font-size: 1em;
+  opacity: 0.9;
+}
+.of-link:has(.of-link__lead) {
+  background-position: calc(0.25rem + 1em + 0.3rem) calc(100% - 0.6rem);
+  background-size: calc(100% - 2.9rem) 1.5px;
+}
+
+/* Icon buttons for the profiles: round, quiet, the accent only on hover. */
+.of-social {
+  display: flex;
+  gap: 0.25rem;
+}
+.of-social a {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  color: var(--of-soft);
+  transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+.of-social a:hover {
+  color: var(--of-accent);
+  background: var(--of-rule);
+}
+.of-social a:active {
+  transform: scale(0.94);
+}
+.of-social--nav {
+  display: none;
+  margin-left: 0.25rem;
+  padding-left: 0.25rem;
+  border-left: 1px solid var(--of-rule);
+}
+.of-social--nav a {
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+}
+@media (min-width: 60rem) {
+  .of-social--nav {
+    display: flex;
+  }
+}
+
+/* The hero's last line: the resume's facts on the left, the profiles on the right. */
+.of-hero-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.of-hero-foot .of-meta {
+  margin-top: 0;
+}
+
+/* Contact: each profile as a card with its mark, the site and the handle. */
+.of-profiles {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.5rem;
+}
+.of-link.of-profile,
+.of-profile {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0 0.75rem;
+  width: 100%;
+  min-height: 60px;
+  padding: 0.625rem 0.875rem;
+  border-radius: 16px;
+  border: 1px solid var(--of-rule);
+  background: color-mix(in oklch, var(--of-panel-solid) 60%, transparent);
+  color: var(--of-ink) !important;
+  font-weight: 600;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.of-profile:hover {
+  border-color: var(--of-accent);
+  background: var(--of-panel-solid);
+}
+.of-profile .of-link__lead {
+  grid-row: span 2;
+  font-size: 1.5rem;
+  color: var(--of-accent);
+}
+.of-profile .of-link__icon {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+  color: var(--of-soft);
+}
+.of-profile__site {
+  font-size: 0.9375rem;
+  line-height: 1.2;
+}
+.of-profile__handle {
+  grid-column: 2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--of-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--of-soft);
+}
+
+/* Footer: who and the profiles on one row, how it was made (with its source) under them. */
+.of-footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.25rem 1rem;
+}
+.of-footer > .of-social {
+  grid-column: 2;
+  grid-row: 1;
+  margin-right: -0.625rem;
+}
+.of-footer__made {
+  grid-column: 1 / -1;
+}
+.of-footer__who {
+  display: flex;
+  gap: 0.75rem;
+  color: var(--of-ink);
+  font-weight: 600;
+}
+.of-footer__made {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.5rem;
+}
+.of-footer__made .of-link {
+  font-size: 0.875rem;
+}
