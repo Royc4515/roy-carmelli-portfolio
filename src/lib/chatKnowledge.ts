@@ -34,6 +34,14 @@ interface GithubRepo {
 
 export const SITE_URL = 'https://roy-carmelli-portfolio.vercel.app';
 
+/**
+ * Where a project lives on the live page (option F): a main project has its own station, the rest
+ * share the "More work" panel. The old `#projects` id exists only on the classic site.
+ */
+export function projectAnchor(p: Pick<Project, 'id' | 'tier'>): string {
+  return `${SITE_URL}/#${p.tier === 'main' ? `project-${p.id}` : 'more'}`;
+}
+
 /** Same wording as the rest of the site; no em dashes reach the model's examples. */
 const plain = (text: string) => text.replace(/[–—]/g, '-').replace(/⁠/g, '').replace(/\s+/g, ' ').trim();
 
@@ -58,7 +66,7 @@ function projectChunk(p: Project, repo: GithubRepo | undefined) {
     id: `site:project:${p.id}`,
     source: 'site' as const,
     title: plain(p.title),
-    url: p.live ?? p.github ?? `${SITE_URL}/#projects`,
+    url: p.live ?? p.github ?? projectAnchor(p),
     text: lines.filter(Boolean).join('\n'),
     keywords: [...new Set([p.id, ...words(p.title), ...words(p.kind), ...p.tech.flatMap(words), ...(repo ? [repo.name.toLowerCase(), ...words(repo.name.replace(/[-_]/g, ' '))] : [])])],
   };

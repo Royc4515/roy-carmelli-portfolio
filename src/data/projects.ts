@@ -1,6 +1,9 @@
 // src/data/projects.ts
 import type { Project } from '../types/index';
 
+/** Shown where the code link would be when a project has no public repo (classic card, live-page row). */
+export const PRIVATE_REPO_NOTE = 'Private repo · code on request';
+
 export const projects: Project[] = [
   {
     id: "nechita-raka",
@@ -56,11 +59,11 @@ export const projects: Project[] = [
   // ───────────── Side quests ─────────────
   {
     id: "leet-for-berger",
-    kind: "Coding practice platform",
+    kind: "Coding practice site",
     tier: "side",
     tagline: "LeetCode-style interview practice: 225 problems, 8 languages plus SQL, each answer judged on 15 tests in the browser or on a runner I host.",
     title: "Leet-For-Berger - Interview Practice Platform",
-    description: "Leet-For-Berger is a free LeetCode-style practice site for students and developers preparing for coding interviews, a solo static app in vanilla JavaScript on GitHub Pages with a Supabase backend and a self-hosted code runner. Pick one of 225 problems, write a solution in Python, JavaScript, TypeScript, Java, C++, C, C# or Go (SQL for the database problems) in a Monaco editor, and it is judged on exactly 15 tests: 5 visible with full detail, 10 hidden that report only pass or fail, each under a time limit. JavaScript, TypeScript and Python run in Web Workers in the page (Python on Pyodide, SQL on sql.js), with a watchdog per test so an infinite loop costs a worker, not the tab. Java, C++, C, C# and Go go through a Cloudflare Worker (origin allowlist, size cap, per-IP rate limit) to Piston on a free Oracle VM, and the output is judged back in the page: the code under test never sees the expected answers. CI runs every shipped solution in every language against its 15 tests. Around the judge: a zoomable map of 26 topics, a 131-problem learning path, practice sets by company (Israeli ones included), a daily quiz in English and Hebrew with a leaderboard, and an interview simulator. Google or GitHub sign-in (Supabase, row-level security) syncs progress across devices and can push accepted solutions to your own GitHub repo. Over 2,100 unit tests and a Playwright smoke test that fails on any console error. I build it with Claude Code: I set the rules (10 ADRs, a list of invariants) and review and merge every pull request myself.",
+    description: "Leet-For-Berger is a free LeetCode-style practice site for students and developers preparing for coding interviews, a solo static app in vanilla JavaScript on GitHub Pages with a Supabase backend and a self-hosted code runner. Pick one of 225 problems, write a solution in Python, JavaScript, TypeScript, Java, C++, C, C# or Go (SQL for the database problems) in a Monaco editor, and it is judged on exactly 15 tests: 5 visible with full detail, 10 hidden that report only pass or fail, each under a time limit. JavaScript, TypeScript and Python run in Web Workers in the page (Python on Pyodide, SQL on sql.js), with a watchdog per test so an infinite loop costs a worker, not the tab. Java, C++, C, C# and Go go through a Cloudflare Worker (origin allowlist, size cap, per-IP rate limit) to Piston on a free Oracle VM, and the output is judged back in the page: the code under test never sees the expected answers. CI runs every shipped solution in every language against its 15 tests. Around the judge: a zoomable map of 26 topics, a 131-problem learning path, practice sets by company (Israeli ones included), a daily quiz in English and Hebrew with a leaderboard, and an interview simulator. Google or GitHub sign-in (Supabase, row-level security) syncs progress across devices and can push accepted solutions to your own GitHub repo. Over 2,100 unit tests and a Playwright smoke test that fails on any console error. I build it with Claude Code agents: its decisions are written down as 10 ADRs and a list of invariants every change must keep, and I review and merge every pull request myself.",
     tech: ["JavaScript", "Web Workers", "Monaco Editor", "Pyodide", "sql.js", "Cloudflare Workers", "Piston", "Docker", "Supabase", "PostgreSQL", "Edge Functions", "Playwright", "GitHub Actions", "GitHub Pages", "Hebrew / RTL"],
     github: "https://github.com/Royc4515/leet-for-berger",
     live: "https://royc4515.github.io/leet-for-berger/",
@@ -74,7 +77,7 @@ export const projects: Project[] = [
     tagline: "My own wardrobe app: AI tags each garment from one photo, and an engine plus Claude pick the day's outfit for the weather and Shabbat.",
     title: "Fit Check - AI Wardrobe Stylist",
     description: "Fit Check is a wardrobe and styling app I built for myself in TypeScript with Expo (React Native) and Supabase, Hebrew first, running as a web app on Vercel. A photo of a few garments goes to Supabase Edge Functions (Deno): Gemini finds each garment and, on request, redraws it as a clean product photo, and Claude Haiku tags it against a fixed zod schema. A pure TypeScript engine filters the wardrobe by weather, laundry and the day's rules (Shabbat times from Hebcal) and scores outfits on colour, formality and pair weights learned from what I wear, save or dislike. Claude Sonnet gets at most 8 candidates, never the whole wardrobe, picks one and explains it; if its answer fails validation, the top-scored outfit shows instead. It is also an MCP server: Claude connects over OAuth 2.1 and gets 17 tools to search, edit and log the wardrobe. Every AI call is logged with its cost, paid Google calls stop at a monthly cap in code, and every table has row-level security. When images ran Supabase's free egress to 42.77 GB of a 5 GB quota and the project was restricted, I traced five causes, fixed them (one-year cache headers, grid thumbnails, throttled reloads) and moved the images to Cloudflare R2. 884 tests (Vitest and Deno) cover the engine, schemas, app logic and functions. I build it with Claude Code agents: a lead agent writes the specs and delegates each task, and an agent that did not write a change verifies it. Still in development; the repo is private, and I can share it on request.",
-    tech: ["TypeScript", "React Native", "Expo", "Supabase", "PostgreSQL", "Deno", "Claude API", "Gemini API", "MCP", "OAuth 2.1", "Zod", "Vitest", "Cloudflare R2", "Vercel", "Hebrew / RTL"],
+    tech: ["TypeScript", "React Native", "Claude API", "MCP", "Supabase", "Expo", "PostgreSQL", "Deno", "Gemini API", "OAuth 2.1", "Zod", "Vitest", "Cloudflare R2", "Vercel", "Hebrew / RTL"],
     year: 2026,
   },
   {

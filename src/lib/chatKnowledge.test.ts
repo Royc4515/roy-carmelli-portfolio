@@ -1,5 +1,5 @@
 import { bio } from '../data/bio';
-import { buildChatKnowledge, renderKnowledgeModule } from './chatKnowledge';
+import { buildChatKnowledge, projectAnchor, renderKnowledgeModule, SITE_URL } from './chatKnowledge';
 
 const knowledge = buildChatKnowledge();
 const everything = JSON.stringify(knowledge);
@@ -52,6 +52,13 @@ describe('chat knowledge', () => {
     for (const chunk of knowledge.chunks) {
       if (chunk.url) expect(knowledge.allowedUrlPrefixes.some(p => chunk.url!.startsWith(p)), chunk.url).toBe(true);
     }
+  });
+
+  it('links a project with no live site or repo to its section of the live page', () => {
+    expect(projectAnchor({ id: 'x', tier: 'side' })).toBe(`${SITE_URL}/#more`);
+    expect(projectAnchor({ id: 'x', tier: 'research' })).toBe(`${SITE_URL}/#more`);
+    expect(projectAnchor({ id: 'x', tier: 'main' })).toBe(`${SITE_URL}/#project-x`);
+    for (const chunk of knowledge.chunks) expect(chunk.url ?? '', chunk.id).not.toMatch(/#projects$/);
   });
 
   it('folds a repo behind a site card into that card instead of using its README', () => {

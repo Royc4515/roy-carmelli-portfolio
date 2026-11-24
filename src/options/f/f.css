@@ -129,6 +129,7 @@ main,
 .of-meta,
 .of-status,
 .of-row__kind,
+.of-row__note,
 .of-facts dt {
   font-family: var(--of-mono);
   font-size: 0.8125rem;

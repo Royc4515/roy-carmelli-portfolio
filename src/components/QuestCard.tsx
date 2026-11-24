@@ -1,5 +1,6 @@
 import { Fragment, useState, type CSSProperties } from 'react';
 import type { Project } from '../types/index';
+import { PRIVATE_REPO_NOTE } from '../data/projects';
 import PixelPanel from './PixelPanel';
 import PixelIcon from './PixelIcon';
 import ItemSprite, { itemForProject, type ItemScale } from './ItemSprite';
@@ -111,8 +112,7 @@ export function metaLine({ kind, year }: Pick<Project, 'kind' | 'year'>): string
 
 type Surface = 'paper' | 'wood';
 
-/** Shown in place of the Code button when a project has no public repo. */
-export const PRIVATE_REPO_NOTE = 'Private repo · code on request';
+export { PRIVATE_REPO_NOTE };
 
 /** Tech chips shown before the `+N` chip, on every quest card. */
 const CHIP_MAX = 4;

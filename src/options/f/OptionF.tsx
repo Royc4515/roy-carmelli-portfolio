@@ -32,6 +32,7 @@ import { AskRoy, Portrait } from './AskRoy';
 import { frameSection } from './frame';
 import { MobileBar } from './MobileBar';
 import { chatPersona } from '../../data/chatPersona';
+import { PRIVATE_REPO_NOTE } from '../../data/projects';
 import type { VoxelWorld } from './engine';
 import { useAmbience, type Ambience, type SkyMode } from './ambience';
 import { AmbienceLine } from './AmbienceLine';
@@ -250,6 +251,8 @@ function Row({ project }: { project: Project }) {
       <div className="of-row__links">
         {project.live && <External href={project.live}>Live<span className="opt-sr">: {name}</span></External>}
         {project.github && <External href={project.github} icon={<Github />}>Source<span className="opt-sr">: {name}</span></External>}
+        {/* An empty slot reads as a missing link; say why there is none. */}
+        {!project.live && !project.github && <span className="of-row__note">{PRIVATE_REPO_NOTE}</span>}
       </div>
       <p className="of-row__text">{project.tagline}</p>
     </li>

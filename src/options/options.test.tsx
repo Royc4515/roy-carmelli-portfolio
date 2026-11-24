@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import { AppProviders } from '../AppProviders';
-import { bio, mainProjects, splitTitle, sentences, storyParagraphs, DEGREE } from './shared/content';
+import { bio, mainProjects, sideProjects, splitTitle, sentences, storyParagraphs, DEGREE } from './shared/content';
+import { PRIVATE_REPO_NOTE } from '../data/projects';
 import { readOptionRoute, OPTION_KEYS } from './route';
 import { OPTIONS } from './registry';
 import Chooser from './Chooser';
@@ -119,5 +120,26 @@ describe.each(OPTION_KEYS)('option %s', key => {
     for (const a of container.querySelectorAll('a[target="_blank"]')) {
       expect(a.getAttribute('rel') ?? '').toMatch(/noopener/);
     }
+  });
+});
+
+describe('option F side projects', () => {
+  it('says why a row has no link, and only then', () => {
+    render(
+      <AppProviders>
+        <OptionF />
+      </AppProviders>,
+    );
+    // The chat links projects without a site or repo here (chatKnowledge.projectAnchor).
+    expect(document.getElementById('more')).not.toBeNull();
+    const rows = [...document.querySelectorAll<HTMLElement>('#more .of-row')];
+    for (const project of sideProjects) {
+      const { name } = splitTitle(project.title);
+      const row = rows.find(r => r.querySelector('.of-row__name')?.textContent === name);
+      expect(row, project.id).toBeDefined();
+      const linkless = !project.live && !project.github;
+      expect(within(row!).queryByText(PRIVATE_REPO_NOTE) !== null, project.id).toBe(linkless);
+    }
+    expect(sideProjects.some(p => !p.live && !p.github)).toBe(true);
   });
 });
