@@ -31,7 +31,7 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 ## Commands
 - `npm install` (or `npm ci`) - verified.
 - `npm run dev` - Vite dev server on port 5173 (unverified here).
-- `npm test` - `vitest run`; verified: 64 files / 865 tests pass (the `api/_tests` files run in the node environment). jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
+- `npm test` - `vitest run`; verified: 67 files / 886 tests pass (the `api/_tests` files run in the node environment). jsdom logs "getContext() not implemented" warnings for the canvas; they are expected, not failures.
 - `npm run build` - `tsc -b && vite build`, then `vite build --ssr src/entry-server.tsx` and `node scripts/seo/prerender.mjs` (writes the rendered page, JSON-LD, sitemap.xml and llms.txt into `dist/`); verified. `tsc -b` also typechecks `api/` (its own `api/tsconfig.json`). Check what crawlers see with `npm run build && npx vite preview`, then `curl localhost:4173`.
 - `vercel dev` - runs the site with the `/api` functions locally (needs `vercel link` + `vercel env pull`; unverified here). Plain `npm run dev` has no `/api`.
 - `npm run test:coverage` - v8 coverage (unverified).

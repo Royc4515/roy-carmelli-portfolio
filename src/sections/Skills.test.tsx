@@ -90,8 +90,8 @@ describe('Skills (equipment screen)', () => {
     expect(within(tip).getByText('Languages')).toBeInTheDocument();
     expect(tip).toHaveTextContent(/Used in/i);
     const used = within(tip).getAllByRole('listitem').map(li => li.textContent);
-    expect(used).toEqual(['Nechita Raka,', 'Aside,', 'Groupie,', 'White Matter Tracts Game']);
-    expect(js).toHaveAccessibleDescription(/Used in: Nechita Raka, Aside, Groupie, White Matter Tracts Game/);
+    expect(used).toEqual(['Nechita Raka,', 'Aside,', 'Leet-For-Berger,', 'Groupie,', 'White Matter Tracts Game']);
+    expect(js).toHaveAccessibleDescription(/Used in: Nechita Raka, Aside, Leet-For-Berger, Groupie, White Matter Tracts Game/);
 
     // Keyboard focus leaving the grid takes its description with it.
     act(() => js.blur());
@@ -114,7 +114,7 @@ describe('Skills (equipment screen)', () => {
     expect(tip).toHaveTextContent('Studied in coursework');
     expect(tip).not.toHaveTextContent(/Used in/i);
 
-    act(() => item('MCP').focus());
+    act(() => item('Claude Code').focus());
     tip = screen.getByRole('tooltip');
     expect(tip).toHaveTextContent('AI & Agents');
     expect(tip).not.toHaveTextContent(/Used in/i);
@@ -395,7 +395,7 @@ describe('Skills on mobile (< 768px)', () => {
     expect(row).toHaveTextContent('CLR');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     // The hidden tooltip still describes the item for assistive tech.
-    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Wine Sommelier Bot, Groupie, Personal Portfolio, CLR/);
+    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Wine Sommelier Bot, Fit Check, Groupie, Personal Portfolio, CLR/);
 
     await user.click(item('Vercel'));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();
