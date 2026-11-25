@@ -86,12 +86,15 @@ describe('projectsUsing (real data)', () => {
       'signal-processing',
     ]);
     expect(ids('TypeScript')).toEqual(['fit-check', 'clr']);
+    expect(ids('C/C++')).toEqual(['wolt-clone']);
+    expect(ids('AI agents')).toEqual(['fit-check', 'sommelier-bot']);
+    expect(ids('Claude Code')).toEqual(['nechita-raka', 'fit-check', 'leet-for-berger']);
     expect(ids('JavaScript')).toEqual(['nechita-raka', 'ai-sidebar', 'leet-for-berger', 'groupie', 'white-matter-game']);
     expect(ids('MCP')).toEqual(['fit-check']);
   });
 
   it('normalizes versions: React 19 and Java 17', () => {
-    expect(ids('React')).toEqual(['career-predictor', 'clr', 'wolt-clone']);
+    expect(ids('React')).toEqual(['wolt-clone', 'career-predictor', 'clr']);
     expect(ids('Java 17')).toEqual(['arkanoid-game']);
   });
 
@@ -99,14 +102,13 @@ describe('projectsUsing (real data)', () => {
     expect(ids('Tailwind CSS')).toEqual(['career-predictor']);
     expect(ids('Telegram Bot API')).toEqual(['sommelier-bot', 'clr']);
     expect(ids('Google OAuth')).toEqual(['career-predictor']);
-    expect(ids('Claude API')).toEqual(['ai-sidebar', 'fit-check']);
-    expect(ids('Node.js')).toEqual(['nechita-raka', 'career-predictor', 'wolt-clone']);
+    expect(ids('Claude API')).toEqual(['fit-check', 'ai-sidebar']);
+    expect(ids('Node.js')).toEqual(['nechita-raka', 'wolt-clone', 'career-predictor']);
   });
 
   it('returns nothing for skills no project lists', () => {
     expect(ids('C')).toEqual([]);
     expect(ids('x86 Assembly')).toEqual([]);
-    expect(ids('Claude Code')).toEqual([]);
     expect(ids('Algorithms')).toEqual([]);
     expect(ids('Git')).toEqual([]);
     expect(ids('Claude Code 101')).toEqual([]);
@@ -156,10 +158,11 @@ describe('skillDetail', () => {
       'Studied in coursework',
     );
     expect(skillDetail('OOP', group('CS Foundations'), projects).note).toBeNull();
-    const claudeCode = skillDetail('Claude Code', group('AI & Agents'), projects);
-    expect(claudeCode.usedIn).toEqual([]);
-    expect(claudeCode.note).toBeNull();
-    expect(skillDetail('Git', group('Tools & Platforms'), projects).note).toBeNull();
+    const openAi = skillDetail('OpenAI API', group('AI & Agents'), projects);
+    expect(openAi.usedIn).toEqual(['Aside']);
+    const git = skillDetail('Git', group('Testing & Tools'), projects);
+    expect(git.usedIn).toEqual([]);
+    expect(git.note).toBeNull();
   });
 
   it('says "Certificate earned" for certifications no project lists', () => {

@@ -102,7 +102,7 @@ export function buildChatKnowledge(): ChatKnowledge {
   const core = [
     `Name: ${bio.name} (Hebrew: ${bio.nameHe}).`,
     `Headline: ${bio.role}. ${plain(bio.title)}.`,
-    `Studies: third-year B.Sc. student at ${linkedin.education.school}, dual major in Computer Science and Neuroscience, ${linkedin.education.period}.`,
+    `Studies: third-year B.Sc. student in the honors program at ${linkedin.education.school}, dual major in Computer Science and Neuroscience, ${linkedin.education.period}. ${bio.research}.`,
     `Looking for: ${plain(bio.contactBlurb)}`,
     'Based in: central Israel.',
     `Military service: ${linkedin.service.role}. ${linkedin.service.period}.`,

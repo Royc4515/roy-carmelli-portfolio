@@ -8,9 +8,9 @@ import { pixelSprites } from '../theme/pixelSprites';
 const AT_A_GLANCE: Array<[string, string]> = [
   ['Degree', 'B.Sc. Computer Science & Neuroscience (dual major)'],
   ['University', 'Bar-Ilan University'],
-  ['Year', '3rd year · expected graduation Feb 2028'],
+  ['Year', '3rd year · honors program · graduating Feb 2028'],
   ['GPA', '85.09 / 100'],
-  ['Open to', 'Student & intern roles: full-stack, frontend, AI'],
+  ['Open to', 'Student roles, 2-3 days a week: full-stack, AI'],
 ];
 
 describe('About', () => {
@@ -85,7 +85,7 @@ describe('About', () => {
     // The service record is not framed as a game achievement or a character sheet.
     expect(screen.queryByText(/achievement|character sheet/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText((_, el) => el?.textContent === 'Battalion medic · led a unit from 12 to 30+'),
+      screen.getByText((_, el) => el?.textContent === 'Senior battalion medic · led a unit from 12 to 30+'),
     ).toBeInTheDocument();
     // The claim must stay backed by the bio text.
     expect(bio.about).toMatch(/battalion medic/);

@@ -2,7 +2,7 @@
 //
 // Roy's public LinkedIn profile (from its "Save to PDF" export, Oct 2026), curated for the chat
 // agent's knowledge. Not rendered on the page. Where LinkedIn and the site disagree, the site
-// wins (Roy's call): the IDF role uses the site's wording, the team size is "about 30", and the
+// wins (Roy's call): the IDF role uses the site's wording, the team size follows the CV ("30+"), and the
 // location stays at "central Israel" rather than the city. Contact lines are left out on purpose.
 
 export const linkedin = {
@@ -26,14 +26,14 @@ export const linkedin = {
   service: {
     org: "Israel Defense Forces",
     /** don't touch / repo rule: describe the role this way, never as "combat medic". */
-    role: 'Battalion medic (חוג"ד) and medical coordinator in the Gaza Division, an operational support role',
+    role: 'Senior battalion medic (חוג"ד) and medical officer coordinator in the Gaza Division, an operational support role',
     /** LinkedIn's own title; the chat uses it only when someone asks about his title. */
     linkedinTitle: "Senior Medical Operations Commander",
-    period: "Regular service from 2021; active reservist since August 2024",
+    period: "Regular service 2021 - August 2024; reservist since, with 400+ days of reserve duty alongside full-time studies",
     points: [
-      "Led a medical unit as it grew from 12 to about 30 people at the start of the war, during high-intensity operations.",
+      "Led a medical unit as it grew from 12 to 30+ people at the start of the war, during high-intensity operations.",
       "Ran real-time medical logistics and evacuation coordination in the Gaza Division war room, between field units and senior command.",
-      "Made time-critical triage and evacuation calls in mass-casualty events.",
+      "Led the medical response in mass-casualty events, making time-critical triage and evacuation calls.",
       "As clinic commander, ran routine clinic operations and staff to keep the division ready.",
     ],
   },

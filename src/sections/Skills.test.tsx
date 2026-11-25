@@ -114,15 +114,11 @@ describe('Skills (equipment screen)', () => {
     expect(tip).toHaveTextContent('Studied in coursework');
     expect(tip).not.toHaveTextContent(/Used in/i);
 
-    act(() => item('Claude Code').focus());
+    act(() => item('Git').focus());
     tip = screen.getByRole('tooltip');
-    expect(tip).toHaveTextContent('AI & Agents');
+    expect(tip).toHaveTextContent('Testing & Tools');
     expect(tip).not.toHaveTextContent(/Used in/i);
     expect(tip).not.toHaveTextContent(/coursework/i);
-
-    act(() => item('C').focus());
-    tip = screen.getByRole('tooltip');
-    expect(tip).not.toHaveTextContent(/Used in/i);
   });
 
   it('opens on hover and stays after the pointer leaves, so it can travel to the strip', async () => {
@@ -130,16 +126,16 @@ describe('Skills (equipment screen)', () => {
     render(<Skills />);
 
     await user.hover(item('Python'));
-    expect(screen.getByRole('tooltip')).toHaveTextContent('Wine Sommelier Bot');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Sommelier Bot');
     await user.unhover(item('Python'));
-    expect(screen.getByRole('tooltip')).toHaveTextContent('Wine Sommelier Bot');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Sommelier Bot');
     expect(item('Python')).toHaveAttribute('data-open');
 
     // Another item replaces it; only one description shows at a time.
-    await user.hover(item('Vite'));
+    await user.hover(item('Vitest'));
     expect(screen.getAllByRole('tooltip')).toHaveLength(1);
-    expect(screen.getByRole('tooltip')).toHaveTextContent('Vite');
-    expect(item('Vite')).toHaveAttribute('data-open');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Vitest');
+    expect(item('Vitest')).toHaveAttribute('data-open');
     expect(item('Python')).not.toHaveAttribute('data-open');
   });
 
@@ -147,11 +143,11 @@ describe('Skills (equipment screen)', () => {
     const user = userEvent.setup();
     render(<Skills />);
 
-    await user.hover(item('Vite'));
+    await user.hover(item('Vitest'));
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
-    await user.hover(item('Vite'));
+    await user.hover(item('Vitest'));
     fireEvent.pointerDown(document.body);
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
@@ -182,8 +178,8 @@ describe('Skills (equipment screen)', () => {
     render(<Skills />);
 
     await user.tab();
-    expect(item('Java 17')).toHaveFocus();
-    expect(screen.getByRole('tooltip')).toHaveTextContent('Arkanoid');
+    expect(item('Python')).toHaveFocus();
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Sommelier Bot');
 
     await user.keyboard('{Enter}');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
@@ -192,7 +188,7 @@ describe('Skills (equipment screen)', () => {
 
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-    expect(item('Java 17')).toHaveFocus();
+    expect(item('Python')).toHaveFocus();
   });
 
   it('renders the Character once, at x3 from 1024px', () => {
@@ -263,7 +259,7 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     render(<Skills />);
     const total = skills.reduce((n, g) => n + g.items.length, 0);
     expect(allItems()).toHaveLength(total);
-    expect(tabStops()).toEqual([item('Java 17')]);
+    expect(tabStops()).toEqual([item('Python')]);
     expect(allItems().filter(b => b.tabIndex === -1)).toHaveLength(total - 1);
   });
 
@@ -273,17 +269,17 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     act(() => screen.getByRole('button', { name: 'Before' }).focus());
 
     await user.tab();
-    expect(item('Java 17')).toHaveFocus();
+    expect(item('Python')).toHaveFocus();
     await user.keyboard('{ArrowRight}{ArrowRight}');
-    expect(item('C')).toHaveFocus();
-    expect(tabStops()).toEqual([item('C')]);
+    expect(item('JavaScript')).toHaveFocus();
+    expect(tabStops()).toEqual([item('JavaScript')]);
 
     await user.tab();
     expect(screen.getByRole('button', { name: 'After' })).toHaveFocus();
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
     await user.tab({ shift: true });
-    expect(item('C')).toHaveFocus();
+    expect(item('JavaScript')).toHaveFocus();
     await user.tab({ shift: true });
     expect(screen.getByRole('button', { name: 'Before' })).toHaveFocus();
   });
@@ -294,25 +290,25 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     await user.tab();
 
     await user.keyboard('{ArrowRight}');
-    expect(item('Python')).toHaveFocus();
+    expect(item('TypeScript')).toHaveFocus();
     expect(screen.getAllByRole('tooltip')).toHaveLength(1);
-    expect(tip()).toHaveTextContent('Wine Sommelier Bot');
-    expect(item('Python')).toHaveAttribute('aria-describedby', tip().id);
+    expect(tip()).toHaveTextContent('Fit Check');
+    expect(item('TypeScript')).toHaveAttribute('aria-describedby', tip().id);
 
     await user.keyboard('{ArrowDown}'); // Armor, same column
     expect(item('Node.js')).toHaveFocus();
     expect(tip()).toHaveTextContent('Web & Full-Stack');
     await user.keyboard('{ArrowUp}');
-    expect(item('Python')).toHaveFocus();
+    expect(item('TypeScript')).toHaveFocus();
 
     await user.keyboard('{End}');
-    expect(item('x86 Assembly')).toHaveFocus();
+    expect(item('C/C++')).toHaveFocus();
     await user.keyboard('{ArrowRight}'); // end of the slot: stays
-    expect(item('x86 Assembly')).toHaveFocus();
+    expect(item('C/C++')).toHaveFocus();
     await user.keyboard('{Home}');
-    expect(item('Java 17')).toHaveFocus();
+    expect(item('Python')).toHaveFocus();
     await user.keyboard('{ArrowLeft}{ArrowUp}'); // first item of the first slot: stays
-    expect(item('Java 17')).toHaveFocus();
+    expect(item('Python')).toHaveFocus();
 
     await user.keyboard('{Control>}{End}{/Control}');
     expect(item('AI Fluency')).toHaveFocus();
@@ -320,22 +316,22 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     await user.keyboard('{ArrowDown}'); // last slot: stays
     expect(item('AI Fluency')).toHaveFocus();
     await user.keyboard('{Control>}{Home}{/Control}');
-    expect(item('Java 17')).toHaveFocus();
-    expect(tip()).toHaveTextContent('Arkanoid');
+    expect(item('Python')).toHaveFocus();
+    expect(tip()).toHaveTextContent('Sommelier Bot');
   });
 
   it('Up / Down keep a sticky column through shorter slots', async () => {
     const user = userEvent.setup();
     render(<Skills />);
-    act(() => item('Telegram Bot API').focus()); // Magic, column 7 of 7
-    expect(tabStops()).toEqual([item('Telegram Bot API')]);
+    act(() => item('OpenAI API').focus()); // Magic, column 6 of 6
+    expect(tabStops()).toEqual([item('OpenAI API')]);
 
     await user.keyboard('{ArrowDown}'); // Potions has 5 items
     expect(item('Jupyter')).toHaveFocus();
     await user.keyboard('{ArrowDown}'); // Tomes has 4
     expect(item('Systems Programming')).toHaveFocus();
-    await user.keyboard('{ArrowDown}'); // Trinkets has 6: toward column 7 again, clamped to 6
-    expect(item('GitHub Pages')).toHaveFocus();
+    await user.keyboard('{ArrowDown}'); // Trinkets has 5: toward column 6 again, clamped to 5
+    expect(item('Vercel')).toHaveFocus();
     await user.keyboard('{ArrowLeft}{ArrowUp}'); // a sideways move resets the column
     expect(item('Systems Programming')).toHaveFocus();
   });
@@ -346,16 +342,16 @@ describe('Skills keyboard grid (roving tabindex)', () => {
     await user.tab();
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-    expect(item('Java 17')).toHaveFocus();
+    expect(item('Python')).toHaveFocus();
 
     await user.keyboard('{ArrowRight}');
-    expect(item('Python')).toHaveFocus();
-    expect(tip()).toHaveTextContent('Python');
+    expect(item('TypeScript')).toHaveFocus();
+    expect(tip()).toHaveTextContent('TypeScript');
   });
 
   it('handled keys never scroll the page; Tab, Enter and Alt+arrows pass through', () => {
     render(<Skills />);
-    const java = item('Java 17');
+    const java = item('Python');
     act(() => java.focus());
     // fireEvent returns false when the default was prevented.
     expect(fireEvent.keyDown(java, { key: 'ArrowUp' })).toBe(false); // an edge, still handled
@@ -391,11 +387,11 @@ describe('Skills on mobile (< 768px)', () => {
 
     await user.click(item('Vercel'));
     const row = screen.getByTestId('skill-detail');
-    expect(row).toHaveTextContent('Wine Sommelier Bot');
+    expect(row).toHaveTextContent('Sommelier Bot');
     expect(row).toHaveTextContent('CLR');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     // The hidden tooltip still describes the item for assistive tech.
-    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Wine Sommelier Bot, Fit Check, Groupie, CLR/);
+    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Fit Check, Sommelier Bot, Groupie, CLR/);
 
     await user.click(item('Vercel'));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();
@@ -484,17 +480,17 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     mockMedia({ mobile: false, short: true });
     const user = userEvent.setup();
     render(<Skills />);
-    act(() => item('Claude API').focus()); // Magic
+    act(() => item('Claude Code').focus()); // Magic
     await user.keyboard('{ArrowDown}');
     expect(item('NumPy')).toHaveFocus(); // Potions, the next line down
     await user.keyboard('{ArrowUp}');
-    expect(item('Claude API')).toHaveFocus();
-    // Magic wraps onto a second line on the narrower short screens: Right runs on through the wrap.
-    act(() => item('Claude Code').focus());
+    expect(item('Claude Code')).toHaveFocus();
+    // Right runs on to Magic's last item; Up from there clamps to Armor's last (it has one fewer).
+    act(() => item('Gemini API').focus());
     await user.keyboard('{ArrowRight}');
-    expect(item('Telegram Bot API')).toHaveFocus();
+    expect(item('OpenAI API')).toHaveFocus();
     await user.keyboard('{ArrowUp}');
-    expect(item('Tailwind CSS')).toHaveFocus(); // Armor, same column
+    expect(item('Docker')).toHaveFocus();
   });
 });
 
@@ -546,7 +542,7 @@ describe('Skills on tall screens from xl', () => {
   it('Up / Down go to the slot above or below, in data order', async () => {
     const user = userEvent.setup();
     render(<Skills />);
-    act(() => item('Claude API').focus()); // Magic
+    act(() => item('Claude Code').focus()); // Magic
     await user.keyboard('{ArrowDown}');
     expect(item('NumPy')).toHaveFocus(); // Potions
     await user.keyboard('{ArrowUp}{ArrowUp}');

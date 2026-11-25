@@ -193,7 +193,7 @@ describe('<QuestCard> main quest (standard)', () => {
   it('has no Live link when the project has no demo', () => {
     const { container } = render(<QuestCard project={byId('sommelier-bot')} />);
     expect(screen.queryByRole('link', { name: /Live demo/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^Code on GitHub: Wine Sommelier Bot/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^Code on GitHub: Sommelier Bot/ })).toBeInTheDocument();
     // One link: on phones Code and Quest log share a row.
     expect(container.querySelector('.quest-actions')).not.toHaveClass('quest-actions--pair');
   });
@@ -224,8 +224,8 @@ describe('<QuestCard> main quest (standard)', () => {
   });
 
   it('says why a private project has no Code link (no Live, no Code, a note instead)', () => {
-    const hidden = byId('fit-check'); // a private repo with no public demo
-    expect(hidden.live ?? hidden.github).toBeUndefined();
+    // Every card links its code today; a private one is the same card without links.
+    const hidden = { ...byId('fit-check'), github: undefined, live: undefined };
     const { container } = render(<QuestCard project={hidden} />);
     expect(container.querySelector('svg[data-item]')).toHaveAttribute('data-item', 'hanger');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();

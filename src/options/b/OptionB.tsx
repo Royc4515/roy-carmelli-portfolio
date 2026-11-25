@@ -277,7 +277,9 @@ export default function OptionB() {
     ];
   }, [copyEmail, openProject, theme, toggleTheme]);
 
-  const [aside, nechita, sommelier] = mainProjects;
+  // By id, not position: the live site reorders its main projects, and this prototype frames these three.
+  const pick = (id: string) => mainProjects.find(p => p.id === id);
+  const [aside, nechita, sommelier] = [pick('ai-sidebar'), pick('nechita-raka'), pick('sommelier-bot')];
   const openProjectData = mainProjects.find(p => p.id === openId) ?? null;
   const isMorph = (project: Project) => morphId === project.id && openId === null;
   const copyMessage = copyState === 'copied' ? 'Email address copied' : copyState === 'failed' ? 'Copy was blocked. Use the email link instead.' : '';

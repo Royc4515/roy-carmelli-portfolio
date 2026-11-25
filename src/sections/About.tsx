@@ -11,9 +11,9 @@ import './About.css';
 const AT_A_GLANCE = [
   { label: 'Degree', value: 'B.Sc. Computer Science & Neuroscience (dual major)' },
   { label: 'University', value: 'Bar-Ilan University' },
-  { label: 'Year', value: '3rd year · expected graduation Feb 2028' },
+  { label: 'Year', value: '3rd year · honors program · graduating Feb 2028' },
   { label: 'GPA', value: '85.09 / 100' },
-  { label: 'Open to', value: 'Student & intern roles: full-stack, frontend, AI' },
+  { label: 'Open to', value: 'Student roles, 2-3 days a week: full-stack, AI' },
 ] as const;
 
 /**
@@ -21,7 +21,7 @@ const AT_A_GLANCE = [
  * unit as it grew from 12 to 30+). Two parts so a narrow sheet breaks after
  * the "·", never inside the phrase.
  */
-const SERVICE = ['Battalion medic ·', 'led a unit from 12 to 30+'] as const;
+const SERVICE = ['Senior battalion medic ·', 'led a unit from 12 to 30+'] as const;
 
 /** The portrait is the native face sprite at ×2 (×1 on short laptop screens, About.css). */
 const FACE_SCALE = 2;
