@@ -29,7 +29,7 @@ the character, both themes and all existing content.
 |---|---|
 | Fonts | Display: Press Start 2P. HUD: IBM Plex Mono 500/600. Body: IBM Plex Sans 400/600. Remove JetBrains Mono and every `"Inter"` reference. |
 | Nav | Brand (face + ROY CARMELLI) links to top · Projects · About · Skills · Contact · Resume (primary CTA) · Play · theme toggle. "Library" becomes the *zone name* of Projects, not a nav label. |
-| Project tiers | main: `ai-sidebar`, `career-predictor`, `sommelier-bot` · side: `clr`, `arkanoid-game`, `portfolio` · research: `signal-processing`, `cognitive-correlation`, `white-matter-game`. |
+| Project tiers | main (in order): `nechita-raka`, `fit-check`, `ai-sidebar`, `sommelier-bot`, `leet-for-berger` · side: `wolt-clone`, `groupie`, `career-predictor`, `clr` · research (coursework): `cognitive-correlation`, `signal-processing`, `white-matter-game`, `arkanoid-game`. The live site (option F) gives each main project a voxel totem, matched by position (`TOTEM_BUILDERS` in `src/options/f/voxels.ts`). |
 | Availability | Hero chip: `bio.availability`. Contact paragraph: `bio.contactBlurb`. |
 | Assets | Site UI uses native-resolution art in `public/assets/pixel/`. Files the mini-game loads stay in `public/assets/sprites/` with the same names and pixel dimensions (no engine change); they may be re-encoded in place (256-colour palette + lossless PNG optimisation) when the game shows no visible difference at 100%. Unused files are deleted; hi-res sources the pixel pipeline needs move to `design-src/`. |
 | Hero | Game title screen: forest backdrop at integer scale, character on the ground line at the same pixel scale, title card. |

@@ -329,6 +329,42 @@ function wine(g: Grid): void {
   });
 }
 
+/** Fit Check: a shirt on a wooden hanger, on a stand. */
+function hanger(g: Grid): void {
+  g.box(-1, 0, -1, 1, 1, 1, C.ink); g.box(-6, 0, -2, 6, 0, 1, C.ink); // foot
+  g.box(0, 2, 0, 0, 27, 0, C.steel); // the pole
+  g.box(-1, 27, -1, 1, 28, 1, C.steel); // hook
+  // The hanger: a wooden bar sloping down from the hook to both shoulders.
+  for (let n = 0; n <= 11; n++) {
+    const y = 25 - Math.round(n * 0.33);
+    g.box(n, y, -1, n, y, 0, C.wood); g.box(-n, y, -1, -n, y, 0, C.wood);
+  }
+  // The shirt: shoulders under the bar, short sleeves, a body down to the hem.
+  g.box(-11, 18, -2, 11, 21, 1, C.sky); // shoulders and sleeves
+  g.box(-14, 15, -2, -11, 20, 1, C.sky); g.box(11, 15, -2, 14, 20, 1, C.sky); // sleeves
+  g.box(-8, 4, -2, 8, 20, 1, C.sky); // body
+  g.box(-2, 19, 2, 2, 22, 2, C.white); // collar
+  g.box(0, 6, 2, 0, 18, 2, C.navy); // placket
+  for (const y of [8, 12, 16]) g.set(0, y, 3, C.white); // buttons
+  g.box(-8, 4, -2, 8, 4, 1, C.navy); // hem
+}
+
+/** Leet-For-Berger: a code editor with a run button and a row of green test lights. */
+function terminal(g: Grid): void {
+  g.box(-14, 4, -1, 14, 25, 0, C.ink); // frame
+  g.box(-13, 9, 1, 13, 21, 1, C.navy); // editor
+  g.box(-13, 22, 1, 13, 24, 1, C.steel); // title bar
+  g.box(8, 22, 2, 12, 24, 2, C.orange); // the Submit button
+  for (let row = 0; row < 4; row++) {
+    const y = 19 - row * 3;
+    g.set(-12, y, 2, C.grey); // line numbers
+    g.box(-10 + (row % 2) * 2, y, 2, -10 + [14, 10, 16, 8][row], y, 2, [C.yellow, C.cream, C.sky, C.cream][row]);
+  }
+  g.box(-13, 5, 1, 13, 8, 1, C.ink); // console
+  for (let n = 0; n < 7; n++) g.box(-11 + n * 3, 6, 2, -10 + n * 3, 7, 2, C.green); // tests passed
+  g.box(-1, 0, -1, 1, 3, 0, C.ink); g.box(-6, 0, -2, 6, 0, 1, C.ink); // stand
+}
+
 /** 5x7 glyphs for the "more work" totem. */
 const GLYPHS: Record<string, string[]> = {
   '<': ['...#.', '..#..', '.#...', '#....', '.#...', '..#..', '...#.'],
@@ -395,7 +431,7 @@ function toolbox(g: Grid): void {
 }
 
 /** One model per station after the hero, in page order. The engine builds one island per entry plus the hero's. */
-export const TOTEM_BUILDERS = [parachute, browser, wine, codeMark, brain, toolbox, mailbox];
+export const TOTEM_BUILDERS = [parachute, hanger, browser, wine, terminal, codeMark, brain, toolbox, mailbox];
 
 /**
  * All totems share one pool of `count` cubes, so the same cubes can fly from one model to the

@@ -7,10 +7,15 @@ import { projects } from '../data/projects';
 
 describe('byTier', () => {
   it('keeps data order within a tier', () => {
-    expect(byTier(projects, 'main').map(p => p.id)).toEqual(['nechita-raka', 'ai-sidebar', 'sommelier-bot']);
-    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['leet-for-berger', 'fit-check', 'groupie', 'career-predictor', 'clr']);
+    expect(byTier(projects, 'main').map(p => p.id)).toEqual([
+      'nechita-raka',
+      'fit-check',
+      'ai-sidebar',
+      'sommelier-bot',
+      'leet-for-berger',
+    ]);
+    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['wolt-clone', 'groupie', 'career-predictor', 'clr']);
     expect(byTier(projects, 'research').map(p => p.id)).toEqual([
-      'wolt-clone',
       'cognitive-correlation',
       'signal-processing',
       'white-matter-game',
@@ -27,7 +32,7 @@ describe('<Projects>', () => {
     expect(section).toHaveAttribute('aria-labelledby', title.id);
     expect(screen.getByText('Zone 01 · The Library')).toBeInTheDocument();
     expect(
-      screen.getByText("Start with the main quests: the three I'd walk you through first. Side quests and coursework are below."),
+      screen.getByText("Start with the main quests: the five I'd walk you through first. Side quests and coursework are below."),
     ).toBeInTheDocument();
   });
 
@@ -51,18 +56,18 @@ describe('<Projects>', () => {
         .map(h => h.textContent);
     expect(titlesIn('Main quests')).toEqual([
       'Nechita Raka - First-Year Student Hub',
+      'Fit Check - AI Wardrobe Stylist',
       'Aside - AI Sidebar',
-      'Wine Sommelier Bot',
+      'Sommelier Bot - AI Wine Agent',
+      'Leet-For-Berger - Interview Practice Platform',
     ]);
     expect(titlesIn('Side quests')).toEqual([
-      'Leet-For-Berger - Interview Practice Platform',
-      'Fit Check - AI Wardrobe Stylist',
+      'Wolt Clone - Food-Delivery App',
       'Groupie - WhatsApp Year in Review',
       'CareerPredict AI',
       'CLR - Culinary Logic Repository',
     ]);
     expect(titlesIn('Training logs')).toEqual([
-      'Wolt Clone - Food-Delivery App',
       'Cognitive Background - Neuro-Data Analysis',
       'Signal Processing - Neural Data',
       'White Matter Tracts Game',

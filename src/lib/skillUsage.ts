@@ -38,6 +38,8 @@ const ALIASES: Readonly<Record<string, string>> = {
  */
 const FAMILIES: Readonly<Record<string, (tech: string) => boolean>> = {
   'design patterns': tech => tech.endsWith(' pattern') || tech === 'template method',
+  // The CV lists the two languages as one skill; a project lists either one.
+  'c/c++': tech => tech === 'c' || tech === 'c++',
 };
 
 /** Canonical comparison key for a skill or tech name. */

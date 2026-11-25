@@ -98,7 +98,7 @@ const mostlyHebrew = (text: string) =>
 
 /** The service in the site's own wording, for when every sentence of an answer had to go. */
 export const SERVICE_LINE = {
-  en: 'I served as a battalion medic (חוג"ד) and medical coordinator in the Gaza Division, an operational support role.',
+  en: 'I served as a senior battalion medic (חוג"ד) and medical officer coordinator in the Gaza Division, an operational support role.',
   he: 'שירתתי כחוג"ד ומתאם רפואי באוגדת עזה, בתפקיד תומך לחימה.',
 } as const;
 

@@ -17,7 +17,7 @@ export const courseworkProjects = projects.filter(p => p.tier === 'research');
 /** Repo rule: the degree is always written this way. */
 export const DEGREE = 'Computer Science & Neuroscience';
 /** Repo rule: the service is described this way, in a plain professional tone. */
-export const SERVICE_ROLE = 'Battalion medic and medical coordinator, operational support role';
+export const SERVICE_ROLE = 'Senior battalion medic and medical officer coordinator, operational support role';
 export const SERVICE_ORG = linkedin.service.org;
 export const SERVICE_PERIOD = linkedin.service.period;
 export const EDUCATION_PERIOD = linkedin.education.period;
@@ -57,6 +57,7 @@ const IMAGE_SLUGS: Record<string, string> = {
   'ai-sidebar': 'aside',
   'nechita-raka': 'nechita-raka',
   'wolt-clone': 'wolt-clone',
+  'leet-for-berger': 'leet-for-berger',
 };
 
 export function projectImage(project: Project): ProjectImage | null {
