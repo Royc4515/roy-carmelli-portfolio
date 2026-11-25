@@ -1,6 +1,9 @@
 // src/data/projects.ts
 import type { Project } from '../types/index';
 
+/** Shown where the code link would be when a project has no public repo (classic card, live-page row). */
+export const PRIVATE_REPO_NOTE = 'Private repo · code on request';
+
 export const projects: Project[] = [
   {
     id: "nechita-raka",
@@ -55,6 +58,29 @@ export const projects: Project[] = [
 
   // ───────────── Side quests ─────────────
   {
+    id: "leet-for-berger",
+    kind: "Coding practice site",
+    tier: "side",
+    tagline: "LeetCode-style interview practice: 225 problems, 8 languages plus SQL, each answer judged on 15 tests in the browser or on a runner I host.",
+    title: "Leet-For-Berger - Interview Practice Platform",
+    description: "Leet-For-Berger is a free LeetCode-style practice site for students and developers preparing for coding interviews, a solo static app in vanilla JavaScript on GitHub Pages with a Supabase backend and a self-hosted code runner. Pick one of 225 problems, write a solution in Python, JavaScript, TypeScript, Java, C++, C, C# or Go (SQL for the database problems) in a Monaco editor, and it is judged on exactly 15 tests: 5 visible with full detail, 10 hidden that report only pass or fail, each under a time limit. JavaScript, TypeScript and Python run in Web Workers in the page (Python on Pyodide, SQL on sql.js), with a watchdog per test so an infinite loop costs a worker, not the tab. Java, C++, C, C# and Go go through a Cloudflare Worker (origin allowlist, size cap, per-IP rate limit) to Piston on a free Oracle VM, and the output is judged back in the page: the code under test never sees the expected answers. CI runs every shipped solution in every language against its 15 tests. Around the judge: a zoomable map of 26 topics, a 131-problem learning path, practice sets by company (Israeli ones included), a daily quiz in English and Hebrew with a leaderboard, and an interview simulator. Google or GitHub sign-in (Supabase, row-level security) syncs progress across devices and can push accepted solutions to your own GitHub repo. Over 2,100 unit tests and a Playwright smoke test that fails on any console error. I build it with Claude Code agents: its decisions are written down as 10 ADRs and a list of invariants every change must keep, and I review and merge every pull request myself.",
+    tech: ["JavaScript", "Web Workers", "Monaco Editor", "Pyodide", "sql.js", "Cloudflare Workers", "Piston", "Docker", "Supabase", "PostgreSQL", "Edge Functions", "Playwright", "GitHub Actions", "GitHub Pages", "Hebrew / RTL"],
+    github: "https://github.com/Royc4515/leet-for-berger",
+    live: "https://royc4515.github.io/leet-for-berger/",
+    year: 2026,
+  },
+  {
+    id: "fit-check",
+    kind: "AI app + MCP server",
+    tier: "side",
+    status: "in-development",
+    tagline: "My own wardrobe app: AI tags each garment from one photo, and an engine plus Claude pick the day's outfit for the weather and Shabbat.",
+    title: "Fit Check - AI Wardrobe Stylist",
+    description: "Fit Check is a wardrobe and styling app I built for myself in TypeScript with Expo (React Native) and Supabase, Hebrew first, running as a web app on Vercel. A photo of a few garments goes to Supabase Edge Functions (Deno): Gemini finds each garment and, on request, redraws it as a clean product photo, and Claude Haiku tags it against a fixed zod schema. A pure TypeScript engine filters the wardrobe by weather, laundry and the day's rules (Shabbat times from Hebcal) and scores outfits on colour, formality and pair weights learned from what I wear, save or dislike. Claude Sonnet gets at most 8 candidates, never the whole wardrobe, picks one and explains it; if its answer fails validation, the top-scored outfit shows instead. It is also an MCP server: Claude connects over OAuth 2.1 and gets 17 tools to search, edit and log the wardrobe. Every AI call is logged with its cost, paid Google calls stop at a monthly cap in code, and every table has row-level security. When images ran Supabase's free egress to 42.77 GB of a 5 GB quota and the project was restricted, I traced five causes, fixed them (one-year cache headers, grid thumbnails, throttled reloads) and moved the images to Cloudflare R2. 884 tests (Vitest and Deno) cover the engine, schemas, app logic and functions. I build it with Claude Code agents: a lead agent writes the specs and delegates each task, and an agent that did not write a change verifies it. Still in development; the repo is private, and I can share it on request.",
+    tech: ["TypeScript", "React Native", "Claude API", "MCP", "Supabase", "Expo", "PostgreSQL", "Deno", "Gemini API", "OAuth 2.1", "Zod", "Vitest", "Cloudflare R2", "Vercel", "Hebrew / RTL"],
+    year: 2026,
+  },
+  {
     id: "groupie",
     kind: "Privacy-first web app",
     tier: "side",
@@ -63,30 +89,6 @@ export const projects: Project[] = [
     description: "Groupie is a year-in-review for WhatsApp group chats, a solo web app in plain JavaScript and canvas, live on Vercel, Hebrew first with English. Drop in a chat export (a .txt, or the .zip an iPhone makes) and it builds 16 story cards, 14 awards and a festival line-up poster, played as a story with music. Sharing sends a story link that keeps the summary in the URL fragment, so even a shared story never reaches a server. The privacy promise is enforced, not just stated: everything is computed in the browser, nothing is uploaded or stored, scripts and fonts are self-hosted and pinned by hash, and a security gate plus a network check with a marker chat run in CI and fail the build if a rule breaks. The parser reads the iOS and Android export formats and is tested against a synthetic corpus with hand-counted expectations. I run it with 9 Claude Code agents with separate roles (CEO, security, QA, DevOps, growth, product engineer, designer, legal and privacy drafts, support) and a decision log. The repo is private; I can share it on request.",
     tech: ["JavaScript", "Canvas", "Playwright", "GitHub Actions", "Vercel", "Hebrew / RTL", "SEO / JSON-LD"],
     live: "https://groupie-three.vercel.app",
-    year: 2026,
-  },
-  {
-    id: "wolt-clone",
-    teamSize: 2,
-    kind: "Full-stack web app",
-    tier: "side",
-    tagline: "A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client.",
-    title: "Wolt Clone - Food-Delivery App",
-    description: "Wolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, and the admin pages. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The whole stack starts with one docker compose up behind an nginx proxy, with tests for the API, the web client and the C++ service.",
-    tech: ["React 19", "Node.js", "Express", "MongoDB", "React Native", "Docker", "JWT auth", "C++"],
-    github: "https://github.com/Royc4515/Wolt-clone",
-    year: 2026,
-  },
-  {
-    id: "portfolio",
-    kind: "Website + engine",
-    tier: "side",
-    tagline: "You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me.",
-    title: "Personal Portfolio",
-    description: "Personal Portfolio is this site, my portfolio for recruiters, built from scratch (no template) with React 18, TypeScript, Vite, Tailwind CSS and Framer Motion and deployed on Vercel. Press start and the title screen turns into Roy Runner, an endless runner on a small canvas engine I built for it: a game-state machine, a 7-state animation machine for the player, AABB collision, and a speed that climbs to a cap. It plays with a keyboard or touch controls, with a fullscreen mode on phones, and its music and sound effects are synthesised in the browser with the Web Audio API. Day and night themes follow your system setting. Pixel Roy, the little me in the corner, is an AI chat that answers questions about me, using only what this site, my public GitHub and my LinkedIn say. A Vercel Function screens each question with Prompt Guard, pulls the relevant facts with BM25 search, and asks a Groq model, falling back to a second one when the first is busy. Every answer then passes output checks: no personal details, no links outside my own, no rule-breaking wording. It runs on Groq's free tier with a daily cap per visitor, and conversations are not stored. A scoreboard on Neon Postgres with Google sign-in keeps the high scores, the build prerenders the page with JSON-LD so search and AI crawlers read it without JavaScript, and 860+ Vitest tests cover the site, the game and the API.",
-    tech: ["TypeScript", "React 18", "Canvas", "Web Audio API", "Vite", "Tailwind CSS", "Framer Motion", "Groq API", "Serverless Functions", "Neon Postgres", "Vitest", "Vercel"],
-    github: "https://github.com/Royc4515/roy-carmelli-portfolio",
-    live: "https://roy-carmelli-portfolio.vercel.app/",
     year: 2026,
   },
   {
@@ -115,6 +117,18 @@ export const projects: Project[] = [
   },
 
   // ───────────── Training logs (coursework) ─────────────
+  {
+    id: "wolt-clone",
+    teamSize: 2,
+    kind: "Full-stack web app",
+    tier: "research",
+    tagline: "A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client.",
+    title: "Wolt Clone - Food-Delivery App",
+    description: "Wolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, and the admin pages. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The whole stack starts with one docker compose up behind an nginx proxy, with tests for the API, the web client and the C++ service.",
+    tech: ["React 19", "Node.js", "Express", "MongoDB", "React Native", "Docker", "JWT auth", "C++"],
+    github: "https://github.com/Royc4515/Wolt-clone",
+    year: 2026,
+  },
   {
     id: "cognitive-correlation",
     teamSize: 4,

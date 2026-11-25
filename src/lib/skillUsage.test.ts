@@ -85,27 +85,28 @@ describe('projectsUsing (real data)', () => {
       'cognitive-correlation',
       'signal-processing',
     ]);
-    expect(ids('TypeScript')).toEqual(['portfolio', 'clr']);
-    expect(ids('JavaScript')).toEqual(['nechita-raka', 'ai-sidebar', 'groupie', 'white-matter-game']);
+    expect(ids('TypeScript')).toEqual(['fit-check', 'clr']);
+    expect(ids('JavaScript')).toEqual(['nechita-raka', 'ai-sidebar', 'leet-for-berger', 'groupie', 'white-matter-game']);
+    expect(ids('MCP')).toEqual(['fit-check']);
   });
 
   it('normalizes versions: React 19 and Java 17', () => {
-    expect(ids('React')).toEqual(['wolt-clone', 'portfolio', 'career-predictor', 'clr']);
+    expect(ids('React')).toEqual(['career-predictor', 'clr', 'wolt-clone']);
     expect(ids('Java 17')).toEqual(['arkanoid-game']);
   });
 
   it('uses the alias map', () => {
-    expect(ids('Tailwind CSS')).toEqual(['portfolio', 'career-predictor']);
+    expect(ids('Tailwind CSS')).toEqual(['career-predictor']);
     expect(ids('Telegram Bot API')).toEqual(['sommelier-bot', 'clr']);
     expect(ids('Google OAuth')).toEqual(['career-predictor']);
-    expect(ids('Claude API')).toEqual(['ai-sidebar']);
-    expect(ids('Node.js')).toEqual(['nechita-raka', 'wolt-clone', 'career-predictor']);
+    expect(ids('Claude API')).toEqual(['ai-sidebar', 'fit-check']);
+    expect(ids('Node.js')).toEqual(['nechita-raka', 'career-predictor', 'wolt-clone']);
   });
 
   it('returns nothing for skills no project lists', () => {
     expect(ids('C')).toEqual([]);
     expect(ids('x86 Assembly')).toEqual([]);
-    expect(ids('MCP')).toEqual([]);
+    expect(ids('Claude Code')).toEqual([]);
     expect(ids('Algorithms')).toEqual([]);
     expect(ids('Git')).toEqual([]);
     expect(ids('Claude Code 101')).toEqual([]);
@@ -141,7 +142,7 @@ describe('skillDetail', () => {
       name: 'JavaScript',
       slot: 'Weapons',
       category: 'Languages',
-      usedIn: ['Nechita Raka', 'Aside', 'Groupie', 'White Matter Tracts Game'],
+      usedIn: ['Nechita Raka', 'Aside', 'Leet-For-Berger', 'Groupie', 'White Matter Tracts Game'],
       note: null,
     });
     expect(skillDetail('Design Patterns', group('CS Foundations'), projects).usedIn).toEqual([
@@ -155,9 +156,9 @@ describe('skillDetail', () => {
       'Studied in coursework',
     );
     expect(skillDetail('OOP', group('CS Foundations'), projects).note).toBeNull();
-    const mcp = skillDetail('MCP', group('AI & Agents'), projects);
-    expect(mcp.usedIn).toEqual([]);
-    expect(mcp.note).toBeNull();
+    const claudeCode = skillDetail('Claude Code', group('AI & Agents'), projects);
+    expect(claudeCode.usedIn).toEqual([]);
+    expect(claudeCode.note).toBeNull();
     expect(skillDetail('Git', group('Tools & Platforms'), projects).note).toBeNull();
   });
 

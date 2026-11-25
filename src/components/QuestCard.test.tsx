@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
-import QuestCard, { descriptionParagraphs, PRIVATE_REPO_NOTE, QUEST_LOG_SCREENSHOTS, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle } from './QuestCard';
+import QuestCard, { descriptionParagraphs, PRIVATE_REPO_NOTE, QUEST_LOG_SCREENSHOTS, QUEST_SCREENSHOTS, ResearchLogItem, metaLine, splitTitle, type QuestScreenshot } from './QuestCard';
 import { itemForProject } from './ItemSprite';
 import { projects } from '../data/projects';
 import type { Project } from '../types/index';
@@ -224,18 +224,18 @@ describe('<QuestCard> main quest (standard)', () => {
   });
 
   it('says why a private project has no Code link (no Live, no Code, a note instead)', () => {
-    // No card is code-less and live-less today; strip one so the fallback stays covered.
-    const hidden = { ...byId('wolt-clone'), github: undefined, live: undefined };
+    const hidden = byId('fit-check'); // a private repo with no public demo
+    expect(hidden.live ?? hidden.github).toBeUndefined();
     const { container } = render(<QuestCard project={hidden} />);
-    expect(container.querySelector('svg[data-item]')).toHaveAttribute('data-item', 'delivery-bag');
+    expect(container.querySelector('svg[data-item]')).toHaveAttribute('data-item', 'hanger');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText(PRIVATE_REPO_NOTE)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: `Details: ${hidden.title}` })).toBeInTheDocument();
   });
 
-  it('links the Wolt Clone code now that its repo is public', () => {
-    render(<QuestCard project={byId('wolt-clone')} />);
-    expect(screen.getByRole('link', { name: /code/i })).toHaveAttribute('href', 'https://github.com/Royc4515/Wolt-clone');
+  it('links the code of a side quest whose repo is public', () => {
+    render(<QuestCard project={byId('leet-for-berger')} />);
+    expect(screen.getByRole('link', { name: /code/i })).toHaveAttribute('href', 'https://github.com/Royc4515/leet-for-berger');
     expect(screen.queryByText(PRIVATE_REPO_NOTE)).not.toBeInTheDocument();
   });
 
@@ -244,18 +244,32 @@ describe('<QuestCard> main quest (standard)', () => {
     expect(screen.queryByText(PRIVATE_REPO_NOTE)).not.toBeInTheDocument();
   });
 
-  it('keeps the Wolt Clone screenshot in the quest log, lazy, until Details opens', async () => {
-    const user = userEvent.setup();
-    const wolt = byId('wolt-clone');
-    render(<QuestCard project={wolt} />);
-    const img = screen.getByRole('img', { name: /Wolt Clone home page/, hidden: true });
-    expect(img.closest('.quest-log')).toHaveAttribute('hidden');
-    expect(img).toHaveAttribute('loading', 'lazy');
-    expect(img.getAttribute('srcset')).toContain('wolt-clone-640.webp 640w');
-    expect(img).toHaveAttribute('width', '1280');
-    expect(img).toHaveAttribute('height', '880');
-    await user.click(screen.getByRole('button', { name: `Details: ${wolt.title}` }));
-    expect(screen.getByRole('img', { name: /Wolt Clone home page/ })).toBeVisible();
+  it('keeps a side quest screenshot in the quest log, lazy, until Details opens', async () => {
+    // No side quest has one today, so lend Leet-For-Berger one to keep the quest-log path covered.
+    const shots = QUEST_LOG_SCREENSHOTS as Record<string, QuestScreenshot>;
+    shots['leet-for-berger'] = {
+      src: '/assets/projects/wolt-clone-1280.webp',
+      srcSet: '/assets/projects/wolt-clone-640.webp 640w, /assets/projects/wolt-clone-1280.webp 1280w',
+      sizes: '320px',
+      width: 1280,
+      height: 880,
+      alt: 'A borrowed test screenshot',
+    };
+    try {
+      const user = userEvent.setup();
+      const leet = byId('leet-for-berger');
+      render(<QuestCard project={leet} />);
+      const img = screen.getByRole('img', { name: /borrowed test screenshot/, hidden: true });
+      expect(img.closest('.quest-log')).toHaveAttribute('hidden');
+      expect(img).toHaveAttribute('loading', 'lazy');
+      expect(img.getAttribute('srcset')).toContain('wolt-clone-640.webp 640w');
+      expect(img).toHaveAttribute('width', '1280');
+      expect(img).toHaveAttribute('height', '880');
+      await user.click(screen.getByRole('button', { name: `Details: ${leet.title}` }));
+      expect(screen.getByRole('img', { name: /borrowed test screenshot/ })).toBeVisible();
+    } finally {
+      delete shots['leet-for-berger'];
+    }
   });
 
   it('only gives quest-log screenshots to side quests that exist', () => {
@@ -264,10 +278,10 @@ describe('<QuestCard> main quest (standard)', () => {
 
   it('lists every technology in the quest log, including the ones behind +N', async () => {
     const user = userEvent.setup();
-    const wolt = byId('wolt-clone');
-    render(<QuestCard project={wolt} />);
-    await user.click(screen.getByRole('button', { name: `Details: ${wolt.title}` }));
-    expect(screen.getByText(wolt.tech.join(' · '))).toBeVisible();
+    const leet = byId('leet-for-berger');
+    render(<QuestCard project={leet} />);
+    await user.click(screen.getByRole('button', { name: `Details: ${leet.title}` }));
+    expect(screen.getByText(leet.tech.join(' · '))).toBeVisible();
   });
 });
 
@@ -311,7 +325,7 @@ describe('<QuestCard> side quest', () => {
   });
 
   it('keeps Live · Code · Quest log in that order', () => {
-    const { container } = render(<QuestCard project={byId('portfolio')} />);
+    const { container } = render(<QuestCard project={byId('leet-for-berger')} />);
     const controls = screen.getAllByRole('link').concat(screen.getAllByRole('button'));
     expect(controls.map(c => c.textContent)).toEqual(['Live', 'Code', 'Details']);
     // Two links: on phones Live · Code share a row and Quest log goes under them.

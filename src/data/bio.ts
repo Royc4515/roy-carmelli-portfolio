@@ -33,7 +33,7 @@ I've also taught, tutored and run trainings in Israel and abroad, led people and
 /** `slot` is the equipment-screen slot each category maps to. */
 export const skills = [
   { slot: "Weapons", category: "Languages",          items: ["Java 17", "Python", "C", "C++", "JavaScript", "TypeScript", "x86 Assembly"] },
-  { slot: "Armor", category: "Web & Full-Stack",     items: ["React", "Node.js", "Express", "MongoDB", "React Native", "Tailwind CSS", "Vite"] },
+  { slot: "Armor", category: "Web & Full-Stack",     items: ["React", "Node.js", "Express", "MongoDB", "Supabase", "React Native", "Tailwind CSS", "Vite"] },
   { slot: "Magic", category: "AI & Agents",          items: ["Claude API", "Gemini API", "OpenAI API", "Groq API", "MCP", "Claude Code", "Telegram Bot API"] },
   { slot: "Potions", category: "Data & Analysis",    items: ["NumPy", "Pandas", "SciPy", "Matplotlib", "Jupyter"] },
   { slot: "Tomes", category: "CS Foundations",       items: ["OOP", "Data Structures", "Design Patterns", "Systems Programming"] },

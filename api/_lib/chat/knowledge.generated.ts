@@ -3,7 +3,7 @@
 import type { Knowledge } from './types.js';
 
 export const KNOWLEDGE: Knowledge = {
-  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student position in full-stack or AI development in Israel, part-time at first (2-3 days a week) alongside my studies. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, TypeScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Nechita Raka - First-Year Student Hub [main quest, Site + AI chat] - A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine. | Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Groupie - WhatsApp Year in Review [side quest, Privacy-first web app] - A year-in-review for WhatsApp group chats: story cards, awards and a poster, all computed in your browser. No message leaves the device. | Wolt Clone - Food-Delivery App [side quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, and land on a magazine cover as one of 40 made-up futures. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: sampling and aliasing, smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
+  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student position in full-stack or AI development in Israel, part-time at first (2-3 days a week) alongside my studies. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, TypeScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, Supabase, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Nechita Raka - First-Year Student Hub [main quest, Site + AI chat] - A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine. | Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Leet-For-Berger - Interview Practice Platform [side quest, Coding practice site] - LeetCode-style interview practice: 225 problems, 8 languages plus SQL, each answer judged on 15 tests in the browser or on a runner I host. | Fit Check - AI Wardrobe Stylist [side quest, AI app + MCP server] - My own wardrobe app: AI tags each garment from one photo, and an engine plus Claude pick the day's outfit for the weather and Shabbat. | Groupie - WhatsApp Year in Review [side quest, Privacy-first web app] - A year-in-review for WhatsApp group chats: story cards, awards and a poster, all computed in your browser. No message leaves the device. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, and land on a magazine cover as one of 40 made-up futures. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Wolt Clone - Food-Delivery App [research quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: sampling and aliasing, smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: roy-carmelli-portfolio - My personal portfolio site | Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
   "chunks": [
     {
       "id": "site:about",
@@ -130,6 +130,81 @@ export const KNOWLEDGE: Knowledge = {
       ]
     },
     {
+      "id": "site:project:leet-for-berger",
+      "source": "site",
+      "title": "Leet-For-Berger - Interview Practice Platform",
+      "url": "https://royc4515.github.io/leet-for-berger/",
+      "text": "Leet-For-Berger - Interview Practice Platform (Coding practice site, 2026).\nLeet-For-Berger is a free LeetCode-style practice site for students and developers preparing for coding interviews, a solo static app in vanilla JavaScript on GitHub Pages with a Supabase backend and a self-hosted code runner. Pick one of 225 problems, write a solution in Python, JavaScript, TypeScript, Java, C++, C, C# or Go (SQL for the database problems) in a Monaco editor, and it is judged on exactly 15 tests: 5 visible with full detail, 10 hidden that report only pass or fail, each under a time limit. JavaScript, TypeScript and Python run in Web Workers in the page (Python on Pyodide, SQL on sql.js), with a watchdog per test so an infinite loop costs a worker, not the tab. Java, C++, C, C# and Go go through a Cloudflare Worker (origin allowlist, size cap, per-IP rate limit) to Piston on a free Oracle VM, and the output is judged back in the page: the code under test never sees the expected answers. CI runs every shipped solution in every language against its 15 tests. Around the judge: a zoomable map of 26 topics, a 131-problem learning path, practice sets by company (Israeli ones included), a daily quiz in English and Hebrew with a leaderboard, and an interview simulator. Google or GitHub sign-in (Supabase, row-level security) syncs progress across devices and can push accepted solutions to your own GitHub repo. Over 2,100 unit tests and a Playwright smoke test that fails on any console error. I build it with Claude Code agents: its decisions are written down as 10 ADRs and a list of invariants every change must keep, and I review and merge every pull request myself.\nTech: JavaScript, Web Workers, Monaco Editor, Pyodide, sql.js, Cloudflare Workers, Piston, Docker, Supabase, PostgreSQL, Edge Functions, Playwright, GitHub Actions, GitHub Pages, Hebrew / RTL.\nCode: https://github.com/Royc4515/leet-for-berger\nLive: https://royc4515.github.io/leet-for-berger/\nGitHub repo leet-for-berger: JavaScript, last push 2026-11-24.",
+      "keywords": [
+        "leet-for-berger",
+        "leet",
+        "for",
+        "berger",
+        "interview",
+        "practice",
+        "platform",
+        "coding",
+        "site",
+        "javascript",
+        "web",
+        "workers",
+        "monaco",
+        "editor",
+        "pyodide",
+        "sql",
+        "js",
+        "cloudflare",
+        "piston",
+        "docker",
+        "supabase",
+        "postgresql",
+        "edge",
+        "functions",
+        "playwright",
+        "github",
+        "actions",
+        "pages",
+        "hebrew",
+        "rtl"
+      ]
+    },
+    {
+      "id": "site:project:fit-check",
+      "source": "site",
+      "title": "Fit Check - AI Wardrobe Stylist",
+      "url": "https://roy-carmelli-portfolio.vercel.app/#more",
+      "text": "Fit Check - AI Wardrobe Stylist (AI app + MCP server, 2026, in development).\nFit Check is a wardrobe and styling app I built for myself in TypeScript with Expo (React Native) and Supabase, Hebrew first, running as a web app on Vercel. A photo of a few garments goes to Supabase Edge Functions (Deno): Gemini finds each garment and, on request, redraws it as a clean product photo, and Claude Haiku tags it against a fixed zod schema. A pure TypeScript engine filters the wardrobe by weather, laundry and the day's rules (Shabbat times from Hebcal) and scores outfits on colour, formality and pair weights learned from what I wear, save or dislike. Claude Sonnet gets at most 8 candidates, never the whole wardrobe, picks one and explains it; if its answer fails validation, the top-scored outfit shows instead. It is also an MCP server: Claude connects over OAuth 2.1 and gets 17 tools to search, edit and log the wardrobe. Every AI call is logged with its cost, paid Google calls stop at a monthly cap in code, and every table has row-level security. When images ran Supabase's free egress to 42.77 GB of a 5 GB quota and the project was restricted, I traced five causes, fixed them (one-year cache headers, grid thumbnails, throttled reloads) and moved the images to Cloudflare R2. 884 tests (Vitest and Deno) cover the engine, schemas, app logic and functions. I build it with Claude Code agents: a lead agent writes the specs and delegates each task, and an agent that did not write a change verifies it. Still in development; the repo is private, and I can share it on request.\nTech: TypeScript, React Native, Claude API, MCP, Supabase, Expo, PostgreSQL, Deno, Gemini API, OAuth 2.1, Zod, Vitest, Cloudflare R2, Vercel, Hebrew / RTL.\nCode: private repo, shared on request.",
+      "keywords": [
+        "fit-check",
+        "fit",
+        "check",
+        "ai",
+        "wardrobe",
+        "stylist",
+        "app",
+        "mcp",
+        "server",
+        "typescript",
+        "react",
+        "native",
+        "claude",
+        "api",
+        "supabase",
+        "expo",
+        "postgresql",
+        "deno",
+        "gemini",
+        "oauth",
+        "zod",
+        "vitest",
+        "cloudflare",
+        "r2",
+        "vercel",
+        "hebrew",
+        "rtl"
+      ]
+    },
+    {
       "id": "site:project:groupie",
       "source": "site",
       "title": "Groupie - WhatsApp Year in Review",
@@ -156,70 +231,6 @@ export const KNOWLEDGE: Knowledge = {
         "seo",
         "json",
         "ld"
-      ]
-    },
-    {
-      "id": "site:project:wolt-clone",
-      "source": "site",
-      "title": "Wolt Clone - Food-Delivery App",
-      "url": "https://github.com/Royc4515/Wolt-clone",
-      "text": "Wolt Clone - Food-Delivery App (Full-stack web app, 2026).\nWolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, and the admin pages. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The whole stack starts with one docker compose up behind an nginx proxy, with tests for the API, the web client and the C++ service.\nTech: React 19, Node.js, Express, MongoDB, React Native, Docker, JWT auth, C++.\nCode: https://github.com/Royc4515/Wolt-clone\nGitHub repo Wolt-clone: JavaScript, last push 2026-11-11.",
-      "keywords": [
-        "wolt-clone",
-        "wolt",
-        "clone",
-        "food",
-        "delivery",
-        "app",
-        "full",
-        "stack",
-        "web",
-        "react",
-        "19",
-        "node",
-        "js",
-        "express",
-        "mongodb",
-        "native",
-        "docker",
-        "jwt",
-        "auth",
-        "c++"
-      ]
-    },
-    {
-      "id": "site:project:portfolio",
-      "source": "site",
-      "title": "Personal Portfolio",
-      "url": "https://roy-carmelli-portfolio.vercel.app/",
-      "text": "Personal Portfolio (Website + engine, 2026).\nPersonal Portfolio is this site, my portfolio for recruiters, built from scratch (no template) with React 18, TypeScript, Vite, Tailwind CSS and Framer Motion and deployed on Vercel. Press start and the title screen turns into Roy Runner, an endless runner on a small canvas engine I built for it: a game-state machine, a 7-state animation machine for the player, AABB collision, and a speed that climbs to a cap. It plays with a keyboard or touch controls, with a fullscreen mode on phones, and its music and sound effects are synthesised in the browser with the Web Audio API. Day and night themes follow your system setting. Pixel Roy, the little me in the corner, is an AI chat that answers questions about me, using only what this site, my public GitHub and my LinkedIn say. A Vercel Function screens each question with Prompt Guard, pulls the relevant facts with BM25 search, and asks a Groq model, falling back to a second one when the first is busy. Every answer then passes output checks: no personal details, no links outside my own, no rule-breaking wording. It runs on Groq's free tier with a daily cap per visitor, and conversations are not stored. A scoreboard on Neon Postgres with Google sign-in keeps the high scores, the build prerenders the page with JSON-LD so search and AI crawlers read it without JavaScript, and 860+ Vitest tests cover the site, the game and the API.\nTech: TypeScript, React 18, Canvas, Web Audio API, Vite, Tailwind CSS, Framer Motion, Groq API, Serverless Functions, Neon Postgres, Vitest, Vercel.\nCode: https://github.com/Royc4515/roy-carmelli-portfolio\nLive: https://roy-carmelli-portfolio.vercel.app/\nGitHub repo roy-carmelli-portfolio: TypeScript, last push 2026-10-12.",
-      "keywords": [
-        "portfolio",
-        "personal",
-        "website",
-        "engine",
-        "typescript",
-        "react",
-        "18",
-        "canvas",
-        "web",
-        "audio",
-        "api",
-        "vite",
-        "tailwind",
-        "css",
-        "framer",
-        "motion",
-        "groq",
-        "serverless",
-        "functions",
-        "neon",
-        "postgres",
-        "vitest",
-        "vercel",
-        "roy-carmelli-portfolio",
-        "roy",
-        "carmelli"
       ]
     },
     {
@@ -282,6 +293,35 @@ export const KNOWLEDGE: Knowledge = {
         "vercel",
         "render",
         "culinary-logic-repository"
+      ]
+    },
+    {
+      "id": "site:project:wolt-clone",
+      "source": "site",
+      "title": "Wolt Clone - Food-Delivery App",
+      "url": "https://github.com/Royc4515/Wolt-clone",
+      "text": "Wolt Clone - Food-Delivery App (Full-stack web app, 2026).\nWolt Clone is a Wolt-style food-delivery platform, built in a team of 2 for the Advanced Systems Programming course, with a React web client, a React Native app, an Express and MongoDB API, and a C++ recommendation service. I owned the React 19 web client: restaurant browsing with category filters, menu search, a cart drawer and checkout, order history with status, and the admin pages. On the backend I built the Express skeleton and the MongoDB storage for restaurants, products and search, and co-wrote the Node client that talks to the C++ recommender over TCP; my teammate owned auth and orders. I also set up the web and frontend Docker containers and built several React Native screens. The whole stack starts with one docker compose up behind an nginx proxy, with tests for the API, the web client and the C++ service.\nTech: React 19, Node.js, Express, MongoDB, React Native, Docker, JWT auth, C++.\nCode: https://github.com/Royc4515/Wolt-clone\nGitHub repo Wolt-clone: JavaScript, last push 2026-11-11.",
+      "keywords": [
+        "wolt-clone",
+        "wolt",
+        "clone",
+        "food",
+        "delivery",
+        "app",
+        "full",
+        "stack",
+        "web",
+        "react",
+        "19",
+        "node",
+        "js",
+        "express",
+        "mongodb",
+        "native",
+        "docker",
+        "jwt",
+        "auth",
+        "c++"
       ]
     },
     {
@@ -369,6 +409,22 @@ export const KNOWLEDGE: Knowledge = {
         "observer",
         "pattern",
         "arkanoidgame"
+      ]
+    },
+    {
+      "id": "github:roy-carmelli-portfolio",
+      "source": "github",
+      "title": "GitHub: roy-carmelli-portfolio",
+      "url": "https://github.com/Royc4515/roy-carmelli-portfolio",
+      "text": "Repo roy-carmelli-portfolio (https://github.com/Royc4515/roy-carmelli-portfolio).\nMy personal portfolio site\nREADME excerpt: Roy Carmelli - Portfolio Live: https://roy-carmelli-portfolio.vercel.app/ Personal portfolio for a CS & Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. Press start and the title screen becomes Roy Runner, an endless runner on a small canvas engine built for this site: a game-state machine, a 7-state player animation machine, AABB collision and a speed that keeps climbing. Day/night theme with system preference detection. Pixel Roy is an AI chat in the corner...\nLanguage: TypeScript.\nTopics: portfolio, react, typescript, vite.\nLast push: 2026-10-12.\nHomepage: https://roy-carmelli-portfolio.vercel.app/",
+      "keywords": [
+        "roy-carmelli-portfolio",
+        "roy",
+        "carmelli",
+        "portfolio",
+        "react",
+        "typescript",
+        "vite"
       ]
     },
     {
@@ -507,6 +563,7 @@ export const KNOWLEDGE: Knowledge = {
     "https://www.linkedin.com/in/roy-carmelli",
     "https://nechita-raka.vercel.app",
     "https://royc4515.github.io/Aside",
+    "https://royc4515.github.io/leet-for-berger",
     "https://groupie-three.vercel.app",
     "https://career-predictor-cnvg.onrender.com",
     "https://royc4515.github.io/white-matter-tracts-game",
