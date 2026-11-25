@@ -8,8 +8,9 @@ import { projects } from '../data/projects';
 describe('byTier', () => {
   it('keeps data order within a tier', () => {
     expect(byTier(projects, 'main').map(p => p.id)).toEqual(['nechita-raka', 'ai-sidebar', 'sommelier-bot']);
-    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['leet-for-berger', 'fit-check', 'groupie', 'wolt-clone', 'portfolio', 'career-predictor', 'clr']);
+    expect(byTier(projects, 'side').map(p => p.id)).toEqual(['leet-for-berger', 'fit-check', 'groupie', 'portfolio', 'career-predictor', 'clr']);
     expect(byTier(projects, 'research').map(p => p.id)).toEqual([
+      'wolt-clone',
       'cognitive-correlation',
       'signal-processing',
       'white-matter-game',
@@ -57,12 +58,12 @@ describe('<Projects>', () => {
       'Leet-For-Berger - Interview Practice Platform',
       'Fit Check - AI Wardrobe Stylist',
       'Groupie - WhatsApp Year in Review',
-      'Wolt Clone - Food-Delivery App',
       'Personal Portfolio',
       'CareerPredict AI',
       'CLR - Culinary Logic Repository',
     ]);
     expect(titlesIn('Training logs')).toEqual([
+      'Wolt Clone - Food-Delivery App',
       'Cognitive Background - Neuro-Data Analysis',
       'Signal Processing - Neural Data',
       'White Matter Tracts Game',

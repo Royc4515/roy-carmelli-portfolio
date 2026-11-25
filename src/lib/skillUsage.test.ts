@@ -91,7 +91,7 @@ describe('projectsUsing (real data)', () => {
   });
 
   it('normalizes versions: React 19 and Java 17', () => {
-    expect(ids('React')).toEqual(['wolt-clone', 'portfolio', 'career-predictor', 'clr']);
+    expect(ids('React')).toEqual(['portfolio', 'career-predictor', 'clr', 'wolt-clone']);
     expect(ids('Java 17')).toEqual(['arkanoid-game']);
   });
 
@@ -100,7 +100,7 @@ describe('projectsUsing (real data)', () => {
     expect(ids('Telegram Bot API')).toEqual(['sommelier-bot', 'clr']);
     expect(ids('Google OAuth')).toEqual(['career-predictor']);
     expect(ids('Claude API')).toEqual(['ai-sidebar', 'fit-check']);
-    expect(ids('Node.js')).toEqual(['nechita-raka', 'wolt-clone', 'career-predictor']);
+    expect(ids('Node.js')).toEqual(['nechita-raka', 'career-predictor', 'wolt-clone']);
   });
 
   it('returns nothing for skills no project lists', () => {

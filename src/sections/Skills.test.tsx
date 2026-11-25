@@ -494,7 +494,7 @@ describe('Skills on short laptop screens (the `short` variant)', () => {
     await user.keyboard('{ArrowRight}');
     expect(item('Telegram Bot API')).toHaveFocus();
     await user.keyboard('{ArrowUp}');
-    expect(item('Vite')).toHaveFocus(); // Armor, same column
+    expect(item('Tailwind CSS')).toHaveFocus(); // Armor, same column
   });
 });
 

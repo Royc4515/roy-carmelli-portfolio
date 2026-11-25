@@ -47,20 +47,10 @@ export const QUEST_SCREENSHOTS: Readonly<Record<string, QuestScreenshot>> = {
 /**
  * Screenshots for side quests, shown inside the quest log. A side card has no visual band (its
  * rows line up across the side list through subgrid), so the shot waits in "Details"; with the
- * log closed the lazy image is `display: none` and never downloads.
+ * log closed the lazy image is `display: none` and never downloads. None today: Wolt Clone's
+ * moved to coursework, whose rows have no quest log (its files stay for the design options).
  */
 export const QUEST_LOG_SCREENSHOTS: Readonly<Record<string, QuestScreenshot>> = {
-  'wolt-clone': {
-    src: '/assets/projects/wolt-clone-1280.webp',
-    srcSet: '/assets/projects/wolt-clone-640.webp 640w, /assets/projects/wolt-clone-1280.webp 1280w',
-    // Short laptop screens: one full-width card per row · lg: a third of the 1120px list ·
-    // from 640px: half the list · phones: full width.
-    sizes:
-      '(min-width: 1024px) and (max-height: 960px) 640px, (min-width: 1024px) 320px, (min-width: 640px) 45vw, calc(100vw - 80px)',
-    width: 1280,
-    height: 880,
-    alt: 'Wolt Clone home page in dark theme: food category tiles, a Promoted row and an All Restaurants row of restaurant cards with delivery fees, times and ratings.',
-  },
 };
 
 export type QuestCardLayout = 'feature' | 'standard';
