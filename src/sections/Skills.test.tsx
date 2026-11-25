@@ -103,7 +103,7 @@ describe('Skills (equipment screen)', () => {
     act(() => item('React').focus());
     const tip = screen.getByRole('tooltip');
     expect(tip).toHaveTextContent('Wolt Clone');
-    expect(tip).toHaveTextContent('Personal Portfolio');
+    expect(tip).toHaveTextContent('CareerPredict AI');
   });
 
   it('never invents usage', () => {
@@ -395,7 +395,7 @@ describe('Skills on mobile (< 768px)', () => {
     expect(row).toHaveTextContent('CLR');
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     // The hidden tooltip still describes the item for assistive tech.
-    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Wine Sommelier Bot, Fit Check, Groupie, Personal Portfolio, CLR/);
+    expect(item('Vercel')).toHaveAccessibleDescription(/Used in: Nechita Raka, Wine Sommelier Bot, Fit Check, Groupie, CLR/);
 
     await user.click(item('Vercel'));
     expect(screen.queryByTestId('skill-detail')).not.toBeInTheDocument();

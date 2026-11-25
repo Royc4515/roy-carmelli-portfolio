@@ -85,18 +85,18 @@ describe('projectsUsing (real data)', () => {
       'cognitive-correlation',
       'signal-processing',
     ]);
-    expect(ids('TypeScript')).toEqual(['fit-check', 'portfolio', 'clr']);
+    expect(ids('TypeScript')).toEqual(['fit-check', 'clr']);
     expect(ids('JavaScript')).toEqual(['nechita-raka', 'ai-sidebar', 'leet-for-berger', 'groupie', 'white-matter-game']);
     expect(ids('MCP')).toEqual(['fit-check']);
   });
 
   it('normalizes versions: React 19 and Java 17', () => {
-    expect(ids('React')).toEqual(['portfolio', 'career-predictor', 'clr', 'wolt-clone']);
+    expect(ids('React')).toEqual(['career-predictor', 'clr', 'wolt-clone']);
     expect(ids('Java 17')).toEqual(['arkanoid-game']);
   });
 
   it('uses the alias map', () => {
-    expect(ids('Tailwind CSS')).toEqual(['portfolio', 'career-predictor']);
+    expect(ids('Tailwind CSS')).toEqual(['career-predictor']);
     expect(ids('Telegram Bot API')).toEqual(['sommelier-bot', 'clr']);
     expect(ids('Google OAuth')).toEqual(['career-predictor']);
     expect(ids('Claude API')).toEqual(['ai-sidebar', 'fit-check']);

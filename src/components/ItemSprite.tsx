@@ -404,7 +404,6 @@ export const PROJECT_ITEMS: Readonly<Record<string, ItemName>> = {
   'sommelier-bot': 'wine-glass',
   clr: 'recipe-book',
   'arkanoid-game': 'arkanoid',
-  portfolio: 'joystick',
   'nechita-raka': 'parachute',
   'signal-processing': 'oscilloscope',
   'cognitive-correlation': 'scatter-plot',

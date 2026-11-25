@@ -3,7 +3,7 @@
 import type { Knowledge } from './types.js';
 
 export const KNOWLEDGE: Knowledge = {
-  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student position in full-stack or AI development in Israel, part-time at first (2-3 days a week) alongside my studies. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, TypeScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, Supabase, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Nechita Raka - First-Year Student Hub [main quest, Site + AI chat] - A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine. | Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Leet-For-Berger - Interview Practice Platform [side quest, Coding practice site] - LeetCode-style interview practice: 225 problems, 8 languages plus SQL, each answer judged on 15 tests in the browser or on a runner I host. | Fit Check - AI Wardrobe Stylist [side quest, AI app + MCP server] - My own wardrobe app: AI tags each garment from one photo, and an engine plus Claude pick the day's outfit for the weather and Shabbat. | Groupie - WhatsApp Year in Review [side quest, Privacy-first web app] - A year-in-review for WhatsApp group chats: story cards, awards and a poster, all computed in your browser. No message leaves the device. | Personal Portfolio [side quest, Website + engine] - You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, and land on a magazine cover as one of 40 made-up futures. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Wolt Clone - Food-Delivery App [research quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: sampling and aliasing, smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
+  "core": "Name: Roy Carmelli (Hebrew: רועי כרמלי).\nHeadline: Full-Stack & AI Developer. CS & Neuroscience · Bar-Ilan University.\nStudies: third-year B.Sc. student at Bar-Ilan University, dual major in Computer Science and Neuroscience, October 2024 - February 2028 (expected).\nLooking for: I'm looking for a student position in full-stack or AI development in Israel, part-time at first (2-3 days a week) alongside my studies. Email works best.\nBased in: central Israel.\nMilitary service: Battalion medic (חוג\"ד) and medical coordinator in the Gaza Division, an operational support role. Regular service from 2021; active reservist since August 2024.\nContact: email Roy.y.carmelli@gmail.com; LinkedIn https://linkedin.com/in/roy-carmelli; GitHub https://github.com/Royc4515; phone number: on the site's Contact section (https://roy-carmelli-portfolio.vercel.app/#contact). CV: https://roy-carmelli-portfolio.vercel.app/Roy_Carmelli_CV.pdf (PDF · 1 page · updated Oct 2026).\nSkills: Languages: Java 17, Python, C, C++, JavaScript, TypeScript, x86 Assembly. Web & Full-Stack: React, Node.js, Express, MongoDB, Supabase, React Native, Tailwind CSS, Vite. AI & Agents: Claude API, Gemini API, OpenAI API, Groq API, MCP, Claude Code, Telegram Bot API. Data & Analysis: NumPy, Pandas, SciPy, Matplotlib, Jupyter. CS Foundations: OOP, Data Structures, Design Patterns, Systems Programming. Tools & Platforms: Git, GitHub Actions, Docker, Vercel, Render, GitHub Pages. Certifications: Claude Code in Action, Claude Code 101, Claude 101, AI Fluency.\nLinkedIn top skills: Git, React.js, TypeScript. Certifications: Claude Code in Action, AI Fluency: Framework & Foundations, Claude 101, Introduction to Claude Cowork, Claude Code 101.\nProjects on the site: Nechita Raka - First-Year Student Hub [main quest, Site + AI chat] - A first-year hub at Bar-Ilan, now for CS and Neuroscience: guides, course browsers, the calendar and an AI chat, on one engine. | Aside - AI Sidebar [main quest, Chrome extension] - Alt+A opens an AI sidebar on any web page, with the page text already loaded as context. Six providers, your own API keys, stored locally. | Wine Sommelier Bot [main quest, Telegram bot] - A Telegram AI agent that runs my wine cellar in a Google Sheet: it reads label photos, updates the list and pairs bottles with dinner. | Leet-For-Berger - Interview Practice Platform [side quest, Coding practice site] - LeetCode-style interview practice: 225 problems, 8 languages plus SQL, each answer judged on 15 tests in the browser or on a runner I host. | Fit Check - AI Wardrobe Stylist [side quest, AI app + MCP server] - My own wardrobe app: AI tags each garment from one photo, and an engine plus Claude pick the day's outfit for the weather and Shabbat. | Groupie - WhatsApp Year in Review [side quest, Privacy-first web app] - A year-in-review for WhatsApp group chats: story cards, awards and a poster, all computed in your browser. No message leaves the device. | CareerPredict AI [side quest, Full-stack web app] - A tongue-in-cheek career quiz: sign in with Google, answer 5 questions, and land on a magazine cover as one of 40 made-up futures. | CLR - Culinary Logic Repository [side quest, AI pipeline] - Send a link, note, voice memo or photo to a Telegram bot, and an LLM files it as a recipe, a restaurant or kitchen gear in a web app. | Wolt Clone - Food-Delivery App [research quest, Full-stack web app] - A Wolt-style food-delivery app, built in a team of 2 for a systems programming course. I owned the React web client. | Cognitive Background - Neuro-Data Analysis [research quest, Team data project] - Team of 4: does a child's socio-educational background predict math and reasoning scores? OpenNeuro data, 56 subjects, hierarchical OLS. | Signal Processing - Neural Data [research quest, Jupyter notebook] - Solo course assignment: sampling and aliasing, smoothing and SNR on a voltage-imaging recording, then firing rates, ISIs and PSTHs on spike trains. | White Matter Tracts Game [research quest, Study game] - A drag-and-drop study game: sort 8 white-matter tracts into commissural or association, in training mode or against the clock. | Arkanoid [research quest, Java game] - OOP course assignment in Java: Sprite and Collidable interfaces, hit events through an Observer, and no public fields.\nOther public GitHub repos: roy-carmelli-portfolio - My personal portfolio site | Project2_SignalProcessing | Project3_SignalProcessing - Signal processing project 3 - FIR/IIR filtering, instantaneous phase via Hilbert transform, and spike-theta phase locking analysis of LFP and single-neuron data | build-your-goat - Build Your GOAT - TikTok-style NBA GOAT-builder web game (vanilla JS, zero dependencies) | neetcode-submissions - My NeetCode.io problem submissions | py_mini_project_1 - 1st mini project, python and data analysis for neuroscience students | py_mini_project_2 - 2nd mini project in Neuroscience Data Analysis in Python course",
   "chunks": [
     {
       "id": "site:about",
@@ -234,41 +234,6 @@ export const KNOWLEDGE: Knowledge = {
       ]
     },
     {
-      "id": "site:project:portfolio",
-      "source": "site",
-      "title": "Personal Portfolio",
-      "url": "https://roy-carmelli-portfolio.vercel.app/",
-      "text": "Personal Portfolio (Website + engine, 2026).\nPersonal Portfolio is this site, my portfolio for recruiters, built from scratch (no template) with React 18, TypeScript, Vite, Tailwind CSS and Framer Motion and deployed on Vercel. Press start and the title screen turns into Roy Runner, an endless runner on a small canvas engine I built for it: a game-state machine, a 7-state animation machine for the player, AABB collision, and a speed that climbs to a cap. It plays with a keyboard or touch controls, with a fullscreen mode on phones, and its music and sound effects are synthesised in the browser with the Web Audio API. Day and night themes follow your system setting. Pixel Roy, the little me in the corner, is an AI chat that answers questions about me, using only what this site, my public GitHub and my LinkedIn say. A Vercel Function screens each question with Prompt Guard, pulls the relevant facts with BM25 search, and asks a Groq model, falling back to a second one when the first is busy. Every answer then passes output checks: no personal details, no links outside my own, no rule-breaking wording. It runs on Groq's free tier with a daily cap per visitor, and conversations are not stored. A scoreboard on Neon Postgres with Google sign-in keeps the high scores, the build prerenders the page with JSON-LD so search and AI crawlers read it without JavaScript, and 860+ Vitest tests cover the site, the game and the API.\nTech: TypeScript, React 18, Canvas, Web Audio API, Vite, Tailwind CSS, Framer Motion, Groq API, Serverless Functions, Neon Postgres, Vitest, Vercel.\nCode: https://github.com/Royc4515/roy-carmelli-portfolio\nLive: https://roy-carmelli-portfolio.vercel.app/\nGitHub repo roy-carmelli-portfolio: TypeScript, last push 2026-10-12.",
-      "keywords": [
-        "portfolio",
-        "personal",
-        "website",
-        "engine",
-        "typescript",
-        "react",
-        "18",
-        "canvas",
-        "web",
-        "audio",
-        "api",
-        "vite",
-        "tailwind",
-        "css",
-        "framer",
-        "motion",
-        "groq",
-        "serverless",
-        "functions",
-        "neon",
-        "postgres",
-        "vitest",
-        "vercel",
-        "roy-carmelli-portfolio",
-        "roy",
-        "carmelli"
-      ]
-    },
-    {
       "id": "site:project:career-predictor",
       "source": "site",
       "title": "CareerPredict AI",
@@ -444,6 +409,22 @@ export const KNOWLEDGE: Knowledge = {
         "observer",
         "pattern",
         "arkanoidgame"
+      ]
+    },
+    {
+      "id": "github:roy-carmelli-portfolio",
+      "source": "github",
+      "title": "GitHub: roy-carmelli-portfolio",
+      "url": "https://github.com/Royc4515/roy-carmelli-portfolio",
+      "text": "Repo roy-carmelli-portfolio (https://github.com/Royc4515/roy-carmelli-portfolio).\nMy personal portfolio site\nREADME excerpt: Roy Carmelli - Portfolio Live: https://roy-carmelli-portfolio.vercel.app/ Personal portfolio for a CS & Neuroscience student at Bar-Ilan University, built as the title screen and pause menu of a small pixel RPG. Built from scratch in TypeScript + React + Vite + Tailwind + Framer Motion. Press start and the title screen becomes Roy Runner, an endless runner on a small canvas engine built for this site: a game-state machine, a 7-state player animation machine, AABB collision and a speed that keeps climbing. Day/night theme with system preference detection. Pixel Roy is an AI chat in the corner...\nLanguage: TypeScript.\nTopics: portfolio, react, typescript, vite.\nLast push: 2026-10-12.\nHomepage: https://roy-carmelli-portfolio.vercel.app/",
+      "keywords": [
+        "roy-carmelli-portfolio",
+        "roy",
+        "carmelli",
+        "portfolio",
+        "react",
+        "typescript",
+        "vite"
       ]
     },
     {

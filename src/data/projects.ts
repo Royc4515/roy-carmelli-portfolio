@@ -92,18 +92,6 @@ export const projects: Project[] = [
     year: 2026,
   },
   {
-    id: "portfolio",
-    kind: "Website + engine",
-    tier: "side",
-    tagline: "You're playing it. React and TypeScript, Roy Runner (an endless runner on a canvas engine I built for it), and Pixel Roy, an AI chat that answers as me.",
-    title: "Personal Portfolio",
-    description: "Personal Portfolio is this site, my portfolio for recruiters, built from scratch (no template) with React 18, TypeScript, Vite, Tailwind CSS and Framer Motion and deployed on Vercel. Press start and the title screen turns into Roy Runner, an endless runner on a small canvas engine I built for it: a game-state machine, a 7-state animation machine for the player, AABB collision, and a speed that climbs to a cap. It plays with a keyboard or touch controls, with a fullscreen mode on phones, and its music and sound effects are synthesised in the browser with the Web Audio API. Day and night themes follow your system setting. Pixel Roy, the little me in the corner, is an AI chat that answers questions about me, using only what this site, my public GitHub and my LinkedIn say. A Vercel Function screens each question with Prompt Guard, pulls the relevant facts with BM25 search, and asks a Groq model, falling back to a second one when the first is busy. Every answer then passes output checks: no personal details, no links outside my own, no rule-breaking wording. It runs on Groq's free tier with a daily cap per visitor, and conversations are not stored. A scoreboard on Neon Postgres with Google sign-in keeps the high scores, the build prerenders the page with JSON-LD so search and AI crawlers read it without JavaScript, and 860+ Vitest tests cover the site, the game and the API.",
-    tech: ["TypeScript", "React 18", "Canvas", "Web Audio API", "Vite", "Tailwind CSS", "Framer Motion", "Groq API", "Serverless Functions", "Neon Postgres", "Vitest", "Vercel"],
-    github: "https://github.com/Royc4515/roy-carmelli-portfolio",
-    live: "https://roy-carmelli-portfolio.vercel.app/",
-    year: 2026,
-  },
-  {
     id: "career-predictor",
     kind: "Full-stack web app",
     tier: "side",

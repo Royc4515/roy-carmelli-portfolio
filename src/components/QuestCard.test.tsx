@@ -325,7 +325,7 @@ describe('<QuestCard> side quest', () => {
   });
 
   it('keeps Live · Code · Quest log in that order', () => {
-    const { container } = render(<QuestCard project={byId('portfolio')} />);
+    const { container } = render(<QuestCard project={byId('leet-for-berger')} />);
     const controls = screen.getAllByRole('link').concat(screen.getAllByRole('button'));
     expect(controls.map(c => c.textContent)).toEqual(['Live', 'Code', 'Details']);
     // Two links: on phones Live · Code share a row and Quest log goes under them.
