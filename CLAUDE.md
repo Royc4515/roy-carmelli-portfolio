@@ -40,6 +40,7 @@ Live: https://roy-carmelli-portfolio.vercel.app/ (Vercel, auto-deploys on push t
 - `node scripts/chat/snapshot-github.mjs [--repos-json file]` - refreshes `src/data/github.generated.json` from the allowlisted public repos; verified with `--repos-json` (this cloud session's proxy blocks `api.github.com/users/...`).
 - `node scripts/chat/eval.mjs <url>` - 14 live normal and adversarial questions against a running chat (needs a real Groq key; unverified here).
 - No CI in this repo; run tests and build locally before pushing, since every push to `main` deploys.
+- Roy's standing rule (Nov 2026): no preview PRs. Once tests and build pass, push finished work straight to `main` so it goes live; do not open a PR or wait for a Vercel preview unless Roy asks for one.
 
 ## Conventions (Roy's standing rules)
 - Comments explain WHY, not what.
